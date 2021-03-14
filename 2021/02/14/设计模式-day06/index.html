@@ -27,7 +27,7 @@
 <meta property="og:site_name" content="24khandsome&#39;s Blog">
 <meta property="og:description" content="6 , 行为型模式6.11 解释器模式6.11.1 概述  如上图，设计一个软件用来进行加减计算。我们第一想法就是使用工具类，提供对应的加法和减法的工具方法。 123456789101112131415161718&#x2F;&#x2F;用于两个整数相加public static int add(int a,int b)&amp;#123;    return a + b;&amp;#125;&#x2F;&#x2F;用于两个整数相加public sta">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day06/img/image-20200215220322641.png">
+<meta property="og:image" content="http://example.com/img/design-model-day06/image-20200215220322641.png">
 <meta property="og:image" content="http://example.com/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day06/img/image-20200215225227616.png">
 <meta property="og:image" content="http://example.com/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day06/img/解释器模式.png">
 <meta property="og:image" content="http://example.com/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day06/img/image-20200429165544151.png">
@@ -38,11 +38,11 @@
 <meta property="og:image" content="http://example.com/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day06/img/image-20200429204700956.png">
 <meta property="og:image" content="http://example.com/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day06/img/image-20200429211132185.png">
 <meta property="article:published_time" content="2021-02-14T08:38:03.000Z">
-<meta property="article:modified_time" content="2021-03-13T15:08:48.210Z">
+<meta property="article:modified_time" content="2021-03-14T15:23:49.123Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="设计模式">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day06/img/image-20200215220322641.png">
+<meta name="twitter:image" content="http://example.com/img/design-model-day06/image-20200215220322641.png">
 
 <link rel="canonical" href="http://example.com/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day06/">
 
@@ -204,7 +204,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-03-13 23:08:48" itemprop="dateModified" datetime="2021-03-13T23:08:48+08:00">2021-03-13</time>
+                <time title="修改时间：2021-03-14 23:23:49" itemprop="dateModified" datetime="2021-03-14T23:23:49+08:00">2021-03-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -227,7 +227,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="6-行为型模式"><a href="#6-行为型模式" class="headerlink" title="6 , 行为型模式"></a>6 , 行为型模式</h1><h2 id="6-11-解释器模式"><a href="#6-11-解释器模式" class="headerlink" title="6.11 解释器模式"></a>6.11 解释器模式</h2><h3 id="6-11-1-概述"><a href="#6-11-1-概述" class="headerlink" title="6.11.1 概述"></a>6.11.1 概述</h3><img src="./img/image-20200215220322641.png" style="zoom:60%;" />
+        <h1 id="6-行为型模式"><a href="#6-行为型模式" class="headerlink" title="6 , 行为型模式"></a>6 , 行为型模式</h1><h2 id="6-11-解释器模式"><a href="#6-11-解释器模式" class="headerlink" title="6.11 解释器模式"></a>6.11 解释器模式</h2><h3 id="6-11-1-概述"><a href="#6-11-1-概述" class="headerlink" title="6.11.1 概述"></a>6.11.1 概述</h3><img src="/img/design-model-day06/image-20200215220322641.png" style="zoom:60%;" />
 
 <p>如上图，设计一个软件用来进行加减计算。我们第一想法就是使用工具类，提供对应的加法和减法的工具方法。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//用于两个整数相加</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">add</span><span class="params">(<span class="keyword">int</span> a,<span class="keyword">int</span> b)</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//用于两个整数相加</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">add</span><span class="params">(<span class="keyword">int</span> a,<span class="keyword">int</span> b,<span class="keyword">int</span> c)</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b + c;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//用于n个整数相加</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">add</span><span class="params">(Integer ... arr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> sum = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (Integer i : arr) &#123;</span><br><span class="line">        sum += i;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> sum;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
