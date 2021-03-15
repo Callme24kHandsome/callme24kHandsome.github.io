@@ -22,39 +22,39 @@
 
   <meta name="description" content="1，设计模式概述1.1 软件设计模式的产生背景“设计模式”最初并不是出现在软件设计中，而是被用于建筑领域的设计中。 1977年美国著名建筑大师、加利福尼亚大学伯克利分校环境结构中心主任克里斯托夫·亚历山大（Christopher Alexander）在他的著作《建筑模式语言：城镇、建筑、构造》中描述了一些常见的建筑设计问题，并提出了 253 种关于对城镇、邻里、住宅、花园和房间等进行设计的基本模式">
 <meta property="og:type" content="article">
-<meta property="og:title" content="24khandsome&#39;s Blog">
-<meta property="og:url" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/index.html">
+<meta property="og:title" content="设计模式-day01">
+<meta property="og:url" content="http://example.com/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/index.html">
 <meta property="og:site_name" content="24khandsome&#39;s Blog">
 <meta property="og:description" content="1，设计模式概述1.1 软件设计模式的产生背景“设计模式”最初并不是出现在软件设计中，而是被用于建筑领域的设计中。 1977年美国著名建筑大师、加利福尼亚大学伯克利分校环境结构中心主任克里斯托夫·亚历山大（Christopher Alexander）在他的著作《建筑模式语言：城镇、建筑、构造》中描述了一些常见的建筑设计问题，并提出了 253 种关于对城镇、邻里、住宅、花园和房间等进行设计的基本模式">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5CEmployee.jpg">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cdemo.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Ccustomer_address.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Ccustomer_product.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cnode.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cimage-20191229173422328.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cimage-20191229173455149.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cimage-20191229173518926.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cimage-20191229173539838.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cimage-20191229173554296.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Copen-close.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img/%E6%AD%A3%E6%96%B9%E5%BD%A2%E4%B8%8D%E6%98%AF%E9%95%BF%E6%96%B9%E5%BD%A2.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/设计模式-day01/img/设计模式-day01/正方形不是长方形改进.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/设计模式-day01/img/设计模式-day01/依赖倒转原则.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img/依赖倒转原则改进.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cimg%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5C%E6%8E%A5%E5%8F%A3%E9%9A%94%E7%A6%BB%E5%8E%9F%E5%88%99.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cimg%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5C%E6%8E%A5%E5%8F%A3%E9%9A%94%E7%A6%BB%E5%8E%9F%E5%88%991.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img/迪米特法则.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img/合成复用原则.png">
-<meta property="og:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img/合成复用原则1.png">
-<meta property="article:published_time" content="2021-03-14T15:03:17.477Z">
-<meta property="article:modified_time" content="2021-03-14T14:53:58.952Z">
+<meta property="og:image" content="http://example.com/images/design-model-day01/Employee.jpg">
+<meta property="og:image" content="http://example.com/images/design-model-day01/demo.png">
+<meta property="og:image" content="http://example.com/images/design-model-day01/customer_address.png">
+<meta property="og:image" content="http://example.com/images/design-model-day01/customer_product.png">
+<meta property="og:image" content="http://example.com/images/design-model-day01/node.png">
+<meta property="og:image" content="http://example.com/images/design-model-day01/image-20191229173422328.png">
+<meta property="og:image" content="http://example.com/images/design-model-day01/image-20191229173455149.png">
+<meta property="og:image" content="http://example.com/images/design-model-day01/image-20191229173518926.png">
+<meta property="og:image" content="http://example.com/images/design-model-day01/image-20191229173539838.png">
+<meta property="og:image" content="http://example.com/images/design-model-day01/image-20191229173554296.png">
+<meta property="og:image" content="http://example.com/images/design-model-day01/open-close.png">
+<meta property="og:image" content="http://example.com/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/images%5Cdesign-model-day01/img/%E6%AD%A3%E6%96%B9%E5%BD%A2%E4%B8%8D%E6%98%AF%E9%95%BF%E6%96%B9%E5%BD%A2.png">
+<meta property="og:image" content="http://example.com/images/design-model-day01/img/design-model-day01/正方形不是长方形改进.png">
+<meta property="og:image" content="http://example.com/images/design-model-day01/img/design-model-day01/依赖倒转原则.png">
+<meta property="og:image" content="http://example.com/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img/依赖倒转原则改进.png">
+<meta property="og:image" content="http://example.com/images/design-model-day01/img%5Cdesign-model-day01%5C%E6%8E%A5%E5%8F%A3%E9%9A%94%E7%A6%BB%E5%8E%9F%E5%88%99.png">
+<meta property="og:image" content="http://example.com/images/design-model-day01/img%5Cdesign-model-day01%5C%E6%8E%A5%E5%8F%A3%E9%9A%94%E7%A6%BB%E5%8E%9F%E5%88%991.png">
+<meta property="og:image" content="http://example.com/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img/迪米特法则.png">
+<meta property="og:image" content="http://example.com/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img/合成复用原则.png">
+<meta property="og:image" content="http://example.com/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img/合成复用原则1.png">
+<meta property="article:published_time" content="2021-02-14T08:38:02.000Z">
+<meta property="article:modified_time" content="2021-03-14T16:14:28.184Z">
 <meta property="article:author" content="24khandsome">
-<meta property="article:tag" content="24khandsome">
+<meta property="article:tag" content="设计模式">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5CEmployee.jpg">
+<meta name="twitter:image" content="http://example.com/images/design-model-day01/Employee.jpg">
 
-<link rel="canonical" href="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/">
+<link rel="canonical" href="http://example.com/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/">
 
 
 <script id="page-configurations">
@@ -67,7 +67,7 @@
   };
 </script>
 
-  <title> | 24khandsome's Blog</title>
+  <title>设计模式-day01 | 24khandsome's Blog</title>
   
 
 
@@ -184,7 +184,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
@@ -197,7 +197,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          
+          设计模式-day01
         </h1>
 
         <div class="post-meta">
@@ -206,9 +206,24 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-03-14 23:03:17 / 修改时间：22:53:58" itemprop="dateCreated datePublished" datetime="2021-03-14T23:03:17+08:00">2021-03-14</time>
+              <time title="创建时间：2021-02-14 16:38:02" itemprop="dateCreated datePublished" datetime="2021-02-14T16:38:02+08:00">2021-02-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-03-15 00:14:28" itemprop="dateModified" datetime="2021-03-15T00:14:28+08:00">2021-03-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
             </span>
 
           
@@ -252,7 +267,7 @@
 <li>类图是系统分析和设计阶段的重要产物，是系统编码和测试的重要模型。</li>
 </ul>
 <h2 id="2-3-类图表示法"><a href="#2-3-类图表示法" class="headerlink" title="2.3 类图表示法"></a>2.3 类图表示法</h2><h3 id="2-3-1-类的表示方式"><a href="#2-3-1-类的表示方式" class="headerlink" title="2.3.1 类的表示方式"></a>2.3.1 类的表示方式</h3><p>在UML类图中，类使用包含类名、属性(field) 和方法(method) 且带有分割线的矩形来表示，比如下图表示一个Employee类，它包含name,age和address这3个属性，以及work()方法。 </p>
-<p><img src="img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5CEmployee.jpg"></p>
+<p><img src="/images/design-model-day01/Employee.jpg"></p>
 <p>属性/方法名称前加的加号和减号表示了这个属性/方法的可见性，UML类图中表示可见性的符号有三种：</p>
 <ul>
 <li><p>+：表示public</p>
@@ -270,7 +285,7 @@
 <p>​    2，也有将类型放在变量名前面，返回值类型放在方法名前面</p>
 </blockquote>
 <p><strong>举个栗子：</strong></p>
-<p><img src="img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cdemo.png"></p>
+<p><img src="/images/design-model-day01/demo.png"></p>
 <p>上图Demo类定义了三个方法：</p>
 <ul>
 <li>method()方法：修饰符为public，没有参数，没有返回值。</li>
@@ -280,32 +295,32 @@
 <h3 id="2-3-2-类与类之间关系的表示方式"><a href="#2-3-2-类与类之间关系的表示方式" class="headerlink" title="2.3.2 类与类之间关系的表示方式"></a>2.3.2 类与类之间关系的表示方式</h3><h4 id="2-3-2-1-关联关系"><a href="#2-3-2-1-关联关系" class="headerlink" title="2.3.2.1 关联关系"></a>2.3.2.1 关联关系</h4><p>关联关系是对象之间的一种引用关系，用于表示一类对象与另一类对象之间的联系，如老师和学生、师傅和徒弟、丈夫和妻子等。关联关系是类与类之间最常用的一种关系，分为一般关联关系、聚合关系和组合关系。我们先介绍一般关联。</p>
 <p>关联又可以分为单向关联，双向关联，自关联。</p>
 <p><strong>1，单向关联</strong></p>
-<p><img src="img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Ccustomer_address.png"></p>
+<p><img src="/images/design-model-day01/customer_address.png"></p>
 <p>在UML类图中单向关联用一个带箭头的实线表示。上图表示每个顾客都有一个地址，这通过让Customer类持有一个类型为Address的成员变量类实现。</p>
 <p><strong>2，双向关联</strong></p>
-<p><img src="img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Ccustomer_product.png"></p>
+<p><img src="/images/design-model-day01/customer_product.png"></p>
 <p>从上图中我们很容易看出，所谓的双向关联就是双方各自持有对方类型的成员变量。</p>
 <p>在UML类图中，双向关联用一个不带箭头的直线表示。上图中在Customer类中维护一个List&lt;Product&gt;，表示一个顾客可以购买多个商品；在Product类中维护一个Customer类型的成员变量表示这个产品被哪个顾客所购买。</p>
 <p><strong>3，自关联</strong></p>
-<p><img src="img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cnode.png"></p>
+<p><img src="/images/design-model-day01/node.png"></p>
 <p>自关联在UML类图中用一个带有箭头且指向自身的线表示。上图的意思就是Node类包含类型为Node的成员变量，也就是“自己包含自己”。</p>
 <h4 id="2-3-2-2-聚合关系"><a href="#2-3-2-2-聚合关系" class="headerlink" title="2.3.2.2 聚合关系"></a>2.3.2.2 聚合关系</h4><p>聚合关系是关联关系的一种，是强关联关系，是整体和部分之间的关系。</p>
 <p>聚合关系也是通过成员对象来实现的，其中成员对象是整体对象的一部分，但是成员对象可以脱离整体对象而独立存在。例如，学校与老师的关系，学校包含老师，但如果学校停办了，老师依然存在。</p>
 <p>在 UML 类图中，聚合关系可以用带空心菱形的实线来表示，菱形指向整体。下图所示是大学和教师的关系图：</p>
-<p><img src="img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cimage-20191229173422328.png"></p>
+<p><img src="/images/design-model-day01/image-20191229173422328.png"></p>
 <h4 id="2-3-2-3-组合关系"><a href="#2-3-2-3-组合关系" class="headerlink" title="2.3.2.3 组合关系"></a>2.3.2.3 组合关系</h4><p>组合表示类之间的整体与部分的关系，但它是一种更强烈的聚合关系。</p>
 <p>在组合关系中，整体对象可以控制部分对象的生命周期，一旦整体对象不存在，部分对象也将不存在，部分对象不能脱离整体对象而存在。例如，头和嘴的关系，没有了头，嘴也就不存在了。</p>
 <p>在 UML 类图中，组合关系用带实心菱形的实线来表示，菱形指向整体。下图所示是头和嘴的关系图：</p>
-<p><img src="img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cimage-20191229173455149.png"></p>
+<p><img src="/images/design-model-day01/image-20191229173455149.png"></p>
 <h4 id="2-3-2-4-依赖关系"><a href="#2-3-2-4-依赖关系" class="headerlink" title="2.3.2.4 依赖关系"></a>2.3.2.4 依赖关系</h4><p>依赖关系是一种使用关系，它是对象之间耦合度最弱的一种关联方式，是临时性的关联。在代码中，某个类的方法通过局部变量、方法的参数或者对静态方法的调用来访问另一个类（被依赖类）中的某些方法来完成一些职责。</p>
 <p>在 UML 类图中，依赖关系使用带箭头的虚线来表示，箭头从使用类指向被依赖的类。下图所示是司机和汽车的关系图，司机驾驶汽车：</p>
-<p><img src="img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cimage-20191229173518926.png"></p>
+<p><img src="/images/design-model-day01/image-20191229173518926.png"></p>
 <h4 id="2-3-2-5-继承关系"><a href="#2-3-2-5-继承关系" class="headerlink" title="2.3.2.5 继承关系"></a>2.3.2.5 继承关系</h4><p>继承关系是对象之间耦合度最大的一种关系，表示一般与特殊的关系，是父类与子类之间的关系，是一种继承关系。</p>
 <p>在 UML 类图中，泛化关系用带空心三角箭头的实线来表示，箭头从子类指向父类。在代码实现时，使用面向对象的继承机制来实现泛化关系。例如，Student 类和 Teacher 类都是 Person 类的子类，其类图如下图所示：</p>
-<p><img src="img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cimage-20191229173539838.png"></p>
+<p><img src="/images/design-model-day01/image-20191229173539838.png"></p>
 <h4 id="2-3-2-6-实现关系"><a href="#2-3-2-6-实现关系" class="headerlink" title="2.3.2.6 实现关系"></a>2.3.2.6 实现关系</h4><p>实现关系是接口与实现类之间的关系。在这种关系中，类实现了接口，类中的操作实现了接口中所声明的所有的抽象操作。</p>
 <p>在 UML 类图中，实现关系使用带空心三角箭头的虚线来表示，箭头从实现类指向接口。例如，汽车和船实现了交通工具，其类图如图 9 所示。</p>
-<p><img src="img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cimage-20191229173554296.png"></p>
+<p><img src="/images/design-model-day01/image-20191229173554296.png"></p>
 <h1 id="3，软件设计原则"><a href="#3，软件设计原则" class="headerlink" title="3，软件设计原则"></a>3，软件设计原则</h1><p>在软件开发中，为了提高软件系统的可维护性和可复用性，增加软件的可扩展性和灵活性，程序员要尽量根据6条原则来开发程序，从而提高软件开发效率、节约软件开发成本和维护成本。</p>
 <h2 id="3-1-开闭原则"><a href="#3-1-开闭原则" class="headerlink" title="3.1 开闭原则"></a>3.1 开闭原则</h2><p><strong>对扩展开放，对修改关闭</strong>。在程序需要进行拓展的时候，不能去修改原有的代码，实现一个热插拔的效果。简言之，是为了使程序的扩展性好，易于维护和升级。</p>
 <p>想要达到这样的效果，我们需要使用接口和抽象类。</p>
@@ -313,14 +328,14 @@
 <p>下面以 <code>搜狗输入法</code> 的皮肤为例介绍开闭原则的应用。</p>
 <p>【例】<code>搜狗输入法</code> 的皮肤设计。</p>
 <p>分析：<code>搜狗输入法</code> 的皮肤是输入法背景图片、窗口颜色和声音等元素的组合。用户可以根据自己的喜爱更换自己的输入法的皮肤，也可以从网上下载新的皮肤。这些皮肤有共同的特点，可以为其定义一个抽象类（AbstractSkin），而每个具体的皮肤（DefaultSpecificSkin和HeimaSpecificSkin）是其子类。用户窗体可以根据需要选择或者增加新的主题，而不需要修改原代码，所以它是满足开闭原则的。</p>
-<p><img src="img%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Copen-close.png"></p>
+<p><img src="/images/design-model-day01/open-close.png"></p>
 <h2 id="3-2-里氏代换原则"><a href="#3-2-里氏代换原则" class="headerlink" title="3.2 里氏代换原则"></a>3.2 里氏代换原则</h2><p>里氏代换原则是面向对象设计的基本原则之一。</p>
 <p>里氏代换原则：任何基类可以出现的地方，子类一定可以出现。通俗理解：子类可以扩展父类的功能，但不能改变父类原有的功能。换句话说，子类继承父类时，除添加新的方法完成新增功能外，尽量不要重写父类的方法。</p>
 <p>如果通过重写父类的方法来完成新的功能，这样写起来虽然简单，但是整个继承体系的可复用性会比较差，特别是运用多态比较频繁时，程序运行出错的概率会非常大。</p>
 <p>下面看一个里氏替换原则中经典的一个例子</p>
 <p>【例】正方形不是长方形。</p>
 <p>在数学领域里，正方形毫无疑问是长方形，它是一个长宽相等的长方形。所以，我们开发的一个与几何图形相关的软件系统，就可以顺理成章的让正方形继承自长方形。</p>
-<p><img src="./%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01/img/%E6%AD%A3%E6%96%B9%E5%BD%A2%E4%B8%8D%E6%98%AF%E9%95%BF%E6%96%B9%E5%BD%A2.png"></p>
+<p><img src="./images%5Cdesign-model-day01/img/%E6%AD%A3%E6%96%B9%E5%BD%A2%E4%B8%8D%E6%98%AF%E9%95%BF%E6%96%B9%E5%BD%A2.png"></p>
 <p>代码如下：</p>
 <p><strong>长方形类（Rectangle）：</strong></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Rectangle</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">double</span> length;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">double</span> width;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">getLength</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> length;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setLength</span><span class="params">(<span class="keyword">double</span> length)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.length = length;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">getWidth</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> width;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setWidth</span><span class="params">(<span class="keyword">double</span> width)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.width = width;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -334,7 +349,7 @@
 
 <p>我们运行一下这段代码就会发现，假如我们把一个普通长方形作为参数传入resize方法，就会看到长方形宽度逐渐增长的效果，当宽度大于长度,代码就会停止，这种行为的结果符合我们的预期；假如我们再把一个正方形作为参数传入resize方法后，就会看到正方形的宽度和长度都在不断增长，代码会一直运行下去，直至系统产生溢出错误。所以，普通的长方形是适合这段代码的，正方形不适合。<br>我们得出结论：在resize方法中，Rectangle类型的参数是不能被Square类型的参数所代替，如果进行了替换就得不到预期结果。因此，Square类和Rectangle类之间的继承关系违反了里氏代换原则，它们之间的继承关系不成立，正方形不是长方形。</p>
 <p>如何改进呢？此时我们需要重新设计他们之间的关系。抽象出来一个四边形接口(Quadrilateral)，让Rectangle类和Square类实现Quadrilateral接口</p>
-<img src="设计模式-day01\img\设计模式-day01\正方形不是长方形改进.png" style="zoom:80%;" />
+<img src="/images/design-model-day01/img\design-model-day01\正方形不是长方形改进.png" style="zoom:80%;" />
 
 
 
@@ -343,7 +358,7 @@
 <p>【例】组装电脑</p>
 <p>现要组装一台电脑，需要配件cpu，硬盘，内存条。只有这些配置都有了，计算机才能正常的运行。选择cpu有很多选择，如Intel，AMD等，硬盘可以选择希捷，西数等，内存条可以选择金士顿，海盗船等。</p>
 <p><strong>类图如下：</strong></p>
-<img src="设计模式-day01\img\设计模式-day01\依赖倒转原则.png" style="zoom:80%;" />
+<img src="/images/design-model-day01/img\design-model-day01\依赖倒转原则.png" style="zoom:80%;" />
 
 <p>代码如下：</p>
 <p><strong>希捷硬盘类（XiJieHardDisk）:</strong></p>
@@ -376,9 +391,9 @@
 <p>下面看一个例子来理解接口隔离原则</p>
 <p>【例】安全门案例</p>
 <p>我们需要创建一个<code>黑马</code>品牌的安全门，该安全门具有防火、防水、防盗的功能。可以将防火，防水，防盗功能提取成一个接口，形成一套规范。类图如下：</p>
-<p><img src="%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cimg%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5C%E6%8E%A5%E5%8F%A3%E9%9A%94%E7%A6%BB%E5%8E%9F%E5%88%99.png"></p>
+<p><img src="/images/design-model-day01/img%5Cdesign-model-day01%5C%E6%8E%A5%E5%8F%A3%E9%9A%94%E7%A6%BB%E5%8E%9F%E5%88%99.png"></p>
 <p>上面的设计我们发现了它存在的问题，黑马品牌的安全门具有防盗，防水，防火的功能。现在如果我们还需要再创建一个传智品牌的安全门，而该安全门只具有防盗、防水功能呢？很显然如果实现SafetyDoor接口就违背了接口隔离原则，那么我们如何进行修改呢？看如下类图：</p>
-<p><img src="%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5Cimg%5C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day01%5C%E6%8E%A5%E5%8F%A3%E9%9A%94%E7%A6%BB%E5%8E%9F%E5%88%991.png"></p>
+<p><img src="/images/design-model-day01/img%5Cdesign-model-day01%5C%E6%8E%A5%E5%8F%A3%E9%9A%94%E7%A6%BB%E5%8E%9F%E5%88%991.png"></p>
 <p>代码如下：</p>
 <p><strong>AntiTheft（接口）：</strong></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">AntiTheft</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">antiTheft</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -587,6 +602,9 @@
     
 
       <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag"># 设计模式</a>
+          </div>
 
         
 
@@ -594,10 +612,13 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2021/03/13/hello-world/" rel="prev" title="Hello World">
-      <i class="fa fa-chevron-left"></i> Hello World
+    <a href="/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day02/" rel="prev" title="设计模式-day02">
+      <i class="fa fa-chevron-left"></i> 设计模式-day02
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2021/02/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-day04/" rel="next" title="设计模式-day04">
+      设计模式-day04 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -672,7 +693,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">8</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
