@@ -1,0 +1,537 @@
+<svg height="2408" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1373" viewBox="0 0 1373 2408">
+    <style type="text/css"><![CDATA[
+.st1 {fill:#303030;font-family:宋体;font-size:10pt;font-weight:bold}
+.st2 {fill:#303030;font-family:宋体;font-size:10pt}
+.st3 {font-weight:bold}
+]]></style>
+    <defs/>
+    <g transform="translate(-901.92,-169)">
+        <g transform="translate(1567.52,170)">
+            <g id="shape1">
+                <path d="M25.5,49L237.5,49C250.5,49,261,38.5,261,25.5C261,12.5,250.5,2,237.5,2L25.5,2C12.5,2,2,12.5,2,25.5C2,38.5,12.5,49,25.5,49z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M23.5,47L235.5,47C248.5,47,259,36.5,259,23.5C259,10.5,248.5,0,235.5,0L23.5,0C10.5,0,0,10.5,0,23.5C0,36.5,10.5,47,23.5,47z" fill="#00af54" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="29.1" y="28.6">AbstractBeanFactory#getBean</tspan>
+            </text>
+        </g>
+        <g id="shape2" transform="translate(1697.02,217)">
+            <path d="M0,0L0,29.6" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,34L3,28.8C2.1,29.3,1.1,29.6,0,29.6C-1.1,29.6,-2.1,29.3,-3,28.8L0,34" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1619.52,251)">
+            <g id="shape3">
+                <path d="M25.5,49L133.5,49C146.5,49,157,38.5,157,25.5C157,12.5,146.5,2,133.5,2L25.5,2C12.5,2,2,12.5,2,25.5C2,38.5,12.5,49,25.5,49z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M23.5,47L131.5,47C144.5,47,155,36.5,155,23.5C155,10.5,144.5,0,131.5,0L23.5,0C10.5,0,0,10.5,0,23.5C0,36.5,10.5,47,23.5,47z" fill="#00af54" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="44" y="28.6">doGetBean</tspan>
+            </text>
+        </g>
+        <g id="shape4" transform="translate(1697.02,298)">
+            <path d="M0,0L0,29.6" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,34L3,28.8C2.1,29.3,1.1,29.6,0,29.6C-1.1,29.6,-2.1,29.3,-3,28.8L0,34" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1567.52,332)">
+            <g id="shape5">
+                <path d="M25.5,49L237.5,49C250.5,49,261,38.5,261,25.5C261,12.5,250.5,2,237.5,2L25.5,2C12.5,2,2,12.5,2,25.5C2,38.5,12.5,49,25.5,49z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M23.5,47L235.5,47C248.5,47,259,36.5,259,23.5C259,10.5,248.5,0,235.5,0L23.5,0C10.5,0,0,10.5,0,23.5C0,36.5,10.5,47,23.5,47z" fill="#00af54" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="58.9" y="28.6">transformedBeanName</tspan>
+            </text>
+        </g>
+        <g id="shape6" transform="translate(1697.02,379)">
+            <path d="M0,0L0,37.6" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,42L3,36.8C2.1,37.3,1.1,37.6,0,37.6C-1.1,37.6,-2.1,37.3,-3,36.8L0,42" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1567.52,421)">
+            <g id="shape7">
+                <path d="M25.5,49L237.5,49C250.5,49,261,38.5,261,25.5C261,12.5,250.5,2,237.5,2L25.5,2C12.5,2,2,12.5,2,25.5C2,38.5,12.5,49,25.5,49z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M23.5,47L235.5,47C248.5,47,259,36.5,259,23.5C259,10.5,248.5,0,235.5,0L23.5,0C10.5,0,0,10.5,0,23.5C0,36.5,10.5,47,23.5,47z" fill="#00af54" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="66.3" y="28.6">bean=getSingleton</tspan>
+            </text>
+        </g>
+        <g transform="translate(1634.77,510)">
+            <g id="shape8">
+                <path d="M64.3,58L126.5,30L64.3,2L2,30L64.3,58z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M62.3,56L124.5,28L62.3,0L0,28L62.3,56z" fill="#00af54" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="25.4" y="33.1">bean!=null</tspan>
+            </text>
+        </g>
+        <g id="shape9" transform="translate(1697.02,468)">
+            <path d="M0,0L0,37.6" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,42L3,36.8C2.1,37.3,1.1,37.6,0,37.6C-1.1,37.6,-2.1,37.3,-3,36.8L0,42" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1834.52,514.5)">
+            <g id="shape10">
+                <path d="M225,49L225,2L2,2L2,49L225,49z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M223,47L223,0L0,0L0,47L223,47z" fill="#00af54" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="22.3" y="28.6">getObjectForBeanInstance</tspan>
+            </text>
+        </g>
+        <g id="shape11" transform="translate(1759.27,538)">
+            <path d="M0,0L70.9,0" fill="none" stroke="#6d6d6d"/>
+            <path d="M75.3,0L70.1,-3C70.6,-2.1,70.9,-1.1,70.9,0C70.9,1.1,70.6,2.1,70.1,3L75.3,0" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g id="shape12" transform="translate(1774.52,524)">
+            <text class="st1">
+                <tspan x="10.3" y="17.1">Y</tspan>
+            </text>
+        </g>
+        <g transform="translate(1596.77,609.6)">
+            <g id="shape13">
+                <path d="M202.5,49.4L202.5,2L2,2L2,49.4L202.5,49.4z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M200.5,47.4L200.5,0L0,0L0,47.4L200.5,47.4z" fill="#f29952" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="18.5" y="28.8">getParentBeanFactory()</tspan>
+            </text>
+        </g>
+        <g id="shape14" transform="translate(1697.02,566)">
+            <path d="M0,0L0,39.2" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,43.6L3,38.4C2.1,38.9,1.1,39.2,0,39.2C-1.1,39.2,-2.1,38.9,-3,38.4L0,43.6" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g id="shape15" transform="translate(1689.52,572)">
+            <text class="st1">
+                <tspan x="15.4" y="12.1">N</tspan>
+            </text>
+        </g>
+        <g transform="translate(2138.52,518.8)">
+            <g id="shape16">
+                <path d="M21.2,40.4L114.8,40.4C125.4,40.4,134,31.8,134,21.2C134,10.6,125.4,2,114.8,2L21.2,2C10.6,2,2,10.6,2,21.2C2,31.8,10.6,40.4,21.2,40.4z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M19.2,38.4L112.8,38.4C123.4,38.4,132,29.8,132,19.2C132,8.6,123.4,0,112.8,0L19.2,0C8.6,0,0,8.6,0,19.2C0,29.8,8.6,38.4,19.2,38.4z" fill="#e6609d" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="24" y="24.3">直接返回bean</tspan>
+            </text>
+        </g>
+        <g id="shape17" transform="translate(2057.52,538)">
+            <path d="M0,0L76.6,0" fill="none" stroke="#6d6d6d"/>
+            <path d="M81,0L75.8,-3C76.3,-2.1,76.6,-1.1,76.6,0C76.6,1.1,76.3,2.1,75.8,3L81,0" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1354.33,598.15)">
+            <g id="shape18">
+                <path d="M99.1,72.3L196.3,37.1L99.1,2L2,37.1L99.1,72.3z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M97.1,70.3L194.3,35.1L97.1,0L0,35.1L97.1,70.3z" fill="#f29952" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="11.6" y="40.3">parentBeanFactory!=null</tspan>
+            </text>
+        </g>
+        <g id="shape19" transform="translate(1596.77,633.3)">
+            <path d="M0,0L-43.8,-0" fill="none" stroke="#6d6d6d"/>
+            <path d="M-48.2,-0L-43,3C-43.5,2.1,-43.8,1.1,-43.8,-0C-43.8,-1.1,-43.5,-2.1,-43,-3L-48.2,-0" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g id="shape20" transform="translate(1354.32,633.3)">
+            <path d="M0,0L-43.8,0" fill="none" stroke="#6d6d6d"/>
+            <path d="M-48.2,0L-43,3C-43.5,2.1,-43.8,1.1,-43.8,0C-43.8,-1.1,-43.5,-2.1,-43,-3L-48.2,0" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1111.88,596.57)">
+            <g id="shape21">
+                <path d="M99.1,75.5L196.3,38.7L99.1,2L2,38.7L99.1,75.5z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M97.1,73.5L194.3,36.7L97.1,0L0,36.7L97.1,73.5z" fill="#f29952" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="8.1" y="34.4">containsBeanDefinition(b</tspan>
+                <tspan x="67.6" y="49.3">eanName)</tspan>
+            </text>
+        </g>
+        <g id="shape22" transform="translate(1313,600)">
+            <text class="st2">
+                <tspan x="20.6" y="17.1">N</tspan>
+            </text>
+        </g>
+        <g id="shape23" transform="translate(1209,596.58)">
+            <path d="M0,0L0,-403.1L354.1,-403.1" fill="none" stroke="#6d6d6d"/>
+            <path d="M358.5,-403.1L353.3,-406.1C353.8,-405.2,354.1,-404.2,354.1,-403.1C354.1,-402,353.8,-401,353.3,-400.1L358.5,-403.1" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g id="shape24" transform="translate(1224,557)">
+            <text class="st2">
+                <tspan x="14.9" y="19.6">N</tspan>
+            </text>
+        </g>
+        <g id="shape25" transform="translate(1228,373)">
+            <text class="st1">
+                <tspan x="8.6" y="11.4">这里的逻辑分支就是,当前容</tspan>
+                <tspan x="5.1" y="26.2">器有父容器，且当前容器不包</tspan>
+                <tspan x="4" y="41.1">含当前bean定义，那么就会走</tspan>
+                <tspan x="24.6" y="55.9">父容器创建bean的流程</tspan>
+            </text>
+        </g>
+        <g transform="translate(1172,742)">
+            <g id="shape26">
+                <path d="M332,59.6L332,2L2,2L2,59.6L332,59.6z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M330,57.6L330,0L0,0L0,57.6L330,57.6z" fill="#c6a5c8" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="20" y="33.9">getMergedLocalBeanDefinition(beanName);</tspan>
+            </text>
+        </g>
+        <g id="shape27" transform="translate(1209,670.02)">
+            <path d="M0,0L0,40L128,40L128,67.6" fill="none" stroke="#6d6d6d"/>
+            <path d="M128,72L131,66.8C130.1,67.3,129.1,67.6,128,67.6C126.9,67.6,125.9,67.3,125,66.8L128,72" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g id="shape28" transform="translate(1451.45,668.45)">
+            <path d="M0,0L0,41.5L-114.4,41.5L-114.4,69.2" fill="none" stroke="#6d6d6d"/>
+            <path d="M-114.4,73.5L-111.4,68.4C-112.3,68.9,-113.4,69.2,-114.4,69.2C-115.5,69.2,-116.6,68.9,-117.4,68.4L-114.4,73.5" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g id="shape29" transform="translate(1313,685)">
+            <text class="st2">
+                <tspan x="25.1" y="14.6">Y</tspan>
+            </text>
+        </g>
+        <g id="shape30" transform="translate(1337,799.6)">
+            <path d="M0,0L0,42" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,46.4L3,41.2C2.1,41.7,1.1,42,0,42C-1.1,42,-2.1,41.7,-3,41.2L0,46.4" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1172,846)">
+            <g id="shape31">
+                <path d="M332,59.6L332,2L2,2L2,59.6L332,59.6z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M330,57.6L330,0L0,0L0,57.6L330,57.6z" fill="#c6a5c8" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="72" y="33.9">checkMergedBeanDefinition</tspan>
+            </text>
+        </g>
+        <g id="shape32" transform="translate(1337,903.6)">
+            <path d="M0,0L0,55.6" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,60L3,54.8C2.1,55.3,1.1,55.6,0,55.6C-1.1,55.6,-2.1,55.3,-3,54.8L0,60" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1172,963.6)">
+            <g id="shape33">
+                <path d="M332,59.6L332,2L2,2L2,59.6L332,59.6z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M330,57.6L330,0L0,0L0,57.6L330,57.6z" fill="#c6a5c8" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="27.4" y="33.9">registerDependentBean(dep, beanName);</tspan>
+            </text>
+        </g>
+        <g transform="translate(1186,1068)">
+            <g id="shape34">
+                <path d="M304,58L304,2L2,2L2,58L304,58z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M302,56L302,0L0,0L0,56L302,56z" fill="#30c9f7" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="48" y="33.1">根据Bean定义的scope来创建Bean</tspan>
+            </text>
+        </g>
+        <g id="shape35" transform="translate(1337,1021.2)">
+            <path d="M0,0L0,42.4" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,46.8L3,41.6C2.1,42.1,1.1,42.4,0,42.4C-1.1,42.4,-2.1,42.1,-3,41.6L0,46.8" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1179.75,1170.8)">
+            <g id="shape36">
+                <path d="M316.5,58L316.5,2L2,2L2,58L316.5,58z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M314.5,56L314.5,0L0,0L0,56L314.5,56z" fill="#30c9f7" stroke="#6d6d6d"/>
+            </g>
+            <text class="st2">
+                <tspan x="43.1" y="10.9" class="st3">					</tspan>
+                <tspan x="12.3" y="25.7" class="st3">sharedInstance = getSingleton(beanName, </tspan>
+                <tspan x="46" y="40.6" class="st3">new ObjectFactory&lt;Object>(){})</tspan>
+            </text>
+        </g>
+        <g id="shape37" transform="translate(1337,1124)">
+            <path d="M0,0L0,42.4" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,46.8L3,41.6C2.1,42.1,1.1,42.4,0,42.4C-1.1,42.4,-2.1,42.1,-3,41.6L0,46.8" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1237.5,1267)">
+            <g id="shape38">
+                <path d="M201,48L201,2L2,2L2,48L201,48z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M199,46L199,0L0,0L0,46L199,46z" fill="#30c9f7" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="14.3" y="28.1">beforeSingletonCreation</tspan>
+            </text>
+        </g>
+        <g id="shape39" transform="translate(1337,1226.8)">
+            <path d="M0,0L0,35.8" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,40.2L3,35C2.1,35.5,1.1,35.8,0,35.8C-1.1,35.8,-2.1,35.5,-3,35L0,40.2" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g id="shape40" transform="translate(1337,1313)">
+            <path d="M0,0L0,35.8" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,40.2L3,35C2.1,35.5,1.1,35.8,0,35.8C-1.1,35.8,-2.1,35.5,-3,35L0,40.2" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1204.75,1353.2)">
+            <g id="shape41">
+                <path d="M266.5,48L266.5,2L2,2L2,48L266.5,48z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M264.5,46L264.5,0L0,0L0,46L264.5,46z" fill="#30c9f7" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="18" y="5.9">					</tspan>
+                <tspan x="69.4" y="20.7">singletonObject = </tspan>
+                <tspan x="24.8" y="35.6">singletonFactory.getObject();</tspan>
+            </text>
+        </g>
+        <g id="shape42" transform="translate(1469.25,1376.2)">
+            <path d="M0,0L55.6,0" fill="none" stroke="#6d6d6d"/>
+            <path d="M60,0L54.8,-3C55.3,-2.1,55.6,-1.1,55.6,0C55.6,1.1,55.3,2.1,54.8,3L60,0" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1529.25,1353.2)">
+            <g id="shape43">
+                <path d="M266.5,48L266.5,2L2,2L2,48L266.5,48z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M264.5,46L264.5,0L0,0L0,46L264.5,46z" fill="#30c9f7" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="18" y="5.9">					</tspan>
+                <tspan x="69.4" y="20.7">singletonObject = </tspan>
+                <tspan x="24.8" y="35.6">singletonFactory.getObject();</tspan>
+            </text>
+        </g>
+        <g id="shape44" transform="translate(1661.5,1399.2)">
+            <path d="M0,0L0,55.6" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,60L3,54.8C2.1,55.3,1.1,55.6,0,55.6C-1.1,55.6,-2.1,55.3,-3,54.8L0,60" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1529.25,1459.2)">
+            <g id="shape45">
+                <path d="M266.5,48L266.5,2L2,2L2,48L266.5,48z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M264.5,46L264.5,0L0,0L0,46L264.5,46z" fill="#a3cf62" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="6" y="20.7">AbstractAutowireCapableBeanFactory</tspan>
+                <tspan x="91.7" y="35.6">#createBean</tspan>
+            </text>
+        </g>
+        <g id="shape46" transform="translate(1661.5,1505.2)">
+            <path d="M0,0L0,55.6" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,60L3,54.8C2.1,55.3,1.1,55.6,0,55.6C-1.1,55.6,-2.1,55.3,-3,54.8L0,60" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1529.25,1565.2)">
+            <g id="shape47">
+                <path d="M266.5,48L266.5,2L2,2L2,48L266.5,48z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M264.5,46L264.5,0L0,0L0,46L264.5,46z" fill="#a3cf62" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="35.7" y="28.1">resolveBeforeInstantiation</tspan>
+            </text>
+        </g>
+        <g id="shape48" transform="translate(1661.5,1611.2)">
+            <path d="M0,0L0,55.6" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,60L3,54.8C2.1,55.3,1.1,55.6,0,55.6C-1.1,55.6,-2.1,55.3,-3,54.8L0,60" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1529.25,1671.2)">
+            <g id="shape49">
+                <path d="M266.5,48L266.5,2L2,2L2,48L266.5,48z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M264.5,46L264.5,0L0,0L0,46L264.5,46z" fill="#a3cf62" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="87.7" y="28.1">doCreateBean</tspan>
+            </text>
+        </g>
+        <g transform="translate(1547.75,1757.6)">
+            <g id="shape50">
+                <path d="M229.5,44.4L229.5,2L2,2L2,44.4L229.5,44.4z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M227.5,42.4L227.5,0L0,0L0,42.4L227.5,42.4z" fill="#a3cf62" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="47.1" y="26.3">createBeanInstance</tspan>
+            </text>
+        </g>
+        <g id="shape51" transform="translate(1661.5,1717.2)">
+            <path d="M0,0L0,36" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,40.4L3,35.2C2.1,35.7,1.1,36,0,36C-1.1,36,-2.1,35.7,-3,35.2L0,40.4" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1233,1896.5)">
+            <g id="shape52">
+                <path d="M261,35L261,2L2,2L2,35L261,35z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M259,33L259,0L0,0L0,33L259,33z" fill="#7fb80e" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="21.7" y="21.6">instantiateUsingFactoryMethod</tspan>
+            </text>
+        </g>
+        <g id="shape53" transform="matrix(-0.95,0.31,-0.31,-0.95,1661.5,1800)">
+            <path d="M0,0C204.8,30.7,280.7,27.1,310.8,3" fill="none" stroke="#6d6d6d"/>
+            <path d="M314.2,0L308.3,1.2C309.3,1.5,310.2,2.1,310.9,2.9C311.6,3.7,312.1,4.7,312.3,5.7L314.2,0" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1573,1896.5)">
+            <g id="shape54">
+                <path d="M196,37.5L196,2L2,2L2,37.5L196,37.5z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M194,35.5L194,0L0,0L0,35.5L194,35.5z" fill="#7fb80e" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="26.3" y="22.9">autowireConstructor</tspan>
+            </text>
+        </g>
+        <g id="shape55" transform="matrix(0.09,1,-1,0.09,1661.5,1800)">
+            <path d="M0,0C25.4,2.2,71.1,-0.8,91.6,-0.3" fill="none" stroke="#6d6d6d"/>
+            <path d="M96.9,0L91.8,-3.3C92.3,-2.4,92.5,-1.3,92.5,-0.2C92.4,.9,92.1,1.9,91.5,2.7L96.9,0" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1871,1896.5)">
+            <g id="shape56">
+                <path d="M205,37.5L205,2L2,2L2,37.5L205,37.5z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M203,35.5L203,0L0,0L0,35.5L203,35.5z" fill="#a3cf62" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="45.7" y="22.9">instantiateBean</tspan>
+            </text>
+        </g>
+        <g id="shape57" transform="matrix(0.96,0.3,-0.3,0.96,1661.5,1800)">
+            <path d="M0,0C138.3,15.8,254.6,-77.1,322.4,-3.7" fill="none" stroke="#6d6d6d"/>
+            <path d="M325.6,0L324.4,-5.9C324.1,-4.9,323.5,-4,322.7,-3.3C321.9,-2.6,320.9,-2.1,319.9,-1.9L325.6,0" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1559,1999)">
+            <g id="shape58">
+                <path d="M186,53L186,2L2,2L2,53L186,53z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M184,51L184,0L0,0L0,51L184,51z" fill="#7fb80e" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="21.7" y="30.6">addSingletonFactory</tspan>
+            </text>
+        </g>
+        <g id="shape59" transform="matrix(0.97,0.23,-0.23,0.97,1362.5,1929.5)">
+            <path d="M0,0C41.3,97.9,177.1,-23,291.5,-1.1" fill="none" stroke="#6d6d6d"/>
+            <path d="M296.8,0L292.3,-4C292.6,-3,292.7,-2,292.5,-0.9C292.2,.2,291.7,1.1,291,1.9L296.8,0" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g id="shape60" transform="matrix(-0.98,0.2,-0.2,-0.98,1972.5,1932)">
+            <path d="M0,0C48.8,-61.7,140.8,-1,323.4,-0" fill="none" stroke="#6d6d6d"/>
+            <path d="M328.4,0L323.2,-3C323.7,-2.1,324,-1.1,324,-0C324,1.1,323.7,2.1,323.2,3L328.4,0" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g id="shape61" transform="matrix(-0.27,0.96,-0.96,-0.27,1670,1932)">
+            <path d="M0,0C13.3,-33.2,57,-34.7,68.2,-4.6" fill="none" stroke="#6d6d6d"/>
+            <path d="M69.6,0L71,-5.8C70.3,-5.1,69.4,-4.5,68.4,-4.2C67.3,-3.9,66.3,-3.9,65.3,-4.1L69.6,0" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1586.75,2093)">
+            <g id="shape62">
+                <path d="M130.5,39L130.5,2L2,2L2,39L130.5,39z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M128.5,37L128.5,0L0,0L0,37L128.5,37z" fill="#7fb80e" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="19.7" y="23.6">populateBean</tspan>
+            </text>
+        </g>
+        <g id="shape63" transform="translate(1651,2050)">
+            <path d="M0,0L0,38.6" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,43L3,37.8C2.1,38.3,1.1,38.6,0,38.6C-1.1,38.6,-2.1,38.3,-3,37.8L0,43" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1562.5,2187.6)">
+            <g id="shape64">
+                <path d="M179,44.4L179,2L2,2L2,44.4L179,44.4z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M177,42.4L177,0L0,0L0,42.4L177,42.4z" fill="#9e9f9f" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="36.6" y="26.3">initializeBean</tspan>
+            </text>
+        </g>
+        <g id="shape65" transform="translate(1651,2130)">
+            <path d="M0,0L0,53.2" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,57.6L3,52.4C2.1,52.9,1.1,53.2,0,53.2C-1.1,53.2,-2.1,52.9,-3,52.4L0,57.6" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1565,2263)">
+            <g id="shape66">
+                <path d="M174,54L174,2L2,2L2,54L174,54z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M172,52L172,0L0,0L0,52L172,52z" fill="#b4b5b5" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="29.1" y="31.1">回调XXXAware接口</tspan>
+            </text>
+        </g>
+        <g id="shape67" transform="translate(1651,2230)">
+            <path d="M0,0L0,28.6" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,33L3,27.8C2.1,28.3,1.1,28.6,0,28.6C-1.1,28.6,-2.1,28.3,-3,27.8L0,33" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g id="shape68" transform="translate(1651,2315)">
+            <path d="M0,0L0,28.6" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,33L3,27.8C2.1,28.3,1.1,28.6,0,28.6C-1.1,28.6,-2.1,28.3,-3,27.8L0,33" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1565,2348)">
+            <g id="shape69">
+                <path d="M174,54L174,2L2,2L2,54L174,54z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M172,52L172,0L0,0L0,52L172,52z" fill="#b4b5b5" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="9.1" y="23.7">调用后置处理啊的before</tspan>
+                <tspan x="72.6" y="38.6">方法</tspan>
+            </text>
+        </g>
+        <g transform="translate(1565,2433)">
+            <g id="shape70">
+                <path d="M176,52L176,2L2,2L2,52L176,52z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M174,50L174,0L0,0L0,50L174,50z" fill="#b4b5b5" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="24" y="30.1">invokeInitMethods</tspan>
+            </text>
+        </g>
+        <g id="shape71" transform="translate(1651,2400)">
+            <path d="M0,0L0,17L1,17L1,28.6" fill="none" stroke="#6d6d6d"/>
+            <path d="M1,33L4,27.8C3.1,28.3,2.1,28.6,1,28.6C-0.1,28.6,-1.1,28.3,-2,27.8L1,33" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g id="shape72" transform="translate(1652,2483)">
+            <path d="M0,0L0,24L.4,35.6" fill="none" stroke="#6d6d6d"/>
+            <path d="M.5,40L3.3,34.7C2.5,35.3,1.5,35.6,.4,35.6C-0.7,35.6,-1.8,35.4,-2.7,34.9L.5,40" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1565.5,2523)">
+            <g id="shape73">
+                <path d="M176,52L176,2L2,2L2,52L176,52z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M174,50L174,0L0,0L0,50L174,50z" fill="#b4b5b5" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="6.9" y="22.7">调用后置处理器的after方</tspan>
+                <tspan x="80" y="37.6">法</tspan>
+            </text>
+        </g>
+        <g id="shape74" transform="matrix(-0.29,-0.96,0.96,-0.29,1565.5,2548)">
+            <path d="M0,0C244.6,-611.4,1074.6,-613,1224.9,-4.8" fill="none" stroke="#6d6d6d"/>
+            <path d="M1226.1,0L1227.8,-5.8C1227,-5.1,1226.1,-4.5,1225,-4.3C1224,-4,1222.9,-4.1,1221.9,-4.3L1226.1,0" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1228.5,1439.4)">
+            <g id="shape75">
+                <path d="M219,51L219,2L2,2L2,51L219,51z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M217,49L217,0L0,0L0,49L217,49z" fill="#30c9f7" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="26.9" y="29.6">afterSingletonCreation</tspan>
+            </text>
+        </g>
+        <g id="shape76" transform="translate(1337,1399.2)">
+            <path d="M0,0L0,35.8" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,40.2L3,35C2.1,35.5,1.1,35.8,0,35.8C-1.1,35.8,-2.1,35.5,-3,35L0,40.2" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1245,1528.6)">
+            <g id="shape77">
+                <path d="M186,51.4L186,2L2,2L2,51.4L186,51.4z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M184,49.4L184,0L0,0L0,49.4L184,49.4z" fill="#30c9f7" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="47.4" y="29.8">addSingleton</tspan>
+            </text>
+        </g>
+        <g id="shape78" transform="translate(1337,1488.4)">
+            <path d="M0,0L0,35.8" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,40.2L3,35C2.1,35.5,1.1,35.8,0,35.8C-1.1,35.8,-2.1,35.5,-3,35L0,40.2" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1225.5,1618.2)">
+            <g id="shape79">
+                <path d="M225,49L225,2L2,2L2,49L225,49z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M223,47L223,0L0,0L0,47L223,47z" fill="#00b4f0" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="22.3" y="28.6">getObjectForBeanInstance</tspan>
+            </text>
+        </g>
+        <g id="shape80" transform="translate(1337,1578)">
+            <path d="M0,0L0,35.8" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,40.2L3,35C2.1,35.5,1.1,35.8,0,35.8C-1.1,35.8,-2.1,35.5,-3,35L0,40.2" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+        <g transform="translate(1257,1695.6)">
+            <g id="shape81">
+                <path d="M23.7,45.4L140.3,45.4C152.3,45.4,162,35.7,162,23.7C162,11.7,152.3,2,140.3,2L23.7,2C11.7,2,2,11.7,2,23.7C2,35.7,11.7,45.4,23.7,45.4z" fill="#000000" fill-opacity="0.08"/>
+                <path d="M21.7,43.4L138.3,43.4C150.3,43.4,160,33.7,160,21.7C160,9.7,150.3,0,138.3,0L21.7,0C9.7,0,0,9.7,0,21.7C0,33.7,9.7,43.4,21.7,43.4z" fill="#30c9f7" stroke="#6d6d6d"/>
+            </g>
+            <text class="st1">
+                <tspan x="37.7" y="26.8">直接返回bean</tspan>
+            </text>
+        </g>
+        <g id="shape82" transform="translate(1337,1665.2)">
+            <path d="M0,0L0,26" fill="none" stroke="#6d6d6d"/>
+            <path d="M0,30.4L3,25.2C2.1,25.7,1.1,26,0,26C-1.1,26,-2.1,25.7,-3,25.2L0,30.4" fill="#6d6d6d" stroke-linecap="round" stroke-width="1" stroke="#6d6d6d"/>
+        </g>
+    </g>
+</svg>

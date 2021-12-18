@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Mybatis整合Spring带来的变化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mybatis整合Spring">
+<meta property="og:url" content="http://example.com/2021/05/15/myBatis%20%E7%AC%AC%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E9%9B%86%E6%88%90/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="Mybatis整合Spring带来的变化">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-05-15T13:00:00.000Z">
+<meta property="article:modified_time" content="2021-08-11T14:29:02.591Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="myBatis">
+<meta property="article:tag" content="Spring">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2021/05/15/myBatis%20%E7%AC%AC%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E9%9B%86%E6%88%90/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Mybatis整合Spring | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/15/myBatis%20%E7%AC%AC%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E9%9B%86%E6%88%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mybatis整合Spring
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-05-15 21:00:00" itemprop="dateCreated datePublished" datetime="2021-05-15T21:00:00+08:00">2021-05-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-08-11 22:29:02" itemprop="dateModified" datetime="2021-08-11T22:29:02+08:00">2021-08-11</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/myBatis/" itemprop="url" rel="index"><span itemprop="name">myBatis</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">Mybatis整合Spring带来的变化</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <ol>
+<li>spring 集成myBatis</li>
+<li>动态化SQL与脚本解析器</li>
+</ol>
+<h2 id="一、spring-集成myBatis"><a href="#一、spring-集成myBatis" class="headerlink" title="一、spring 集成myBatis"></a><strong>一、spring 集成myBatis</strong></h2><hr>
+<h3 id="核心使用："><a href="#核心使用：" class="headerlink" title="核心使用："></a><strong>核心使用：</strong></h3><p>基础集成使用：</p>
+<p>1、配置 SqlSessionFactoryBean</p>
+<p>2、配置 MapperFactoryBean</p>
+<p>3、获取mapper 对像执行业务方法</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;dateSource&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;org.springframework.jdbc.datasource.DriverManagerDataSource&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">constructor-arg</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;url&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;$&#123;jdbc.url&#125;&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">constructor-arg</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">constructor-arg</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;password&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;$&#123;jdbc.password&#125;&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">constructor-arg</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">constructor-arg</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;username&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;$&#123;jdbc.username&#125;&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">constructor-arg</span>&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">bean</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;sqlSessionFactory&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;org.mybatis.spring.SqlSessionFactoryBean&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;dataSource&quot;</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">&quot;dateSource&quot;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">bean</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;userMapper&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;org.mybatis.spring.mapper.MapperFactoryBean&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;mapperInterface&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;com.study.mapper.UserMapper&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;sqlSessionFactory&quot;</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">&quot;sqlSessionFactory&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">bean</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>对像说明：</p>
+<h3 id="FactoryBean："><a href="#FactoryBean：" class="headerlink" title="FactoryBean："></a>FactoryBean：</h3><p>工厂Bean 用于 自定义生成Bean对像，当在ioc 中配置FactoryBean 的实例时，最终通过bean id 对应的是FactoryBean.getObject()实例，而非FactoryBean 实例本身</p>
+<h3 id="SqlSessionFactoryBean："><a href="#SqlSessionFactoryBean：" class="headerlink" title="SqlSessionFactoryBean："></a>SqlSessionFactoryBean：</h3><p>生成SqlSessionFactory 实例，该为单例对像，作用于整个应用生命周期。常用属性如下：</p>
+<ul>
+<li>dataSource：数据源(必填)</li>
+<li>configLocation：指定mybatis-config.xml 的内容，但其设置的<dataSource> <properties> <environments> 将会失效(选填)</environments></properties></dataSource></li>
+<li>mapperLocations：指定mapper.xml 的路径，相当于mybatis-config.xml 中<mappers> 元素配置，(选填)</mappers></li>
+</ul>
+<h3 id="MapperFactoryBean："><a href="#MapperFactoryBean：" class="headerlink" title="MapperFactoryBean："></a>MapperFactoryBean：</h3><p>生成对应的Mapper对像，通常为单例，作用于整个应用生命周期。常用属性如下：</p>
+<ul>
+<li>mapperInterface：mapper 接口      (必填)</li>
+<li>sqlSessionFactory：会话工厂实例 引用 (必填)</li>
+</ul>
+<h3 id="关于Mapper-单例情况下是否存在线程安全的问题"><a href="#关于Mapper-单例情况下是否存在线程安全的问题" class="headerlink" title="关于Mapper 单例情况下是否存在线程安全的问题?"></a>关于Mapper 单例情况下是否存在线程安全的问题?</h3><p>在原生的myBatis 使用中mapper 对像的生命期是与SqlSession同步的，不会存在线程安全问题，现在单例的mapper 是如何解决线程安全的问题的呢？</p>
+<h3 id="核心流程解析："><a href="#核心流程解析：" class="headerlink" title="核心流程解析："></a><strong>核心流程解析：</strong></h3><p>SQL session 集成结构：</p>
+<p>![image1](/images/myBatis 第三方框架集成/image1.png)</p>
+<h4 id="初始化流程"><a href="#初始化流程" class="headerlink" title="初始化流程"></a>初始化流程</h4><h5 id="创建会话模板-SqlSessionTemplate"><a href="#创建会话模板-SqlSessionTemplate" class="headerlink" title="创建会话模板 SqlSessionTemplate"></a>创建会话模板 SqlSessionTemplate</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java">&gt;org.mybatis.spring.mapper.MapperFactoryBean#MapperFactoryBean()<br>&gt; org.mybatis.spring.support.SqlSessionDaoSupport#setSqlSessionFactory<br>&gt; org.mybatis.spring.SqlSessionTemplate#SqlSessionTemplate()<br>&gt;org.mybatis.spring.SqlSessionTemplate.SqlSessionInterceptor <br>    <span class="hljs-comment">//sqlSessionProxy被SqlSessionInterceptor代理拦截</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="创建接口"><a href="#创建接口" class="headerlink" title="创建接口"></a>创建接口</h5><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java">org.mybatis.spring.mapper.MapperFactoryBean#getObject<br>org.mybatis.spring.SqlSessionTemplate#getMapper<br>org.apache.ibatis.session.Configuration#getMapper<br>org.apache.ibatis.binding.MapperProxyFactory#newInstance(org.apache.ibatis.binding.MapperProxy&lt;T&gt;) //最终获取到的userMapper是已经代理过的<br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="执行查询"><a href="#执行查询" class="headerlink" title="执行查询"></a>执行查询</h5><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java">com.tuling.mybatis.dao.UserMapper#selectByid<br>org.apache.ibatis.binding.MapperProxy#invoke<br>org.mybatis.spring.SqlSessionTemplate#selectOne(java.lang.String)<br>org.mybatis.spring.SqlSessionTemplate#sqlSessionProxy#selectOne(java.lang.String)<br>org.mybatis.spring.SqlSessionTemplate.SqlSessionInterceptor#invoke<br>   <span class="hljs-comment">//重新获取sqlsession</span><br>     SqlSession sqlSession = getSqlSession(<br>          SqlSessionTemplate.<span class="hljs-keyword">this</span>.sqlSessionFactory,<br>          SqlSessionTemplate.<span class="hljs-keyword">this</span>.executorType,<br>          SqlSessionTemplate.<span class="hljs-keyword">this</span>.exceptionTranslator);<br>org.mybatis.spring.SqlSessionUtils#getSqlSession()<br>org.apache.ibatis.session.SqlSessionFactory#openSession()<br>org.apache.ibatis.session.defaults.DefaultSqlSession#selectOne()<br></code></pre></td></tr></table></figure>
+
+<p>每次查询都会创建一个新的 SqlSession 会话，一级缓存还会生效吗？</p>
+<p>通过前几次课我们了解到 一级缓存的条件是必须相同的会话.</p>
+<p><strong>所以缓存通过和spring 集成之后就不会生效了。除非使用spring 事物 这时就不会在重新创建会话。</strong></p>
+<h3 id="事务使用"><a href="#事务使用" class="headerlink" title="事务使用 :"></a><strong>事务使用 :</strong></h3><p>spring 事物没有针对myBatis的配置，都是一些常规事物配置：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-comment">&lt;!--添加事物配置--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;transactionManager&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;org.springframework.jdbc.datasource.DataSourceTransactionManager&quot;</span>&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">constructor-arg</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">&quot;dataSource&quot;</span>/&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">bean</span>&gt;</span><br><span class="hljs-comment">&lt;!--事物注解配置--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">tx:annotation-driven</span>/&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>添加事物注解：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Override</span><br>    <span class="hljs-meta">@Transactional(rollbackFor = Exception.class)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">selectById</span><span class="hljs-params">(Integer id)</span> </span>&#123;<br>        User user = userMapper.selectById(id);<br>        User user1 = userMapper.selectById(id);<br><br>        System.out.println(user);<br>        System.out.println(user1);<br><br>    &#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>执行测试发现 当调用selectById方法时两次查询不在重复创建 sqlSession。而是共用一个直到selectById方法结束。</p>
+<h5 id="事物与SqlSession-集成原理："><a href="#事物与SqlSession-集成原理：" class="headerlink" title="事物与SqlSession 集成原理："></a>事物与SqlSession 集成原理：</h5><p>其原理前面讲查询流程时有所涉及。每次执行SQL操作前都会通过 getSqlSession 来获取会话。其主要逻辑是</p>
+<p>​     如果当前线程存在事物，并且存在相关会话，就从ThreadLocal中取出 。如果没就从创建一个 SqlSession 并存储到ThreadLocal 当中，共下次查询使用。</p>
+<p>相关源码：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java">org.mybatis.spring.SqlSessionUtils#getSqlSession()<br>org.springframework.transaction.support.TransactionSynchronizationManager#getResource<br>org.mybatis.spring.SqlSessionUtils#sessionHolder<br>org.apache.ibatis.session.SqlSessionFactory#openSession()<br>org.mybatis.spring.SqlSessionUtils#registerSessionHolder<br>org.springframework.transaction.support.TransactionSynchronizationManager#isSynchronizationActive<br>org.springframework.transaction.support.TransactionSynchronizationManager#bindResource<br></code></pre></td></tr></table></figure>
+
+<h3 id="简化Mapper-配置"><a href="#简化Mapper-配置" class="headerlink" title="简化Mapper 配置"></a><strong>简化Mapper 配置</strong></h3><p>如果每个mapper 接口都配置<em>MapperFactoryBean</em>相当麻烦 可以通过 如下配置进行自动扫描</p>
+<p>&lt;mybatis:scan base-package=”com.tuling.mybatis.dao”/&gt;</p>
+<p>其与 spring bean 注解扫描机制类似，所以得加上注解扫描开关的配置</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">context:annotation-config</span>/&gt;</span><br></code></pre></td></tr></table></figure>
+
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/myBatis/" rel="tag"># myBatis</a>
+              <a href="/tags/Spring/" rel="tag"># Spring</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/05/15/Mybati%E6%89%A7%E8%A1%8C%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E8%BF%87%E7%A8%8B%E4%B8%8E%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" rel="prev" title="Mybati执行对象创建过程与执行">
+      <i class="fa fa-chevron-left"></i> Mybati执行对象创建过程与执行
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/05/25/Mybatis-plus/" rel="next" title="Mybatis-plus">
+      Mybatis-plus <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81spring-%E9%9B%86%E6%88%90myBatis"><span class="nav-number">1.</span> <span class="nav-text">一、spring 集成myBatis</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E4%BD%BF%E7%94%A8%EF%BC%9A"><span class="nav-number">1.1.</span> <span class="nav-text">核心使用：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FactoryBean%EF%BC%9A"><span class="nav-number">1.2.</span> <span class="nav-text">FactoryBean：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SqlSessionFactoryBean%EF%BC%9A"><span class="nav-number">1.3.</span> <span class="nav-text">SqlSessionFactoryBean：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MapperFactoryBean%EF%BC%9A"><span class="nav-number">1.4.</span> <span class="nav-text">MapperFactoryBean：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8EMapper-%E5%8D%95%E4%BE%8B%E6%83%85%E5%86%B5%E4%B8%8B%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">1.5.</span> <span class="nav-text">关于Mapper 单例情况下是否存在线程安全的问题?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B%E8%A7%A3%E6%9E%90%EF%BC%9A"><span class="nav-number">1.6.</span> <span class="nav-text">核心流程解析：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B"><span class="nav-number">1.6.1.</span> <span class="nav-text">初始化流程</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E4%BC%9A%E8%AF%9D%E6%A8%A1%E6%9D%BF-SqlSessionTemplate"><span class="nav-number">1.6.1.1.</span> <span class="nav-text">创建会话模板 SqlSessionTemplate</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.6.1.2.</span> <span class="nav-text">创建接口</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E6%9F%A5%E8%AF%A2"><span class="nav-number">1.6.1.3.</span> <span class="nav-text">执行查询</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E4%BD%BF%E7%94%A8"><span class="nav-number">1.7.</span> <span class="nav-text">事务使用 :</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BA%8B%E7%89%A9%E4%B8%8ESqlSession-%E9%9B%86%E6%88%90%E5%8E%9F%E7%90%86%EF%BC%9A"><span class="nav-number">1.7.0.1.</span> <span class="nav-text">事物与SqlSession 集成原理：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E5%8C%96Mapper-%E9%85%8D%E7%BD%AE"><span class="nav-number">1.8.</span> <span class="nav-text">简化Mapper 配置</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

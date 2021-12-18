@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="SpringBoot03-自动配置原理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot03-自动配置">
+<meta property="og:url" content="http://example.com/2021/08/17/SpringBoot03-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="SpringBoot03-自动配置原理">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/SpringBoot03-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE/image-20210816124943642.png">
+<meta property="og:image" content="http://example.com/images/SpringBoot03-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE/image-20210817001324502.png">
+<meta property="article:published_time" content="2021-08-17T13:00:00.000Z">
+<meta property="article:modified_time" content="2021-08-21T15:02:31.685Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="SpringBoot">
+<meta property="article:tag" content="自动配置">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/SpringBoot03-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE/image-20210816124943642.png">
+
+<link rel="canonical" href="http://example.com/2021/08/17/SpringBoot03-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SpringBoot03-自动配置 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/17/SpringBoot03-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringBoot03-自动配置
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-17 21:00:00" itemprop="dateCreated datePublished" datetime="2021-08-17T21:00:00+08:00">2021-08-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-08-21 23:02:31" itemprop="dateModified" datetime="2021-08-21T23:02:31+08:00">2021-08-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SpringBoot/" itemprop="url" rel="index"><span itemprop="name">SpringBoot</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">SpringBoot03-自动配置原理</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="SpringBoot自动配置原理"><a href="#SpringBoot自动配置原理" class="headerlink" title="SpringBoot自动配置原理"></a>SpringBoot自动配置原理</h1><h2 id="Spring注解方式整合redis"><a href="#Spring注解方式整合redis" class="headerlink" title="Spring注解方式整合redis"></a>Spring注解方式整合redis</h2><p>redis.properties</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-meta">redis.hostname</span>=<span class="hljs-string">127.0.0.1</span><br><br><span class="hljs-meta">redis.port</span>=<span class="hljs-string">6379</span><br><br><span class="hljs-meta">redis.database</span>=<span class="hljs-string">0</span><br><br><span class="hljs-meta">redis.pool.maxActive</span>=<span class="hljs-string">600</span><br><br><span class="hljs-meta">redis.pool.maxIdle</span>=<span class="hljs-string">300</span><br><br><span class="hljs-meta">redis.pool.maxWait</span>=<span class="hljs-string">3000</span><br><br><span class="hljs-meta">redis.pool.testOnBorrow</span>=<span class="hljs-string">true</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Configuration</span><br><span class="hljs-meta">@PropertySource(&quot;classpath:redis.properties&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RedisConfig</span> </span>&#123;<br>    <span class="hljs-meta">@Value(&quot;$&#123;redis.hostname&#125;&quot;)</span><br>    <span class="hljs-keyword">private</span> String hostname;<br><br>    <span class="hljs-meta">@Value(&quot;$&#123;redis.port&#125;&quot;)</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> port;<br><br>    <span class="hljs-meta">@Value(&quot;$&#123;redis.database&#125;&quot;)</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> database;<br><br>    <span class="hljs-meta">@Value(&quot;$&#123;redis.pool.maxActive&#125;&quot;)</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> maxActive;<br><br>    <span class="hljs-meta">@Value(&quot;$&#123;redis.pool.maxIdle&#125;&quot;)</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> maxIdle;<br><br>    <span class="hljs-meta">@Value(&quot;$&#123;redis.pool.maxWait&#125;&quot;)</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> maxWait;<br><br>    <span class="hljs-meta">@Value(&quot;$&#123;redis.pool.testOnBorrow&#125;&quot;)</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">boolean</span> testOnBorrow;<br><br><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> JedisPoolConfig <span class="hljs-title">jedisPoolConfig</span><span class="hljs-params">()</span></span>&#123;<br>        JedisPoolConfig poolConfig = <span class="hljs-keyword">new</span> JedisPoolConfig();<br>        poolConfig.setMaxTotal(maxActive);<br>        poolConfig.setMaxIdle(maxIdle);<br>        poolConfig.setMaxWaitMillis(maxWait);<br>        poolConfig.setTestOnBorrow(testOnBorrow);<br>        <span class="hljs-keyword">return</span> poolConfig;<br>    &#125;<br><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> JedisConnectionFactory <span class="hljs-title">jedisConnectionFactory</span><span class="hljs-params">()</span></span>&#123;<br>        JedisConnectionFactory factory = <span class="hljs-keyword">new</span> JedisConnectionFactory();<br>        factory.setHostName(hostname);<br>        factory.setPort(port);<br>        factory.setPoolConfig(jedisPoolConfig());<br>        factory.setDatabase(database);<br>        <span class="hljs-keyword">return</span> factory;<br><br>    &#125;<br><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> RedisTemplate&lt;String,Object&gt; <span class="hljs-title">redisTemplate</span><span class="hljs-params">()</span></span>&#123;<br>        <span class="hljs-comment">//使用Jackson2JsonRedisSerializer来序列化和反序列化redis的value值（默认使用JDK的序列化方式）</span><br>        Jackson2JsonRedisSerializer jacksonSeial = <span class="hljs-keyword">new</span> Jackson2JsonRedisSerializer(Object.class);<br><br>        RedisTemplate&lt;String,Object&gt; redisTemplate = <span class="hljs-keyword">new</span> RedisTemplate();<br>        redisTemplate.setKeySerializer(<span class="hljs-keyword">new</span> StringRedisSerializer());<br>        redisTemplate.setValueSerializer(jacksonSeial);<br>        redisTemplate.setHashKeySerializer(<span class="hljs-keyword">new</span> StringRedisSerializer());<br>        redisTemplate.setHashValueSerializer(jacksonSeial);<br>        redisTemplate.setEnableTransactionSupport(<span class="hljs-keyword">true</span>);<br>        redisTemplate.setConnectionFactory(jedisConnectionFactory());<br>        <span class="hljs-keyword">return</span> redisTemplate;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs pom">&lt;dependency&gt;<br>    &lt;groupId&gt;redis.clients&lt;&#x2F;groupId&gt;<br>    &lt;artifactId&gt;jedis&lt;&#x2F;artifactId&gt;<br>    &lt;version&gt;2.10.2&lt;&#x2F;version&gt;<br>&lt;&#x2F;dependency&gt;<br>&lt;dependency&gt;<br>    &lt;groupId&gt;org.springframework.data&lt;&#x2F;groupId&gt;<br>    &lt;artifactId&gt;spring-data-redis&lt;&#x2F;artifactId&gt;<br>    &lt;version&gt;2.1.5.RELEASE&lt;&#x2F;version&gt;<br>&lt;&#x2F;dependency&gt;<br></code></pre></td></tr></table></figure>
+
+<h2 id="SpringBoot自动装配整合redis"><a href="#SpringBoot自动装配整合redis" class="headerlink" title="SpringBoot自动装配整合redis"></a>SpringBoot自动装配整合redis</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Configuration</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RedisConfig</span> </span>&#123;<br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> RedisTemplate&lt;Object, Object&gt; <span class="hljs-title">redisTemplate</span><span class="hljs-params">(RedisConnectionFactory redisConnectionFactory)</span> </span>&#123;<br>        RedisTemplate&lt;Object, Object&gt; template = <span class="hljs-keyword">new</span> RedisTemplate&lt;&gt;();<br>        template.setDefaultSerializer(<span class="hljs-keyword">new</span> Jackson2JsonRedisSerializer(Object.class));<br>        template.setConnectionFactory(redisConnectionFactory);<br>        <span class="hljs-keyword">return</span> template;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-data-redis<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="传统整合和springboot自动装配对比"><a href="#传统整合和springboot自动装配对比" class="headerlink" title="传统整合和springboot自动装配对比"></a>传统整合和springboot自动装配对比</h2><p><img src="/images/SpringBoot03-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE/image-20210816124943642.png" alt="image-20210816124943642"></p>
+<p>传统整合：</p>
+<p>​    自己引入依赖</p>
+<p>​    版本冲突</p>
+<p>​    配置复杂</p>
+<p>自动装配</p>
+<p>​    起步依赖</p>
+<p>​    自动配置</p>
+<p>​    约定 &gt; 配置 &gt; 编码</p>
+<h2 id="SpringBoot自动配置原理-1"><a href="#SpringBoot自动配置原理-1" class="headerlink" title="SpringBoot自动配置原理"></a>SpringBoot自动配置原理</h2><h3 id="Condition"><a href="#Condition" class="headerlink" title="@Condition"></a>@Condition</h3><p>​    Condition 是在Spring 4.0 增加的条件判断功能，通过这个可以功能可以<strong>根据系统中已有组件实现动态选择性的创建 Bean 操作</strong>，从而达到自动配置的目的。</p>
+<h4 id="思考："><a href="#思考：" class="headerlink" title="思考："></a>思考：</h4><p>​    SpringBoot是如何知道要创建哪个Bean的？比如SpringBoot是如何知道要创建RedisTemplate的？</p>
+<p>SpringBoot引入spring-data-redis坐标后，RedisAutoConfiguration配置类起作用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Configuration(proxyBeanMethods = false)</span><br><span class="hljs-meta">@ConditionalOnClass(RedisOperations.class)</span><br><span class="hljs-meta">@EnableConfigurationProperties(RedisProperties.class)</span><br><span class="hljs-meta">@Import(&#123; LettuceConnectionConfiguration.class, JedisConnectionConfiguration.class &#125;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RedisAutoConfiguration</span> </span>&#123;<br><br>	<span class="hljs-meta">@Bean</span><br>	<span class="hljs-meta">@ConditionalOnMissingBean(name = &quot;redisTemplate&quot;)</span><br>	<span class="hljs-meta">@ConditionalOnSingleCandidate(RedisConnectionFactory.class)</span><br>	<span class="hljs-function"><span class="hljs-keyword">public</span> RedisTemplate&lt;Object, Object&gt; <span class="hljs-title">redisTemplate</span><span class="hljs-params">(RedisConnectionFactory redisConnectionFactory)</span> </span>&#123;<br>		RedisTemplate&lt;Object, Object&gt; template = <span class="hljs-keyword">new</span> RedisTemplate&lt;&gt;();<br>		template.setConnectionFactory(redisConnectionFactory);<br>		<span class="hljs-keyword">return</span> template;<br>	&#125;<br><br>	<span class="hljs-meta">@Bean</span><br>	<span class="hljs-meta">@ConditionalOnMissingBean</span><br>	<span class="hljs-meta">@ConditionalOnSingleCandidate(RedisConnectionFactory.class)</span><br>	<span class="hljs-function"><span class="hljs-keyword">public</span> StringRedisTemplate <span class="hljs-title">stringRedisTemplate</span><span class="hljs-params">(RedisConnectionFactory redisConnectionFactory)</span> </span>&#123;<br>		StringRedisTemplate template = <span class="hljs-keyword">new</span> StringRedisTemplate();<br>		template.setConnectionFactory(redisConnectionFactory);<br>		<span class="hljs-keyword">return</span> template;<br>	&#125;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="模仿使用"><a href="#模仿使用" class="headerlink" title="模仿使用"></a>模仿使用</h4><p>​    <strong>判断是否存在哪些类而注入当前类</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-number">1</span>、定义一个Condtion实现类<br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyCondition</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Condition</span> </span>&#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">matches</span><span class="hljs-params">(ConditionContext conditionContext, AnnotatedTypeMetadata annotatedTypeMetadata)</span> </span>&#123;<br>        Map&lt;String, Object&gt; map =<br>                annotatedTypeMetadata.getAnnotationAttributes(MyConditionOnClass.class.getName());<br>        String[] className = (String[]) map.get(<span class="hljs-string">&quot;value&quot;</span>);<br>        System.out.println(className);<br>        <span class="hljs-keyword">for</span> (String s : className) &#123;<br>            <span class="hljs-keyword">try</span> &#123;<br>                Class&lt;?&gt; aClass = Class.forName(s);<br>            &#125; <span class="hljs-keyword">catch</span> (ClassNotFoundException e) &#123;<br>                <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;<br>    &#125;<br>&#125;<br><span class="hljs-number">2</span>、声明一个注解，用来接收要判断是否存在的类<br><span class="hljs-meta">@Target(&#123;ElementType.TYPE, ElementType.METHOD&#125;)</span><br><span class="hljs-meta">@Retention(RetentionPolicy.RUNTIME)</span><br><span class="hljs-meta">@Documented</span><br><span class="hljs-meta">@Conditional(value = MyCondition.class)</span><br><span class="hljs-keyword">public</span> <span class="hljs-meta">@interface</span> MyConditionOnClass &#123;<br>    String [] value();<br>&#125;<br><br><span class="hljs-number">3</span>、<br><span class="hljs-meta">@Configuration</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AutoConfig</span> </span>&#123;<br><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-meta">@MyConditionOnClass(&quot;com.study.springboot.Springboot02AutoconfigApplication&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Person <span class="hljs-title">person</span><span class="hljs-params">()</span></span>&#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Person(<span class="hljs-string">&quot;小帅&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Person</span></span>&#123;<br>        <span class="hljs-keyword">private</span> String name;<br><br>        <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Person</span><span class="hljs-params">(String name)</span> </span>&#123;<br>            <span class="hljs-keyword">this</span>.name = name;<br>        &#125;<br><br>        <span class="hljs-meta">@Override</span><br>        <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span><span class="hljs-params">()</span> </span>&#123;<br>            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Person&#123;&quot;</span> +<br>                    <span class="hljs-string">&quot;name=&#x27;&quot;</span> + name + <span class="hljs-string">&#x27;\&#x27;&#x27;</span> +<br>                    <span class="hljs-string">&#x27;&#125;&#x27;</span>;<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><h5 id="自定义条件："><a href="#自定义条件：" class="headerlink" title="自定义条件："></a>自定义条件：</h5><p>​    第一步 定义条件类：</p>
+<p>​        自定义类实现Condition接口，重写 matches 方法，在 matches 方法中进行逻辑判断，返回boolean值 。 matches 方法两个参数：</p>
+<p>​            context：上下文对象，可以获取属性值，获取类加载器，获取BeanFactory等。</p>
+<p>​            metadata：元数据对象，用于获取注解属性。</p>
+<p>​    第二步伐 充当判断条件： 在初始化Bean时，使用 @Conditional(条件类.class)注解</p>
+<h5 id="SpringBoot-提供的常用条件注解："><a href="#SpringBoot-提供的常用条件注解：" class="headerlink" title="SpringBoot 提供的常用条件注解："></a>SpringBoot 提供的常用条件注解：</h5><p>​        <strong>ConditionalOnProperty</strong>：判断配置文件中是否有对应属性和值才初始化Bean</p>
+<p>​        <strong>ConditionalOnClass</strong>：判断环境中是否有对应字节码文件才初始化Bean</p>
+<p>​        <strong>ConditionalOnMissingBean</strong>：判断环境中没有对应Bean才初始化Bean</p>
+<h2 id="Enable"><a href="#Enable" class="headerlink" title="@Enable*"></a>@Enable*</h2><p>​    SpringBoot中提供了很多Enable开头的注解，这些注解都是用于动态启用某些功能的。而其底层原理是使用@Import注解导入一些配置类，实现Bean的动态加载</p>
+<h2 id="Import注解"><a href="#Import注解" class="headerlink" title="@Import注解"></a>@Import注解</h2><p>​    @Enable底层依赖于@Import注解导入一些类，使用@Import导入的类会被Spring加载到IOC容器中。而@Import提供4中用法：</p>
+<ol>
+<li>直接注入类</li>
+<li>导入配置类（最先注入）</li>
+<li>导入 ImportSelector 实现类。一般用于加载配置文件中的类（返回new String[] 可以返回配置文件的key）</li>
+<li>导入 ImportBeanDefinitionRegistrar 实现类（最后注入）。</li>
+</ol>
+<h2 id="EnableAutoConfiguration"><a href="#EnableAutoConfiguration" class="headerlink" title="@EnableAutoConfiguration"></a>@EnableAutoConfiguration</h2><ol>
+<li>@EnableAutoConfiguration 注解内部使用 @Import(AutoConfigurationImportSelector.class)来加载配置类。</li>
+<li>配置文件位置：META-INF/spring.factories，该配置文件中定义了大量的配置类，当 SpringBoot 应用启动时，会自动加载这些配置类，初始化Bean</li>
+<li>并不是所有的Bean都会被初始化，在配置类中使用Condition来加载满足条件的Bean</li>
+</ol>
+<p>在本版本中（2.5.3）AutoConfigurationImportSelector实际起作用的是process()方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Override</span><br>   <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">process</span><span class="hljs-params">(AnnotationMetadata annotationMetadata, DeferredImportSelector deferredImportSelector)</span> </span>&#123;<br>       Assert.state(deferredImportSelector <span class="hljs-keyword">instanceof</span> AutoConfigurationImportSelector,<br>                    () -&gt; String.format(<span class="hljs-string">&quot;Only %s implementations are supported, got %s&quot;</span>,<br>                                        AutoConfigurationImportSelector.class.getSimpleName(),<br>                                        deferredImportSelector.getClass().getName()));<br>       <span class="hljs-comment">//去mata-info/spring.factories文件中 查询org.springframework.boot.autoconfigure.EnableAutoConfiguration对应的值</span><br>       AutoConfigurationEntry autoConfigurationEntry = ((AutoConfigurationImportSelector) deferredImportSelector)<br>           .getAutoConfigurationEntry(annotationMetadata);<br>       <span class="hljs-keyword">this</span>.autoConfigurationEntries.add(autoConfigurationEntry);<br>       <span class="hljs-comment">//去除重复的配置类，若我们自己写的starter 可能存主重复的</span><br>       <span class="hljs-keyword">for</span> (String importClassName : autoConfigurationEntry.getConfigurations()) &#123;<br>           <span class="hljs-keyword">this</span>.entries.putIfAbsent(importClassName, annotationMetadata);<br>       &#125;<br>   &#125;<br><br><br><br></code></pre></td></tr></table></figure>
+
+<p>SpringFactoriesLoader:去spring.factories 中去查询EnableAutoConfirution类 </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> List&lt;String&gt; <span class="hljs-title">loadFactoryNames</span><span class="hljs-params">(Class&lt;?&gt; factoryType, <span class="hljs-meta">@Nullable</span> ClassLoader classLoader)</span> </span>&#123;<br>	ClassLoader classLoaderToUse = classLoader;<br>	<span class="hljs-keyword">if</span> (classLoaderToUse == <span class="hljs-keyword">null</span>) &#123;<br>		classLoaderToUse = SpringFactoriesLoader.class.getClassLoader();<br>	&#125;<br>	String factoryTypeName = factoryType.getName();<br>	<span class="hljs-keyword">return</span> loadSpringFactories(classLoaderToUse).getOrDefault(factoryTypeName, Collections.emptyList());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>最终筛选出需要自动配置的类</p>
+<p><img src="/images/SpringBoot03-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE/image-20210817001324502.png" alt="image-20210817001324502"></p>
+<h3 id="RedisAutoConfiguration"><a href="#RedisAutoConfiguration" class="headerlink" title="RedisAutoConfiguration"></a>RedisAutoConfiguration</h3><p>​    导入了三个组件 </p>
+<p>​        RedisTemplate </p>
+<p>​        StringRedisTemplate </p>
+<p>​        JedisConnectionConfiguration</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Configuration(proxyBeanMethods = false)</span><br><span class="hljs-meta">@ConditionalOnClass(RedisOperations.class)</span><br><span class="hljs-meta">@EnableConfigurationProperties(RedisProperties.class)</span><br><span class="hljs-meta">@Import(&#123; LettuceConnectionConfiguration.class, JedisConnectionConfiguration.class &#125;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RedisAutoConfiguration</span> </span>&#123;<br>	<span class="hljs-meta">@Bean</span><br>	<span class="hljs-meta">@ConditionalOnMissingBean(name = &quot;redisTemplate&quot;)</span><br>	<span class="hljs-meta">@ConditionalOnSingleCandidate(RedisConnectionFactory.class)</span><br>	<span class="hljs-function"><span class="hljs-keyword">public</span> RedisTemplate&lt;Object, Object&gt; <span class="hljs-title">redisTemplate</span><span class="hljs-params">(RedisConnectionFactory redisConnectionFactory)</span> </span>&#123;<br>		RedisTemplate&lt;Object, Object&gt; template = <span class="hljs-keyword">new</span> RedisTemplate&lt;&gt;();<br>		template.setConnectionFactory(redisConnectionFactory);<br>		<span class="hljs-keyword">return</span> template;<br>	&#125;<br><br>	<span class="hljs-meta">@Bean</span><br>	<span class="hljs-meta">@ConditionalOnMissingBean</span><br>	<span class="hljs-meta">@ConditionalOnSingleCandidate(RedisConnectionFactory.class)</span><br>	<span class="hljs-function"><span class="hljs-keyword">public</span> StringRedisTemplate <span class="hljs-title">stringRedisTemplate</span><span class="hljs-params">(RedisConnectionFactory redisConnectionFactory)</span> </span>&#123;<br>		StringRedisTemplate template = <span class="hljs-keyword">new</span> StringRedisTemplate();<br>		template.setConnectionFactory(redisConnectionFactory);<br>		<span class="hljs-keyword">return</span> template;<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>​    SpringBoot自动配置原理：简单来说就是通过</p>
+<p>​    @SpringBootApplication -&gt; </p>
+<p>​        @EnableAutoConfiguration -&gt;</p>
+<p>​            @Import(AutoConfigurationImportSelector.class)</p>
+<p>​                    导入项目所有 META-INF/spring.factories 中所有org.springframework.boot.autoconfigure.EnableAutoConfiguration的值，再通过@condition、import，@ConfigurationProperties @EnableConfigurationProperties等系列注解达到根据环境自动注入配置的目的。</p>
+<p>​    <strong>具体例子可见SpringBoot04篇章</strong></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SpringBoot/" rel="tag"># SpringBoot</a>
+              <a href="/tags/%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE/" rel="tag"># 自动配置</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/08/11/SpringBoot02-webmvc/" rel="prev" title="SpringBoot02-webmvc">
+      <i class="fa fa-chevron-left"></i> SpringBoot02-webmvc
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/08/18/SpringBoot04-%E8%87%AA%E5%AE%9A%E4%B9%89starter/" rel="next" title="SpringBoot04-自定义starter">
+      SpringBoot04-自定义starter <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SpringBoot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">SpringBoot自动配置原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring%E6%B3%A8%E8%A7%A3%E6%96%B9%E5%BC%8F%E6%95%B4%E5%90%88redis"><span class="nav-number">1.1.</span> <span class="nav-text">Spring注解方式整合redis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SpringBoot%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E6%95%B4%E5%90%88redis"><span class="nav-number">1.2.</span> <span class="nav-text">SpringBoot自动装配整合redis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%A0%E7%BB%9F%E6%95%B4%E5%90%88%E5%92%8Cspringboot%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E5%AF%B9%E6%AF%94"><span class="nav-number">1.3.</span> <span class="nav-text">传统整合和springboot自动装配对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SpringBoot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E5%8E%9F%E7%90%86-1"><span class="nav-number">1.4.</span> <span class="nav-text">SpringBoot自动配置原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Condition"><span class="nav-number">1.4.1.</span> <span class="nav-text">@Condition</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%9D%E8%80%83%EF%BC%9A"><span class="nav-number">1.4.1.1.</span> <span class="nav-text">思考：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E4%BB%BF%E4%BD%BF%E7%94%A8"><span class="nav-number">1.4.1.2.</span> <span class="nav-text">模仿使用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">1.4.1.3.</span> <span class="nav-text">小结</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%9D%A1%E4%BB%B6%EF%BC%9A"><span class="nav-number">1.4.1.3.1.</span> <span class="nav-text">自定义条件：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SpringBoot-%E6%8F%90%E4%BE%9B%E7%9A%84%E5%B8%B8%E7%94%A8%E6%9D%A1%E4%BB%B6%E6%B3%A8%E8%A7%A3%EF%BC%9A"><span class="nav-number">1.4.1.3.2.</span> <span class="nav-text">SpringBoot 提供的常用条件注解：</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Enable"><span class="nav-number">1.5.</span> <span class="nav-text">@Enable*</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Import%E6%B3%A8%E8%A7%A3"><span class="nav-number">1.6.</span> <span class="nav-text">@Import注解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EnableAutoConfiguration"><span class="nav-number">1.7.</span> <span class="nav-text">@EnableAutoConfiguration</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RedisAutoConfiguration"><span class="nav-number">1.7.1.</span> <span class="nav-text">RedisAutoConfiguration</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">2.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

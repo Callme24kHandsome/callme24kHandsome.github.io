@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="从现代计算机理论模型与工作原理-&gt;cpu多核缓存架构-&gt;MESI-&gt;JMM模型-&gt;volatile">
+<meta property="og:type" content="article">
+<meta property="og:title" content="并发编程01-JMM&amp;volatile">
+<meta property="og:url" content="http://example.com/2021/08/29/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="从现代计算机理论模型与工作原理-&gt;cpu多核缓存架构-&gt;MESI-&gt;JMM模型-&gt;volatile">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210829224323237.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210829224618735.png">
+<meta property="og:image" content="http://example.com/images/并发编程01JMM&volatile/image-20210829232930566.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210830151211718.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210830151225845.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210830152624403.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210830175453639.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210830175639511.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210830181231664.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210831163732484.png">
+<meta property="article:published_time" content="2021-08-29T13:00:00.000Z">
+<meta property="article:modified_time" content="2021-10-24T09:48:17.430Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="并发编程">
+<meta property="article:tag" content="JMM">
+<meta property="article:tag" content="volatile">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210829224323237.png">
+
+<link rel="canonical" href="http://example.com/2021/08/29/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>并发编程01-JMM&volatile | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/29/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          并发编程01-JMM&volatile
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-29 21:00:00" itemprop="dateCreated datePublished" datetime="2021-08-29T21:00:00+08:00">2021-08-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-10-24 17:48:17" itemprop="dateModified" datetime="2021-10-24T17:48:17+08:00">2021-10-24</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">从现代计算机理论模型与工作原理->cpu多核缓存架构->MESI->JMM模型->volatile</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>参考文档：一文解决内存屏障 <a target="_blank" rel="noopener" href="https://www.jianshu.com/p/64240319ed60">https://www.jianshu.com/p/64240319ed60</a></p>
+</blockquote>
+<h1 id="现代计算机理论模型与工作原理"><a href="#现代计算机理论模型与工作原理" class="headerlink" title="现代计算机理论模型与工作原理"></a>现代计算机理论模型与工作原理</h1><h2 id="冯诺依曼计算机模型"><a href="#冯诺依曼计算机模型" class="headerlink" title="冯诺依曼计算机模型"></a>冯诺依曼计算机模型</h2><p>简介：</p>
+<p>​    现代计算机模型是基于-冯诺依曼计算机模型 计算机在运行时，先从内存中取出第一条指令，通过控制器的译码，按指令的要求，从存 储器中取出数据进行指定的运算和逻辑操作等加工，然后再按地址把结果送到内存中去。接下来，再取出第二条指令，在控制器的指挥下完成规定操作。依此进行下去，直至遇到停止指令。</p>
+<h3 id="计算机五大核心组成部分"><a href="#计算机五大核心组成部分" class="headerlink" title="计算机五大核心组成部分"></a>计算机五大核心组成部分</h3><ul>
+<li>控制器</li>
+<li>运算器</li>
+<li>存储器</li>
+<li>输入</li>
+<li>输出</li>
+</ul>
+<h3 id="冯诺依曼计算机模型图"><a href="#冯诺依曼计算机模型图" class="headerlink" title="冯诺依曼计算机模型图"></a>冯诺依曼计算机模型图</h3><p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210829224323237.png" alt="image-20210829224323237"></p>
+<h3 id="现代计算机硬件结构原理图"><a href="#现代计算机硬件结构原理图" class="headerlink" title="现代计算机硬件结构原理图"></a>现代计算机硬件结构原理图</h3><p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210829224618735.png" alt="image-20210829224618735"></p>
+<h1 id="CPU多核缓存架构"><a href="#CPU多核缓存架构" class="headerlink" title="CPU多核缓存架构"></a>CPU多核缓存架构</h1><img src="/images/并发编程01JMM&volatile/image-20210829232930566.png">
+
+<h3 id="CPU内部结构划分"><a href="#CPU内部结构划分" class="headerlink" title="CPU内部结构划分"></a>CPU内部结构划分</h3><ul>
+<li>控制单元（包含指令计数器、指令寄存器等）</li>
+<li>运算单元</li>
+<li>存储单元</li>
+</ul>
+<p><strong>多CPU</strong></p>
+<p>​    一个现代计算机通常由两个或者多个CPU，如果要运行多个程序（<strong>进程</strong>）的话，<strong>假如只有 一个CPU的话，就意味着要经常进行进程上下文切换</strong>，因为单CPU即便是多核的，也只是多个处理器核心，其他设备都是共用的，所以多个进程就必然要<strong>经常进行进程上下文切换，这个代价是很高</strong>的</p>
+<p><strong>CPU多核</strong> （<strong>支持进程内同时跑多个线程</strong>）</p>
+<p>​    一个现代CPU除了<strong>处理器核心</strong>之外还包括寄存器、L1L2L3缓存这些存储设备、浮点运算 单元、整数运算单元等一些辅助运算设备以及内部总线等。<strong>一个多核的CPU也就是一个CPU上 有多个处理器核心</strong>，这样有什么好处呢？比如说现在我们要在一台计算机上跑一个多线程的程序，因为是一个进程里的线程，所以需要一些共享一些存储变量，如果这台计算机都是单核单线程CPU的话，就意味着<strong>这个程序的不同线程需要经常在CPU之间的外部总线上通信</strong>，<strong>同时还要处理不同CPU之间不同缓存导致数据不一致的问题</strong>，所以在这种场景下多核单CPU的架构就能发挥很大的优势，通信都在内部总线，共用同一个缓存。</p>
+<p><strong>CPU寄存器</strong></p>
+<p>​    CPU在寄存器上执行操作的 速度远大于在主存上执行的速度。<strong>这是因为CPU访问寄存器的速度远大于主存。大概是几十到几百倍</strong> </p>
+<p><strong>CPU缓存</strong></p>
+<p>​    即高速缓冲存储器，是位于CPU与主内存间的一种容量较小但速度很高的存储器。由于 CPU的速度远高于主内存，CPU直接从内存中存取数据要等待一定时间周期，Cache中保存着CPU刚用过或循环使用的一部分数据，当CPU再次使用该部分数据时可从Cache中直接调用, 减少CPU的等待时间，提高了系统的效率。 一级Cache(L1 Cache) 二级Cache(L2 Cache) 三级Cache(L3 Cache)，运行速度 寄存器&gt;L1&gt;L2&gt;L3&gt;内存</p>
+<p><strong>内存</strong></p>
+<p>​    一个计算机还包含一个主存。所有的CPU都可以访问主存。主存通常比CPU中的缓存大得 多</p>
+<h1 id="缓存一致性协议（MESI）"><a href="#缓存一致性协议（MESI）" class="headerlink" title="缓存一致性协议（MESI）"></a>缓存一致性协议（MESI）</h1><h2 id="MESI协议的作用"><a href="#MESI协议的作用" class="headerlink" title="MESI协议的作用"></a>MESI协议的作用</h2><p><strong>多线程环境下存在的问题：缓存一致性问题</strong> </p>
+<p>​    在多处理器系统中，每个处理器都有自己的高速缓存，而它们又共享同一主内存。基于高速缓存的存储交互很好地解决了处理器与内存的速度矛盾，但是 也引入了新的问题：缓存一致性（CacheCoherence）。当多个处理器的运算任务都涉及同一 块主内存区域时，将可能导致各自的缓存数据不一致的情况，如果真的发生这种情况，那同步回到主内存时以谁的缓存数据为准呢？</p>
+<p>​    为了解决一致性的问题，需要各个处理器访问缓存时都 遵循一些协议，在读写时要根据协议来进行操作，这类协议有MSI、 <strong>MESI</strong>（IllinoisProtocol）、MOSI、Synapse、Firefly及DragonProtocol，等等</p>
+<p>​                                                                    <strong>MESI缓存一致性协议</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>状态</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>监听任务</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>M 修改 (Modified)</td>
+<td>该Cache line有效，数据被修改了，和内存中的数据不一致，数据只存在于本Cache中。</td>
+<td>缓存行必须时刻监听所有试图读该缓存行相对就主存的操作，这种操作必须在缓存将该缓存行写回主存并将状态变成S（共享）状态之前被延迟执行。</td>
+</tr>
+<tr>
+<td>E 独享、互斥 (Exclusive)</td>
+<td>该Cache line有效，数据和内存中的数据一致，数据只存在于本Cache中。</td>
+<td>缓存行也必须监听其它缓存读主存中该缓存行的操作，一旦有这种操作，该缓存行需要变成S（共享）状态。</td>
+</tr>
+<tr>
+<td>S 共享 (Shared)</td>
+<td>该Cache line有效，数据和内存中的数据一致，数据存在于很多Cache中。</td>
+<td>缓存行也必须监听其它缓存使该缓存行无效或者独享该缓存行的请求，并将该缓存行变成无效（Invalid）。</td>
+</tr>
+<tr>
+<td>I 无效 (Invalid)</td>
+<td>该Cache line无效。</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p> 缓存行：CPU缓存的最小存储单元</p>
+<p>总线嗅探机制：多个cpu读取同一份内存变量A到cpu缓存后会嗅探别的cpu对该变量A的读取而修改状态</p>
+<p>指令周期内会进行裁决：多个cpu同时向总线递交modified时，指令周期内会裁决A,B哪个线程生效，如果A生效，另一个线程B 标记invalid且已执行过程序（类似代码跑完了，对这个线程来说却实际没有生效）</p>
+<h2 id="缓存一致性协议失效的情况："><a href="#缓存一致性协议失效的情况：" class="headerlink" title="缓存一致性协议失效的情况："></a>缓存一致性协议失效的情况：</h2><p>1、要缓存的数据大于一个缓存行的大小，只能加总线锁（一个缓存行可以存多个数据）</p>
+<p>2、CPU本身不支持缓存一致性协议    </p>
+<h1 id="什么是线程"><a href="#什么是线程" class="headerlink" title="什么是线程"></a>什么是线程</h1><h2 id="什么是进程"><a href="#什么是进程" class="headerlink" title="什么是进程"></a>什么是进程</h2><p>​    现代操作系统在运行一个程序时，会为其创建一个进程。例如，启动一个Java程序，操作系统就会创建一个Java进程。<strong>进程是系统分配资源的基本单位</strong></p>
+<h2 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h2><p>​    <strong>现代操作系统调度CPU的最小单元是线程</strong>，也叫轻量级进程 （Light Weight Process），在一个进程里可以创建多个线程，这些线程都拥有各自的计数器、堆栈和局部变量等属性，并且能够访问共享的内存变量。处理器在这些线程上高速切换， 让使用者感觉到这些线程在同时执行。</p>
+<h3 id="线程分为两类"><a href="#线程分为两类" class="headerlink" title="线程分为两类"></a>线程分为两类</h3><ul>
+<li><strong>用户线程（User-Level Thread）ULT-对应用户空间</strong><ul>
+<li>指不需要内核支持而在用户程序中实现的线程，其不依赖于操作系统核心，应用进程利用线程库提供创建、同步、调度和管理线程的函数来控制用户线程。另外，用户线程 是由应用进程利用线程库创建和管理，不依赖于操作系统核心。不需要用户态/核心态切换， 速度快。操作系统内核不知道多线程的存在，因此一个线程阻塞将使得整个进程（包括它的所 有线程）阻塞。<strong>由于这里的处理器时间片分配是以进程为基本单位，所以每个线程执行的时间相对减少。</strong> </li>
+</ul>
+</li>
+<li><strong>内核线程(Kernel-Level Tread) KLT-对应内核空间</strong><ul>
+<li>线程的所有管理操作都是由操作系统内核完成的。内核保存线程的状态和上下 文信息，当一个线程执行了引起阻塞的系统调用时，内核可以调度该进程的其他线程执行。<strong>在 多处理器系统上，内核可以分派属于同一进程的多个线程在多个处理器上运行，提高进程执行的并行度</strong>。由于需要内核完成线程的创建、调度和管理，所以和用户级线程相比这些操作要慢 得多，但是仍然比进程的创建和管理操作要快。大多数市场上的操作系统，如Windows， Linux等都支持内核级线程</li>
+</ul>
+</li>
+</ul>
+<p>在 4 GB 的内存空间中，只有 3 GB 可以用于用户应用程序。一个进程只能运行 在用户方式（usermode）或内核方式（kernelmode）下。用户程序运行在用户方式下，而系统调用运行在内核方式下。在这两种方式下所用的堆栈不一样：用户方式下用的是一般的堆栈，而内核方式下用的是固定大小的堆栈（一般为一个内存页的大小） 每个进程都有自己的 3 G 用户空间，它们共享1GB的内核空间。当一个进程从用户空间进 入内核空间时，它就不再有自己的进程空间了。<strong>这也就是为什么我们经常说线程上下文切换会 涉及到用户态到内核态的切换原因所在</strong></p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210830151211718.png"></p>
+<h3 id="Java线程与内核线程的关系"><a href="#Java线程与内核线程的关系" class="headerlink" title="Java线程与内核线程的关系"></a>Java线程与内核线程的关系</h3><p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210830151225845.png" alt="image-20210830151225845"></p>
+<h3 id="Java线程生命状态"><a href="#Java线程生命状态" class="headerlink" title="Java线程生命状态"></a>Java线程生命状态</h3><ul>
+<li>新建</li>
+<li>就绪</li>
+<li>运行</li>
+<li>终止</li>
+<li>阻塞</li>
+<li>等待</li>
+<li>超时等待</li>
+</ul>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210830152624403.png" alt="image-20210830152624403"></p>
+<h1 id="并发（多线程）的意义"><a href="#并发（多线程）的意义" class="headerlink" title="并发（多线程）的意义"></a>并发（多线程）的意义</h1><h2 id="并发的作用"><a href="#并发的作用" class="headerlink" title="并发的作用"></a>并发的作用</h2><p><strong>1、充分利用多核CPU的计算能力</strong></p>
+<blockquote>
+<p>​    在单cpu系统中，每一时间点只能有一道程序执行，即微观上这些程序是分时的交替执行，因为分时交替运行的时间是非常短的，只不过给人的感觉是同时运行，在宏观上并发和并行一样都是同时在进行但是在微观上是不一样的。在多个cpu的操作系统中，这些可以并发执行的程序便可以分配到多个处理器（cpu），实现多任务并行执行，就是利用每个处理器来处理一个可以并发执行的程序，这样<strong>多个程序便可以同时执行</strong>。核越多，并行处理的程序越多，可以大大<strong>提高电脑的运行效率</strong>。如果能够合理地使用多线程，将能够缩减复杂应用程序的开发和维护成本，并能提供更好的性能。通过将异步工作流转换为多个序列化工作流，多线程可以更好地对人类的工作和交互方式建模。使用多线程，很多复杂的代码将变得更加直截了当，因此更容易编写、阅读和维护，但是使用多线程也意味着有很大的<strong>风险</strong>。</p>
+</blockquote>
+<p><strong>2、方便进行业务拆分，提升应用性能</strong></p>
+<h2 id="并发产生的问题"><a href="#并发产生的问题" class="headerlink" title="并发产生的问题"></a>并发产生的问题</h2><p>1、产生频繁的上下文切换</p>
+<p>2、多线程安全问题，容器出现死锁，产生的死锁会造成系统功能的阻塞或者不可用</p>
+<p>3、代码复杂度提升。。。</p>
+<h1 id="JMM模型"><a href="#JMM模型" class="headerlink" title="JMM模型"></a>JMM模型</h1><h2 id="JMM概念（Java-Memory-Model）"><a href="#JMM概念（Java-Memory-Model）" class="headerlink" title="JMM概念（Java Memory Model）"></a>JMM概念（Java Memory Model）</h2><p>JMM与JVM内存区域划分是不同的概念层次，JMM描述的是一组规则，通过这种规则控制程序中各个变量在工作内存和主内存的反问方式，JMM是围绕着原子性、有序性、可见性展开的。</p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210830175453639.png" alt="image-20210830175453639"></p>
+<h2 id="JMM与硬件内存架构的关系"><a href="#JMM与硬件内存架构的关系" class="headerlink" title="JMM与硬件内存架构的关系"></a>JMM与硬件内存架构的关系</h2><p>​    <strong>JMM模型是依据现代计算机理论模型，以CPU多核缓存架构（硬件内存架构）为基础，屏蔽底层操作系统实现而抽象出来的一种抽象模型</strong></p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210830175639511.png" alt="image-20210830175639511"></p>
+<h2 id="JMM内存交互操作"><a href="#JMM内存交互操作" class="headerlink" title="JMM内存交互操作"></a>JMM内存交互操作</h2><ol>
+<li>lock(锁定)：作用于主内存的变量，把一个变量标记为一条线程独占状态</li>
+<li>unlock(解锁)：作用于主内存的变量，把一个处于锁定状态的变量释放出来，释放后的变量才可以被其他线程锁定</li>
+<li>read(读取)：作用于主内存的变量，把一个变量值从主内存传输到线程的工作内存中，以便随后的load动作使用</li>
+<li>load(载入)：作用于工作内存的变量，它把read操作从主内存中得到的变量值放入工作内存的变量副本中</li>
+<li>use(使用)：作用于工作内存的变量，把工作内存中的一个变量值传递给执行引擎</li>
+<li>assign(赋值)：作用于工作内存的变量，它把一个从执行引擎接收到的值赋给工作内存的变量</li>
+<li>store(存储)：作用于工作内存的变量，把工作内存中的一个变量的值传送到主内存中，以便随后的write的操作</li>
+<li>write(写入)：作用于工作内存的变量，它把store操作从工作内存中的一个变量的值传送到主内存的变量中</li>
+</ol>
+<p>现代计算机主要结构组成</p>
+<p>​    把一个变量从主内存中复制到工作内存中，就需要按顺序地执行read和load操作，如果把变量从工作内存中同步到主内存中，就需要按顺序地执行store和write操作。<strong>但Java内存模型只要求上述8大操作(原子操作)必须按顺序执行，而没有保证必须是连续执行。</strong></p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210830181231664.png" alt="image-20210830181231664"></p>
+<p>​    </p>
+<h2 id="JMM内存同步规则"><a href="#JMM内存同步规则" class="headerlink" title="JMM内存同步规则"></a>JMM内存同步规则</h2><ol>
+<li>不允许一个线程无原因地（没有发生过任何assign操作）把数据从工作内存同步回主内存中</li>
+<li>一个新的<strong>变量只能在主内存中诞生</strong>，不允许在工作内存中直接使用一个未被初始化（load或者assign）的变量。即就是对一个变量实施use和store操作之前，必须先自行assign和load操作。</li>
+<li>一个变量在同一时刻只允许一条线程对其进行lock操作，但lock操作可以被同一线程重复执行多次，多次执行lock后，只有执行相同次数的unlock操作，变量才会被解锁。<strong>lock和unlock必须成对出现</strong>。</li>
+<li>如果对一个变量执行lock操作，将会清空工作内存中此变量的值，在执行引擎使用这个变量之前需要重新执行load或assign操作初始化变量的值。</li>
+<li>如果一个变量事先没有被lock操作锁定，则不允许对它执行unlock操作；也不允许去unlock一个被其他线程锁定的变量。</li>
+<li>对一个变量执行unlock操作之前，必须先把此变量同步到主内存中（执行store和write操作）</li>
+</ol>
+<h1 id="volatile原理与内存语义"><a href="#volatile原理与内存语义" class="headerlink" title="volatile原理与内存语义"></a>volatile原理与内存语义</h1><p><strong>volatile是Java虚拟机提供的轻量级的同步机制</strong></p>
+<p><strong>volatile语义</strong>有如下两个作用<br>    <strong>可见性</strong>：保证被volatile修饰的共享变量对所有线程总数可见的，也就是当一个线程修改了一个被volatile修饰共享变量的值，新值总是可以被其他线程立即得知。</p>
+<p>​    <strong>有序性</strong>：禁止指令重排序优化(通过内存屏障)。</p>
+<p><strong>volatile缓存可见性实现原理</strong></p>
+<p>​    JMM内存交互层面：volatile修饰的变量的read、load、use操作和assign、store、write必须是连续的，即修改后必须立即同步会主内存，使用时必须从主内存刷新，由此保证volatile变量的可见性。</p>
+<p>​    底层实现：通过汇编lock前缀指令，它会锁定变量缓存行区域并写回主内存，这个操作称为“缓存锁定”，缓存一致性机制会阻止同时修改被两个以上处理器缓存的内存区域数据。一个处理器的缓存回写到内存内存会导致其他处理器的缓存无效</p>
+<p>​    汇编代码查看<br>-XX:+UnlockDiagnosticVMOptions -XX:+PrintAssembly -Xcomp</p>
+<h1 id="可见性-amp-原子性-amp-有序性"><a href="#可见性-amp-原子性-amp-有序性" class="headerlink" title="可见性&amp;原子性&amp;有序性"></a>可见性&amp;原子性&amp;有序性</h1><p>并发编程三大特性</p>
+<ul>
+<li><p>可见性：当一个线程修改了某个共享变量的值，其他线程是否能够马上得知这个修改的值（高速缓存操作和指令重排会导致可见性丢失）</p>
+</li>
+<li><p>原子性：原子性指的是一个操作是不可中断的，即使是在多线程环境下，一个操作一旦开始就不会 </p>
+<p>被其他线程影响。</p>
+</li>
+<li><p>有序性：<strong>Java允许编译器和处理器对指令进行重排序，但是重排序过程不会影响到单线程程序的执行</strong>，却会影响到多线程并发执行的正确性。</p>
+</li>
+</ul>
+<p>​    volatile保证可见性与有序性，但是不能保证原子性，要保证原子性需要借助synchronized、Lock锁机制，同理也能保证有序性与可见性。因为synchronized和Lock能够保证任一时刻只有一个线程访问该代码块。</p>
+<h2 id="有序性-amp-指令重排"><a href="#有序性-amp-指令重排" class="headerlink" title="有序性&amp;指令重排"></a>有序性&amp;指令重排</h2><p>​    java语言规范规定JVM线程内部维持顺序化语义。单线程内保证串行语义执行的一致性:<strong>即只要程序的最终结果与它顺序化情况的结果相等，那么指令的执行顺序可以与代码顺序不一致，此过程叫指令的重排序</strong>。<br>​    指令重排序的意义：JVM能根据处理器特性（CPU多级缓存系统、多核处理器等）适当的对机器指令进行重排序，使机器指令能更符合CPU的执行特性，最大限度的发挥机器性能。可以理解为：只要不影响程序单线程、顺序执行的结果，就可以对两个指令重排序。<br>在<strong>编译器</strong>与<strong>CPU</strong>处理器中都能执行<strong>指令重排优化操作</strong></p>
+<h2 id="JMM如何解决原子性-amp-可见性-amp-有序性问题"><a href="#JMM如何解决原子性-amp-可见性-amp-有序性问题" class="headerlink" title="JMM如何解决原子性&amp;可见性&amp;有序性问题"></a><strong>JMM如何解决原子性&amp;可见性&amp;有序性问题</strong></h2><h3 id="as-if-serial语义"><a href="#as-if-serial语义" class="headerlink" title="as-if-serial语义"></a><strong>as-if-serial语义</strong></h3><pre><code>&gt;不管怎么重排序（编译器和处理器为了提高并行度），（单线程）程序的执行结果不能被改变。编译器、runtime和处理器都必须遵守as-if-serial语义。 
+&gt;
+&gt;​    为了遵守as-if-serial语义，编译器和处理器不会对存在数据依赖关系的操作做重排序，因为这种重排序会改变执行结果。但是，如果操作之间不存在数据依赖关系，这些操作就可能被 编译器和处理器重排序。 
+</code></pre>
+<h3 id="happens-before-原则"><a href="#happens-before-原则" class="headerlink" title="happens-before 原则"></a><strong>happens-before 原则</strong></h3><blockquote>
+<p>从JDK 5开始，Java使用新的JSR-133内存模型，提供了 </p>
+<p>happens-before 原则来辅助保证程序执行的原子性、可见性以及有序性的问题，它是判断数 </p>
+<p>据是否存在竞争、线程是否安全的依据，happens-before 原则内容如下 </p>
+<p>\1. 程序顺序原则，即在一个线程内必须保证语义串行性，也就是说按照代码顺序执行。 </p>
+<p>\2. 锁规则 解锁(unlock)操作必然发生在后续的同一个锁的加锁(lock)之前，也就是说， </p>
+<p>如果对于一个锁解锁后，再加锁，那么加锁的动作必须在解锁动作之后(同一个锁)。 </p>
+<p>\3. volatile规则 volatile变量的写，先发生于读，这保证了volatile变量的可见性，简单 </p>
+<p>的理解就是，volatile变量在每次被线程访问时，都强迫从主内存中读该变量的值，而当 </p>
+<p>该变量发生变化时，又会强迫将最新的值刷新到主内存，任何时刻，不同的线程总是能 </p>
+<p>够看到该变量的最新值。 </p>
+<p>\4. 线程启动规则 线程的start()方法先于它的每一个动作，即如果线程A在执行线程B的 </p>
+<p>start方法之前修改了共享变量的值，那么当线程B执行start方法时，线程A对共享变量 </p>
+<p>的修改对线程B可见 </p>
+<p>\5. 传递性 A先于B ，B先于C 那么A必然先于C </p>
+<p>\6. 线程终止规则 线程的所有操作先于线程的终结，Thread.join()方法的作用是等待当前 </p>
+<p>执行的线程终止。假设在线程B终止之前，修改了共享变量，线程A从线程B的join方法 </p>
+<p>成功返回后，线程B对共享变量的修改将对线程A可见。 </p>
+<p>\7. 线程中断规则 对线程 interrupt()方法的调用先行发生于被中断线程的代码检测到中 </p>
+<p>断事件的发生，可以通过Thread.interrupted()方法检测线程是否中断。 </p>
+<p>\8. 对象终结规则 对象的构造函数执行，结束先于finalize()方法 </p>
+</blockquote>
+<h3 id="volatile保证可见性"><a href="#volatile保证可见性" class="headerlink" title="volatile保证可见性"></a><strong>volatile保证可见性</strong></h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VolatileVisibilitySample</span> </span>&#123;<br>    <span class="hljs-keyword">volatile</span> <span class="hljs-keyword">boolean</span> initFlag = <span class="hljs-keyword">false</span>;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">save</span><span class="hljs-params">()</span></span>&#123;<br>        <span class="hljs-keyword">this</span>.initFlag = <span class="hljs-keyword">true</span>;<br>        String threadname = Thread.currentThread().getName();<br>        System.out.println(<span class="hljs-string">&quot;线程：&quot;</span>+threadname+<span class="hljs-string">&quot;:修改共享变量initFlag&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">load</span><span class="hljs-params">()</span></span>&#123;<br>        String threadname = Thread.currentThread().getName();<br>        <span class="hljs-keyword">while</span> (!initFlag)&#123;<br>            System.out.println(<span class="hljs-string">&quot;线程：&quot;</span>+threadname+<span class="hljs-string">&quot;当前线程还在跑空循环&quot;</span>);<br>            <span class="hljs-comment">//线程在此处空跑，等待initFlag状态改变</span><br>        &#125;<br>        System.out.println(<span class="hljs-string">&quot;线程：&quot;</span>+threadname+<span class="hljs-string">&quot;当前线程嗅探到initFlag的状 态的改变&quot;</span>);<br>    &#125;<br><br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span></span>&#123;<br>        VolatileVisibilitySample sample = <span class="hljs-keyword">new</span> VolatileVisibilitySample();<br>        Thread threadA = <span class="hljs-keyword">new</span> Thread(()-&gt;&#123; sample.save(); &#125;,<span class="hljs-string">&quot;threadA&quot;</span>);<br>        Thread threadB = <span class="hljs-keyword">new</span> Thread(()-&gt;&#123; sample.load(); &#125;,<span class="hljs-string">&quot;threadB&quot;</span>);<br>        threadB.start();<br>        <span class="hljs-keyword">try</span> &#123;<br>            Thread.sleep(<span class="hljs-number">1000</span>);<br>        &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br>            e.printStackTrace();<br>        &#125;<br>        threadA.start();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="volatile无法保证原子性"><a href="#volatile无法保证原子性" class="headerlink" title="volatile无法保证原子性"></a><strong>volatile无法保证原子性</strong></h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * volatile无法保证原子性</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VolatileAtomicSample</span> </span>&#123;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">volatile</span> <span class="hljs-keyword">int</span> counter = <span class="hljs-number">0</span>;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; i++) &#123;<br>            Thread thread = <span class="hljs-keyword">new</span> Thread(()-&gt;&#123;<br>                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> j = <span class="hljs-number">0</span>; j &lt; <span class="hljs-number">1000</span>; j++) &#123;<br>                    counter++; <span class="hljs-comment">//不是一个原子操作,第一轮循环结果是没有刷入主存，这一轮循环已经无效</span><br>                    <span class="hljs-comment">//1 load counter 到工作内存</span><br>                    <span class="hljs-comment">//2 add counter 执行自加</span><br>                    <span class="hljs-comment">//其他的代码段？</span><br>                &#125;<br>            &#125;);<br>            thread.start();<br>        &#125;<br><br>        <span class="hljs-keyword">try</span> &#123;<br>            Thread.sleep(<span class="hljs-number">1000</span>);<br>        &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br>            e.printStackTrace();<br>        &#125;<br><br>        System.out.println(counter);<br>    &#125;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="volatile禁止重排优化"><a href="#volatile禁止重排优化" class="headerlink" title="volatile禁止重排优化"></a><strong>volatile禁止重排优化</strong></h3><p>案例一：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VolatileReOrderSample</span> </span>&#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>, y = <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> a = <span class="hljs-number">0</span>, b =<span class="hljs-number">0</span>;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> InterruptedException </span>&#123;<br>        <span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>;<br><br>        <span class="hljs-keyword">for</span> (;;)&#123;<br>            i++;<br>            x = <span class="hljs-number">0</span>; y = <span class="hljs-number">0</span>;<br>            a = <span class="hljs-number">0</span>; b = <span class="hljs-number">0</span>;<br>            Thread t1 = <span class="hljs-keyword">new</span> Thread(<span class="hljs-keyword">new</span> Runnable() &#123;<br>                <span class="hljs-meta">@Override</span><br>                <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>&#123;<br>                    <span class="hljs-comment">//由于线程one先启动，下面这句话让它等一等线程two. 读着可根据自己电脑的实际性能适当调整等待时间.</span><br>                    shortWait((<span class="hljs-keyword">long</span>) (Math.random() * <span class="hljs-number">1000</span>));<br>                    a = <span class="hljs-number">1</span>; <span class="hljs-comment">//是读还是写？store，volatile写</span><br>                    <span class="hljs-comment">//storeload ,读写屏障，不允许volatile写与第二部volatile读发生重排</span><br>                    <span class="hljs-comment">//手动加内存屏障</span><br>                    <span class="hljs-comment">//UnsafeInstance.reflectGetUnsafe().storeFence();</span><br>                    x = b; <span class="hljs-comment">// 读还是写？读写都有，先读volatile，写普通变量</span><br>                    <span class="hljs-comment">//分两步进行，第一步先volatile读，第二步再普通写</span><br>                &#125;<br>            &#125;);<br>            Thread t2 = <span class="hljs-keyword">new</span> Thread(<span class="hljs-keyword">new</span> Runnable() &#123;<br>                <span class="hljs-meta">@Override</span><br>                <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>&#123;<br>                    shortWait((<span class="hljs-keyword">long</span>) (Math.random() * <span class="hljs-number">100</span>));<br>                    b = <span class="hljs-number">1</span>;<br>                    <span class="hljs-comment">//UnsafeInstance.reflectGetUnsafe().storeFence();</span><br>                    y = a;<br>                &#125;<br>            &#125;);<br>            t1.start();<br>            t2.start();<br>            t1.join();<br>            t2.join();<br><br>            <span class="hljs-comment">/**</span><br><span class="hljs-comment">             * cpu或者jit对我们的代码进行了指令重排？</span><br><span class="hljs-comment">             * 1,1</span><br><span class="hljs-comment">             * 0,1</span><br><span class="hljs-comment">             * 1,0</span><br><span class="hljs-comment">             * 0,0</span><br><span class="hljs-comment">             */</span><br>            String result = <span class="hljs-string">&quot;第&quot;</span> + i + <span class="hljs-string">&quot;次 (&quot;</span> + x + <span class="hljs-string">&quot;,&quot;</span> + y + <span class="hljs-string">&quot;）&quot;</span>;<br>            <span class="hljs-keyword">if</span>(x == <span class="hljs-number">0</span> &amp;&amp; y == <span class="hljs-number">0</span>) &#123;<br>                System.err.println(result);<br>                <span class="hljs-keyword">break</span>;<br>            &#125; <span class="hljs-keyword">else</span> &#123;<br>                System.out.println(result);<br>            &#125;<br>        &#125;<br><br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">shortWait</span><span class="hljs-params">(<span class="hljs-keyword">long</span> interval)</span></span>&#123;<br>        <span class="hljs-keyword">long</span> start = System.nanoTime();<br>        <span class="hljs-keyword">long</span> end;<br>        <span class="hljs-keyword">do</span>&#123;<br>            end = System.nanoTime();<br>        &#125;<span class="hljs-keyword">while</span>(start + interval &gt;= end);<br>    &#125;<br><br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>案例二：DCL 单例模式-双重检查</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DoubleCheckLock</span> </span>&#123;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">volatile</span> DoubleCheckLock instance;<br><br>    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-title">DoubleCheckLock</span><span class="hljs-params">()</span> </span>&#123;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> DoubleCheckLock <span class="hljs-title">getInstance</span><span class="hljs-params">()</span></span>&#123;<br>        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">null</span> != instance)&#123;<br>            <span class="hljs-keyword">synchronized</span> (DoubleCheckLock.class)&#123;<br>                <span class="hljs-keyword">if</span>(<span class="hljs-keyword">null</span> == instance)&#123;<br>                    instance = <span class="hljs-keyword">new</span> DoubleCheckLock();<br>                &#125;<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">return</span> instance;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>因为instance = new DoubleCheckLock();可以分为以下3步完成(伪代码) </p>
+<p>memory = allocate();//1.分配对象内存空间 </p>
+<p>instance(memory);//2.初始化对象 </p>
+<p>instance = memory;//3.设置instance指向刚分配的内存地址，此时 </p>
+<p>instance！=null </p>
+<p>由于步骤1和步骤2间可能会重排序，如下： </p>
+<p>memory=allocate();//1.分配对象内存空间 </p>
+<p>instance=memory;//3.设置instance指向刚分配的内存地址，此时instance！ </p>
+<p>=null，但是对象还没有初始化完成！ </p>
+<p>instance(memory);//2.初始化对象 </p>
+<p>由于步骤2和步骤3不存在数据依赖关系，而且无论重排前还是重排后程序的执行结果在单 </p>
+<p>线程中并没有改变，因此这种重排优化是允许的。但是指令重排只会保证串行语义的执行的一 </p>
+<p>致性(单线程)，但并不会关心多线程间的语义一致性。所以当一条线程访问instance不为null </p>
+<p>时，由于instance实例未必已初始化完成，也就造成了线程安全问题。那么该如何解决呢，很 </p>
+<p>简单，我们使用volatile禁止instance变量被执行指令重排优化即可。</p>
+</blockquote>
+<h3 id="内存屏障-Memory-Barrier）"><a href="#内存屏障-Memory-Barrier）" class="headerlink" title="内存屏障(Memory Barrier）"></a>内存屏障(Memory Barrier）</h3><blockquote>
+<p>内存屏障，又称内存栅栏，是一个CPU指令，它的作用有两个，<strong>一是保证特定操作的执行</strong> </p>
+<p><strong>顺序</strong>，<strong>二是保证某些变量的内存可见性（利用该特性实现volatile的内存可见性）</strong>。由于编译 </p>
+<p>器和处理器都能执行指令重排优化。如果在指令间插入一条Memory Barrier则会告诉编译器 </p>
+<p>和CPU，不管什么指令都不能和这条Memory Barrier指令重排序，也就是说通过插入内存屏 </p>
+<p>障禁止在内存屏障前后的指令执行重排序优化。Memory Barrier的另外一个作用是强制刷出 </p>
+<p>各种CPU的缓存数据，因此任何CPU上的线程都能读取到这些数据的最新版本。==总之，== </p>
+<p>==volatile变量正是通过内存屏障实现其在内存中的语义，即可见性和禁止重排优化==</p>
+</blockquote>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210831163732484.png" alt="image-20210831163732484"></p>
+<p>为了实现volatile的内存语义，编译器在生成字节码时，会在指令序列中插入内存屏障来 禁止特定类型的处理器重排序。对于编译器来说，发现一个最优布置来最小化插入屏障的总数 几乎不可能。为此，JMM采取保守策略。下面是基于保守策略的JMM内存屏障插入策略。 </p>
+<ul>
+<li>在每个volatile写操作的前面插入一个StoreStore屏障。 </li>
+<li>在每个volatile写操作的后面插入一个StoreLoad屏障。 </li>
+<li>在每个volatile读操作的后面插入一个LoadLoad屏障。 </li>
+<li>在每个volatile读操作的后面插入一个LoadStore屏障</li>
+</ul>
+<blockquote>
+<p>先简单了解两个指令：</p>
+<ul>
+<li>Store：将处理器缓存的数据刷新到内存中。</li>
+<li>Load：将内存存储的数据拷贝到处理器的缓存中。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="left">屏障类型</th>
+<th align="left">指令示例</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">LoadLoad Barriers</td>
+<td align="left">Load1;LoadLoad;Load2</td>
+<td align="left">该屏障确保Load1数据的装载先于Load2及其后所有装载指令的的操作</td>
+</tr>
+<tr>
+<td align="left">StoreStore Barriers</td>
+<td align="left">Store1;StoreStore;Store2</td>
+<td align="left">该屏障确保Store1立刻刷新数据到内存(使其对其他处理器可见)的操作先于Store2及其后所有存储指令的操作</td>
+</tr>
+<tr>
+<td align="left">LoadStore Barriers</td>
+<td align="left">Load1;LoadStore;Store2</td>
+<td align="left">确保Load1的数据装载先于Store2及其后所有的存储指令刷新数据到内存的操作</td>
+</tr>
+<tr>
+<td align="left">StoreLoad Barriers</td>
+<td align="left">Store1;StoreLoad;Load2</td>
+<td align="left">该屏障确保Store1立刻刷新数据到内存的操作先于Load2及其后所有装载装载指令的操作。它会使该屏障之前的所有内存访问指令(存储指令和访问指令)完成之后,才执行该屏障之后的内存访问指令</td>
+</tr>
+</tbody></table>
+<p>StoreLoad Barriers同时具备其他三个屏障的效果，因此也称之为<code>全能屏障</code>（mfence），是目前大多数处理器所支持的；但是相对其他屏障，该屏障的开销相对昂贵。</p>
+</blockquote>
+<p>volatile关键字与CAS使用过多会产生什么问题？有没有听过总线风暴</p>
+<p>1、Cpu工作内存与主内存存在大量交互，且大量的无效工作内存变量产生</p>
+<p>嗅探机制</p>
+<p>读内存、写内存</p>
+<p>无效交互</p>
+<p>无效变量产生</p>
+<p>导致IO总线通道被大量无效占据，导致总线风暴</p>
+<p>2、解决办法：适当使用synchronize关键字</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" rel="tag"># 并发编程</a>
+              <a href="/tags/JMM/" rel="tag"># JMM</a>
+              <a href="/tags/volatile/" rel="tag"># volatile</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/08/22/SpringBoot06-%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/" rel="prev" title="SpringBoot06-启动原理">
+      <i class="fa fa-chevron-left"></i> SpringBoot06-启动原理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/09/10/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/" rel="next" title="DDD简介科普">
+      DDD简介科普 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%B0%E4%BB%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%90%86%E8%AE%BA%E6%A8%A1%E5%9E%8B%E4%B8%8E%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">现代计算机理论模型与工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%AF%E8%AF%BA%E4%BE%9D%E6%9B%BC%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.1.</span> <span class="nav-text">冯诺依曼计算机模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BA%94%E5%A4%A7%E6%A0%B8%E5%BF%83%E7%BB%84%E6%88%90%E9%83%A8%E5%88%86"><span class="nav-number">1.1.1.</span> <span class="nav-text">计算机五大核心组成部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%AF%E8%AF%BA%E4%BE%9D%E6%9B%BC%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%A8%A1%E5%9E%8B%E5%9B%BE"><span class="nav-number">1.1.2.</span> <span class="nav-text">冯诺依曼计算机模型图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%B0%E4%BB%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A1%AC%E4%BB%B6%E7%BB%93%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE"><span class="nav-number">1.1.3.</span> <span class="nav-text">现代计算机硬件结构原理图</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CPU%E5%A4%9A%E6%A0%B8%E7%BC%93%E5%AD%98%E6%9E%B6%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">CPU多核缓存架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CPU%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84%E5%88%92%E5%88%86"><span class="nav-number">2.0.1.</span> <span class="nav-text">CPU内部结构划分</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE%EF%BC%88MESI%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">缓存一致性协议（MESI）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#MESI%E5%8D%8F%E8%AE%AE%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">3.1.</span> <span class="nav-text">MESI协议的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE%E5%A4%B1%E6%95%88%E7%9A%84%E6%83%85%E5%86%B5%EF%BC%9A"><span class="nav-number">3.2.</span> <span class="nav-text">缓存一致性协议失效的情况：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E7%BA%BF%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">什么是线程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%BF%9B%E7%A8%8B"><span class="nav-number">4.1.</span> <span class="nav-text">什么是进程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B"><span class="nav-number">4.2.</span> <span class="nav-text">线程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E5%88%86%E4%B8%BA%E4%B8%A4%E7%B1%BB"><span class="nav-number">4.2.1.</span> <span class="nav-text">线程分为两类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Java%E7%BA%BF%E7%A8%8B%E4%B8%8E%E5%86%85%E6%A0%B8%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">4.2.2.</span> <span class="nav-text">Java线程与内核线程的关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Java%E7%BA%BF%E7%A8%8B%E7%94%9F%E5%91%BD%E7%8A%B6%E6%80%81"><span class="nav-number">4.2.3.</span> <span class="nav-text">Java线程生命状态</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%EF%BC%88%E5%A4%9A%E7%BA%BF%E7%A8%8B%EF%BC%89%E7%9A%84%E6%84%8F%E4%B9%89"><span class="nav-number">5.</span> <span class="nav-text">并发（多线程）的意义</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">5.1.</span> <span class="nav-text">并发的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E4%BA%A7%E7%94%9F%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">5.2.</span> <span class="nav-text">并发产生的问题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JMM%E6%A8%A1%E5%9E%8B"><span class="nav-number">6.</span> <span class="nav-text">JMM模型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#JMM%E6%A6%82%E5%BF%B5%EF%BC%88Java-Memory-Model%EF%BC%89"><span class="nav-number">6.1.</span> <span class="nav-text">JMM概念（Java Memory Model）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JMM%E4%B8%8E%E7%A1%AC%E4%BB%B6%E5%86%85%E5%AD%98%E6%9E%B6%E6%9E%84%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">6.2.</span> <span class="nav-text">JMM与硬件内存架构的关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JMM%E5%86%85%E5%AD%98%E4%BA%A4%E4%BA%92%E6%93%8D%E4%BD%9C"><span class="nav-number">6.3.</span> <span class="nav-text">JMM内存交互操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JMM%E5%86%85%E5%AD%98%E5%90%8C%E6%AD%A5%E8%A7%84%E5%88%99"><span class="nav-number">6.4.</span> <span class="nav-text">JMM内存同步规则</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#volatile%E5%8E%9F%E7%90%86%E4%B8%8E%E5%86%85%E5%AD%98%E8%AF%AD%E4%B9%89"><span class="nav-number">7.</span> <span class="nav-text">volatile原理与内存语义</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%AF%E8%A7%81%E6%80%A7-amp-%E5%8E%9F%E5%AD%90%E6%80%A7-amp-%E6%9C%89%E5%BA%8F%E6%80%A7"><span class="nav-number">8.</span> <span class="nav-text">可见性&amp;原子性&amp;有序性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%89%E5%BA%8F%E6%80%A7-amp-%E6%8C%87%E4%BB%A4%E9%87%8D%E6%8E%92"><span class="nav-number">8.1.</span> <span class="nav-text">有序性&amp;指令重排</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JMM%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%8E%9F%E5%AD%90%E6%80%A7-amp-%E5%8F%AF%E8%A7%81%E6%80%A7-amp-%E6%9C%89%E5%BA%8F%E6%80%A7%E9%97%AE%E9%A2%98"><span class="nav-number">8.2.</span> <span class="nav-text">JMM如何解决原子性&amp;可见性&amp;有序性问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#as-if-serial%E8%AF%AD%E4%B9%89"><span class="nav-number">8.2.1.</span> <span class="nav-text">as-if-serial语义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#happens-before-%E5%8E%9F%E5%88%99"><span class="nav-number">8.2.2.</span> <span class="nav-text">happens-before 原则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#volatile%E4%BF%9D%E8%AF%81%E5%8F%AF%E8%A7%81%E6%80%A7"><span class="nav-number">8.2.3.</span> <span class="nav-text">volatile保证可见性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#volatile%E6%97%A0%E6%B3%95%E4%BF%9D%E8%AF%81%E5%8E%9F%E5%AD%90%E6%80%A7"><span class="nav-number">8.2.4.</span> <span class="nav-text">volatile无法保证原子性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#volatile%E7%A6%81%E6%AD%A2%E9%87%8D%E6%8E%92%E4%BC%98%E5%8C%96"><span class="nav-number">8.2.5.</span> <span class="nav-text">volatile禁止重排优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C-Memory-Barrier%EF%BC%89"><span class="nav-number">8.2.6.</span> <span class="nav-text">内存屏障(Memory Barrier）</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Spring源码-常用注解于常用工厂类">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring源码">
+<meta property="og:url" content="http://example.com/2021/06/14/Spring-01-%E5%B7%A5%E5%8E%82%E7%B1%BB%E4%B8%8E%E5%B8%B8%E7%94%A8%E6%B3%A8%E8%A7%A3/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="Spring源码-常用注解于常用工厂类">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/Spring-01-工厂类与常用注解/image-20210614232348569.png">
+<meta property="og:image" content="http://example.com/images/Spring-01-%E5%B7%A5%E5%8E%82%E7%B1%BB%E4%B8%8E%E5%B8%B8%E7%94%A8%E6%B3%A8%E8%A7%A3/BeanFactory.png">
+<meta property="article:published_time" content="2021-06-14T13:00:00.000Z">
+<meta property="article:modified_time" content="2021-06-16T15:44:38.884Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="源码">
+<meta property="article:tag" content="Spring">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/Spring-01-工厂类与常用注解/image-20210614232348569.png">
+
+<link rel="canonical" href="http://example.com/2021/06/14/Spring-01-%E5%B7%A5%E5%8E%82%E7%B1%BB%E4%B8%8E%E5%B8%B8%E7%94%A8%E6%B3%A8%E8%A7%A3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Spring源码 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/14/Spring-01-%E5%B7%A5%E5%8E%82%E7%B1%BB%E4%B8%8E%E5%B8%B8%E7%94%A8%E6%B3%A8%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring源码
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-06-14 21:00:00" itemprop="dateCreated datePublished" datetime="2021-06-14T21:00:00+08:00">2021-06-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-06-16 23:44:38" itemprop="dateModified" datetime="2021-06-16T23:44:38+08:00">2021-06-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring/" itemprop="url" rel="index"><span itemprop="name">Spring</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">Spring源码-常用注解于常用工厂类</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Spring框架功能整体介绍"><a href="#Spring框架功能整体介绍" class="headerlink" title="Spring框架功能整体介绍"></a>Spring框架功能整体介绍</h1><img src="/images/Spring-01-工厂类与常用注解/image-20210614232348569.png" alt="image-20210614232348569" style="zoom: 67%;">
+
+<h2 id="Spring-Core-Container"><a href="#Spring-Core-Container" class="headerlink" title="Spring Core Container"></a>Spring Core Container</h2><p>​    Core 和 Beans 模块是框架的基础部分，提供 IoC （转控制）和依赖注入特性。 这里的基础 概念是 BeanFactory，它提供对 Factory 模式的经典实 现来消除对程序’性单例模式的需要，并真 正地允许你从程序逻辑中分离出依赖关系和配置</p>
+<p>​    <strong>Core</strong>：主要包含 Spring 框架基本的核心工具类， Spring 的其他组件都要用到这个包 里的类， Core模块是其他组件的基 本核心。</p>
+<p>​    <strong>Beans</strong> (BeanFacotry)：它包含访问配直文件、创建和管理 bean 以及进行 Inversion of Control I Dependency Injection ( IoC/DI ）操作相关的所有类</p>
+<p>​    <strong>Context</strong>(处理BeanFactory，一般还是ApplicationContext起作用)：构建于 Core 和 Beans 模块基础之上，提供了一种类似JNDI 注册器的框 架式的对象访问方法。 Context 模块继承了 Beans 的特性，为 Spring 核 心提供了大量 扩展，添加了对国际化（例如资源绑定）、事件传播、资源加载和对 Context 的透明创 建的支持。 Context 模块同时也支持 J2EE 的一些特 性， ApplicationContext 接口是 Context 模块的关键</p>
+<p>​    Expression Language：模块提供了强大的表达式语言，用于在运行时查询和操纵对象。 它是 JSP 2.1 规范中定义的 unifed expression language 的扩展。 该语言支持设直／获取属 性的值，属性的分配，方法的调用，访问数组上下文（ accessiong the context of arrays ）、 容器和索引器、逻辑和算术运算符、命名变量以及从Spring的 IoC 容器中根据名称检 索对象。 它也支持 list 投影、选择和一般的 list 聚合</p>
+<h2 id="Spring-Data-Access-Integration"><a href="#Spring-Data-Access-Integration" class="headerlink" title="Spring Data Access/Integration"></a>Spring Data Access/Integration</h2><p>​    <strong>JDBC：</strong>模块提供了一个 JDBC 抽象层，它可以消除冗长的 JDBC 编码和解析数据库厂 商特有的错误代码。这个模块包含了 Spring 对 JDBC 数据访问进行封装的所有类</p>
+<p>​    <strong>ORM：</strong>模块为流行的对象－关系映射API，如 JPA、 JDO、 Hibernate、 iBatis 等，提供了 一个交互层。 利用 ORM 封装包，可以混合使用所有 Spring 提供的特性进行 O/R 映射， 如前边提到的简单声 明性事务管理。</p>
+<p>​    <strong>OXM：</strong> <strong>模块提供了一个对</strong> ObjecνXML <strong>映射实现的抽象层，</strong></p>
+<p>​    <strong>JMS ( Java Messaging Service )：</strong>模块主要包含了 一些制造和消 费消息的特性。</p>
+<p>​    <strong>Transaction：</strong>支持编程和声明性的事务管理，这些事务类必须实现特定的接口，并 且对所有的 POJO 都适用</p>
+<h2 id="Spring-Web"><a href="#Spring-Web" class="headerlink" title="Spring Web"></a>Spring Web</h2><p>​    Web 模块：提供了基础的面向 Web 的集成特性c.例如，多文件上传、使用 servlet listeners 初始化IoC 容器以及一个面向 Web 的应用上下文。 它还包含 Spring 远程支持中 Web 的相关部分。</p>
+<h2 id="Spring-Aop"><a href="#Spring-Aop" class="headerlink" title="Spring Aop"></a>Spring Aop</h2><p>​    <strong>Aspects</strong> 模块提供了对 AspectJ 的集成支持。</p>
+<p>​    <strong>Instrumentation</strong> 模块提供了 class instrumentation 支持和     classloader 实现，使得可以在特定的应用服务器上使用</p>
+<h2 id="Test"><a href="#Test" class="headerlink" title="Test"></a>Test</h2><p>Test 模块支持使用 JUnit 和 TestNG 对 Spring 组件进行测试</p>
+<h2 id="Spring容器继承图"><a href="#Spring容器继承图" class="headerlink" title="Spring容器继承图"></a>Spring容器继承图</h2><p><img src="/images/Spring-01-%E5%B7%A5%E5%8E%82%E7%B1%BB%E4%B8%8E%E5%B8%B8%E7%94%A8%E6%B3%A8%E8%A7%A3/BeanFactory.png"></p>
+<h2 id="IOC和DI-控制反转和依赖注入"><a href="#IOC和DI-控制反转和依赖注入" class="headerlink" title="IOC和DI(控制反转和依赖注入)"></a>IOC和DI(控制反转和依赖注入)</h2><p>​        <strong>DI：</strong>软件设计的一个重要思想：依赖倒置原则（Dependency Inversion Principle ）</p>
+<p>​        <strong>IOC：</strong>的思想最核心的地方在于，资源不由使用资源的双方管理，而由不使用资源的第三方管理，这可以带来很多好处。第一，资源集中管理，实现资源的可配置和易管理。第二，降低了使用资源双方的依赖程度，也就是我们说的耦合度</p>
+<h1 id="SpringIOC容器底层注解使用"><a href="#SpringIOC容器底层注解使用" class="headerlink" title="SpringIOC容器底层注解使用"></a>SpringIOC容器底层注解使用</h1><h2 id="往容器中定义bean信息的方式"><a href="#往容器中定义bean信息的方式" class="headerlink" title="往容器中定义bean信息的方式"></a>往容器中定义bean信息的方式</h2><p>在标有@Configuration的类上</p>
+<ol>
+<li>@Bean(<strong>适用于导入第三方组件的类</strong>)</li>
+<li>通过@CompentScan +@Controller @Service @Respository @compent<ol>
+<li>排除用法 excludeFilters(排除@Controller注解的,和TulingService的)</li>
+<li>包含用法 includeFilters ,注意，若使用包含的用法，需要把useDefaultFilters属性设置为false（true表<br>示扫描全部的）</li>
+<li>@ComponentScan.Filter type的类型<ol>
+<li>注解形式的FilterType.ANNOTATION @Controller @Service @Repository @Compent</li>
+<li>指定类型的 FilterType.ASSIGNABLE_TYPE @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,value = {TulingService.class})</li>
+<li>aspectj类型的 FilterType.ASPECTJ(不常用) d)正则表达式的 FilterType.REGEX(不常用)</li>
+<li>e)自定义的 FilterType.CUSTOM</li>
+</ol>
+</li>
+<li>适用场景: 针对我们自己写的组件可以通过该方式来进行加载到容器中。</li>
+</ol>
+</li>
+<li>@Import<strong>（导入组件的</strong>id<strong>为全类名路径）</strong><ol>
+<li>ImportSeletor</li>
+<li>ImportBeanDefinitionRegister</li>
+</ol>
+</li>
+<li>@BeanFactory（创建复杂对象如SqlSessionFactoryBean）</li>
+</ol>
+<h2 id="配置Bean的作用域对象"><a href="#配置Bean的作用域对象" class="headerlink" title="配置Bean的作用域对象"></a>配置Bean的作用域对象</h2><h3 id="Scope指定的作用域方法取值"><a href="#Scope指定的作用域方法取值" class="headerlink" title="@Scope指定的作用域方法取值"></a>@Scope指定的作用域方法取值</h3><ul>
+<li>singleton 单实例的(默认)</li>
+<li>prototype 多实例的</li>
+<li>request 同一次请求</li>
+<li>session 同一个会话级别</li>
+</ul>
+<h2 id="bean的生命周期"><a href="#bean的生命周期" class="headerlink" title="bean的生命周期"></a>bean的生命周期</h2><p>​    bean的创建—–&gt;初始化    &gt;销毁方法</p>
+<h3 id="bean的初始化和销毁"><a href="#bean的初始化和销毁" class="headerlink" title="bean的初始化和销毁"></a>bean的初始化和销毁</h3><p>由容器管理Bean的生命周期，我们可以通过自己指定bean的初始化方法和bean的销毁方法</p>
+<p>​    <strong>针对单实例bean的话，容器启动的时候，bean的对象就创建了，而且容器销毁的时候，也会调用Bean的销毁方法</strong></p>
+<p>​    <strong>针对多实例bean的话,容器启动的时候，bean是不会被创建的而是在获取bean的时候被创建，而且bean的销毁不受IOC容器的管理.</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Configuration</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MainConfig</span> </span>&#123;<br><span class="hljs-comment">//指定了bean的生命周期的初始化方法和销毁方法.</span><br>	<span class="hljs-meta">@Bean(initMethod = &quot;init&quot;,destroyMethod = &quot;destroy&quot;)</span> <span class="hljs-function"><span class="hljs-keyword">public</span> Car <span class="hljs-title">car</span><span class="hljs-params">()</span> </span>&#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Car();<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>通过 InitializingBean和DisposableBean 的二个接口实现bean的初始化以及销毁方法</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span> <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Book</span> </span>&#123;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Book</span><span class="hljs-params">()</span> </span>&#123;<br>    	System.out.println(<span class="hljs-string">&quot;book 的构造方法&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-meta">@PostConstruct</span> <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">init</span><span class="hljs-params">()</span> </span>&#123;<br>    	System.out.println(<span class="hljs-string">&quot;book 的PostConstruct标志的方法&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-meta">@PreDestroy</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">destory</span><span class="hljs-params">()</span> </span>&#123;<br>    	System.out.println(<span class="hljs-string">&quot;book 的PreDestory标注的方法&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>通过Spring的BeanPostProcessor的 bean的后置处理器会拦截所有bean初始化过程</strong></p>
+<p>​    postProcessBeforeInitialization 在init方法之前调用</p>
+<p>​    postProcessAfterInitialization 在init方法之后调用</p>
+<h2 id="组件赋值"><a href="#组件赋值" class="headerlink" title="组件赋值"></a>组件赋值</h2><p><strong>通过@Value +@PropertySource来给组件赋值</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Person</span> </span>&#123;<br><br>    <span class="hljs-comment">//通过普通的方式@Value(&quot;司马&quot;)</span><br>    <span class="hljs-keyword">private</span> String firstName;<br><br>    <span class="hljs-comment">//spel方式来赋值@Value(&quot;#&#123;28-8&#125;&quot;)</span><br>    <span class="hljs-keyword">private</span> Integer age;<br>    通过读取外部配置文件的值<br>    <span class="hljs-meta">@Value(&quot;$&#123;person.lastName&#125;&quot;)</span> <br>    <span class="hljs-keyword">private</span> String lastName;<br><br>    &#125;<br><br><span class="hljs-meta">@Configuration</span><br><span class="hljs-meta">@PropertySource(value = &#123;&quot;classpath:person.properties&quot;&#125;)</span> <span class="hljs-comment">//指定外部文件的位置public class MainConfig &#123;</span><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Person <span class="hljs-title">person</span><span class="hljs-params">()</span> </span>&#123; <br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Person();           <br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="自动装配"><a href="#自动装配" class="headerlink" title="自动装配"></a><strong>自动装配</strong></h2><h3 id="AutoWired的使用"><a href="#AutoWired的使用" class="headerlink" title="@AutoWired的使用"></a>@AutoWired的使用</h3><ul>
+<li><p>自动装配首先时按照类型进行装配，若在IOC容器中发现了多个相同类型的组件，那么就按照 属性名称来进行装配</p>
+<ul>
+<li><p>比如，我容器中有二个TulingDao类型的组件 一个叫tulingDao 一个叫tulingDao2</p>
+<p>那么我们通过@AutoWired 来修饰的属性名称时tulingDao，那么拿就加载容器的tulingDao组件，若属性名称为<br>tulignDao2 那么他就加载的时tulingDao2组件</p>
+</li>
+</ul>
+</li>
+<li><p>假设我们需要指定特定的组件来进行装配，我们可以通过使用@Qualifier(“tulingDao”)来指定装配的组件或者在配置类上的@Bean加上@Primary注解</p>
+</li>
+<li><p>假设我们容器中即没有tulingDao 和tulingDao2,那么在装配的时候就会抛出异常No qualifying bean of type ‘com.tuling.testautowired.TulingDao’ available 若我们想不抛异常 ，我们需要指定 required为false的时候可以了</p>
+</li>
+<li><p>使用autowired 、</p>
+<ul>
+<li>可以标注在方法上标注在set方法上</li>
+<li>标注在构造方法上</li>
+<li>标注在配置类上的入参中（可以不写）</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Autowired</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setTulingLog</span><span class="hljs-params">(TulingLog tulingLog)</span> </span>&#123; <br>    <span class="hljs-keyword">this</span>.tulingLog = tulingLog;<br>&#125;<br><br><span class="hljs-meta">@Autowired</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">TulingAspect</span><span class="hljs-params">(TulingLog tulingLog)</span> </span>&#123; <br>    <span class="hljs-keyword">this</span>.tulingLog = tulingLog;<br>&#125;<br><br><span class="hljs-comment">//标注在配置类上的入参中（可以不写）</span><br><span class="hljs-meta">@Bean</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> TulingAspect <span class="hljs-title">tulingAspect</span><span class="hljs-params">(<span class="hljs-meta">@Autowired</span> TulingLog tulingLog)</span> </span>&#123; <br>    TulingAspect tulingAspect = <span class="hljs-keyword">new</span> TulingAspect(tulingLog);<br>    <span class="hljs-keyword">return</span> tulingAspect;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="Resource-JSR250规范"><a href="#Resource-JSR250规范" class="headerlink" title="@Resource(JSR250规范)"></a>@Resource(JSR250规范)</h3><p>功能和@AutoWired的功能差不多一样，但是不支持@Primary 和@Qualifier</p>
+<h3 id="InJect（JSR330规范）"><a href="#InJect（JSR330规范）" class="headerlink" title="@InJect（JSR330规范）"></a>@InJect（JSR330规范）</h3><p>需要导入jar包依赖<br>功能和支持@Primary功能 ,但是没有Require=false的功能</p>
+<p>使用autowired 可以标注在方法上标注在set方法上</p>
+<p>标注在构造方法上</p>
+<p>标注在配置类上的入参中（可以不写）</p>
+<h2 id="XXXAware接口-内部组件赋值"><a href="#XXXAware接口-内部组件赋值" class="headerlink" title="XXXAware接口(内部组件赋值)"></a>XXXAware接口(内部组件赋值)</h2><p>​    我们自己的组件 需要使用spring ioc的底层组件的时候,比如 ApplicationContext等我们可以通过实现XXXAware接口来实现</p>
+<h2 id="Profile环境激活"><a href="#Profile环境激活" class="headerlink" title="@Profile环境激活"></a>@Profile环境激活</h2><p>来根据环境来激活标识不同的Bean </p>
+<ol>
+<li>@Profile标识在类上，那么只有当前环境匹配，整个配置类才会生效</li>
+<li>@Profile标识在Bean上 ，那么只有当前环境的Bean才会被激活</li>
+<li>没有标志为@Profile的bean 不管在什么环境都可以被激活</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Configuration</span><br><span class="hljs-meta">@PropertySource(value = &#123;&quot;classpath:ds.properties&quot;&#125;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MainConfig</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">EmbeddedValueResolverAware</span> </span>&#123;<br><br>	<span class="hljs-meta">@Value(&quot;$&#123;ds.username&#125;&quot;)</span> <br>    <span class="hljs-keyword">private</span> String userName;<br><br>    <span class="hljs-meta">@Value(&quot;$&#123;ds.password&#125;&quot;)</span> <br>    <span class="hljs-keyword">private</span> String password;<br>    <span class="hljs-keyword">private</span> String jdbcUrl; <br>    <span class="hljs-keyword">private</span> String classDriver; <br>    <br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setEmbeddedValueResolver</span><span class="hljs-params">(StringValueResolver resolver)</span> </span>&#123;<br>    	<span class="hljs-keyword">this</span>.jdbcUrl = resolver.resolveStringValue(<span class="hljs-string">&quot;$&#123;ds.jdbcUrl&#125;&quot;</span>); <br>        <span class="hljs-keyword">this</span>.classDriver = resolver.resolveStringValue(<span class="hljs-string">&quot;$&#123;ds.classDriver&#125;&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-comment">//标识为测试环境才会被装配@Bean</span><br>    <span class="hljs-meta">@Profile(value = &quot;test&quot;)</span> <span class="hljs-function"><span class="hljs-keyword">public</span> DataSource <span class="hljs-title">testDs</span><span class="hljs-params">()</span> </span>&#123;<br>    	<span class="hljs-keyword">return</span> buliderDataSource(<span class="hljs-keyword">new</span> DruidDataSource());<br>    &#125;<br><br>    <span class="hljs-comment">//标识开发环境才会被激活@Bean</span><br>    <span class="hljs-meta">@Profile(value = &quot;dev&quot;)</span> <span class="hljs-function"><span class="hljs-keyword">public</span> DataSource <span class="hljs-title">devDs</span><span class="hljs-params">()</span> </span>&#123;<br>    	<span class="hljs-keyword">return</span> buliderDataSource(<span class="hljs-keyword">new</span> DruidDataSource());<br>    &#125;<br><br>    <span class="hljs-comment">//标识生产环境才会被激活@Bean</span><br>    <span class="hljs-meta">@Profile(value = &quot;prod&quot;)</span> <span class="hljs-function"><span class="hljs-keyword">public</span> DataSource <span class="hljs-title">prodDs</span><span class="hljs-params">()</span> </span>&#123;<br>    	<span class="hljs-keyword">return</span> buliderDataSource(<span class="hljs-keyword">new</span> DruidDataSource());<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">private</span> DataSource <span class="hljs-title">buliderDataSource</span><span class="hljs-params">(DruidDataSource dataSource)</span> </span>&#123; <br>        dataSource.setUsername(userName); dataSource.setPassword(password); <br>        dataSource.setDriverClassName(classDriver); dataSource.setUrl(jdbcUrl);<br>    	<span class="hljs-keyword">return</span> dataSource;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%BA%90%E7%A0%81/" rel="tag"># 源码</a>
+              <a href="/tags/Spring/" rel="tag"># Spring</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/06/01/SpringMVC%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B%E8%A7%A3%E6%9E%90/" rel="prev" title="SpringMVC核心流程解析">
+      <i class="fa fa-chevron-left"></i> SpringMVC核心流程解析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/06/16/Spring02-%E6%89%AB%E6%8F%8Fbean%E5%AE%9A%E4%B9%89%E7%9A%84%E8%BF%87%E7%A8%8B/" rel="next" title="Spring02-扫描bean定义的过程">
+      Spring02-扫描bean定义的过程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring%E6%A1%86%E6%9E%B6%E5%8A%9F%E8%83%BD%E6%95%B4%E4%BD%93%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">Spring框架功能整体介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Core-Container"><span class="nav-number">1.1.</span> <span class="nav-text">Spring Core Container</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Data-Access-Integration"><span class="nav-number">1.2.</span> <span class="nav-text">Spring Data Access&#x2F;Integration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Web"><span class="nav-number">1.3.</span> <span class="nav-text">Spring Web</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Aop"><span class="nav-number">1.4.</span> <span class="nav-text">Spring Aop</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Test"><span class="nav-number">1.5.</span> <span class="nav-text">Test</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring%E5%AE%B9%E5%99%A8%E7%BB%A7%E6%89%BF%E5%9B%BE"><span class="nav-number">1.6.</span> <span class="nav-text">Spring容器继承图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IOC%E5%92%8CDI-%E6%8E%A7%E5%88%B6%E5%8F%8D%E8%BD%AC%E5%92%8C%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5"><span class="nav-number">1.7.</span> <span class="nav-text">IOC和DI(控制反转和依赖注入)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SpringIOC%E5%AE%B9%E5%99%A8%E5%BA%95%E5%B1%82%E6%B3%A8%E8%A7%A3%E4%BD%BF%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">SpringIOC容器底层注解使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BE%80%E5%AE%B9%E5%99%A8%E4%B8%AD%E5%AE%9A%E4%B9%89bean%E4%BF%A1%E6%81%AF%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="nav-number">2.1.</span> <span class="nav-text">往容器中定义bean信息的方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEBean%E7%9A%84%E4%BD%9C%E7%94%A8%E5%9F%9F%E5%AF%B9%E8%B1%A1"><span class="nav-number">2.2.</span> <span class="nav-text">配置Bean的作用域对象</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Scope%E6%8C%87%E5%AE%9A%E7%9A%84%E4%BD%9C%E7%94%A8%E5%9F%9F%E6%96%B9%E6%B3%95%E5%8F%96%E5%80%BC"><span class="nav-number">2.2.1.</span> <span class="nav-text">@Scope指定的作用域方法取值</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#bean%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">2.3.</span> <span class="nav-text">bean的生命周期</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bean%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96%E5%92%8C%E9%94%80%E6%AF%81"><span class="nav-number">2.3.1.</span> <span class="nav-text">bean的初始化和销毁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E8%B5%8B%E5%80%BC"><span class="nav-number">2.4.</span> <span class="nav-text">组件赋值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D"><span class="nav-number">2.5.</span> <span class="nav-text">自动装配</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#AutoWired%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">2.5.1.</span> <span class="nav-text">@AutoWired的使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Resource-JSR250%E8%A7%84%E8%8C%83"><span class="nav-number">2.5.2.</span> <span class="nav-text">@Resource(JSR250规范)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#InJect%EF%BC%88JSR330%E8%A7%84%E8%8C%83%EF%BC%89"><span class="nav-number">2.5.3.</span> <span class="nav-text">@InJect（JSR330规范）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#XXXAware%E6%8E%A5%E5%8F%A3-%E5%86%85%E9%83%A8%E7%BB%84%E4%BB%B6%E8%B5%8B%E5%80%BC"><span class="nav-number">2.6.</span> <span class="nav-text">XXXAware接口(内部组件赋值)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Profile%E7%8E%AF%E5%A2%83%E6%BF%80%E6%B4%BB"><span class="nav-number">2.7.</span> <span class="nav-text">@Profile环境激活</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

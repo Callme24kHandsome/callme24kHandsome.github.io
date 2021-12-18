@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="DDD简介">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DDD简介科普">
+<meta property="og:url" content="http://example.com/2021/09/10/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="DDD简介">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902221412119.png">
+<meta property="og:image" content="http://example.com/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902222626509.png">
+<meta property="og:image" content="http://example.com/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902221834222.png">
+<meta property="og:image" content="http://example.com/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902222916470.png">
+<meta property="og:image" content="http://example.com/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902222841017.png">
+<meta property="og:image" content="http://example.com/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902223018287.png">
+<meta property="og:image" content="http://example.com/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902223029121.png">
+<meta property="og:image" content="http://example.com/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902215335205.png">
+<meta property="og:image" content="http://example.com/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902223538517.png">
+<meta property="og:image" content="http://example.com/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902224541628.png">
+<meta property="og:image" content="http://example.com/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210903000820115.png">
+<meta property="article:published_time" content="2021-09-10T13:00:00.000Z">
+<meta property="article:modified_time" content="2021-09-14T16:14:42.057Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="DDD">
+<meta property="article:tag" content="中台">
+<meta property="article:tag" content="微服务">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902221412119.png">
+
+<link rel="canonical" href="http://example.com/2021/09/10/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>DDD简介科普 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/10/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DDD简介科普
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-09-10 21:00:00" itemprop="dateCreated datePublished" datetime="2021-09-10T21:00:00+08:00">2021-09-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-09-15 00:14:42" itemprop="dateModified" datetime="2021-09-15T00:14:42+08:00">2021-09-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/DDD/" itemprop="url" rel="index"><span itemprop="name">DDD</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">DDD简介</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="名词科普"><a href="#名词科普" class="headerlink" title="名词科普"></a>名词科普</h2><h3 id="集群、分布式、SOA、微服务"><a href="#集群、分布式、SOA、微服务" class="headerlink" title="集群、分布式、SOA、微服务"></a>集群、分布式、SOA、微服务</h3><p><strong>单体</strong>：一个应用里包含完整的服务</p>
+<p><strong>集群</strong>：不同服务器部署同一套应用对外提供服务，指同一组件的多个实例，是一种物理形态。</p>
+<p><strong>分布式</strong>：与集群不同，强调的是不同的模块部署在不同服务器上，提供完整的服务（可以存在相同服务部署在多个节点上），强调的是工作方式</p>
+<p><strong>SOA</strong>（Service-Oriented Architecture）:面向服务的架构，是一种设计方法。服务拆分，多个服务相互依赖通过接口和协议联系起来</p>
+<p>​    中心化实现：ESB（Enterprise Service Bus ） 企业服务总线，各服务通过ESB交互的方式实现与其他服务的通信，解决异构系统的连通性，屏蔽其他服务的细节。</p>
+<pre><code> 去中心化：微服务，SOA的升华
+</code></pre>
+<p><strong>微服务</strong>：强调业务的彻底组件化和服务化，每个服务可单独开发，迭代运行，更符合单一职责原则，通过网关</p>
+<p>服务发现与注册，restful api风格轻量级通信等等，各司其职</p>
+<h2 id="系统老化谁的锅"><a href="#系统老化谁的锅" class="headerlink" title="系统老化谁的锅"></a>系统老化谁的锅</h2><p><img src="/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902221412119.png" alt="image-20210902221412119"></p>
+<h1 id="DDD的特点"><a href="#DDD的特点" class="headerlink" title="DDD的特点"></a>DDD的特点</h1><h2 id="基于充血模型的面向对象开发"><a href="#基于充血模型的面向对象开发" class="headerlink" title="基于充血模型的面向对象开发"></a>基于充血模型的面向对象开发</h2><p>贫血模型：</p>
+<p>​    定义对象的简单的属性值，没有业务逻辑上的方法（个人理解）</p>
+<p>​    MVC模式开发是是面向过程的编程方式，符合人类大脑逻辑。定义DTO，定义数据库Model，BO等，对其进行get set方法，然后通过service 对Bo对象进行操作，最后通过copy属性持久化数据库和DTO传输。</p>
+<p>充血模型：</p>
+<p>​    就是我们在定义属性的同时也会定义方法，我们的属性是可以通过某些方式直接得到属性值，那我们也就可以在对象中嵌入方法直接创建出一个具有属性值的对象。也就是说这个对象不再需要我们在进行进一步的操作，这也就复合了OOP的三大特性之一的封装</p>
+<h2 id="DDD四层架构"><a href="#DDD四层架构" class="headerlink" title="DDD四层架构"></a>DDD四层架构</h2><ul>
+<li><p>interface（接口层）</p>
+<ul>
+<li>很薄的一层</li>
+<li>类似于MVC中的controller层 只能直接注入app层</li>
+</ul>
+</li>
+<li><p>application（应用层）</p>
+<ul>
+<li>很薄的一层</li>
+<li>注入领域对象，可以设置状态参数（领域层是无状态的，可以在app层设置用户状态，系统标志等等参数）调用领域服务</li>
+</ul>
+</li>
+<li><p>domain（领域服务层）</p>
+<ul>
+<li>Aservice 只能注入execute、query聚合根来操作持久层<ul>
+<li>A1子领域<ul>
+<li>repository 存放领域内部仓库，操作持久化层<ul>
+<li>dao 存放Mybatis Mapper接口和实现的XML文件</li>
+<li>data（可选）查询前后的数据计算、转化</li>
+<li><strong>execute聚合根</strong> 定义所有增删改操作</li>
+<li><strong>query聚合根</strong> 定义所有查询操作</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>A2子领域</li>
+<li>transfer层 领域内部之前通过该层调用 如 A1service -&gt; A2transfer</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>infrastructure（基础设施层）（配置、自研组件、缓存、防腐层（client）、工具包）</p>
+<ul>
+<li><p>client</p>
+<ul>
+<li>native<ul>
+<li>外围、外部服务client客户端</li>
+</ul>
+</li>
+<li>local 本地大领域之间调用 比如 A调用B Aservice -&gt; BLocalClient <ul>
+<li>BLocalClient</li>
+<li>ALocalClient</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>helper 工具类包</p>
+</li>
+<li><p>config 引入各组件的配置</p>
+</li>
+<li><p>component 存放着系统无关、可以随时迁移的自定义组件</p>
+</li>
+<li><p>common 存放着系统无关、可以随时迁移的实体、常量类、异常类</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="DDD代码编排："><a href="#DDD代码编排：" class="headerlink" title="DDD代码编排："></a>DDD代码编排：</h2><ol>
+<li><p>interfaces-&gt;</p>
+<ol>
+<li>application-&gt;<ol>
+<li>domainService-&gt;<ol>
+<li>Repository(聚合跟DeviceExecuteRepo)-&gt;<ol>
+<li>DeviceMapper-&gt;<ol>
+<li>DeviceDao-&gt;DeviceDao.xml</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>domainService-&gt;<ol>
+<li>发布事件</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>Job/Mq/Eventlistener 监听到事件或MQ-&gt;</p>
+<ol>
+<li>application-&gt; <ol>
+<li>domainService-&gt;<ol>
+<li>业务逻辑    </li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<p><img src="/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902222626509.png" alt="image-20210902222626509"></p>
+<h2 id="DDD可指导单体项目和微服务架构"><a href="#DDD可指导单体项目和微服务架构" class="headerlink" title="DDD可指导单体项目和微服务架构"></a>DDD可指导单体项目和微服务架构</h2><h3 id="微服务架构治标不治本"><a href="#微服务架构治标不治本" class="headerlink" title="微服务架构治标不治本"></a>微服务架构治标不治本</h3><p>​    几遍在微服务架构下，比如订单服务部署了多个节点，也避免不了每个节点内代码的复杂和凌乱，因此，在DDD指导下，无论单体还是微服务架构下，每个领域后续都可拆分或者当成一个微服务来看待</p>
+<p><img src="/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902221834222.png" alt="image-20210902221834222"></p>
+<p><img src="/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902222916470.png" alt="image-20210902222916470"></p>
+<p><img src="/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902222841017.png" alt="image-20210902222841017"></p>
+<p><img src="/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902223018287.png" alt="image-20210902223018287"></p>
+<p><img src="/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902223029121.png" alt="image-20210902223029121"></p>
+<p><img src="/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902215335205.png" alt="image-20210902215335205"></p>
+<h2 id="DDD与中台"><a href="#DDD与中台" class="headerlink" title="DDD与中台"></a>DDD与中台</h2><p><img src="/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902223538517.png" alt="image-20210902223538517"></p>
+<h2 id="DDD并非银弹"><a href="#DDD并非银弹" class="headerlink" title="DDD并非银弹"></a>DDD并非银弹</h2><p><img src="/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902224541628.png" alt="image-20210902224541628"></p>
+<p>数据中台的定义：<a target="_blank" rel="noopener" href="https://www.sohu.com/a/425913998_114819">https://www.sohu.com/a/425913998_114819</a></p>
+<blockquote>
+<p>在数据应用和统计分散化的背景下，通过建设统一的数据服务体系，结合业务、安全、风控等相关诉求，完成数据的采集、清晰、建模等行为，并提供准确以及及时的数据服务、以满足企业不断复杂变化的数据统计与数据应用的需求</p>
+</blockquote>
+<p>实例一：今年我们的库存周转率如何协调财务、库存、运营的口径或者标准</p>
+<p>实例二：如何统一提供sku管理和服务（商品中台）</p>
+<p><img src="/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210903000820115.png" alt="image-20210903000820115"></p>
+<h2 id="SPI"><a href="#SPI" class="headerlink" title="SPI"></a>SPI</h2>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/DDD/" rel="tag"># DDD</a>
+              <a href="/tags/%E4%B8%AD%E5%8F%B0/" rel="tag"># 中台</a>
+              <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" rel="tag"># 微服务</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/08/29/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/" rel="prev" title="并发编程01-JMM&volatile">
+      <i class="fa fa-chevron-left"></i> 并发编程01-JMM&volatile
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/10/03/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9806Nginx%E6%A0%B8%E5%BF%83%E6%A8%A1%E5%9D%97%E4%B8%8E%E5%AE%9E%E6%88%98/" rel="next" title="性能调优06Nginx核心模块与实战">
+      性能调优06Nginx核心模块与实战 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8D%E8%AF%8D%E7%A7%91%E6%99%AE"><span class="nav-number">1.</span> <span class="nav-text">名词科普</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E3%80%81%E5%88%86%E5%B8%83%E5%BC%8F%E3%80%81SOA%E3%80%81%E5%BE%AE%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.1.</span> <span class="nav-text">集群、分布式、SOA、微服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%80%81%E5%8C%96%E8%B0%81%E7%9A%84%E9%94%85"><span class="nav-number">2.</span> <span class="nav-text">系统老化谁的锅</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DDD%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number"></span> <span class="nav-text">DDD的特点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%85%85%E8%A1%80%E6%A8%A1%E5%9E%8B%E7%9A%84%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%BC%80%E5%8F%91"><span class="nav-number">1.</span> <span class="nav-text">基于充血模型的面向对象开发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDD%E5%9B%9B%E5%B1%82%E6%9E%B6%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">DDD四层架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDD%E4%BB%A3%E7%A0%81%E7%BC%96%E6%8E%92%EF%BC%9A"><span class="nav-number">3.</span> <span class="nav-text">DDD代码编排：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDD%E5%8F%AF%E6%8C%87%E5%AF%BC%E5%8D%95%E4%BD%93%E9%A1%B9%E7%9B%AE%E5%92%8C%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84"><span class="nav-number">4.</span> <span class="nav-text">DDD可指导单体项目和微服务架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E6%B2%BB%E6%A0%87%E4%B8%8D%E6%B2%BB%E6%9C%AC"><span class="nav-number">4.1.</span> <span class="nav-text">微服务架构治标不治本</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDD%E4%B8%8E%E4%B8%AD%E5%8F%B0"><span class="nav-number">5.</span> <span class="nav-text">DDD与中台</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDD%E5%B9%B6%E9%9D%9E%E9%93%B6%E5%BC%B9"><span class="nav-number">6.</span> <span class="nav-text">DDD并非银弹</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SPI"><span class="nav-number">7.</span> <span class="nav-text">SPI</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

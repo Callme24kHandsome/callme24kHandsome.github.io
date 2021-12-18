@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Atomic、Unsafe">
+<meta property="og:type" content="article">
+<meta property="og:title" content="并发编程05-Atomic&amp;Unsafe魔法类详解">
+<meta property="og:url" content="http://example.com/2021/11/02/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B05-Atomic&Unsafe%E9%AD%94%E6%B3%95%E7%B1%BB%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="Atomic、Unsafe">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/Untitled/image-20211103234945888.png">
+<meta property="article:published_time" content="2021-11-02T13:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-04T15:09:43.123Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="并发编程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/Untitled/image-20211103234945888.png">
+
+<link rel="canonical" href="http://example.com/2021/11/02/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B05-Atomic&Unsafe%E9%AD%94%E6%B3%95%E7%B1%BB%E8%AF%A6%E8%A7%A3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>并发编程05-Atomic&Unsafe魔法类详解 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/02/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B05-Atomic&Unsafe%E9%AD%94%E6%B3%95%E7%B1%BB%E8%AF%A6%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          并发编程05-Atomic&Unsafe魔法类详解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-11-02 21:00:00" itemprop="dateCreated datePublished" datetime="2021-11-02T21:00:00+08:00">2021-11-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-11-04 23:09:43" itemprop="dateModified" datetime="2021-11-04T23:09:43+08:00">2021-11-04</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">Atomic、Unsafe</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Atomic-amp-Unsafe魔法类详解"><a href="#Atomic-amp-Unsafe魔法类详解" class="headerlink" title="Atomic&amp;Unsafe魔法类详解"></a>Atomic&amp;Unsafe魔法类详解</h1><h2 id="什么是原子操作？"><a href="#什么是原子操作？" class="headerlink" title="什么是原子操作？"></a>什么是原子操作？</h2><p>​    原子（atom）本意是“不能被进一步分割的最小粒子”，而<strong>原子操作（atomic operation）意为”不可被中断的一个或一系列操作</strong>” 。</p>
+<table>
+<thead>
+<tr>
+<th><strong>术语名称</strong></th>
+<th><strong>英文</strong></th>
+<th><strong>解释</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>缓存行</td>
+<td>Cache line</td>
+<td>缓存的最小操作单位</td>
+</tr>
+<tr>
+<td>比较并交换</td>
+<td>Compare and Swap</td>
+<td>CAS操作需要输入两个数值，一个旧值（期望操作前的值）和一个新值，在操作期间先<strong>比较</strong>下在旧值有没有发生变化，如果没有发生变化，才<strong>交换</strong>成新值，发生了变化则不交换。</td>
+</tr>
+<tr>
+<td>CPU流水线</td>
+<td>CPU pipeline</td>
+<td>CPU流水线的工作方式就象工业生产上的装配流水线，在CPU中由5<del>6个不同功能的电路单元组成一条指令处理流水线，然后将一条X86指令分成5</del>6步后再由这些电路单元分别执行，这样就能实现在一个CPU时钟周期完成一条指令，因此提高CPU的运算速度。</td>
+</tr>
+<tr>
+<td>内存顺序冲突</td>
+<td><strong>Memory order violation</strong></td>
+<td>内存顺序冲突一般是由假共享引起，假共享是指多个CPU同时修改同一个缓存行的不同部分而引起其中一个CPU的操作无效，当出现这个内存顺序冲突时，CPU必须清空流水线。</td>
+</tr>
+</tbody></table>
+<h2 id="多CPU原子操作的实现方式"><a href="#多CPU原子操作的实现方式" class="headerlink" title="多CPU原子操作的实现方式"></a>多CPU原子操作的实现方式</h2><p>​    <strong>前提</strong>：<strong>处理器自动保证基本内存操作的原子性</strong>，处理器保证从系统内存中读取或者写入一个字节是原子的，意思是当一个处理器读取一个字节时，其他处理器不能访问这个字节的内存地址。Pentium6和最新的处理器能自动保证单处理器对同一个缓存行里进行16/32/64位的操作时原子的，但是复杂的内存操作处理器是不能自动保证其原子性的，比如跨总线宽度、跨多个缓存行和跨页表的访问。但是，处理器提供总线锁定和缓存锁定两个机制来保证复杂内存操作的原子性。</p>
+<p>​    <strong>实现：2种加锁机制</strong></p>
+<p>1、缓存行加锁（基于缓存加锁，基于MESI协议）<br>2、总线加锁（锁住cpu和内存之间的通信）</p>
+<p>缓存行加锁失效的场景：</p>
+<p>1、CPU不支持缓存锁定</p>
+<p>2、缓存数据过大，一个缓存行放不下</p>
+<h2 id="JAVA原子操作的实现"><a href="#JAVA原子操作的实现" class="headerlink" title="JAVA原子操作的实现"></a>JAVA原子操作的实现</h2><p>​    1、锁<br>​    2、CAS操作（利用处理器提供的<strong>CMPXCHG</strong>指令实现原子操作）。</p>
+<h2 id="Atomic"><a href="#Atomic" class="headerlink" title="Atomic"></a>Atomic</h2><p>​    在Atomic包里一共有12个类，四种原子更新方式，分别是原子更新基本类型，原子更 新数组，原子更新引用和原子更新字段。Atomic包里的类基本都是使用Unsafe实现的包装类</p>
+<p><strong>基本类：</strong>AtomicInteger、AtomicLong、AtomicBoolean；</p>
+<p><strong>引用类型：</strong>AtomicReference、AtomicReference的ABA实例、 AtomicStampedRerence、AtomicMarkableReference； </p>
+<p><strong>数组类型：</strong>AtomicIntegerArray、AtomicLongArray、AtomicReferenceArray </p>
+<p><strong>属性原子修改器（Updater）</strong>：AtomicIntegerFieldUpdater、 AtomicLongFieldUpdater、AtomicReferenceFieldUpdater </p>
+<p><strong>1、原子更新基本类型类</strong> </p>
+<p>用于通过原子的方式更新基本类型，Atomic包提供了以下三个类： </p>
+<ul>
+<li>AtomicBoolean：原子更新布尔类型。 </li>
+<li>AtomicInteger：原子更新整型。 </li>
+<li>AtomicLong：原子更新长整型。 </li>
+</ul>
+<p>AtomicInteger的常用方法如下： </p>
+<ul>
+<li>int addAndGet(int delta) ：以原子方式将输入的数值与实例中的值 （AtomicInteger里的value）相加，并返回结果 </li>
+<li>boolean compareAndSet(int expect, int update) ：如果输入的数值等于预期值，则以原子方式将该值设置为输入的值。 </li>
+<li>int getAndIncrement()：以原子方式将当前值加1，注意：这里返回的是自增前的值。</li>
+<li>void lazySet(int newValue)：最终会设置成newValue，使用lazySet设置值后，可能导致其他线程在之后的一小段时间内还是可以读到旧的值。 </li>
+<li>int getAndSet(int newValue)：以原子方式设置为newValue的值，并返回旧值。 </li>
+</ul>
+<p>Atomic包提供了三种基本类型的原子更新，但是Java的基本类型里还有char，float和double等。那么问题来了，如何原子的更新其他的基本类型呢？Atomic包里的类基本都是使用Unsafe实现的，Unsafe只提供了三种CAS方法，compareAndSwapObject， compareAndSwapInt和compareAndSwapLong，再看AtomicBoolean源码，发现其是先把Boolean转换成整型，再使用compareAndSwapInt进行CAS，所以原子更新double也可以用类似的思路来实现。 </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AtomicIntegerTest</span> </span>&#123;<br>    <span class="hljs-keyword">static</span> AtomicInteger atomicInteger = <span class="hljs-keyword">new</span> AtomicInteger();<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i&lt;<span class="hljs-number">10</span>; i++)&#123;<br>            <span class="hljs-keyword">new</span> Thread(<span class="hljs-keyword">new</span> Runnable() &#123;<br>                <span class="hljs-meta">@Override</span><br>                <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>&#123;<br><br>                    atomicInteger.incrementAndGet();<br>                &#125;<br>            &#125;).start();<br>        &#125;<br><br>        <span class="hljs-keyword">try</span> &#123;<br>            Thread.sleep(<span class="hljs-number">1000</span>);<br>        &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br>            e.printStackTrace();<br>        &#125;<br>        System.out.println(<span class="hljs-string">&quot;自加10次数值：---&gt;&quot;</span>+atomicInteger.get());<br>    &#125;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>2、原子更新数组类</strong></p>
+<p>通过原子的方式更新数组里的某个元素，Atomic包提供了以下三个类： </p>
+<p>​    AtomicIntegerArray：原子更新整型数组里的元素。</p>
+<p>​    AtomicLongArray：原子更新长整型数组里的元素。 </p>
+<p>​    AtomicReferenceArray：原子更新引用类型数组里的元素。 </p>
+<p>AtomicIntegerArray类主要是提供原子的方式更新数组里的整型，其常用方法如下 </p>
+<p>​    int addAndGet(int i, int delta)：</p>
+<p>​    以原子方式将输入值与数组中索引i的元素相加。</p>
+<p>​    boolean compareAndSet(int i, int expect, int update)：</p>
+<p>​    如果当前值等于预期值，则以原子方式将数组位置i的元素设置成update值。 </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AtomicIntegerArrayTest</span> </span>&#123;<br>    <span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span>[] value = <span class="hljs-keyword">new</span> <span class="hljs-keyword">int</span>[]&#123;<span class="hljs-number">1</span>,<span class="hljs-number">2</span>&#125;;<br>    <span class="hljs-keyword">static</span> AtomicIntegerArray aiArray = <span class="hljs-keyword">new</span> AtomicIntegerArray(value);<br><br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        aiArray.getAndSet(<span class="hljs-number">0</span>,<span class="hljs-number">3</span>);<br>        <span class="hljs-keyword">if</span>(!aiArray.compareAndSet(<span class="hljs-number">0</span>,<span class="hljs-number">4</span>,<span class="hljs-number">5</span>))&#123;<br>            System.out.println(<span class="hljs-string">&quot;更新失败&quot;</span>);<br>        &#125;<br>        System.out.println(aiArray.get(<span class="hljs-number">0</span>));<br>        System.out.println(value[<span class="hljs-number">0</span>]);<br>        <span class="hljs-keyword">if</span>(aiArray.get(<span class="hljs-number">0</span>) != value[<span class="hljs-number">0</span>])&#123;<br>            System.out.println(<span class="hljs-string">&quot;不相等&quot;</span>);<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>3、原子更新引用类型</strong> </p>
+<p>​    原子更新基本类型的AtomicInteger，只能更新一个变量，如果要原子的更新多个变 </p>
+<p>量，就需要使用这个原子更新引用类型提供的类。Atomic包提供了以下三个类： </p>
+<p>​    AtomicReference：原子更新引用类型。 </p>
+<p>​    AtomicReferenceFieldUpdater：原子更新引用类型里的字段。 </p>
+<p>​    AtomicMarkableReference：原子更新带有标记位的引用类型。可以原子的更新一个布尔类型的标记位和引用类型。构造方法是AtomicMarkableReference(VinitialRef, boolean initialMark) </p>
+<p><strong>4、原子更新字段类</strong> </p>
+<p>如果我们只需要某个类里的某个字段，那么就需要使用原子更新字段类，Atomic包提供了以下三个类： </p>
+<p>​    AtomicIntegerFieldUpdater：原子更新整型的字段的更新器。 </p>
+<p>​    AtomicLongFieldUpdater：原子更新长整型字段的更新器。 </p>
+<p>​    AtomicStampedReference：原子更新带有版本号的引用类型。该类将整数值 </p>
+<p>与引用关联起来，可用于原子的更数据和数据的版本号，可以解决使用CAS进行原子更新时，可能出现的ABA问题。 原子更新字段类都是抽象类，每次使用都时候必须使用静态方法newUpdater创建一个 </p>
+<p>更新器。原子更新类的字段的必须使用public volatile修饰符</p>
+<h4 id="5、AtomicInteger存在ABA问题"><a href="#5、AtomicInteger存在ABA问题" class="headerlink" title="5、AtomicInteger存在ABA问题"></a>5、AtomicInteger存在ABA问题</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AtomicAbaProblemTest</span> </span>&#123;<br>    <span class="hljs-keyword">static</span> AtomicInteger atomicInteger = <span class="hljs-keyword">new</span> AtomicInteger(<span class="hljs-number">1</span>);<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        Thread main = <span class="hljs-keyword">new</span> Thread(<span class="hljs-keyword">new</span> Runnable() &#123;<br>            <span class="hljs-meta">@Override</span><br>            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>&#123;<br>                <span class="hljs-keyword">int</span> a = atomicInteger.get();<br>                System.out.println(<span class="hljs-string">&quot;操作线程&quot;</span>+Thread.currentThread().getName()+<span class="hljs-string">&quot;--修改前操作数值:&quot;</span>+a);<br>                <span class="hljs-keyword">try</span> &#123;<br>                    Thread.sleep(<span class="hljs-number">1000</span>);<br>                &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br>                    e.printStackTrace();<br>                &#125;<br>                <span class="hljs-keyword">boolean</span> isCasSuccess = atomicInteger.compareAndSet(a,<span class="hljs-number">2</span>);<br>                <span class="hljs-keyword">if</span>(isCasSuccess)&#123;<br>                    System.out.println(<span class="hljs-string">&quot;操作线程&quot;</span>+Thread.currentThread().getName()+<span class="hljs-string">&quot;--Cas修改后操作数值:&quot;</span>+atomicInteger.get());<br>                &#125;<span class="hljs-keyword">else</span>&#123;<br>                    System.out.println(<span class="hljs-string">&quot;CAS修改失败&quot;</span>);<br>                &#125;<br><br>            &#125;<br>        &#125;,<span class="hljs-string">&quot;主线程&quot;</span>);<br><br>        Thread other = <span class="hljs-keyword">new</span> Thread(<span class="hljs-keyword">new</span> Runnable() &#123;<br>            <span class="hljs-meta">@Override</span><br>            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>&#123;<br>                atomicInteger.incrementAndGet();<span class="hljs-comment">// 1+1 = 2;</span><br>                System.out.println(<span class="hljs-string">&quot;操作线程&quot;</span>+Thread.currentThread().getName()+<span class="hljs-string">&quot;--increase后值:&quot;</span>+atomicInteger.get());<br>                atomicInteger.decrementAndGet();<span class="hljs-comment">// atomic-1 = 2-1;</span><br>                System.out.println(<span class="hljs-string">&quot;操作线程&quot;</span>+Thread.currentThread().getName()+<span class="hljs-string">&quot;--decrease后值:&quot;</span>+atomicInteger.get());<br>            &#125;<br>        &#125;,<span class="hljs-string">&quot;干扰线程&quot;</span>);<br><br>        main.start();<br>        other.start();<br><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="自定义原子更新字段类"><a href="#自定义原子更新字段类" class="headerlink" title="自定义原子更新字段类"></a>自定义原子更新字段类</h4><p>利用Unsafe类 + 字段偏移量定位应用类型</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AtomicStudentAgeUpdater</span> </span>&#123;<br>    <span class="hljs-keyword">private</span> String name ;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">volatile</span> <span class="hljs-keyword">int</span> age;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> Unsafe unsafe = UnsafeInstance.reflectGetUnsafe();<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">long</span> valueOffset;<br><br>    <span class="hljs-keyword">static</span> &#123;<br>        <span class="hljs-keyword">try</span> &#123;<br>            valueOffset = unsafe.objectFieldOffset(AtomicStudentAgeUpdater.class.getDeclaredField(<span class="hljs-string">&quot;age&quot;</span>));<br>            System.out.println(<span class="hljs-string">&quot;valueOffset:---&gt;&quot;</span>+valueOffset);<br>        &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> Error(e);<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">compareAndSwapAge</span><span class="hljs-params">(<span class="hljs-keyword">int</span> old,<span class="hljs-keyword">int</span> target)</span></span>&#123;<br>        unsafe.compareAndSwapInt(<span class="hljs-keyword">this</span>,valueOffset,old,target);<br>    &#125;<br><br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">AtomicStudentAgeUpdater</span><span class="hljs-params">(String name, <span class="hljs-keyword">int</span> age)</span></span>&#123;<br>        <span class="hljs-keyword">this</span>.name = name;<br>        <span class="hljs-keyword">this</span>.age = age;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">getAge</span><span class="hljs-params">()</span></span>&#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.age;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        AtomicStudentAgeUpdater updater = <span class="hljs-keyword">new</span> AtomicStudentAgeUpdater(<span class="hljs-string">&quot;杨过&quot;</span>,<span class="hljs-number">18</span>);<br>        updater.compareAndSwapAge(<span class="hljs-number">18</span>,<span class="hljs-number">56</span>);<br><br>        System.out.println(<span class="hljs-string">&quot;真实的杨过年龄---&quot;</span>+updater.getAge());<br><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="Unsafe魔法类"><a href="#Unsafe魔法类" class="headerlink" title="Unsafe魔法类"></a>Unsafe魔法类</h2><p>​    Unsafe是位于sun.misc包下的一个类，主要提供一些用于执行低级别、不安全操作的方法，如直接访问系统内存资源、自主管理内存资源等，这些方法在提升Java运行效率、增强Java语言底层资源操作能力方面起到了很大的作用。<br>​    Unsafe类为一单例实现，提供静态方法getUnsafe获取Unsafe实例，当且仅当调用getUnsafe方法的类为引导类加载器所加载时才合法，否则抛出SecurityException异常</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Unsafe</span> </span>&#123; <br>    <span class="hljs-comment">// 单例对象 </span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> Unsafe theUnsafe;<br>    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-title">Unsafe</span><span class="hljs-params">()</span> </span>&#123; &#125;<br>    <span class="hljs-meta">@CallerSensitive</span> <br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> Unsafe <span class="hljs-title">getUnsafe</span><span class="hljs-params">()</span> </span>&#123; <br>        Class var0 = Reflection.getCallerClass(); <br>            <span class="hljs-comment">// 仅在引导类加载器`BootstrapClassLoader`加载时才合法 </span><br>        <span class="hljs-keyword">if</span>(!VM.isSystemDomainLoader(var0.getClassLoader())) &#123; <br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> SecurityException(<span class="hljs-string">&quot;Unsafe&quot;</span>); <br>        &#125; <span class="hljs-keyword">else</span> &#123; <br>            <span class="hljs-keyword">return</span> theUnsafe; <br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="获取Unsafe实例"><a href="#获取Unsafe实例" class="headerlink" title="获取Unsafe实例"></a>获取Unsafe实例</h3><p>1、把调用Unsafe相关方法的类Demo所在jar包路径追加到默认的bootstrap路径中，使得A被引导类加载器加载<br>    java -Xbootclasspath/Demo:${path} // 其中path为调用Unsafe相关方法的类所在jar包路径<br>2、通过反射获取单例对象theUnsafe</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UnsafeInstance</span> </span>&#123;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> Unsafe <span class="hljs-title">reflectGetUnsafe</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">try</span> &#123;<br>            Field field = Unsafe.class.getDeclaredField(<span class="hljs-string">&quot;theUnsafe&quot;</span>);<br>            field.setAccessible(<span class="hljs-keyword">true</span>);<br>            <span class="hljs-keyword">return</span> (Unsafe) field.get(<span class="hljs-keyword">null</span>);<br>        &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;<br>            e.printStackTrace();<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="Unsafe功能介绍"><a href="#Unsafe功能介绍" class="headerlink" title="Unsafe功能介绍"></a>Unsafe功能介绍</h3><p>Unsafe可以绕过JVM做一些操作，所以称之为魔法类。直接操作提供的API大致可分为</p>
+<p><img src="/images/Untitled/image-20211103234945888.png" alt="image-20211103234945888"></p>
+<h4 id="内存操作"><a href="#内存操作" class="headerlink" title="内存操作"></a>内存操作</h4><p>​    这部分主要包含堆外内存的分配、拷贝、释放、给定地址值操作等方法。 </p>
+<h4 id="CAS-原子操作"><a href="#CAS-原子操作" class="headerlink" title="CAS 原子操作"></a>CAS 原子操作</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">native</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">compareAndSwapObject</span><span class="hljs-params">(Object var1, <span class="hljs-keyword">long</span> var2, Object var4, Object var5)</span>; </span><br><span class="hljs-function"></span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">native</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">compareAndSwapInt</span><span class="hljs-params">(Object var1, <span class="hljs-keyword">long</span> var2, <span class="hljs-keyword">int</span> var4, <span class="hljs-keyword">int</span> var5)</span>; </span><br><span class="hljs-function"></span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">native</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">compareAndSwapLong</span><span class="hljs-params">(Object var1, <span class="hljs-keyword">long</span> var2, <span class="hljs-keyword">long</span> var4, <span class="hljs-keyword">long</span> var6)</span></span><br><span class="hljs-function">    </span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">native</span> <span class="hljs-keyword">long</span> <span class="hljs-title">objectFieldOffset</span><span class="hljs-params">(Field var1)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<h4 id="线程调度"><a href="#线程调度" class="headerlink" title="线程调度"></a>线程调度</h4><p>包括线程挂起、恢复、锁机制等方法。<br>**//取消阻塞线程 **</p>
+<p>public native void unpark(Object thread); </p>
+<p>**//阻塞线程 **</p>
+<p>public native void park(boolean isAbsolute, long time);</p>
+<p>**//获得对象锁（类似可重入锁ReentrantLock或者Synchronized） **</p>
+<p>public native void monitorEnter(Object o); </p>
+<p>**//释放对象锁 **</p>
+<p>public native void monitorExit(Object o);</p>
+<p><strong>//尝试获取对象锁</strong></p>
+<p>public native boolean tryMonitorEnter(Object o);</p>
+<p>​    方法park、unpark即可实现线程的挂起与恢复，将一个线程进行挂起是通过park方 法实现的，调用park方法后，线程将一直阻塞直到超时或者中断等条件出现； unpark可以终止一个挂起的线程，使其恢复正常</p>
+<p>**典型应用:**Java锁和同步器框架的核心类AbstractQueuedSynchronizer，就是通过调用 LockSupport.park()和LockSupport.unpark()实现线程的阻塞和唤醒的，而 LockSupport的park、unpark方法实际是调用Unsafe的park、unpark方式来实现。</p>
+<h4 id="内存屏障"><a href="#内存屏障" class="headerlink" title="内存屏障"></a>内存屏障</h4><p>​    在Java 8中引入，用于定义内存屏障（也称内存栅栏，内存栅障，屏障指令等，是一类 同步屏障指令，是CPU或编译器在对内存随机访问的操作中的一个同步点，使得此点之前的 所有读写操作都执行后才可以开始执行此点之后的操作），避免代码重排序。 </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//内存屏障前后，禁止load操作重排序。屏障前的load操作不能被重排序到屏障后，屏障后的load操作不能被重排序到屏障前 </span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">native</span> <span class="hljs-keyword">void</span> <span class="hljs-title">loadFence</span><span class="hljs-params">()</span>; 相当于loadload屏障</span><br><span class="hljs-function"><span class="hljs-comment">//内存屏障前后，禁止store操作重排序。屏障前的store操作不能被重排序到屏障后， 屏障后的store操作不能被重排序到屏障前</span></span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">native</span> <span class="hljs-keyword">void</span> <span class="hljs-title">storeFence</span><span class="hljs-params">()</span>; 相当于storestore屏障</span><br><span class="hljs-function"><span class="hljs-comment">//内存屏障前后，禁止load、store操作重排序 </span></span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">native</span> <span class="hljs-keyword">void</span> <span class="hljs-title">fullFence</span><span class="hljs-params">()</span>; 相当于 <span class="hljs-title">loadFence</span><span class="hljs-params">()</span>+<span class="hljs-title">storeFence</span><span class="hljs-params">()</span>;使所有Full Barrier之前发生的操作，对所有Full Barrier之后的操作都是可见的</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@description</span> :利用内存屏障手动防止指令</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FenceTest</span> </span>&#123;<br><br><br><span class="hljs-comment">//    public static void main(String[] args) &#123;</span><br><span class="hljs-comment">//</span><br><span class="hljs-comment">//        UnsafeInstance.reflectGetUnsafe().loadFence();//读屏障</span><br><span class="hljs-comment">//</span><br><span class="hljs-comment">//        UnsafeInstance.reflectGetUnsafe().storeFence();//写屏障</span><br><span class="hljs-comment">//</span><br><span class="hljs-comment">//        UnsafeInstance.reflectGetUnsafe().fullFence();//读写屏障</span><br><span class="hljs-comment">//</span><br><span class="hljs-comment">//    &#125;</span><br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>, y = <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> a = <span class="hljs-number">0</span>, b =<span class="hljs-number">0</span>;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> InterruptedException </span>&#123;<br>        <span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>;<br><br>        <span class="hljs-keyword">for</span> (;;)&#123;<br>            i++;<br>            x = <span class="hljs-number">0</span>; y = <span class="hljs-number">0</span>;<br>            a = <span class="hljs-number">0</span>; b = <span class="hljs-number">0</span>;<br>            Thread t1 = <span class="hljs-keyword">new</span> Thread(<span class="hljs-keyword">new</span> Runnable() &#123;<br>                <span class="hljs-meta">@Override</span><br>                <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>&#123;<br>                    <span class="hljs-comment">//由于线程one先启动，下面这句话让它等一等线程two. 读着可根据自己电脑的实际性能适当调整等待时间.</span><br>                    shortWait((<span class="hljs-keyword">long</span>) (Math.random() * <span class="hljs-number">100</span>));<br>                    a = <span class="hljs-number">1</span>;<br>                    <span class="hljs-comment">//不允许2次store操作发生重排</span><br>                    <span class="hljs-comment">//手动加内存屏障</span><br>                    UnsafeInstance.reflectGetUnsafe().storeFence();<br>                    x = b; <span class="hljs-comment">// read-load、assign、store-write</span><br>                    <span class="hljs-comment">//分两步进行，第一步先volatile读，第二步再普通写</span><br>                &#125;<br>            &#125;);<br>            Thread t2 = <span class="hljs-keyword">new</span> Thread(<span class="hljs-keyword">new</span> Runnable() &#123;<br>                <span class="hljs-meta">@Override</span><br>                <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>&#123;<br>                    shortWait((<span class="hljs-keyword">long</span>) (Math.random() * <span class="hljs-number">100</span>));<br>                    b = <span class="hljs-number">1</span>;<br>                    <span class="hljs-comment">//不允许2次store操作发生重排</span><br>                    UnsafeInstance.reflectGetUnsafe().storeFence();<br>                    y = a;<br>                &#125;<br>            &#125;);<br>            t1.start();<br>            t2.start();<br>            t1.join();<br>            t2.join();<br><br>            <span class="hljs-comment">/**</span><br><span class="hljs-comment">             * cpu或者jit对我们的代码进行了指令重排？</span><br><span class="hljs-comment">             * 1,1</span><br><span class="hljs-comment">             * 0,1</span><br><span class="hljs-comment">             * 1,0</span><br><span class="hljs-comment">             * 0,0</span><br><span class="hljs-comment">             */</span><br>            String result = <span class="hljs-string">&quot;第&quot;</span> + i + <span class="hljs-string">&quot;次 (&quot;</span> + x + <span class="hljs-string">&quot;,&quot;</span> + y + <span class="hljs-string">&quot;）&quot;</span>;<br>            <span class="hljs-keyword">if</span>(x == <span class="hljs-number">0</span> &amp;&amp; y == <span class="hljs-number">0</span>) &#123;<br>                System.err.println(result);<br>                <span class="hljs-keyword">break</span>;<br>            &#125; <span class="hljs-keyword">else</span> &#123;<br>                System.out.println(result);<br>            &#125;<br>        &#125;<br><br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">shortWait</span><span class="hljs-params">(<span class="hljs-keyword">long</span> interval)</span></span>&#123;<br>        <span class="hljs-keyword">long</span> start = System.nanoTime();<br>        <span class="hljs-keyword">long</span> end;<br>        <span class="hljs-keyword">do</span>&#123;<br>            end = System.nanoTime();<br>        &#125;<span class="hljs-keyword">while</span>(start + interval &gt;= end);<br>    &#125;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>Class相关</li>
+<li>对象操作</li>
+<li>系统信息获取</li>
+<li>数组操</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" rel="tag"># 并发编程</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/10/31/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B04-juc-Tools/" rel="prev" title="并发编程04-juc-Tools">
+      <i class="fa fa-chevron-left"></i> 并发编程04-juc-Tools
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/11/07/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/" rel="next" title="并发编程06-Collection&Queue体系分析">
+      并发编程06-Collection&Queue体系分析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Atomic-amp-Unsafe%E9%AD%94%E6%B3%95%E7%B1%BB%E8%AF%A6%E8%A7%A3"><span class="nav-number">1.</span> <span class="nav-text">Atomic&amp;Unsafe魔法类详解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%8E%9F%E5%AD%90%E6%93%8D%E4%BD%9C%EF%BC%9F"><span class="nav-number">1.1.</span> <span class="nav-text">什么是原子操作？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9ACPU%E5%8E%9F%E5%AD%90%E6%93%8D%E4%BD%9C%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F"><span class="nav-number">1.2.</span> <span class="nav-text">多CPU原子操作的实现方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JAVA%E5%8E%9F%E5%AD%90%E6%93%8D%E4%BD%9C%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.3.</span> <span class="nav-text">JAVA原子操作的实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Atomic"><span class="nav-number">1.4.</span> <span class="nav-text">Atomic</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#5%E3%80%81AtomicInteger%E5%AD%98%E5%9C%A8ABA%E9%97%AE%E9%A2%98"><span class="nav-number">1.4.0.1.</span> <span class="nav-text">5、AtomicInteger存在ABA问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%8E%9F%E5%AD%90%E6%9B%B4%E6%96%B0%E5%AD%97%E6%AE%B5%E7%B1%BB"><span class="nav-number">1.4.0.2.</span> <span class="nav-text">自定义原子更新字段类</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Unsafe%E9%AD%94%E6%B3%95%E7%B1%BB"><span class="nav-number">1.5.</span> <span class="nav-text">Unsafe魔法类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96Unsafe%E5%AE%9E%E4%BE%8B"><span class="nav-number">1.5.1.</span> <span class="nav-text">获取Unsafe实例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Unsafe%E5%8A%9F%E8%83%BD%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.5.2.</span> <span class="nav-text">Unsafe功能介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%93%8D%E4%BD%9C"><span class="nav-number">1.5.2.1.</span> <span class="nav-text">内存操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CAS-%E5%8E%9F%E5%AD%90%E6%93%8D%E4%BD%9C"><span class="nav-number">1.5.2.2.</span> <span class="nav-text">CAS 原子操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E8%B0%83%E5%BA%A6"><span class="nav-number">1.5.2.3.</span> <span class="nav-text">线程调度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C"><span class="nav-number">1.5.2.4.</span> <span class="nav-text">内存屏障</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

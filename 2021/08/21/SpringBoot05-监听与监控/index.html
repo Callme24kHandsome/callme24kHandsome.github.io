@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="SpringBoot05-监听与监控">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot05-监听与监控">
+<meta property="og:url" content="http://example.com/2021/08/21/SpringBoot05-%E7%9B%91%E5%90%AC%E4%B8%8E%E7%9B%91%E6%8E%A7/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="SpringBoot05-监听与监控">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/SpringBoot05-%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/image-20210822172511981.png">
+<meta property="article:published_time" content="2021-08-21T13:00:00.000Z">
+<meta property="article:modified_time" content="2021-08-22T15:20:39.709Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="SpringBoot">
+<meta property="article:tag" content="监听与监控">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/SpringBoot05-%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/image-20210822172511981.png">
+
+<link rel="canonical" href="http://example.com/2021/08/21/SpringBoot05-%E7%9B%91%E5%90%AC%E4%B8%8E%E7%9B%91%E6%8E%A7/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SpringBoot05-监听与监控 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/21/SpringBoot05-%E7%9B%91%E5%90%AC%E4%B8%8E%E7%9B%91%E6%8E%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringBoot05-监听与监控
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-21 21:00:00" itemprop="dateCreated datePublished" datetime="2021-08-21T21:00:00+08:00">2021-08-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-08-22 23:20:39" itemprop="dateModified" datetime="2021-08-22T23:20:39+08:00">2021-08-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SpringBoot/" itemprop="url" rel="index"><span itemprop="name">SpringBoot</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">SpringBoot05-监听与监控</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="SpringBoot-监听机制"><a href="#SpringBoot-监听机制" class="headerlink" title="SpringBoot-监听机制"></a>SpringBoot-监听机制</h1><h2 id="Java-监听机制"><a href="#Java-监听机制" class="headerlink" title="Java 监听机制"></a>Java 监听机制</h2><p>SpringBoot 的监听机制，其实是对Java提供的事件监听机制的封装。</p>
+<p>​    Java中的事件监听机制定义了以下几个角色：</p>
+<p>​        ① 事件：Event，继承 java.util.EventObject 类的对象</p>
+<p>​        ② 事件源：Source ，任意对象Object</p>
+<p>​        ③ 监听器：Listener，实现 java.util.EventListener 接口 的对象</p>
+<p>​    SpringBoot 在项目启动时，会对几个监听器进行回调，我们可以实现这些监听器接口，在项目启动时完成一些操作。</p>
+<p>​    ApplicationContextInitializer：SpringBoot 初始化时触发</p>
+<p>​    SpringApplicationRunListener：SpringBoot整个生命周期</p>
+<p>​    CommandLineRunner（无需注册）：SpringBoot启动后触发</p>
+<p>​    ApplicationRunner（无需注册）：SpringBoot启动后触发</p>
+<p>定义各种监听器</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyApplicationRunner</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ApplicationRunner</span> </span>&#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">(ApplicationArguments args)</span> <span class="hljs-keyword">throws</span> Exception </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;MyApplicationRunner .. &quot;</span>);<br>    &#125;<br>&#125;<br><br><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyCommandLineRunner</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">CommandLineRunner</span> </span>&#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">(String... args)</span> <span class="hljs-keyword">throws</span> Exception </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;MyCommandLineRunner ...&quot;</span>);<br>    &#125;<br>&#125;<br><br><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyApplicationContextInitializer</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ApplicationContextInitializer</span> </span>&#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initialize</span><span class="hljs-params">(ConfigurableApplicationContext applicationContext)</span> </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;MyApplicationContextInitializer ...&quot;</span>);<br>    &#125;<br>&#125;<br><br><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MySpringApplicationRunListener</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">SpringApplicationRunListener</span></span>&#123;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">starting</span><span class="hljs-params">(ConfigurableBootstrapContext bootstrapContext)</span> </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;MySpringApplicationRunListener ...starting&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">environmentPrepared</span><span class="hljs-params">(ConfigurableBootstrapContext bootstrapContext, ConfigurableEnvironment environment)</span> </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;MySpringApplicationRunListener ...environmentPrepared&quot;</span>);<br>    &#125;<br><br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">contextPrepared</span><span class="hljs-params">(ConfigurableApplicationContext context)</span> </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;MySpringApplicationRunListener ...contextPrepared&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">contextLoaded</span><span class="hljs-params">(ConfigurableApplicationContext context)</span> </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;MySpringApplicationRunListener ...contextLoaded&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">started</span><span class="hljs-params">(ConfigurableApplicationContext context)</span> </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;MySpringApplicationRunListener ...started&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">running</span><span class="hljs-params">(ConfigurableApplicationContext context)</span> </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;MySpringApplicationRunListener ...running&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">failed</span><span class="hljs-params">(ConfigurableApplicationContext context, Throwable exception)</span> </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;MySpringApplicationRunListener ...failed&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">MySpringApplicationRunListener</span><span class="hljs-params">(SpringApplication application, String[] args)</span> </span>&#123;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>META-INF/spring.factories：注册SpringApplicationRunListener和ApplicationContextInitializer</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-meta">org.springframework.boot.SpringApplicationRunListener</span>=<span class="hljs-string">\</span><br><span class="hljs-attr">com.study.springboot01simple.listenerr.MySpringApplicationRunListener</span><br><span class="hljs-meta">org.springframework.context.ApplicationContextInitializer</span>=<span class="hljs-string">\</span><br><span class="hljs-attr">com.study.springboot01simple.listenerr.MyApplicationContextInitializer</span><br></code></pre></td></tr></table></figure>
+
+<p>启动过程</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs java">MySpringApplicationRunListener ...starting<br>MySpringApplicationRunListener ...environmentPrepared<br><br>  .   ____          _            __ _ _<br> /\\ / ___<span class="hljs-string">&#x27;_ __ _ _(_)_ __  __ _ \ \ \ \</span><br><span class="hljs-string">( ( )\___ | &#x27;</span>_ | <span class="hljs-string">&#x27;_| | &#x27;</span>_ \/ _` | \ \ \ \<br> \\/  ___)| |_)| | | | | || (_| |  ) ) ) )<br>  <span class="hljs-string">&#x27;  |____| .__|_| |_|_| |_\__, | / / / /</span><br><span class="hljs-string"> =========|_|==============|___/=/_/_/_/</span><br><span class="hljs-string"> :: Spring Boot ::                (v2.5.3)</span><br><span class="hljs-string"></span><br><span class="hljs-string">MyApplicationContextInitializer ...</span><br><span class="hljs-string">MySpringApplicationRunListener ...contextPrepared</span><br><span class="hljs-string">2021-08-20 22:49:22.105  INFO 18552 --- [           main] c.s.s.Springboot01SimpleApplication      : Starting Springboot01SimpleApplication using Java 1.8.0_171 on LAPTOP-87U6TGC3 with PID 18552 (D:\git\code\study\springboot-itheima-2021\springboot-01-simple\target\classes started by 81566 in D:\git\code\study\springboot-itheima-2021)</span><br><span class="hljs-string">2021-08-20 22:49:22.117  INFO 18552 --- [           main] c.s.s.Springboot01SimpleApplication      : No active profile set, falling back to default profiles: default</span><br><span class="hljs-string">MySpringApplicationRunListener ...contextLoaded</span><br><span class="hljs-string">2021-08-20 22:49:25.313  INFO 18552 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)</span><br><span class="hljs-string">2021-08-20 22:49:25.336  INFO 18552 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]</span><br><span class="hljs-string">2021-08-20 22:49:25.336  INFO 18552 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.50]</span><br><span class="hljs-string">2021-08-20 22:49:25.578  INFO 18552 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext</span><br><span class="hljs-string">2021-08-20 22:49:25.578  INFO 18552 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 3255 ms</span><br><span class="hljs-string">2021-08-20 22:49:26.463  INFO 18552 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path &#x27;</span><span class="hljs-string">&#x27;</span><br><span class="hljs-string">2021-08-20 22:49:26.494  INFO 18552 --- [           main] c.s.s.Springboot01SimpleApplication      : Started Springboot01SimpleApplication in 5.848 seconds (JVM running for 8.709)</span><br><span class="hljs-string">MySpringApplicationRunListener ...started</span><br><span class="hljs-string">MyApplicationRunner .. </span><br><span class="hljs-string">MyCommandLineRunner ...</span><br><span class="hljs-string">MySpringApplicationRunListener ...running</span><br><span class="hljs-string">com.study.springboot01simple.Springboot01SimpleApplication</span><br><span class="hljs-string"></span><br></code></pre></td></tr></table></figure>
+
+<h1 id="SpringBoot监控-actuator"><a href="#SpringBoot监控-actuator" class="headerlink" title="SpringBoot监控-actuator"></a>SpringBoot监控-actuator</h1><h2 id="使用步骤"><a href="#使用步骤" class="headerlink" title="使用步骤"></a>使用步骤</h2><h3 id="①-导入依赖坐标"><a href="#①-导入依赖坐标" class="headerlink" title="① 导入依赖坐标"></a>① 导入依赖坐标</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>          <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>          <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-actuator<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>      <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>          <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>de.codecentric<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>          <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-admin-starter-client<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>      <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>          <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>          <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>      <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="②application-properties"><a href="#②application-properties" class="headerlink" title="②application.properties"></a>②application.properties</h3><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-comment">#开放健康信息检测</span><br><span class="hljs-meta">management.endpoint.health.show-details</span>=<span class="hljs-string">always</span><br><span class="hljs-meta">management.endpoints.web.exposure.include</span>=<span class="hljs-string">*</span><br><span class="hljs-comment">#配置Spring Boot Admin 服务端</span><br><span class="hljs-meta">spring.boot.admin.client.url</span>=<span class="hljs-string">http://localhost:9000</span><br><span class="hljs-meta">spring.boot.admin.client.instance.name</span>=<span class="hljs-string">client-01</span><br><span class="hljs-meta">server.address</span>=<span class="hljs-string">localhost</span><br><span class="hljs-meta">info.username</span>=<span class="hljs-string">小帅哥</span><br><span class="hljs-meta">info.age</span> = <span class="hljs-string">24</span><br><span class="hljs-meta">server.port</span>=<span class="hljs-string">9001</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="③-访问http-localhost-8080-acruator"><a href="#③-访问http-localhost-8080-acruator" class="headerlink" title="③ 访问http://localhost:8080/acruator"></a>③ 访问<a target="_blank" rel="noopener" href="http://localhost:8080/acruator">http://localhost:8080/acruator</a></h3><p>/beans     描述应用程序上下文里全部的Bean，以及它们的关系</p>
+<p>/env     获取全部环境属性</p>
+<p>/env/{name}     根据名称获取特定的环境属性值</p>
+<p>/health     报告应用程序的健康指标，这些值由HealthIndicator的实现类提供</p>
+<p>/info     获取应用程序的定制信息，这些信息由info打头的属性提供</p>
+<p>/mappings     描述全部的URI路径，以及它们和控制器(包含Actuator端点)的映射关系</p>
+<p>/metrics     报告各种应用程序度量信息，比如内存用量和HTTP请求计数</p>
+<p>/metrics/{name}     报告指定名称的应用程序度量值</p>
+<p>/trace     提供基本的HTTP请求跟踪信息(时间戳、HTTP头等)</p>
+<h3 id="④利用spring-boot-admin展示客户端监控信息"><a href="#④利用spring-boot-admin展示客户端监控信息" class="headerlink" title="④利用spring boot admin展示客户端监控信息"></a>④利用spring boot admin展示客户端监控信息</h3><p>​    Spring Boot Admin是一个开源社区项目，用于管理和监控SpringBoot应用程序。</p>
+<p>​    Spring Boot Admin 有两个角色，客户端(Client)和服务端(Server)。 </p>
+<p>​    应用程序作为Spring Boot Admin Client向为Spring Boot Admin Server注册</p>
+<p>​    Spring Boot Admin Server 的UI界面将Spring Boot Admin Client的Actuator Endpoint上的一些监控信息。</p>
+<p>admin-server： </p>
+<p>① 创建 admin-server 模块</p>
+<p>② 导入依赖坐标 admin-starter-server</p>
+<p>③ 在引导类上启用监控功能**@EnableAdminServer**</p>
+<p>admin-client： </p>
+<p>① 创建 admin-client 模块</p>
+<p>② 导入依赖坐标 admin-starter-client</p>
+<p>③ 配置相关信息：server地址等</p>
+<h3 id="⑤-启动server和client服务，访问server"><a href="#⑤-启动server和client服务，访问server" class="headerlink" title="⑤ 启动server和client服务，访问server"></a>⑤ 启动server和client服务，访问server</h3><p><a target="_blank" rel="noopener" href="http://localhost:9000/applications">http://localhost:9000/applications</a></p>
+<p><img src="/images/SpringBoot05-%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/image-20210822172511981.png" alt="image-20210822172511981"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SpringBoot/" rel="tag"># SpringBoot</a>
+              <a href="/tags/%E7%9B%91%E5%90%AC%E4%B8%8E%E7%9B%91%E6%8E%A7/" rel="tag"># 监听与监控</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/08/18/SpringBoot04-%E8%87%AA%E5%AE%9A%E4%B9%89starter/" rel="prev" title="SpringBoot04-自定义starter">
+      <i class="fa fa-chevron-left"></i> SpringBoot04-自定义starter
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/08/22/SpringBoot06-%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/" rel="next" title="SpringBoot06-启动原理">
+      SpringBoot06-启动原理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SpringBoot-%E7%9B%91%E5%90%AC%E6%9C%BA%E5%88%B6"><span class="nav-number">1.</span> <span class="nav-text">SpringBoot-监听机制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Java-%E7%9B%91%E5%90%AC%E6%9C%BA%E5%88%B6"><span class="nav-number">1.1.</span> <span class="nav-text">Java 监听机制</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SpringBoot%E7%9B%91%E6%8E%A7-actuator"><span class="nav-number">2.</span> <span class="nav-text">SpringBoot监控-actuator</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.1.</span> <span class="nav-text">使用步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%91%A0-%E5%AF%BC%E5%85%A5%E4%BE%9D%E8%B5%96%E5%9D%90%E6%A0%87"><span class="nav-number">2.1.1.</span> <span class="nav-text">① 导入依赖坐标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%91%A1application-properties"><span class="nav-number">2.1.2.</span> <span class="nav-text">②application.properties</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%91%A2-%E8%AE%BF%E9%97%AEhttp-localhost-8080-acruator"><span class="nav-number">2.1.3.</span> <span class="nav-text">③ 访问http:&#x2F;&#x2F;localhost:8080&#x2F;acruator</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%91%A3%E5%88%A9%E7%94%A8spring-boot-admin%E5%B1%95%E7%A4%BA%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%9B%91%E6%8E%A7%E4%BF%A1%E6%81%AF"><span class="nav-number">2.1.4.</span> <span class="nav-text">④利用spring boot admin展示客户端监控信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%91%A4-%E5%90%AF%E5%8A%A8server%E5%92%8Cclient%E6%9C%8D%E5%8A%A1%EF%BC%8C%E8%AE%BF%E9%97%AEserver"><span class="nav-number">2.1.5.</span> <span class="nav-text">⑤ 启动server和client服务，访问server</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

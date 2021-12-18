@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="为什么加锁-&gt;锁的分类-&gt;synchronized:JDK内置锁-&gt;内置锁的升级膨胀过程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="并发编程02Synchronized">
+<meta property="og:url" content="http://example.com/2021/10/25/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="为什么加锁-&gt;锁的分类-&gt;synchronized:JDK内置锁-&gt;内置锁的升级膨胀过程">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024180413679.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/%E6%8C%A8%E8%B8%A2%E5%B7%A5%E7%A8%8B%E5%B8%88%E4%B8%8D%E5%BE%97%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84java%E9%94%81.jpg">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024220009143.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024215853709.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024222345420.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024231911266.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024232528178.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024234942906.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/synchronized%E9%94%81%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%8D%87%E7%BA%A7%E8%BF%87%E7%A8%8B-1635176427187.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/JVM%E9%94%81%E7%9A%84%E8%86%A8%E8%83%80%E5%8D%87%E7%BA%A7.jpg">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20210907225841711.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20210927235446858.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20210928000406955.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20210928233525697.png">
+<meta property="article:published_time" content="2021-10-25T13:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-03T16:10:03.391Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="并发编程">
+<meta property="article:tag" content="Synchronized">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024180413679.png">
+
+<link rel="canonical" href="http://example.com/2021/10/25/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>并发编程02Synchronized | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/10/25/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          并发编程02Synchronized
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-10-25 21:00:00" itemprop="dateCreated datePublished" datetime="2021-10-25T21:00:00+08:00">2021-10-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-11-04 00:10:03" itemprop="dateModified" datetime="2021-11-04T00:10:03+08:00">2021-11-04</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">为什么加锁->锁的分类->synchronized:JDK内置锁->内置锁的升级膨胀过程</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="并发编程之synchronized-amp-Lock-amp-AQS详解"><a href="#并发编程之synchronized-amp-Lock-amp-AQS详解" class="headerlink" title="并发编程之synchronized&amp;Lock&amp;AQS详解"></a>并发编程之synchronized&amp;Lock&amp;AQS详解</h1><h2 id="为什么加锁"><a href="#为什么加锁" class="headerlink" title="为什么加锁"></a>为什么加锁</h2><p><strong>加锁目的：</strong>序列化访问临界资源，即同一时刻只能有一个线程访问临界资源(同步互斥访问)</p>
+<p><strong>显示锁与隐示锁</strong></p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024180413679.png" alt="image-20211024180413679"></p>
+<h2 id="锁的分类"><a href="#锁的分类" class="headerlink" title="锁的分类"></a>锁的分类</h2><p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/%E6%8C%A8%E8%B8%A2%E5%B7%A5%E7%A8%8B%E5%B8%88%E4%B8%8D%E5%BE%97%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84java%E9%94%81.jpg"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * Unsafe工具类</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UnsafeInstance</span> </span>&#123;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> Unsafe <span class="hljs-title">reflectGetUnsafe</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">try</span> &#123;<br>            Field field = Unsafe.class.getDeclaredField(<span class="hljs-string">&quot;theUnsafe&quot;</span>);<br>            field.setAccessible(<span class="hljs-keyword">true</span>);<br>            <span class="hljs-keyword">return</span> (Unsafe) field.get(<span class="hljs-keyword">null</span>);<br>        &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;<br>            e.printStackTrace();<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="synchronized使用与原理"><a href="#synchronized使用与原理" class="headerlink" title="synchronized使用与原理"></a>synchronized使用与原理</h2><p><strong>使用方式</strong></p>
+<p>1、类的静态方法，锁当前类对象</p>
+<p>2、实例方法，锁当前实例对象</p>
+<p>3、同步代码块，锁代码里的对象</p>
+<p><strong>底层原理</strong>：</p>
+<p>​    JVM内置锁通过synchronized使用，通过内部对象Monitor(监视器锁)实现，<strong>基于进入与退出Monitor对象实现方法与代码块同步</strong>，监视器锁的实现依赖底层操作系统的<strong>Mutex lock</strong>（互斥锁）实现，它是一个重量级锁性能较低。简单的说时基于JMM8大操作里的lock和unlock，MonitorEnter和MonitorExit</p>
+<h3 id="Monitor"><a href="#Monitor" class="headerlink" title="Monitor"></a>Monitor</h3><p><strong>每个对象都有一个自己的Monitor(监视器锁)</strong></p>
+<p><strong>锁的定义</strong></p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024220009143.png" alt="image-20211024220009143"></p>
+<h3 id="加锁过程"><a href="#加锁过程" class="headerlink" title="加锁过程"></a>加锁过程</h3><p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024215853709.png" alt="image-20211024215853709"></p>
+<h3 id="对象内存结构"><a href="#对象内存结构" class="headerlink" title="对象内存结构"></a>对象内存结构</h3><p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024222345420.png" alt="image-20211024222345420"></p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024231911266.png" alt="image-20211024231911266"></p>
+<ol>
+<li>对象头（哈希code、锁状态、当前持有线程、jvm年龄、偏向变量、MetaDate元数据指针）</li>
+<li>实例数据</li>
+<li>对齐填充</li>
+</ol>
+<h3 id="实例对象内存存储在哪？线程逃逸分析"><a href="#实例对象内存存储在哪？线程逃逸分析" class="headerlink" title="实例对象内存存储在哪？线程逃逸分析"></a>实例对象内存存储在哪？线程逃逸分析</h3><p>如果实例对象存储在堆时：实例对象内存存在堆区，实例引用存在栈上，实例的元数据class存在元空间中<br>如果存在逃逸分析，对象实例内存可能开辟在线程栈上</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StackAllocTest</span> </span>&#123;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 进行两种测试</span><br><span class="hljs-comment">     * 关闭逃逸分析，同时调大堆空间，避免堆内GC的发生，如果有GC信息将会被打印出来</span><br><span class="hljs-comment">     * VM运行参数：-Xmx4G -Xms4G -XX:-DoEscapeAnalysis -XX:+PrintGCDetails -XX:+HeapDumpOnOutOfMemoryError</span><br><span class="hljs-comment">     *</span><br><span class="hljs-comment">     * 开启逃逸分析</span><br><span class="hljs-comment">     * VM运行参数：-Xmx4G -Xms4G -XX:+DoEscapeAnalysis -XX:+PrintGCDetails -XX:+HeapDumpOnOutOfMemoryError</span><br><span class="hljs-comment">     *</span><br><span class="hljs-comment">     * 执行main方法后</span><br><span class="hljs-comment">     * jps 查看进程</span><br><span class="hljs-comment">     * jmap -histo 进程ID</span><br><span class="hljs-comment">     *</span><br><span class="hljs-comment">     */</span><br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        <span class="hljs-keyword">long</span> start = System.currentTimeMillis();<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">500000</span>; i++) &#123;<br>            alloc();<br>        &#125;<br>        <span class="hljs-keyword">long</span> end = System.currentTimeMillis();<br>        <span class="hljs-comment">//查看执行时间</span><br>        System.out.println(<span class="hljs-string">&quot;cost-time &quot;</span> + (end - start) + <span class="hljs-string">&quot; ms&quot;</span>);<br>        <span class="hljs-keyword">try</span> &#123;<br>            Thread.sleep(<span class="hljs-number">100000</span>);<br>        &#125; <span class="hljs-keyword">catch</span> (InterruptedException e1) &#123;<br>            e1.printStackTrace();<br>        &#125;<br>    &#125;<br><br><br>    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> TulingStudent <span class="hljs-title">alloc</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-comment">//Jit对编译时会对代码进行 逃逸分析</span><br>        <span class="hljs-comment">//并不是所有对象存放在堆区，有的一部分存在线程栈空间</span><br>        TulingStudent student = <span class="hljs-keyword">new</span> TulingStudent();<br>        <span class="hljs-keyword">return</span> student;<br>    &#125;<br><br>    <span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TulingStudent</span> </span>&#123;<br>        <span class="hljs-keyword">private</span> String name;<br>        <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> age;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>通过jmap -histo pid 查看jvm内存实例情况</p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024232528178.png" alt="image-20211024232528178"></p>
+<h3 id="锁的优化与升级"><a href="#锁的优化与升级" class="headerlink" title="锁的优化与升级"></a>锁的优化与升级</h3><p>优化：粗化与消除</p>
+<p>升级：无锁-&gt;偏向锁-&gt;轻量级锁-&gt;重量级锁</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Test</span> </span>&#123;<br>    StringBuffer stb = <span class="hljs-keyword">new</span> StringBuffer();<br><br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">test1</span><span class="hljs-params">()</span></span>&#123;<br>        <span class="hljs-comment">//jvm的优化，锁的粗化</span><br>        stb.append(<span class="hljs-string">&quot;1&quot;</span>);<br><br>        stb.append(<span class="hljs-string">&quot;2&quot;</span>);<br><br>        stb.append(<span class="hljs-string">&quot;3&quot;</span>);<br><br>        stb.append(<span class="hljs-string">&quot;4&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 锁的消除</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">test2</span><span class="hljs-params">()</span></span>&#123;<br>        <span class="hljs-comment">//jvm的优化，JVM不会对同步块进行加锁</span><br>        <span class="hljs-keyword">synchronized</span> (<span class="hljs-keyword">new</span> Object()) &#123;<br>            <span class="hljs-comment">//伪代码：很多逻辑</span><br>            <span class="hljs-comment">//jvm是否会加锁？</span><br>            <span class="hljs-comment">//jvm会进行逃逸分析</span><br>        &#125;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        Test test = <span class="hljs-keyword">new</span> Test();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="JVM内置锁的优化升级过程"><a href="#JVM内置锁的优化升级过程" class="headerlink" title="JVM内置锁的优化升级过程"></a>JVM内置锁的优化升级过程</h2><p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024234942906.png" alt="image-20211024234942906"></p>
+<p>自旋锁：<strong>线程间交替执行，本身竞争不激烈</strong>（自旋不会丢失CPU使用权，不同于阻塞）（JDK1.7后，有自适应自旋）</p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/synchronized%E9%94%81%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%8D%87%E7%BA%A7%E8%BF%87%E7%A8%8B-1635176427187.png"></p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/JVM%E9%94%81%E7%9A%84%E8%86%A8%E8%83%80%E5%8D%87%E7%BA%A7.jpg"></p>
+<p>CHL同步队列与条件队列</p>
+<p>公平锁与非公平锁</p>
+<p>reentrantLock是独占锁</p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20210907225841711.png" alt="image-20210907225841711"></p>
+<p>AQS节点的唤醒，唤醒的是同步队列的head指向的next节点。</p>
+<p>Reentrantlock.lock 分析</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">public final void acquire(<span class="hljs-built_in">int</span> arg) &#123;<br>    <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">try</span><span class="hljs-constructor">Acquire(<span class="hljs-params">arg</span>)</span> &amp;&amp;<br>        acquire<span class="hljs-constructor">Queued(<span class="hljs-params">addWaiter</span>(Node.EXCLUSIVE)</span>, arg))<br>        self<span class="hljs-constructor">Interrupt()</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>Semaphore的使用 acquire方法分析</p>
+<p>park、unpark方法阻塞线程 </p>
+<h2 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h2><p>HashMap 1.7 = 数组 + 单向链表<br>扩容时可能会产生死锁，多线程扩容时链表倒插可能产生闭环</p>
+<p>ConcurrentHashMap 1.7 = Segment数组（继承ReentrantLock） + hashEntry数组 + 链表,从而实现分段锁，支持并发</p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20210927235446858.png" alt="image-20210927235446858"></p>
+<p>HashMap 1.8 = 数组 + 单向链表。扩容时不会倒插，而是采用高低位插入，Node的hash 值&amp;（扩容后-1）最高位=1则扩容后下标=扩容前大小+原下标，否则=原下标</p>
+<p>ConcurrentHashMap 1.8 = Node数组 +  链表，区别在于每次插入，都synchronize第一个节点，相同于锁一条链表，并且通过CAS的算法插入每个链表的第一个阶段，从而达到并发，锁的粒度较小，灵活</p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20210928000406955.png" alt="image-20210928000406955"></p>
+<h1 id="线程池原理与解读"><a href="#线程池原理与解读" class="headerlink" title="线程池原理与解读"></a>线程池原理与解读</h1><p>线程池的优势：</p>
+<p>1、重用存在的线程，减少线程创建，消亡的开销（开辟的空间处理，操作内核空间时间的消耗），提高性能</p>
+<p>2、提高响应速度（直接取，无需等待)</p>
+<p>3、提高对线程的管理，方便进行统一分配、调优和监控</p>
+<h2 id="Executor框架"><a href="#Executor框架" class="headerlink" title="Executor框架"></a>Executor框架</h2><h2 id="线程池的创建"><a href="#线程池的创建" class="headerlink" title="线程池的创建"></a>线程池的创建</h2><h2 id="线程池的工作原理"><a href="#线程池的工作原理" class="headerlink" title="线程池的工作原理"></a>线程池的工作原理</h2><p>核心线程</p>
+<p>阻塞队列</p>
+<p>非核心线程</p>
+<p>拒绝策略</p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20210928233525697.png" alt="image-20210928233525697"></p>
+<h3 id="线程池重点属性"><a href="#线程池重点属性" class="headerlink" title="线程池重点属性"></a>线程池重点属性</h3><h3 id="线程池状态流转"><a href="#线程池状态流转" class="headerlink" title="线程池状态流转"></a>线程池状态流转</h3><h3 id="fork-join-分发线程池"><a href="#fork-join-分发线程池" class="headerlink" title="fork/join 分发线程池"></a>fork/join 分发线程池</h3><h3 id="定时任务-定时任务线程池"><a href="#定时任务-定时任务线程池" class="headerlink" title="定时任务/定时任务线程池"></a>定时任务/定时任务线程池</h3>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" rel="tag"># 并发编程</a>
+              <a href="/tags/Synchronized/" rel="tag"># Synchronized</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/10/04/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9810JVM01%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/" rel="prev" title="性能调优10JVM01类加载机制深度解析">
+      <i class="fa fa-chevron-left"></i> 性能调优10JVM01类加载机制深度解析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/10/26/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B03AQS&ReentrantLock/" rel="next" title="并发编程03AQS&ReentrantLock">
+      并发编程03AQS&ReentrantLock <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8Bsynchronized-amp-Lock-amp-AQS%E8%AF%A6%E8%A7%A3"><span class="nav-number">1.</span> <span class="nav-text">并发编程之synchronized&amp;Lock&amp;AQS详解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8A%A0%E9%94%81"><span class="nav-number">1.1.</span> <span class="nav-text">为什么加锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%81%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">1.2.</span> <span class="nav-text">锁的分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#synchronized%E4%BD%BF%E7%94%A8%E4%B8%8E%E5%8E%9F%E7%90%86"><span class="nav-number">1.3.</span> <span class="nav-text">synchronized使用与原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Monitor"><span class="nav-number">1.3.1.</span> <span class="nav-text">Monitor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A0%E9%94%81%E8%BF%87%E7%A8%8B"><span class="nav-number">1.3.2.</span> <span class="nav-text">加锁过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84"><span class="nav-number">1.3.3.</span> <span class="nav-text">对象内存结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E5%AF%B9%E8%B1%A1%E5%86%85%E5%AD%98%E5%AD%98%E5%82%A8%E5%9C%A8%E5%93%AA%EF%BC%9F%E7%BA%BF%E7%A8%8B%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90"><span class="nav-number">1.3.4.</span> <span class="nav-text">实例对象内存存储在哪？线程逃逸分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%81%E7%9A%84%E4%BC%98%E5%8C%96%E4%B8%8E%E5%8D%87%E7%BA%A7"><span class="nav-number">1.3.5.</span> <span class="nav-text">锁的优化与升级</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM%E5%86%85%E7%BD%AE%E9%94%81%E7%9A%84%E4%BC%98%E5%8C%96%E5%8D%87%E7%BA%A7%E8%BF%87%E7%A8%8B"><span class="nav-number">1.4.</span> <span class="nav-text">JVM内置锁的优化升级过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HashMap"><span class="nav-number">1.5.</span> <span class="nav-text">HashMap</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8E%9F%E7%90%86%E4%B8%8E%E8%A7%A3%E8%AF%BB"><span class="nav-number">2.</span> <span class="nav-text">线程池原理与解读</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Executor%E6%A1%86%E6%9E%B6"><span class="nav-number">2.1.</span> <span class="nav-text">Executor框架</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-number">2.2.</span> <span class="nav-text">线程池的创建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">2.3.</span> <span class="nav-text">线程池的工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0%E9%87%8D%E7%82%B9%E5%B1%9E%E6%80%A7"><span class="nav-number">2.3.1.</span> <span class="nav-text">线程池重点属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%8A%B6%E6%80%81%E6%B5%81%E8%BD%AC"><span class="nav-number">2.3.2.</span> <span class="nav-text">线程池状态流转</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fork-join-%E5%88%86%E5%8F%91%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="nav-number">2.3.3.</span> <span class="nav-text">fork&#x2F;join 分发线程池</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1-%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="nav-number">2.3.4.</span> <span class="nav-text">定时任务&#x2F;定时任务线程池</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

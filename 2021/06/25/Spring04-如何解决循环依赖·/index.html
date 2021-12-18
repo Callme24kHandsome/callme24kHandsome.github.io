@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Spring如何解决循环依赖">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring04-如何解决循环依赖">
+<meta property="og:url" content="http://example.com/2021/06/25/Spring04-%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%C2%B7/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="Spring如何解决循环依赖">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/Spring04-%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%C2%B7/spring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E6%95%B0%E6%8D%AE%E6%B5%81%E7%A8%8B%E5%9B%BE.svg">
+<meta property="article:published_time" content="2021-06-25T13:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-14T13:25:44.622Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="源码">
+<meta property="article:tag" content="Spring">
+<meta property="article:tag" content="循环依赖">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/Spring04-%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%C2%B7/spring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E6%95%B0%E6%8D%AE%E6%B5%81%E7%A8%8B%E5%9B%BE.svg">
+
+<link rel="canonical" href="http://example.com/2021/06/25/Spring04-%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%C2%B7/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Spring04-如何解决循环依赖 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/25/Spring04-%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%C2%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring04-如何解决循环依赖
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-06-25 21:00:00" itemprop="dateCreated datePublished" datetime="2021-06-25T21:00:00+08:00">2021-06-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-11-14 21:25:44" itemprop="dateModified" datetime="2021-11-14T21:25:44+08:00">2021-11-14</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring/" itemprop="url" rel="index"><span itemprop="name">Spring</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">Spring如何解决循环依赖</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>读前猜想：</p>
+<ol>
+<li>什么是Spring的循环依赖</li>
+<li>如何检测是否存在循环依赖</li>
+<li><strong>如何解决循环依赖</strong></li>
+<li>循环依赖解决要满足哪些条件</li>
+<li>什么是早期bean</li>
+<li>为什么采用三级缓存解决循环依赖？如果直接将早期bean丢到二级缓存可以么？</li>
+</ol>
+<h1 id="什么是Spring的循环依赖"><a href="#什么是Spring的循环依赖" class="headerlink" title="什么是Spring的循环依赖"></a>什么是Spring的循环依赖</h1><p>多个bean之间相互依赖，形成了一个闭环</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span> </span>&#123;<br>    <span class="hljs-meta">@Resource</span><br>    <span class="hljs-keyword">private</span> B b;<br>&#125;<br><br><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">B</span> </span>&#123;<br>    <span class="hljs-meta">@Resource</span><br>    <span class="hljs-keyword">private</span> A a;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="如何检测是否存在循环依赖"><a href="#如何检测是否存在循环依赖" class="headerlink" title="如何检测是否存在循环依赖"></a>如何检测是否存在循环依赖</h1><p>​    检测循环依赖比较简单，使用一个列表来记录当前正在创建的bean，在每个bean创建之前，先去记录中看一下自己是否在列表中，如果存在，则说明存在循环依赖（A-&gt;B-&gt;A）,如果不在，则将其加入到列表中，待到bean创建完成，再从该列表中移除</p>
+<h2 id="单例："><a href="#单例：" class="headerlink" title="单例："></a>单例：</h2><p>spring创建单例bean时候，会调用下面方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">beforeSingletonCreation</span><span class="hljs-params">(String beanName)</span> </span>&#123;<br>    <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">this</span>.inCreationCheckExclusions.contains(beanName) &amp;&amp; !<span class="hljs-keyword">this</span>.singletonsCurrentlyInCreation.add(beanName)) &#123;<br>        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BeanCurrentlyInCreationException(beanName);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>​    singletonsCurrentlyInCreation就是用来记录目前正在创建中的bean名称列表，<code>this.singletonsCurrentlyInCreation.add(beanName)</code>返回false，说明beanName已经在当前列表中了，此时会抛循环依赖的异常BeanCurrentlyInCreationException</p>
+<h2 id="多例"><a href="#多例" class="headerlink" title="多例"></a>多例</h2><p>​    以prototype情况为例，源码位于<code>org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean</code>方法中，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//检查正在创建的bean列表中是否存在beanName，如果存在，说明存在循环依赖，抛出循环依赖的异常</span><br><span class="hljs-keyword">if</span> (isPrototypeCurrentlyInCreation(beanName)) &#123;<br>    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BeanCurrentlyInCreationException(beanName);<br>&#125;<br><br><span class="hljs-comment">//判断scope是否是prototype</span><br><span class="hljs-keyword">if</span> (mbd.isPrototype()) &#123;<br>    Object prototypeInstance = <span class="hljs-keyword">null</span>;<br>    <span class="hljs-keyword">try</span> &#123;<br>        <span class="hljs-comment">//将beanName放入正在创建的列表中</span><br>        beforePrototypeCreation(beanName);<br>        prototypeInstance = createBean(beanName, mbd, args);<br>    &#125;<br>    <span class="hljs-keyword">finally</span> &#123;<br>        <span class="hljs-comment">//将beanName从正在创建的列表中移除</span><br>        afterPrototypeCreation(beanName);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="Spring如何解决循环依赖的问题"><a href="#Spring如何解决循环依赖的问题" class="headerlink" title="Spring如何解决循环依赖的问题"></a>Spring如何解决循环依赖的问题</h1><p>有了前面创建bean的基础后我们知道</p>
+<p>Spring创建bean的主要步骤</p>
+<p>1、实例化Bean，及调用构造器或者工厂方法创建bean</p>
+<p>2、populateBean 填充属性，注入依赖的bean，比如通过set方式、@Autowired注解的方式注入依赖的bean</p>
+<p>3、初始化bean，调用初始化方法</p>
+<p>从Spring Bean创建的过程来看，注入依赖的方式有两种</p>
+<ol>
+<li><strong>实例化bean时通过构造方法注入</strong></li>
+<li><strong>填充属性时</strong></li>
+</ol>
+<h2 id="构造注入方式导致的循环依赖无法解决"><a href="#构造注入方式导致的循环依赖无法解决" class="headerlink" title="构造注入方式导致的循环依赖无法解决"></a>构造注入方式导致的循环依赖无法解决</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ServiceA</span> </span>&#123;<br>    <span class="hljs-keyword">private</span> ServiceB serviceB;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ServiceA</span><span class="hljs-params">(ServiceB serviceB)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.serviceB = serviceB;<br>    &#125;<br>&#125;<br><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ServiceB</span> </span>&#123;<br>    <span class="hljs-keyword">private</span> ServiceA serviceA;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ServiceB</span><span class="hljs-params">(ServiceA serviceA)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.serviceA = serviceA;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="属性注入方式导致的循环依赖可以解决"><a href="#属性注入方式导致的循环依赖可以解决" class="headerlink" title="属性注入方式导致的循环依赖可以解决"></a>属性注入方式导致的循环依赖可以解决</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ServiceA</span> </span>&#123;<br>    <span class="hljs-keyword">private</span> ServiceB serviceB;<br><br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setServiceB</span><span class="hljs-params">(ServiceB serviceB)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.serviceB = serviceB;<br>    &#125;<br>&#125;<br><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ServiceB</span> </span>&#123;<br>    <span class="hljs-keyword">private</span> ServiceA serviceA;<br><br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setServiceA</span><span class="hljs-params">(ServiceA serviceA)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.serviceA = serviceA;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><img src="/images/Spring04-%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%C2%B7/spring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E6%95%B0%E6%8D%AE%E6%B5%81%E7%A8%8B%E5%9B%BE.svg" alt="spring循环依赖数据流程图"></p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs txt">1.spring轮询准备创建2个bean：serviceA和serviceB<br>2.spring容器发现singletonObjects中没有serviceA<br>3.调用serviceA的构造器创建serviceA实例<br>4.serviceA准备注入依赖的对象，发现需要通过setServiceB注入serviceB<br>5.serviceA向spring容器查找serviceB<br>6.spring容器发现singletonObjects中没有serviceB<br>7.调用serviceB的构造器创建serviceB实例<br>8.serviceB准备注入依赖的对象，发现需要通过setServiceA注入serviceA<br>9.serviceB向spring容器查找serviceA<br>10.此时又进入步骤2了<br></code></pre></td></tr></table></figure>
+
+<p>完整解决循环依赖的过程：</p>
+<ul>
+<li>1.从容器中获取serviceA</li>
+<li>2.容器尝试从单例缓存中找serviceA，找不到</li>
+<li>3.准备创建serviceA<br>4.调用serviceA的构造器创建serviceA，得到serviceA实例，此时serviceA还未填充属性，未进行其他任何初始化的操作</li>
+<li>5**.将早期的serviceA暴露出去：即将其丢到第3级缓存==singletonFactories==中**</li>
+<li>6.serviceA准备填充属性，发现需要注入serviceB，然后向容器获取serviceB</li>
+<li>7.容器尝试从单例缓存中找serviceB，找不到</li>
+<li>8.准备创建serviceB</li>
+<li>9.调用serviceB的构造器创建serviceB，得到serviceB实例，此时serviceB还未填充属性，未进行其他任何初始化的操作</li>
+<li>10.<strong>将早期的serviceB暴露出去：即将其丢到第3级缓存singletonFactories中</strong></li>
+<li>11.serviceB准备填充属性，发现需要注入serviceA，然后向容器获取serviceA</li>
+<li>12.<strong>容器尝试从单例缓存中找serviceA，发现此时serviceA位于第3级缓存中，经过处理之后，serviceA会从第3级缓存中移除，然后会存到第2级缓存中，然后将其返回给serviceB，此时serviceA通过serviceB中的setServiceA方法被注入到serviceB中</strong></li>
+<li>13.<strong>serviceB继续执行后续的一些操作，最后完成创建工作，然后会调用addSingleton方法，将自己丢到第1级缓存中，并将自己从第2和第3级缓存中移除</strong></li>
+<li>14.serviceB将自己返回给serviceA</li>
+<li>15.serviceA通过setServiceB方法将serviceB注入进去</li>
+<li>16.serviceB继续执行后续的一些操作，最后完成创建工作,然后会调用addSingleton方法，将自己丢到第1级缓存中，并将自己从第2和第3级缓存中移除</li>
+</ul>
+<h1 id="循环依赖解决要哪些情况下无法解决"><a href="#循环依赖解决要哪些情况下无法解决" class="headerlink" title="循环依赖解决要哪些情况下无法解决"></a>循环依赖解决要哪些情况下无法解决</h1><p><strong>1、构造器注入（因为暴露早期对象是对象实例化后进行的）</strong></p>
+<p><strong>2、A\B都是多例</strong></p>
+<p><strong>3、A多例 B单例懒加载 且容器先获取A时(如果先获取B时可以解决循环依赖的)</strong></p>
+<p>4、某些情况下使用了在类方法上使用了@async注解的类（后续再讨论）</p>
+<h1 id="什么是早期bean"><a href="#什么是早期bean" class="headerlink" title="什么是早期bean"></a>什么是早期bean</h1><p>​    <strong>刚刚实例化好的bean就是早期的bean，此时bean还未进行属性填充，初始化等操作</strong></p>
+<h1 id="为什么采用三级缓存解决循环依赖？如果直接将早期bean丢到二级缓存可以么？"><a href="#为什么采用三级缓存解决循环依赖？如果直接将早期bean丢到二级缓存可以么？" class="headerlink" title="为什么采用三级缓存解决循环依赖？如果直接将早期bean丢到二级缓存可以么？"></a>为什么采用三级缓存解决循环依赖？如果直接将早期bean丢到二级缓存可以么？</h1><h2 id="为什么使用三级缓存"><a href="#为什么使用三级缓存" class="headerlink" title="为什么使用三级缓存"></a>为什么使用三级缓存</h2><p>没看源码之前，有我们自己猜想，可能有一个 HashMap，缓存这我们创建的单例bean，每个创建完成后就往这个bean里放。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">Map&lt;String, Object&gt; singletonObjects = <span class="hljs-keyword">new</span> ConcurrentHashMap&lt;&gt;(<span class="hljs-number">256</span>);<br></code></pre></td></tr></table></figure>
+
+<p>但是单单如此还解决不了问题,如以下场景</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-number">1.</span>spring轮询准备创建<span class="hljs-number">2</span>个bean：serviceA和serviceB<br><span class="hljs-number">2.</span>spring容器发现singletonObjects中没有serviceA<br><span class="hljs-number">3.</span>调用serviceA的构造器创建serviceA实例<br><span class="hljs-number">4.</span>serviceA准备注入依赖的对象，发现需要通过setServiceB注入serviceB<br><span class="hljs-number">5.</span>serviceA向spring容器查找serviceB<br><span class="hljs-number">6.</span>spring容器发现singletonObjects中没有serviceB<br><span class="hljs-number">7.</span>调用serviceB的构造器创建serviceB实例<br><span class="hljs-number">8.</span>serviceB准备注入依赖的对象，发现需要通过setServiceA注入serviceA<br><span class="hljs-number">9.</span>serviceB向spring容器查找serviceA<br><span class="hljs-number">10.</span>此时又进入步骤<span class="hljs-number">2</span>了<br></code></pre></td></tr></table></figure>
+
+<h2 id="猜想"><a href="#猜想" class="headerlink" title="猜想"></a>猜想</h2><p>​    既然要解决循环依赖，那么势必有一个Map可以缓存当前创建实例后的bean，以便别的bean在实例化时可以从这个map中获取对象。因此我们需要第二个Map:secondMap来帮我们保存正在创建的bean。</p>
+<p>这样的话，我们猜想Spring创建Bean过程如下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-number">1.</span>spring轮询准备创建<span class="hljs-number">2</span>个bean：serviceA和serviceB<br><span class="hljs-number">2.</span>spring容器发现<span class="hljs-number">2</span>个map中没有serviceA<br><span class="hljs-number">3.</span>调用serviceA的构造器创建serviceA实例，并且把serviceA实例添加到secondMap中<br><span class="hljs-number">4.</span>serviceA准备注入依赖的对象，发现需要通过setServiceB注入serviceB<br><span class="hljs-number">5.</span>serviceA向spring容器查找serviceB<br><span class="hljs-number">6.</span>spring容器发现<span class="hljs-number">2</span>个map中没有serviceB<br><span class="hljs-number">7.</span>调用serviceB的构造器创建serviceB实例，并且把serviceB实例添加到secondMap中<br><span class="hljs-number">8.</span>serviceB准备注入依赖的对象，发现需要通过setServiceA注入serviceA<br><span class="hljs-number">9.</span>serviceB向spring容器查找serviceA，secondMap获取到serviceA<br><span class="hljs-number">10.</span>serviceB创建成功，添加到singletonObjects中，移除secondMap对应实例<br><span class="hljs-number">10.</span>serviceA创建成功，添加到singletonObjects中，移除secondMap对应实例<br></code></pre></td></tr></table></figure>
+
+<p>​    咋一看，这样设计也不是不行，实际上，spring中也采用类似的方式，稍微有点区别，上面使用了一个缓存，而spring内部采用了3级缓存来解决这个问题，我们一起来细看一下。</p>
+<p>3级缓存对应的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/** 第一级缓存：单例bean的缓存 */</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, Object&gt; singletonObjects = <span class="hljs-keyword">new</span> ConcurrentHashMap&lt;&gt;(<span class="hljs-number">256</span>);<br><span class="hljs-comment">/** 第二级缓存：早期暴露的bean的缓存 */</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, Object&gt; earlySingletonObjects = <span class="hljs-keyword">new</span> HashMap&lt;&gt;(<span class="hljs-number">16</span>);<br><span class="hljs-comment">/** 第三级缓存：单例bean工厂的缓存 */</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, ObjectFactory&lt;?&gt;&gt; singletonFactories = <span class="hljs-keyword">new</span> HashMap&lt;&gt;(<span class="hljs-number">16</span>);<br></code></pre></td></tr></table></figure>
+
+<p>因此bean从缓存角度实际的创建过程如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-number">1.</span>从容器中获取serviceA<br><span class="hljs-number">2.</span>容器尝试从<span class="hljs-number">3</span>个缓存中找serviceA，找不到<br><span class="hljs-number">3.</span>准备创建serviceA<br><span class="hljs-number">4.</span>调用serviceA的构造器创建serviceA，得到serviceA实例，此时serviceA还未填充属性，未进行其他任何初始化的操作<br><span class="hljs-number">5.</span>将早期的serviceA暴露出去：即将其丢到第<span class="hljs-number">3</span>级缓存singletonFactories中<br><span class="hljs-number">6.</span>serviceA准备填充属性，发现需要注入serviceB，然后向容器获取serviceB<br><span class="hljs-number">7.</span>容器尝试从<span class="hljs-number">3</span>个缓存中找serviceB，找不到<br><span class="hljs-number">8.</span>准备创建serviceB<br><span class="hljs-number">9.</span>调用serviceB的构造器创建serviceB，得到serviceB实例，此时serviceB还未填充属性，未进行其他任何初始化的操作<br><span class="hljs-number">10.</span>将早期的serviceB暴露出去：即将其丢到第<span class="hljs-number">3</span>级缓存singletonFactories中<br><span class="hljs-number">11.</span>serviceB准备填充属性，发现需要注入serviceA，然后向容器获取serviceA<br><span class="hljs-number">12.</span>容器尝试从<span class="hljs-number">3</span>个缓存中找serviceA，发现此时serviceA位于第<span class="hljs-number">3</span>级缓存中，经过处理之后，serviceA会从第<span class="hljs-number">3</span>级缓存中移除，然后会存到第<span class="hljs-number">2</span>级缓存中，然后将其返回给serviceB，此时serviceA通过serviceB中的setServiceA方法被注入到serviceB中<br><span class="hljs-number">13.</span>serviceB继续执行后续的一些操作，最后完成创建工作，然后会调用addSingleton方法，将自己丢到第<span class="hljs-number">1</span>级缓存中，并将自己从第<span class="hljs-number">2</span>和第<span class="hljs-number">3</span>级缓存中移除<br><span class="hljs-number">14.</span>serviceB将自己返回给serviceA<br><span class="hljs-number">15.</span>serviceA通过setServiceB方法将serviceB注入进去<br><span class="hljs-number">16.</span>serviceB继续执行后续的一些操作，最后完成创建工作,然后会调用addSingleton方法，将自己丢到第<span class="hljs-number">1</span>级缓存中，并将自己从第<span class="hljs-number">2</span>和第<span class="hljs-number">3</span>级缓存中移除<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//获取缓存</span><br><span class="hljs-function"><span class="hljs-keyword">protected</span> Object <span class="hljs-title">getSingleton</span><span class="hljs-params">(String beanName, <span class="hljs-keyword">boolean</span> allowEarlyReference)</span> </span>&#123;<br>    <span class="hljs-comment">//1.先从一级缓存中找</span><br>    Object singletonObject = <span class="hljs-keyword">this</span>.singletonObjects.get(beanName);<br>    <span class="hljs-keyword">if</span> (singletonObject == <span class="hljs-keyword">null</span> &amp;&amp; isSingletonCurrentlyInCreation(beanName)) &#123;<br>        <span class="hljs-keyword">synchronized</span> (<span class="hljs-keyword">this</span>.singletonObjects) &#123;<br>            <span class="hljs-comment">//2.从二级缓存中找</span><br>            singletonObject = <span class="hljs-keyword">this</span>.earlySingletonObjects.get(beanName);<br>            <span class="hljs-keyword">if</span> (singletonObject == <span class="hljs-keyword">null</span> &amp;&amp; allowEarlyReference) &#123;<br>                <span class="hljs-comment">//3.二级缓存中没找到 &amp;&amp; allowEarlyReference为true的情况下,从三级缓存中找</span><br>                ObjectFactory&lt;?&gt; singletonFactory = <span class="hljs-keyword">this</span>.singletonFactories.get(beanName);<br>                <span class="hljs-keyword">if</span> (singletonFactory != <span class="hljs-keyword">null</span>) &#123;<br>                    <span class="hljs-comment">//三级缓存返回的是一个工厂，通过工厂来获取创建bean</span><br>                    singletonObject = singletonFactory.getObject();<br>                    <span class="hljs-comment">//将创建好的bean丢到二级缓存中</span><br>                    <span class="hljs-keyword">this</span>.earlySingletonObjects.put(beanName, singletonObject);<br>                    <span class="hljs-comment">//从三级缓存移除</span><br>                    <span class="hljs-keyword">this</span>.singletonFactories.remove(beanName);<br>                &#125;<br>            &#125;<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> singletonObject;<br>&#125;<br><span class="hljs-comment">//创建完成后，添加到缓存中</span><br><span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">addSingleton</span><span class="hljs-params">(String beanName, Object singletonObject)</span> </span>&#123;<br>    <span class="hljs-keyword">synchronized</span> (<span class="hljs-keyword">this</span>.singletonObjects) &#123;<br>        <span class="hljs-comment">//将bean放入第1级缓存中</span><br>        <span class="hljs-keyword">this</span>.singletonObjects.put(beanName, singletonObject);<br>        <span class="hljs-comment">//将其从第3级缓存中移除</span><br>        <span class="hljs-keyword">this</span>.singletonFactories.remove(beanName);<br>        <span class="hljs-comment">//将其从第2级缓存中移除</span><br>        <span class="hljs-keyword">this</span>.earlySingletonObjects.remove(beanName);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="解答"><a href="#解答" class="headerlink" title="解答"></a>解答</h2><p>那回归正题，如上所述，为什么Spring要用3级缓存来解决循环依赖呢？<strong>如果只使用2级缓存，直接将刚实例化好的bean暴露给二级缓存出是否可以？</strong></p>
+<p>结论：不能</p>
+<p>原因：<strong>这样做是可以解决：早期暴露给其他依赖者的bean和最终暴露的bean不一致的问题。</strong></p>
+<p>​    若将刚刚实例化好的bean直接丢到二级缓存中暴露出去，如果后期这个bean对象被更改了，比如可能在上面加了一些拦截器，将其包装为一个代理了，那么暴露出去的bean和最终的这个bean就不一样的，将自己暴露出去的时候是一个原始对象，而自己最终却是一个代理对象，最终会导致被暴露出去的和最终的bean不是同一个bean的，将产生意向不到的效果，而三级缓存就可以发现这个问题，会报错。</p>
+<p>举例说明</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Service1</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">m1</span><span class="hljs-params">()</span> </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;Service1 m1&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-keyword">private</span> Service2 service2;<br><br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setService2</span><span class="hljs-params">(Service2 service2)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.service2 = service2;<br>    &#125;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Service2</span> </span>&#123;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">m1</span><span class="hljs-params">()</span> </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;Service2 m1&quot;</span>);<br>        <span class="hljs-keyword">this</span>.service1.m1();<span class="hljs-comment">//@1</span><br>    &#125;<br><br>    <span class="hljs-keyword">private</span> Service1 service1;<br><br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setService1</span><span class="hljs-params">(Service1 service1)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.service1 = service1;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Service1 <span class="hljs-title">getService1</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> service1;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>注意上面的<code>@1</code>，service2的m1方法中会调用service1的m1方法。</p>
+<h4 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h4><p>​    在service1上面加个拦截器，要求在调用service1的任何方法之前需要先输出一行日志：”你好,service1”</p>
+<h4 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h4><p>新增一个Bean后置处理器来对service1对应的bean进行处理，将其封装为一个代理暴露出去。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">import</span> org.springframework.aop.MethodBeforeAdvice;<br><span class="hljs-keyword">import</span> org.springframework.aop.framework.ProxyFactory;<br><span class="hljs-keyword">import</span> org.springframework.beans.BeansException;<br><span class="hljs-keyword">import</span> org.springframework.beans.factory.config.BeanPostProcessor;<br><span class="hljs-keyword">import</span> org.springframework.lang.Nullable;<br><span class="hljs-keyword">import</span> org.springframework.stereotype.Component;<br><span class="hljs-keyword">import</span> java.lang.reflect.Method;<br><br><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MethodBeforeInterceptor</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">BeanPostProcessor</span> </span>&#123;<br>    <span class="hljs-meta">@Nullable</span><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Object <span class="hljs-title">postProcessAfterInitialization</span><span class="hljs-params">(Object bean, String beanName)</span> <span class="hljs-keyword">throws</span> BeansException </span>&#123;<br>        <span class="hljs-keyword">if</span> (<span class="hljs-string">&quot;service1&quot;</span>.equals(beanName)) &#123;<br>            <span class="hljs-comment">//代理创建工厂，需传入被代理的目标对象</span><br>            ProxyFactory proxyFactory = <span class="hljs-keyword">new</span> ProxyFactory(bean);<br>            <span class="hljs-comment">//添加一个方法前置通知，会在方法执行之前调用通知中的before方法</span><br>            proxyFactory.addAdvice(<span class="hljs-keyword">new</span> MethodBeforeAdvice() &#123;<br>                <span class="hljs-meta">@Override</span><br>                <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">before</span><span class="hljs-params">(Method method, Object[] args, <span class="hljs-meta">@Nullable</span> Object target)</span> <span class="hljs-keyword">throws</span> Throwable </span>&#123;<br>                    System.out.println(<span class="hljs-string">&quot;你好,service1&quot;</span>);<br>                &#125;<br>            &#125;);<br>            <span class="hljs-comment">//返回代理对象</span><br>            <span class="hljs-keyword">return</span> proxyFactory.getProxy();<br>        &#125;<br>        <span class="hljs-keyword">return</span> bean;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>上面的<code>postProcessAfterInitialization</code>方法内部会在service1初始化之后调用，内部会对service1这个bean进行处理，返回一个代理对象，通过代理来访问service1的方法，访问service1中的任何方法之前，会先输出：<code>你好，service1</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Configuration</span><br><span class="hljs-meta">@ComponentScan(value = &#123;&quot;com.study.cycledepend.thirdlevelcache&quot;&#125;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AopConfig</span> </span>&#123;<br><br>&#125;<br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MainClass</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        AnnotationConfigApplicationContext context = <span class="hljs-keyword">new</span> AnnotationConfigApplicationContext();<br>        context.register(AopConfig.class);<br>        context.refresh();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="运行：报错了"><a href="#运行：报错了" class="headerlink" title="运行：报错了"></a>运行：报错了</h4><p>可以看出是<code>AbstractAutowireCapableBeanFactory.java:624</code>这个地方整出来的异常，将这块代码贴出来给大家看一下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">if</span> (earlySingletonExposure) &#123;<br>    <span class="hljs-comment">//@1</span><br>    Object earlySingletonReference = getSingleton(beanName, <span class="hljs-keyword">false</span>);<br>    <span class="hljs-keyword">if</span> (earlySingletonReference != <span class="hljs-keyword">null</span>) &#123;<br>        <span class="hljs-comment">//@2</span><br>        <span class="hljs-keyword">if</span> (exposedObject == bean) &#123;<br>            exposedObject = earlySingletonReference;<br>        &#125;<br>        <span class="hljs-comment">//@3</span><br>        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">this</span>.allowRawInjectionDespiteWrapping &amp;&amp; hasDependentBean(beanName)) &#123;<br>            String[] dependentBeans = getDependentBeans(beanName);<br>            Set&lt;String&gt; actualDependentBeans = <span class="hljs-keyword">new</span> LinkedHashSet&lt;&gt;(dependentBeans.length);<br>            <span class="hljs-keyword">for</span> (String dependentBean : dependentBeans) &#123;<br>                <span class="hljs-keyword">if</span> (!removeSingletonIfCreatedForTypeCheckOnly(dependentBean)) &#123;<br>                    actualDependentBeans.add(dependentBean);<br>                &#125;<br>            &#125;<br>            <span class="hljs-keyword">if</span> (!actualDependentBeans.isEmpty()) &#123;<br>                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BeanCurrentlyInCreationException(beanName,<br>                                                           <span class="hljs-string">&quot;Bean with name &#x27;&quot;</span> + beanName + <span class="hljs-string">&quot;&#x27; has been injected into other beans [&quot;</span> +<br>                                                           StringUtils.collectionToCommaDelimitedString(actualDependentBeans) +<br>                                                           <span class="hljs-string">&quot;] in its raw version as part of a circular reference, but has eventually been &quot;</span> +<br>                                                           <span class="hljs-string">&quot;wrapped. This means that said other beans do not use the final version of the &quot;</span> +<br>                                                           <span class="hljs-string">&quot;bean. This is often the result of over-eager type matching - consider using &quot;</span> +<br>                                                           <span class="hljs-string">&quot;&#x27;getBeanNamesOfType&#x27; with the &#x27;allowEagerInit&#x27; flag turned off, for example.&quot;</span>);<br>            &#125;<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>我们再来通过代码级别的来解释上面代码：</p>
+<p>​    这段代码主要用来判断当有循环依赖的情况下，早期暴露给别人使用的bean是否和最终的bean不一样的情况下，会抛出一个异常。</p>
+<p>@1：调用getSingleton(beanName, false)方法，这个方法用来从3个级别的缓存中获取bean，但是注意了，这个地方第二个参数是false，此时只会尝试从第1级和第2级缓存中获取bean，如果能够获取到，说明了什么？说明了第2级缓存中已经有这个bean了，而什么情况下第2级缓存中会有bean？说明这个bean从第3级缓存中已经被别人获取过，然后从第3级缓存移到了第2级缓存中，说明这个早期的bean被别人通过getSingleton(beanName, true)获取过</p>
+<p>@2：这个地方用来判断早期暴露的bean和最终spring容器对这个bean走完创建过程之后是否还是同一个bean，上面我们的service1被代理了，所以这个地方会返回false，此时会走到<code>@3</code></p>
+<p>@3：<code>allowRawInjectionDespiteWrapping</code>这个参数用来控制是否允许循环依赖的情况下，早期暴露给被人使用的bean在后期是否可以被包装，通俗点理解就是：是否允许早期给别人使用的bean和最终bean不一致的情况，这个值默认是false，表示不允许，也就是说你暴露给别人的bean和你最终的bean需要是一直的，你给别人的是1，你后面不能将其修改成2了啊，不一样了，你给我用个鸟。</p>
+<p>而上面代码注入到service2中的service1是早期的service1，而最终spring容器中的service1变成一个代理对象了，早期的和最终的不一致了，而<code>allowRawInjectionDespiteWrapping</code>又是false，所以报异常了。</p>
+<h4 id="如何解决"><a href="#如何解决" class="headerlink" title="如何解决"></a>如何解决</h4><p>很简单，将<code>allowRawInjectionDespiteWrapping</code>设置为true就可以了，下面改一下代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MainClass</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>    AnnotationConfigApplicationContext context = <span class="hljs-keyword">new</span> AnnotationConfigApplicationContext();<br>    <span class="hljs-comment">//创建一个BeanFactoryPostProcessor：BeanFactory后置处理器</span><br>    context.addBeanFactoryPostProcessor(beanFactory -&gt; &#123;<br>        <span class="hljs-keyword">if</span> (beanFactory <span class="hljs-keyword">instanceof</span> DefaultListableBeanFactory) &#123;<br>            <span class="hljs-comment">//将allowRawInjectionDespiteWrapping设置为true</span><br>            ((DefaultListableBeanFactory) beanFactory).setAllowRawInjectionDespiteWrapping(<span class="hljs-keyword">true</span>);<br>        &#125;<br>    &#125;);<br>    context.register(IocConfig.class);<br>    context.refresh();<br><br>    System.out.println(<span class="hljs-string">&quot;容器初始化完毕&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>​    上面代码中将<code>allowRawInjectionDespiteWrapping</code>设置为true了，是通过一个<code>BeanFactoryPostProcessor</code>来实现的，后面会有一篇文章来详解<code>BeanFactoryPostProcessor</code>，目前你只需要知道<code>BeanFactoryPostProcessor</code>可以在bean创建之前用来干预<code>BeanFactory</code>的创建过程，可以用来修改<code>BeanFactory</code>中的一些配置。</p>
+<p>​    这样配置虽然不报错了，但是spring容器中的Service1和Service2实例中的service1仍旧不是同一个对象,那么这种情况是不是很诧异，如何解决这个问题？</p>
+<p>​    既然最终service1是一个代理对象，那么你提前暴露出去的时候，注入到service2的时候，你也必须得是个代理对象啊，需要确保给别人和最终是同一个对象。</p>
+<p>这个怎么整？继续看暴露早期bean的源码，注意了下面是重点：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs JAVA">addSingletonFactory(beanName, () -&gt; getEarlyBeanReference(beanName, mbd, bean));<br><br><span class="hljs-function"><span class="hljs-keyword">protected</span> Object <span class="hljs-title">getEarlyBeanReference</span><span class="hljs-params">(String beanName, RootBeanDefinition mbd, Object bean)</span> </span>&#123;<br>    Object exposedObject = bean;<br>    <span class="hljs-keyword">if</span> (!mbd.isSynthetic() &amp;&amp; hasInstantiationAwareBeanPostProcessors()) &#123;<br>        <span class="hljs-keyword">for</span> (BeanPostProcessor bp : getBeanPostProcessors()) &#123;<br>            <span class="hljs-keyword">if</span> (bp <span class="hljs-keyword">instanceof</span> SmartInstantiationAwareBeanPostProcessor) &#123;<br>                SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;<br>                exposedObject = ibp.getEarlyBeanReference(exposedObject, beanName);<br>            &#125;<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> exposedObject;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>​    我们可以自定义一个<code>SmartInstantiationAwareBeanPostProcessor</code>，然后在其<code>getEarlyBeanReference</code>中来创建代理不就可以了，聪明，我们来试试，将<code>MethodBeforeInterceptor</code>代码改成下面这样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MainClass1</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        AnnotationConfigApplicationContext context = <span class="hljs-keyword">new</span> AnnotationConfigApplicationContext(AopConfig.class);<br>        Service1 service1 = context.getBean(Service1.class);<br>        Service2 service2 = context.getBean(Service2.class);<br><br>        service1.m1();<br>        service2.m1();<br>        System.out.println(service1.equals(service2.getService1()));<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java">你好,service1<br>Service1 m1<br>Service2 m1<br>你好,service1<br>Service1 m1<br><span class="hljs-keyword">true</span><br></code></pre></td></tr></table></figure>
+
+<p>这样就解决问题了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%BA%90%E7%A0%81/" rel="tag"># 源码</a>
+              <a href="/tags/Spring/" rel="tag"># Spring</a>
+              <a href="/tags/%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96/" rel="tag"># 循环依赖</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/06/20/Spring03-%E5%AE%B9%E5%99%A8%E5%88%9B%E5%BB%BAbean%E7%9A%84%E8%BF%87%E7%A8%8B/" rel="prev" title="Spring03-容器创建bean的过程.">
+      <i class="fa fa-chevron-left"></i> Spring03-容器创建bean的过程.
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/07/01/Spring05-AOP%E6%BA%90%E7%A0%81/" rel="next" title="Spring05-AOP源码">
+      Spring05-AOP源码 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFSpring%E7%9A%84%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96"><span class="nav-number">1.</span> <span class="nav-text">什么是Spring的循环依赖</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%A3%80%E6%B5%8B%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96"><span class="nav-number">2.</span> <span class="nav-text">如何检测是否存在循环依赖</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E4%BE%8B%EF%BC%9A"><span class="nav-number">2.1.</span> <span class="nav-text">单例：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E4%BE%8B"><span class="nav-number">2.2.</span> <span class="nav-text">多例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">Spring如何解决循环依赖的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E6%B3%A8%E5%85%A5%E6%96%B9%E5%BC%8F%E5%AF%BC%E8%87%B4%E7%9A%84%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E6%97%A0%E6%B3%95%E8%A7%A3%E5%86%B3"><span class="nav-number">3.1.</span> <span class="nav-text">构造注入方式导致的循环依赖无法解决</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B1%9E%E6%80%A7%E6%B3%A8%E5%85%A5%E6%96%B9%E5%BC%8F%E5%AF%BC%E8%87%B4%E7%9A%84%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E5%8F%AF%E4%BB%A5%E8%A7%A3%E5%86%B3"><span class="nav-number">3.2.</span> <span class="nav-text">属性注入方式导致的循环依赖可以解决</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E8%A7%A3%E5%86%B3%E8%A6%81%E5%93%AA%E4%BA%9B%E6%83%85%E5%86%B5%E4%B8%8B%E6%97%A0%E6%B3%95%E8%A7%A3%E5%86%B3"><span class="nav-number">4.</span> <span class="nav-text">循环依赖解决要哪些情况下无法解决</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%97%A9%E6%9C%9Fbean"><span class="nav-number">5.</span> <span class="nav-text">什么是早期bean</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%87%87%E7%94%A8%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%EF%BC%9F%E5%A6%82%E6%9E%9C%E7%9B%B4%E6%8E%A5%E5%B0%86%E6%97%A9%E6%9C%9Fbean%E4%B8%A2%E5%88%B0%E4%BA%8C%E7%BA%A7%E7%BC%93%E5%AD%98%E5%8F%AF%E4%BB%A5%E4%B9%88%EF%BC%9F"><span class="nav-number">6.</span> <span class="nav-text">为什么采用三级缓存解决循环依赖？如果直接将早期bean丢到二级缓存可以么？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98"><span class="nav-number">6.1.</span> <span class="nav-text">为什么使用三级缓存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8C%9C%E6%83%B3"><span class="nav-number">6.2.</span> <span class="nav-text">猜想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E7%AD%94"><span class="nav-number">6.3.</span> <span class="nav-text">解答</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9C%80%E6%B1%82"><span class="nav-number">6.3.0.1.</span> <span class="nav-text">需求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0"><span class="nav-number">6.3.0.2.</span> <span class="nav-text">实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%EF%BC%9A%E6%8A%A5%E9%94%99%E4%BA%86"><span class="nav-number">6.3.0.3.</span> <span class="nav-text">运行：报错了</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3"><span class="nav-number">6.3.0.4.</span> <span class="nav-text">如何解决</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

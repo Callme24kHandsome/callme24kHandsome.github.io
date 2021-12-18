@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="介绍ArrayBlockingQueue、HashMap的并发问题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="并发编程06-Collection&amp;Queue体系分析">
+<meta property="og:url" content="http://example.com/2021/11/07/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="介绍ArrayBlockingQueue、HashMap的并发问题">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20211107225144445.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20211107225819914.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20211107230224968.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20211108000253258.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20211110000041790.png">
+<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20211109233748646.png">
+<meta property="article:published_time" content="2021-11-07T13:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-10T14:50:28.125Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="并发编程">
+<meta property="article:tag" content="AQS等待队列">
+<meta property="article:tag" content="ConcurrentHashMap">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20211107225144445.png">
+
+<link rel="canonical" href="http://example.com/2021/11/07/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>并发编程06-Collection&Queue体系分析 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/07/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          并发编程06-Collection&Queue体系分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-11-07 21:00:00" itemprop="dateCreated datePublished" datetime="2021-11-07T21:00:00+08:00">2021-11-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-11-10 22:50:28" itemprop="dateModified" datetime="2021-11-10T22:50:28+08:00">2021-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">介绍ArrayBlockingQueue、HashMap的并发问题</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="并发编程之Collections-amp-Queue"><a href="#并发编程之Collections-amp-Queue" class="headerlink" title="并发编程之Collections&amp;Queue"></a>并发编程之Collections&amp;Queue</h1><h2 id="BlockingQueue阻塞队列"><a href="#BlockingQueue阻塞队列" class="headerlink" title="BlockingQueue阻塞队列"></a>BlockingQueue阻塞队列</h2><p>实质就是一种存储数据的结构</p>
+<p>通常用链表或者数组实现</p>
+<p>一般而言队列具备FIFO先进先出的特性，当然也有双端队列（Deque）优先级队列</p>
+<p>主要操作：入队（EnQueue）与出队（Dequeue）</p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20211107225144445.png" alt="image-20211107225144445"></p>
+<h3 id="种类"><a href="#种类" class="headerlink" title="种类"></a>种类</h3><p>1、ArrayBlockingQueue 由数组支持的有界队列</p>
+<p>2、LinkedBlockingQueue 由链接节点支持的可选有界队列</p>
+<p>3、PriorityBlockingQueue 由优先级堆支持的无界优先级队列</p>
+<p>4、DelayQueue 由优先级堆支持的、基于时间的调度队列</p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20211107225819914.png" alt="image-20211107225819914"></p>
+<h3 id="ArrayBlockingQueue数据结构"><a href="#ArrayBlockingQueue数据结构" class="headerlink" title="ArrayBlockingQueue数据结构"></a>ArrayBlockingQueue数据结构</h3><p>队列基于数组实现,容量大小在创建ArrayBlockingQueue对象时已定义好<br><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20211107230224968.png" alt="image-20211107230224968"></p>
+<h3 id="样例"><a href="#样例" class="headerlink" title="样例"></a>样例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Ball</span> </span>&#123;<br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 编号</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-keyword">private</span> String number ;<br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 颜色</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-keyword">private</span> String color ;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getNumber</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> number;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setNumber</span><span class="hljs-params">(String number)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.number = number;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getColor</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> color;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setColor</span><span class="hljs-params">(String color)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.color = color;<br>    &#125;<br>&#125;<br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span>  <span class="hljs-title">ArrayBlockingQueueTest</span> </span>&#123;<br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 创建容量大小为1的有界队列</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-keyword">private</span> BlockingQueue&lt;Ball&gt; blockingQueue = <span class="hljs-keyword">new</span> ArrayBlockingQueue&lt;Ball&gt;(<span class="hljs-number">1</span>);<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 队列大小</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@return</span></span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">queueSize</span><span class="hljs-params">()</span></span>&#123;<br>        <span class="hljs-keyword">return</span> blockingQueue.size();<br>    &#125;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 将球放入队列当中,生产者</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> ball</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@throws</span> InterruptedException</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">produce</span><span class="hljs-params">(Ball ball)</span> <span class="hljs-keyword">throws</span> InterruptedException</span>&#123;<br>        blockingQueue.put(ball);<br>    &#125;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 将球从队列当中拿出去，消费者</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@return</span></span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Ball <span class="hljs-title">consume</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> InterruptedException </span>&#123;<br>       <span class="hljs-keyword">return</span> blockingQueue.take();<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span></span>&#123;<br>        <span class="hljs-keyword">final</span> ArrayBlockingQueueTest box = <span class="hljs-keyword">new</span> ArrayBlockingQueueTest();<br>        ExecutorService executorService = Executors.newCachedThreadPool();<br><br>        <span class="hljs-comment">/**</span><br><span class="hljs-comment">         * 往箱子里面放入乒乓球</span><br><span class="hljs-comment">         */</span><br>        executorService.submit(<span class="hljs-keyword">new</span> Runnable() &#123;<br>            <span class="hljs-meta">@Override</span><br>            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>&#123;<br>                <span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>;<br>                <span class="hljs-keyword">while</span> (<span class="hljs-keyword">true</span>)&#123;<br>                    Ball ball = <span class="hljs-keyword">new</span> Ball();<br>                    ball.setNumber(<span class="hljs-string">&quot;乒乓球编号:&quot;</span>+i);<br>                    ball.setColor(<span class="hljs-string">&quot;yellow&quot;</span>);<br>                    <span class="hljs-keyword">try</span> &#123;<br>                        System.out.println(System.currentTimeMillis()+<br>                                <span class="hljs-string">&quot;:准备往箱子里放入乒乓球:---&gt;&quot;</span>+ball.getNumber());<br>                        box.produce(ball);<br>                        System.out.println(System.currentTimeMillis()+<br>                                <span class="hljs-string">&quot;:往箱子里放入乒乓球:---&gt;&quot;</span>+ball.getNumber());<br>                        System.out.println(<span class="hljs-string">&quot;put操作后，当前箱子中共有乒乓球:---&gt;&quot;</span><br>                                + box.queueSize() + <span class="hljs-string">&quot;个&quot;</span>);<br>                        Thread.sleep(<span class="hljs-number">1000</span>);<br>                    &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br>                        e.printStackTrace();<br>                    &#125;<br>                    i++;<br>                &#125;<br>            &#125;<br>        &#125;);<br><br>        <span class="hljs-comment">/**</span><br><span class="hljs-comment">         * consumer，负责从箱子里面拿球出来</span><br><span class="hljs-comment">         */</span><br>        executorService.submit(<span class="hljs-keyword">new</span> Runnable() &#123;<br>            <span class="hljs-meta">@Override</span><br>            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>&#123;<br>                <span class="hljs-keyword">while</span> (<span class="hljs-keyword">true</span>)&#123;<br>                    <span class="hljs-keyword">try</span> &#123;<br>                        System.out.println(System.currentTimeMillis()+<br>                                <span class="hljs-string">&quot;准备到箱子中拿乒乓球:---&gt;&quot;</span>);<br>                        Ball ball = box.consume();<br>                        System.out.println(System.currentTimeMillis()+<br>                                <span class="hljs-string">&quot;拿到箱子中的乒乓球:---&gt;&quot;</span>+ball.getNumber());<br>                        System.out.println(<span class="hljs-string">&quot;take操作后，当前箱子中共有乒乓球:---&gt;&quot;</span><br>                                + box.queueSize() + <span class="hljs-string">&quot;个&quot;</span>);<br>                        Thread.sleep(<span class="hljs-number">1000</span>);<br>                    &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br>                        e.printStackTrace();<br>                    &#125;<br>                &#125;<br>            &#125;<br>        &#125;);<br><br>    &#125;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="条件等待队列"><a href="#条件等待队列" class="headerlink" title="条件等待队列"></a>条件等待队列</h3><p>put方法中，使用了AQS的条件等待队列</p>
+<p><strong>条件队列中的结点是不会被唤醒去争夺锁的，只能通过转移至CLH同步等待队列才能参与争夺锁</strong></p>
+<p>在AQS中，维护了 2个条件等待队列，具体实现是AQS的ConditionObject</p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20211108000253258.png" alt="image-20211108000253258"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/** Condition for waiting takes */</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Condition notEmpty;<br><br><span class="hljs-comment">/** Condition for waiting puts */</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Condition notFull;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">put</span><span class="hljs-params">(E e)</span> <span class="hljs-keyword">throws</span> InterruptedException </span>&#123;<br>    checkNotNull(e);<br>    <span class="hljs-comment">//获取独占锁</span><br>    <span class="hljs-keyword">final</span> ReentrantLock lock = <span class="hljs-keyword">this</span>.lock;<br>    lock.lockInterruptibly();<br>    <span class="hljs-keyword">try</span> &#123;<br>        <span class="hljs-keyword">while</span> (count == items.length)<br>            <span class="hljs-comment">//如果容量不足，则进度条件等待队列</span><br>            notFull.await();<br>        <span class="hljs-comment">//占用对象数组容量</span><br>        enqueue(e);<br>    &#125; <span class="hljs-keyword">finally</span> &#123;<br>        lock.unlock();<br>    &#125;<br>&#125;<br><br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 加入条件队列等待，条件队列入口</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">void</span> <span class="hljs-title">await</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> InterruptedException </span>&#123;<br>    <span class="hljs-comment">//如果当前线程被中断则直接抛出异常</span><br>    <span class="hljs-keyword">if</span> (Thread.interrupted())<br>        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> InterruptedException();<br>    <span class="hljs-comment">//把当前节点加入条件队列</span><br>    Node node = addConditionWaiter();<br>    <span class="hljs-comment">//释放掉已经获取的独占锁资源</span><br>    <span class="hljs-keyword">int</span> savedState = fullyRelease(node);<br>    <span class="hljs-keyword">int</span> interruptMode = <span class="hljs-number">0</span>;<br>    <span class="hljs-comment">//如果不在同步队列中则不断挂起</span><br>    <span class="hljs-keyword">while</span> (!isOnSyncQueue(node)) &#123;<br>        LockSupport.park(<span class="hljs-keyword">this</span>);<br>        <span class="hljs-comment">//自选把结点从条件队列移动到同步等待队列（在等待队列中才可能获取独占锁从而获取独占锁）</span><br>        <span class="hljs-comment">//这里被唤醒可能是正常的signal操作也可能是中断</span><br>        <span class="hljs-keyword">if</span> ((interruptMode = checkInterruptWhileWaiting(node)) != <span class="hljs-number">0</span>)<br>            <span class="hljs-keyword">break</span>;<br>    &#125;<br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">             * 走到这里说明节点已经条件满足被加入到了同步队列中或者中断了</span><br><span class="hljs-comment">             * 这个方法很熟悉吧？就跟独占锁调用同样的获取锁方法，从这里可以看出条件队列只能用于独占锁</span><br><span class="hljs-comment">             * 在处理中断之前首先要做的是从同步队列中成功获取锁资源</span><br><span class="hljs-comment">             */</span><br>    <span class="hljs-keyword">if</span> (acquireQueued(node, savedState) &amp;&amp; interruptMode != THROW_IE)<br>        interruptMode = REINTERRUPT;<br>    <span class="hljs-comment">//走到这里说明已经成功获取到了独占锁，接下来就做些收尾工作</span><br>    <span class="hljs-comment">//删除条件队列中被取消的节点</span><br>    <span class="hljs-keyword">if</span> (node.nextWaiter != <span class="hljs-keyword">null</span>) <span class="hljs-comment">// clean up if cancelled</span><br>        unlinkCancelledWaiters();<br>    <span class="hljs-comment">//根据不同模式处理中断</span><br>    <span class="hljs-keyword">if</span> (interruptMode != <span class="hljs-number">0</span>)<br>        reportInterruptAfterWait(interruptMode);<br>&#125;<br><br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 1.与同步队列不同，条件队列头尾指针是firstWaiter跟lastWaiter</span><br><span class="hljs-comment"> * 2.条件队列是在获取锁之后，也就是临界区进行操作，因此很多地方不用考虑并发</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">private</span> Node <span class="hljs-title">addConditionWaiter</span><span class="hljs-params">()</span> </span>&#123;<br>    Node t = lastWaiter;<br>    <span class="hljs-comment">//如果最后一个节点被取消，则删除队列中被取消的节点</span><br>    <span class="hljs-comment">//至于为啥是最后一个节点后面会分析</span><br>    <span class="hljs-keyword">if</span> (t != <span class="hljs-keyword">null</span> &amp;&amp; t.waitStatus != Node.CONDITION) &#123;<br>        <span class="hljs-comment">//删除所有被取消的节点</span><br>        unlinkCancelledWaiters();<br>        t = lastWaiter;<br>    &#125;<br>    <span class="hljs-comment">//创建一个类型为CONDITION的节点并加入队列，由于在临界区，所以这里不用并发控制</span><br>    Node node = <span class="hljs-keyword">new</span> Node(Thread.currentThread(), Node.CONDITION);<br>    <span class="hljs-keyword">if</span> (t == <span class="hljs-keyword">null</span>)<br>        firstWaiter = node;<br>    <span class="hljs-keyword">else</span><br>        t.nextWaiter = node;<br>    lastWaiter = node;<br>    <span class="hljs-keyword">return</span> node;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="DelayQueue"><a href="#DelayQueue" class="headerlink" title="DelayQueue"></a>DelayQueue</h3><p>​    由优先级堆支持的、基于时间的调度队列，内部基于无界队列PriorityQueue实现，而无界队列基于数组的扩容实现。<br>​    应用场景:电影票<br>​    要求入队的对象必须要实现Delayed接口,而Delayed集成自Comparable接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MovieTiket</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Delayed</span> </span>&#123;<br>    <span class="hljs-comment">//延迟时间</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">long</span> delay;<br>    <span class="hljs-comment">//到期时间</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">long</span> expire;<br>    <span class="hljs-comment">//数据</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String msg;<br>    <span class="hljs-comment">//创建时间</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">long</span> now;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">long</span> <span class="hljs-title">getDelay</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> delay;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">long</span> <span class="hljs-title">getExpire</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> expire;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getMsg</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> msg;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">long</span> <span class="hljs-title">getNow</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> now;<br>    &#125;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> msg 消息</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> delay 延期时间</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">MovieTiket</span><span class="hljs-params">(String msg , <span class="hljs-keyword">long</span> delay)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.delay = delay;<br>        <span class="hljs-keyword">this</span>.msg = msg;<br>        expire = System.currentTimeMillis() + delay;    <span class="hljs-comment">//到期时间 = 当前时间+延迟时间</span><br>        now = System.currentTimeMillis();<br>    &#125;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> msg</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">MovieTiket</span><span class="hljs-params">(String msg)</span></span>&#123;<br>        <span class="hljs-keyword">this</span>(msg,<span class="hljs-number">1000</span>);<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">MovieTiket</span><span class="hljs-params">()</span></span>&#123;<br>        <span class="hljs-keyword">this</span>(<span class="hljs-keyword">null</span>,<span class="hljs-number">1000</span>);<br>    &#125;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 获得延迟时间   用过期时间-当前时间,时间单位毫秒</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> unit</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@return</span></span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">long</span> <span class="hljs-title">getDelay</span><span class="hljs-params">(TimeUnit unit)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> unit.convert(<span class="hljs-keyword">this</span>.expire<br>                - System.currentTimeMillis() , TimeUnit.MILLISECONDS);<br>    &#125;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 用于延迟队列内部比较排序  当前时间的延迟时间 - 比较对象的延迟时间</span><br><span class="hljs-comment">     * 越早过期的时间在队列中越靠前</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> delayed</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@return</span></span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">compareTo</span><span class="hljs-params">(Delayed delayed)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> (<span class="hljs-keyword">int</span>) (<span class="hljs-keyword">this</span>.getDelay(TimeUnit.MILLISECONDS)<br>                - delayed.getDelay(TimeUnit.MILLISECONDS));<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;MovieTiket&#123;&quot;</span> +<br>                <span class="hljs-string">&quot;delay=&quot;</span> + delay +<br>                <span class="hljs-string">&quot;, expire=&quot;</span> + expire +<br>                <span class="hljs-string">&quot;, msg=&#x27;&quot;</span> + msg + <span class="hljs-string">&#x27;\&#x27;&#x27;</span> +<br>                <span class="hljs-string">&quot;, now=&quot;</span> + now +<br>                <span class="hljs-string">&#x27;&#125;&#x27;</span>;<br>    &#125;<br>&#125;<br><br><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DelayedQueueTest</span> </span>&#123;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        DelayQueue&lt;MovieTiket&gt; delayQueue = <span class="hljs-keyword">new</span> DelayQueue&lt;MovieTiket&gt;();<br>        MovieTiket tiket = <span class="hljs-keyword">new</span> MovieTiket(<span class="hljs-string">&quot;电影票0&quot;</span>,<span class="hljs-number">10000</span>);<br>        delayQueue.put(tiket);<br>        MovieTiket tiket1 = <span class="hljs-keyword">new</span> MovieTiket(<span class="hljs-string">&quot;电影票1&quot;</span>,<span class="hljs-number">5000</span>);<br>        delayQueue.put(tiket1);<br>        MovieTiket tiket2 = <span class="hljs-keyword">new</span> MovieTiket(<span class="hljs-string">&quot;电影票2&quot;</span>,<span class="hljs-number">8000</span>);<br>        delayQueue.put(tiket2);<br>        System.out.println(<span class="hljs-string">&quot;message:---&gt;入队完毕&quot;</span>);<br><br>        <span class="hljs-keyword">while</span>( delayQueue.size() &gt; <span class="hljs-number">0</span> )&#123;<br>            <span class="hljs-keyword">try</span> &#123;<br>                tiket = delayQueue.take();<br>                System.out.println(<span class="hljs-string">&quot;电影票出队:&quot;</span>+tiket.getMsg());<br>            &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br>                e.printStackTrace();<br>            &#125;<br>        &#125;<br>    &#125;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h2><h3 id="Java7HashMap死锁"><a href="#Java7HashMap死锁" class="headerlink" title="Java7HashMap死锁"></a>Java7HashMap死锁</h3><p>Hash表 = 数组 + 链表</p>
+<p>扩容时可能会产生死锁，多线程扩容时链表<strong>倒插</strong>可能会产生闭环</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MapResizer</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Runnable</span> </span>&#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> Map&lt;Integer,Integer&gt; map = <span class="hljs-keyword">new</span> HashMap&lt;Integer, Integer&gt;(<span class="hljs-number">2</span>);<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> AtomicInteger atomicInteger = <span class="hljs-keyword">new</span> AtomicInteger();<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>&#123;<br><br>        <span class="hljs-keyword">while</span>(atomicInteger.get() &lt; <span class="hljs-number">100000</span>)&#123;<br>            map.put(atomicInteger.get(),atomicInteger.get());<br>            atomicInteger.incrementAndGet();<br>        &#125;<br>        System.out.println( Thread.currentThread().getName() + <span class="hljs-string">&quot;线程结束&quot;</span>);<br>    &#125;<br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MapTest</span> </span>&#123;<br>   <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i=<span class="hljs-number">0</span>;i&lt;<span class="hljs-number">30</span>;i++)&#123;<br>         <span class="hljs-keyword">new</span> Thread(<span class="hljs-keyword">new</span> MapResizer()).start();<br>      &#125;<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="Java8HashMap数据丢失"><a href="#Java8HashMap数据丢失" class="headerlink" title="Java8HashMap数据丢失"></a>Java8HashMap数据丢失</h3><p><strong>Hash表 = 数组 + 链表 + 红黑树</strong></p>
+<p><strong>数组扩容时，高低位搭配，不可能形成闭环</strong></p>
+<p>扩容时不会倒插，而是采用高低位插入，Node的hash 值&amp;（扩容后大小-1）最高位=1则扩容后下标=扩容前大小+原下标，否则=原下标:扩容后原链表大概会被拆成2段，一段在原下标，一段在（扩容前长度+原下标）的位置</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">if</span> (loTail != <span class="hljs-keyword">null</span>) &#123;<br>    loTail.next = <span class="hljs-keyword">null</span>;<br>    newTab[j] = loHead;<br>&#125;<br><span class="hljs-keyword">if</span> (hiTail != <span class="hljs-keyword">null</span>) &#123;<br>    hiTail.next = <span class="hljs-keyword">null</span>;<br>    newTab[j + oldCap] = hiHead;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>链表长度大于8并且数组的长度大于64，会把链表转换成红黑树，当链表长度小于等于6时恢复为链表</strong></p>
+<p>​    1、TreeNodes占用空间是普通Nodes的两倍，所以只有当bin包含足够多的节点且数组长度足够大时才会转成TreeNodes以追求查询速度log2N。</p>
+<p>​    2、且正常来说如果hashcode的离散性好的话，value会均匀分布在数组中而很难达到长度为8的地步。</p>
+<p>​    3、所以当出现了碰撞度比较高的离散算法时，才会使用到红黑树</p>
+<p>理想情况下我们可以看到，一个bin中链表长度达到8个元素的概率为0.00000006，几乎是不可能事件，</p>
+<p>​    0:    0.60653066<br>​    1:    0.30326533<br>​    2:    0.07581633<br>​    3:    0.01263606<br>​    4:    0.00157952<br>​    5:    0.00015795<br>​    6:    0.00001316<br>​    7:    0.00000094<br>​    8:    0.00000006</p>
+<p><strong>扩容过程</strong><br><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20211110000041790.png" alt="image-20211110000041790"></p>
+<h2 id="ConcurrentHashMap线程安全"><a href="#ConcurrentHashMap线程安全" class="headerlink" title="ConcurrentHashMap线程安全"></a>ConcurrentHashMap线程安全</h2><h3 id="1-7分段锁"><a href="#1-7分段锁" class="headerlink" title="1.7分段锁"></a>1.7分段锁</h3><p>ConcurrentHashMap 1.7 = Segment数组（继承ReentrantLock） + hashEntry数组 + 链表,从而实现分段锁，支持并发</p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20211109233748646.png" alt="image-20211109233748646"></p>
+<h3 id="1-8桶锁"><a href="#1-8桶锁" class="headerlink" title="1.8桶锁"></a>1.8桶锁</h3><p>ConcurrentHashMap 1.8 = Node数组 +  链表，区别在于每次插入，都synchronize第一个节点，相同于锁一条链表，锁的粒度变小，并且通过CAS的算法插入每个链表的第一个阶段，从而达到并发，锁的粒度较小，灵活</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" rel="tag"># 并发编程</a>
+              <a href="/tags/AQS%E7%AD%89%E5%BE%85%E9%98%9F%E5%88%97/" rel="tag"># AQS等待队列</a>
+              <a href="/tags/ConcurrentHashMap/" rel="tag"># ConcurrentHashMap</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/11/02/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B05-Atomic&Unsafe%E9%AD%94%E6%B3%95%E7%B1%BB%E8%AF%A6%E8%A7%A3/" rel="prev" title="并发编程05-Atomic&Unsafe魔法类详解">
+      <i class="fa fa-chevron-left"></i> 并发编程05-Atomic&Unsafe魔法类详解
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/11/14/%E6%9E%9A%E4%B8%BE%E6%B2%BB%E7%90%86%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3/" rel="next" title="SpringBoot下枚举治理方案">
+      SpringBoot下枚举治理方案 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B9%8BCollections-amp-Queue"><span class="nav-number">1.</span> <span class="nav-text">并发编程之Collections&amp;Queue</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#BlockingQueue%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97"><span class="nav-number">1.1.</span> <span class="nav-text">BlockingQueue阻塞队列</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A7%8D%E7%B1%BB"><span class="nav-number">1.1.1.</span> <span class="nav-text">种类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ArrayBlockingQueue%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.2.</span> <span class="nav-text">ArrayBlockingQueue数据结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B7%E4%BE%8B"><span class="nav-number">1.1.3.</span> <span class="nav-text">样例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%A1%E4%BB%B6%E7%AD%89%E5%BE%85%E9%98%9F%E5%88%97"><span class="nav-number">1.1.4.</span> <span class="nav-text">条件等待队列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DelayQueue"><span class="nav-number">1.1.5.</span> <span class="nav-text">DelayQueue</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HashMap"><span class="nav-number">1.2.</span> <span class="nav-text">HashMap</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Java7HashMap%E6%AD%BB%E9%94%81"><span class="nav-number">1.2.1.</span> <span class="nav-text">Java7HashMap死锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Java8HashMap%E6%95%B0%E6%8D%AE%E4%B8%A2%E5%A4%B1"><span class="nav-number">1.2.2.</span> <span class="nav-text">Java8HashMap数据丢失</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ConcurrentHashMap%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8"><span class="nav-number">1.3.</span> <span class="nav-text">ConcurrentHashMap线程安全</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-7%E5%88%86%E6%AE%B5%E9%94%81"><span class="nav-number">1.3.1.</span> <span class="nav-text">1.7分段锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-8%E6%A1%B6%E9%94%81"><span class="nav-number">1.3.2.</span> <span class="nav-text">1.8桶锁</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

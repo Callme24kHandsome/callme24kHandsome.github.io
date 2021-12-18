@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Spring事务原码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring06-事务原码">
+<meta property="og:url" content="http://example.com/2021/07/10/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="Spring事务原码">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/image-20210711230028299.png">
+<meta property="og:image" content="http://example.com/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/image-20210712001245156.png">
+<meta property="og:image" content="http://example.com/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/image-20210712105211686.png">
+<meta property="og:image" content="http://example.com/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/image-20210712152123224.png">
+<meta property="og:image" content="http://example.com/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/image-20210712105627407.png">
+<meta property="og:image" content="http://example.com/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/image-20210712110900830.png">
+<meta property="og:image" content="http://example.com/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/%E4%BA%8B%E5%8A%A1%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90.svg">
+<meta property="og:image" content="http://example.com/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/%E4%BA%8B%E7%89%A9%E6%B5%81%E7%A8%8B%E7%AE%80%E5%9B%BE-1626104047827.svg">
+<meta property="og:image" content="http://example.com/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/%E4%BA%8B%E7%89%A9%E4%BB%A3%E7%90%86%E5%AF%B9%E8%B1%A1%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B%E5%9B%BE.svg">
+<meta property="article:published_time" content="2021-07-10T13:00:00.000Z">
+<meta property="article:modified_time" content="2021-07-16T15:06:22.176Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="源码">
+<meta property="article:tag" content="Spring">
+<meta property="article:tag" content="AOP">
+<meta property="article:tag" content="事务">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/image-20210711230028299.png">
+
+<link rel="canonical" href="http://example.com/2021/07/10/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Spring06-事务原码 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/10/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring06-事务原码
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-10 21:00:00" itemprop="dateCreated datePublished" datetime="2021-07-10T21:00:00+08:00">2021-07-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-16 23:06:22" itemprop="dateModified" datetime="2021-07-16T23:06:22+08:00">2021-07-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring/" itemprop="url" rel="index"><span itemprop="name">Spring</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">Spring事务原码</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="事物概念解析"><a href="#事物概念解析" class="headerlink" title="事物概念解析"></a>事物概念解析</h1><h2 id="什么是事务"><a href="#什么是事务" class="headerlink" title="什么是事务"></a>什么是事务</h2><p>​    事务是逻辑上的一组执行单元，要么都执行，要么都不执行.</p>
+<h2 id="事务的特性（ACID）"><a href="#事务的特性（ACID）" class="headerlink" title="事务的特性（ACID）"></a>事务的特性（ACID）</h2><p>​    <img src="/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/image-20210711230028299.png" alt="image-20210711230028299"></p>
+<p> <strong>什么是ACID</strong>  </p>
+<p>   ACID是指数据库管理系统DBMS中事物所具有四个特性</p>
+<ol>
+<li><p>​    原子性：Automicity</p>
+<p>操作不能背分割，要么都成功，要么都失败，若事务出错了，那么事务就会回滚。</p>
+</li>
+<li><p>​    一致性：Consistency</p>
+<p>数据库一直处于一致的状态，事务开始前是一个一致状态，结束后是另一个一致状态</p>
+</li>
+<li><p>​    隔离性：Isolation</p>
+<p>一个事务的影响在该事务提交前对其它事务是不可见的</p>
+</li>
+<li><p>​    持久性：Durablility</p>
+<p>若事务已经提交了，那么就回在数据库中永久的保存下来</p>
+</li>
+</ol>
+<h2 id="Spring事务三大接口介绍"><a href="#Spring事务三大接口介绍" class="headerlink" title="Spring事务三大接口介绍"></a>Spring事务三大接口介绍</h2><h3 id="PlatformTransactionManager：事务管理器"><a href="#PlatformTransactionManager：事务管理器" class="headerlink" title="PlatformTransactionManager：事务管理器"></a>PlatformTransactionManager：事务管理器</h3><p>​    Spring并不直接管理事务，而是提供了多种事务管理器 ，他们将事务管理的职责委托给Hibernate或者JTA等持久化机制所提供的相关平台框架的事务来实现。Spring事务管理器的接口是：<br>​    org.springframework.transaction.PlatformTransactionManager ，<br>​    通过这个接口，Spring为各个平台如JDBC、Hibernate等都提供了对应的事务管理器，但是具体的实现就是各个平台自己的事情了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">PlatformTransactionManager</span> </span>&#123;<br>     <span class="hljs-comment">/**</span><br><span class="hljs-comment">     *获取事物状态</span><br><span class="hljs-comment">     */</span><br>     <span class="hljs-function">TransactionStatus <span class="hljs-title">getTransaction</span><span class="hljs-params">(<span class="hljs-meta">@Nullable</span> TransactionDefinition definition)</span> <span class="hljs-keyword">throws</span> TransactionException</span>;<br>     <span class="hljs-comment">/**</span><br><span class="hljs-comment">     *事物提交</span><br><span class="hljs-comment">     */</span><br>     <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">commit</span><span class="hljs-params">(TransactionStatus status)</span> <span class="hljs-keyword">throws</span> TransactionException</span>;<br>     <span class="hljs-comment">/**</span><br><span class="hljs-comment">     *事物回滚</span><br><span class="hljs-comment">     */</span><br>     <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">rollback</span><span class="hljs-params">(TransactionStatus status)</span> <span class="hljs-keyword">throws</span> TransactionException</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="TransactionDefinition：事物属性的定义"><a href="#TransactionDefinition：事物属性的定义" class="headerlink" title="TransactionDefinition：事物属性的定义"></a>TransactionDefinition：事物属性的定义</h3><p>​    事务定义信息（事务隔离级别、传播行为、超时、只读、回滚）</p>
+<p>​    org.springframework.transaction.TransactionDefinition</p>
+<p>​    TransactionDefinition接口中定义了5个方法以及一些表示事务属性的常量比如隔离级别、传播行为等等的常量。下面只是列出了TransactionDefinition接口中的方法而没有给出接口中定义的常量，该接口中的常量信息会在后面依次介绍到</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">TransactionDefinition</span> </span>&#123;<br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">	 * 支持当前事物，若当前没有事物就创建一个事物</span><br><span class="hljs-comment">	 * */</span><br>	<span class="hljs-keyword">int</span> PROPAGATION_REQUIRED = <span class="hljs-number">0</span>;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     *  如果当前存在事务，则加入该事务；如果当前没有事务，则以非事务的方式继续运行</span><br><span class="hljs-comment">     * */</span><br>	<span class="hljs-keyword">int</span> PROPAGATION_SUPPORTS = <span class="hljs-number">1</span>;<br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">     *如果当前存在事务，则加入该事务；如果当前没有事务，则抛出异常</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-keyword">int</span> PROPAGATION_MANDATORY = <span class="hljs-number">2</span>;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     *创建一个新的事务，如果当前存在事务，则把当前事务挂起</span><br><span class="hljs-comment">     **/</span><br>	<span class="hljs-keyword">int</span> PROPAGATION_REQUIRES_NEW = <span class="hljs-number">3</span>;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     *  以非事务方式运行，如果当前存在事务，则把当前事务挂起</span><br><span class="hljs-comment">     * */</span><br>	<span class="hljs-keyword">int</span> PROPAGATION_NOT_SUPPORTED = <span class="hljs-number">4</span>;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 以非事务方式运行，如果当前存在事务，则抛出异常。</span><br><span class="hljs-comment">     * */</span><br>	<span class="hljs-keyword">int</span> PROPAGATION_NEVER = <span class="hljs-number">5</span>;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     *  表示如果当前正有一个事务在运行中，则该方法应该运行在 一个嵌套的事务中，</span><br><span class="hljs-comment">        被嵌套的事务可以独立于封装事务进行提交或者回滚(保存点)，</span><br><span class="hljs-comment">        如果封装事务不存在,行为就像 PROPAGATION_REQUIRES NEW</span><br><span class="hljs-comment">     * */</span><br>	<span class="hljs-keyword">int</span> PROPAGATION_NESTED = <span class="hljs-number">6</span>;<br><br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">     *使用后端数据库默认的隔离级别，Mysql 默认采用的 REPEATABLE_READ隔离级别 Oracle 默认采用的 READ_COMMITTED隔离级别</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-keyword">int</span> ISOLATION_DEFAULT = -<span class="hljs-number">1</span>;<br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">     *最低的隔离级别，允许读取尚未提交的数据变更，可能会导致脏读、幻读或不可重复读</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-keyword">int</span> ISOLATION_READ_UNCOMMITTED = Connection.TRANSACTION_READ_UNCOMMITTED;<br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">     *允许读取并发事务已经提交的数据，可以阻止脏读，但是幻读或不可重复读仍有可能发生</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-keyword">int</span> ISOLATION_READ_COMMITTED = Connection.TRANSACTION_READ_COMMITTED;<br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">     *对同一字段的多次读取结果都是一致的，除非数据是被本身事务自己所修改，可以阻止脏读和不可重复读，但幻读仍有可能发生</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-keyword">int</span> ISOLATION_REPEATABLE_READ = Connection.TRANSACTION_REPEATABLE_READ;<br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">	 *最高的隔离级别，完全服从ACID的隔离级别。所有的事务依次逐个执行，这样事务之间就完全不可能产生干扰，</span><br><span class="hljs-comment">	 * 也就是说，该级别可以防止脏读、不可重复读以及幻读。但是这将严重影响程序的性能通常情况下也不会用到该级别</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-keyword">int</span> ISOLATION_SERIALIZABLE = Connection.TRANSACTION_SERIALIZABLE;<br><br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">     *使用默认的超时时间</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-keyword">int</span> TIMEOUT_DEFAULT = -<span class="hljs-number">1</span>;<br><br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">     *获取事物的传播行为</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">getPropagationBehavior</span><span class="hljs-params">()</span></span>;<br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">     *获取事物的隔离级别</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">getIsolationLevel</span><span class="hljs-params">()</span></span>;<br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">     *返回事物的超时时间</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">getTimeout</span><span class="hljs-params">()</span></span>;<br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">     *返回当前是否为只读事物</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">isReadOnly</span><span class="hljs-params">()</span></span>;<br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">     *获取事物的名称</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-meta">@Nullable</span><br>	<span class="hljs-function">String <span class="hljs-title">getName</span><span class="hljs-params">()</span></span>;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/image-20210712001245156.png" alt="image-20210712001245156"></p>
+<h3 id="TransactionStatus：事务运行状态"><a href="#TransactionStatus：事务运行状态" class="headerlink" title="TransactionStatus：事务运行状态"></a>TransactionStatus：事务运行状态</h3><p>​    TransactionStatus接口用来记录事务的状态，该接口定义了一组方法,用来获取或判断事务的相应状态信息.</p>
+<p>​    PlatformTransactionManager.getTransaction(…) 方法返回一个 TransactionStatus 对象。返回的TransactionStatus 对象可能代表一个新的或已经存在的事务（如果在当前调用堆栈有一个符合条件的事物</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">TransactionStatus</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">SavepointManager</span>, <span class="hljs-title">Flushable</span> </span>&#123;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 是否为新事物</span><br><span class="hljs-comment">     * */</span><br>	<span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">isNewTransaction</span><span class="hljs-params">()</span></span>;<br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">     *是否有保存点</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">hasSavepoint</span><span class="hljs-params">()</span></span>;<br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">     *设置为只回滚</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setRollbackOnly</span><span class="hljs-params">()</span></span>;<br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">     *是否为只回滚</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">isRollbackOnly</span><span class="hljs-params">()</span></span>;<br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">	 *属性</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-meta">@Override</span><br>	<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">flush</span><span class="hljs-params">()</span></span>;<br><br>	<span class="hljs-comment">/**</span><br><span class="hljs-comment">     *判断当前事物是否已经完成</span><br><span class="hljs-comment">	 */</span><br>	<span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">isCompleted</span><span class="hljs-params">()</span></span>;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h1 id="EnableTransactionManagement"><a href="#EnableTransactionManagement" class="headerlink" title="@EnableTransactionManagement"></a>@EnableTransactionManagement</h1><h2 id="注入了哪些组件"><a href="#注入了哪些组件" class="headerlink" title="注入了哪些组件"></a>注入了哪些组件</h2><p>​    1、注解导入了TransactionManagementConfigurationSelector</p>
+<p>​    2、TransactionManagementConfigurationSelector导入了</p>
+<p>​        1)AutoProxyRegistrar：导入了 InfrastructureAdvisorAutoProxyCreator</p>
+<p>​        2)ProxyTransactionManagementConfiguration</p>
+<p>​                BeanFactoryTransactionAttributeSourceAdvisor</p>
+<p>​                TransactionAttributeSource</p>
+<p>​                TransactionInterceptor</p>
+<p>​                <img src="/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/image-20210712105211686.png" alt="image-20210712105211686"></p>
+<p>因此,EnableTransactionManagement，主要帮我们导入了（默认）4个组件</p>
+<ol>
+<li>InfrastructureAdvisorAutoProxyCreator <ol>
+<li>注意，如果开启了@EnableAspectJAutoProxy，则实际上使用的还是AnnotationAwareAspectJAutoProxyCreator（优先级高）</li>
+<li><img src="/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/image-20210712152123224.png" alt="image-20210712152123224"></li>
+</ol>
+</li>
+<li>TransactionAttributeSource 事务属性源</li>
+<li>TransactionInterceptor 事务拦截器</li>
+<li>BeanFactoryTransactionAttributeSourceAdvisor 事务属性源工厂**==增强器==** </li>
+</ol>
+<h3 id="InfrastructureAdvisorAutoProxyCreator"><a href="#InfrastructureAdvisorAutoProxyCreator" class="headerlink" title="InfrastructureAdvisorAutoProxyCreator"></a>InfrastructureAdvisorAutoProxyCreator</h3><p>类结构图如下，发现与@EnableAspectJAutoProxy导入的：AnnotationAwareAspectJAutoProxyCreator类似</p>
+<p><img src="/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/image-20210712105627407.png" alt="image-20210712105627407"></p>
+<p>结合具体源码得到流程图如下：发现结构和也和AnnotationAwareAspectJAutoProxyCreator类似</p>
+<p><img src="/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/image-20210712110900830.png" alt="image-20210712110900830"></p>
+<p>因此Spring事务注解的启动原理与AOP类似</p>
+<p><img src="/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/%E4%BA%8B%E5%8A%A1%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90.svg" alt="事务源码解析"></p>
+<p>Spring事务方法调用了流程</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">new</span> AnnotationConfigApplicationContext<br>refresh()<br><span class="hljs-comment">// 创建剩余的组件</span><br>finishBeanFactoryInitialization(beanFactory);<br><span class="hljs-comment">// 第一次运行时缓存所有@Aspect的增强器且 每次都寻找容器中的Advisor</span><br>AbstractAutoProxyCreator.postProcessBeforeInstantiation() <br>    shouskip()<br>    	<span class="hljs-comment">//找到符合条件的增强器</span><br>    	findEligibleAdvisors<br>    		<span class="hljs-comment">//找到候选的增强器</span><br>    		findCandidateAdvisors()<br>			<span class="hljs-comment">//从第一步中获取能用的增强器</span><br>			findAdvisorsThatCanApply()<br>				getTransactionAttributeSource()<br>                    computeTransactionAttribute()<br>    					<span class="hljs-comment">//查找@Transational注解</span><br>    					findTransactionAttribute<br>    					<span class="hljs-number">1</span>、实现类的目标方法上找<br>    					<span class="hljs-number">2</span>、实现类上找<br>    					<span class="hljs-number">3</span>、原方法上找<br>    					<span class="hljs-number">4</span>、原类上找 	<br><span class="hljs-comment">// 初始化后，判断是否存在增强器，存在则创建动态代理对象</span><br>AbstractAutoProxyCreator.postProcessAfterInitialization()<br></code></pre></td></tr></table></figure>
+
+<h1 id="事务代码运行调用流程"><a href="#事务代码运行调用流程" class="headerlink" title="事务代码运行调用流程"></a>事务代码运行调用流程</h1><p>以下是某个事务方法执行大致过程：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//动态代理+责任链+递归 </span><br>JdkDynamicAopProxy.invoke-&gt;MethodInterceptor.invoke()<br>    -&gt;ReflectiveMethodInvocation.proceed()<br>    	-&gt;TransactionInterceptor.invoke() <br>    		-&gt;invokeWithinTransaction<br>    			<span class="hljs-comment">//获取事务属性源</span><br>    			getTransactionAttributeSource();<br>				<span class="hljs-keyword">try</span>&#123;<br>                    <span class="hljs-comment">//在事务执行</span><br>                    invocation.proceedWithInvocation();<br>                &#125;<span class="hljs-keyword">catch</span>&#123;<br>                    <span class="hljs-comment">//可回滚事务</span><br>                    completeTransactionAfterThrowing(txInfo, ex);<br>                &#125;<br>				<span class="hljs-comment">//提交事务</span><br>				commitTransactionAfterReturning(txInfo);<br>				<br><br></code></pre></td></tr></table></figure>
+
+<p>实例代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">PayService</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">pay</span><span class="hljs-params">(String accountId,<span class="hljs-keyword">double</span> money)</span></span>;<br>    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">updateProductStore</span><span class="hljs-params">(Integer productId)</span></span>;<br>&#125;<br><br><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PayServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">PayService</span> </span>&#123;<br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> AccountInfoDao accountInfoDao;<br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> ProductInfoDao productInfoDao;<br><br>    <span class="hljs-meta">@Transactional</span><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">pay</span><span class="hljs-params">(String accountId, <span class="hljs-keyword">double</span> money)</span> </span>&#123;<br>        <span class="hljs-comment">//查询余额</span><br>        <span class="hljs-keyword">double</span> blance = accountInfoDao.qryBlanceByUserId(accountId);<br>        <span class="hljs-comment">//余额不足正常逻辑</span><br>        <span class="hljs-keyword">if</span>(<span class="hljs-keyword">new</span> BigDecimal(blance).compareTo(<span class="hljs-keyword">new</span> BigDecimal(money))&lt;<span class="hljs-number">0</span>) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RuntimeException(<span class="hljs-string">&quot;余额不足&quot;</span>);<br>        &#125;<br>        ((PayService) AopContext.currentProxy()).updateProductStore(<span class="hljs-number">1</span>);<br>        <span class="hljs-comment">//更新余额</span><br>        <span class="hljs-keyword">int</span> retVal = accountInfoDao.updateAccountBlance(accountId,money);<br>        System.out.println(<span class="hljs-number">1</span>/<span class="hljs-number">0</span>);<br>    &#125;<br><br>    <span class="hljs-meta">@Transactional(propagation =Propagation.REQUIRES_NEW)</span><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">updateProductStore</span><span class="hljs-params">(Integer productId)</span> </span>&#123;<br>        <span class="hljs-keyword">try</span>&#123;<br>            productInfoDao.updateProductInfo(productId);<br>        &#125;<br>        <span class="hljs-keyword">catch</span> (Exception e) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RuntimeException(<span class="hljs-string">&quot;内部异常&quot;</span>);<br>        &#125;<br>    &#125;<br>&#125;<br><br><span class="hljs-meta">@Configuration</span><br><span class="hljs-meta">@EnableAspectJAutoProxy</span><br><span class="hljs-meta">@EnableTransactionManagement</span><br><span class="hljs-meta">@ComponentScan(basePackages = &#123;&quot;com.study.tx&quot;&#125;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TxConfig</span> </span>&#123;<br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> DataSource <span class="hljs-title">dataSource</span><span class="hljs-params">()</span> </span>&#123;<br>        DruidDataSource dataSource = <span class="hljs-keyword">new</span> DruidDataSource();<br>        dataSource.setUsername(<span class="hljs-string">&quot;root&quot;</span>);<br>        dataSource.setPassword(<span class="hljs-string">&quot;123456&quot;</span>);<br>        dataSource.setUrl(<span class="hljs-string">&quot;jdbc:mysql://localhost:3306/spring-study&quot;</span>);<br>        dataSource.setDriverClassName(<span class="hljs-string">&quot;com.mysql.jdbc.Driver&quot;</span>);<br>        <span class="hljs-keyword">return</span> dataSource;<br>    &#125;<br><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> JdbcTemplate <span class="hljs-title">jdbcTemplate</span><span class="hljs-params">(DataSource dataSource)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> JdbcTemplate(dataSource);<br>    &#125;<br><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> PlatformTransactionManager <span class="hljs-title">transactionManager</span><span class="hljs-params">(DataSource dataSource)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> DataSourceTransactionManager(dataSource);<br>    &#125;<br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TxMain</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        AnnotationConfigApplicationContext ioc = <span class="hljs-keyword">new</span> AnnotationConfigApplicationContext(TxConfig.class);<br>        String[] names = ioc.getBeanDefinitionNames();<br>        <span class="hljs-keyword">for</span> (String name : names) &#123;<br>            System.out.println(name);<br>        &#125;<br>        PayService payService = ioc.getBean(PayService.class);<br>        payService.pay(<span class="hljs-string">&quot;123456789&quot;</span>,<span class="hljs-number">10</span>);<br>    &#125;<br>&#125;<br><br><span class="hljs-meta">@Configuration</span><br><span class="hljs-meta">@EnableAspectJAutoProxy</span><br><span class="hljs-meta">@EnableTransactionManagement</span><br><span class="hljs-meta">@ComponentScan(basePackages = &#123;&quot;com.study.tx&quot;&#125;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TxConfig</span> </span>&#123;<br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> DataSource <span class="hljs-title">dataSource</span><span class="hljs-params">()</span> </span>&#123;<br>        DruidDataSource dataSource = <span class="hljs-keyword">new</span> DruidDataSource();<br>        dataSource.setUsername(<span class="hljs-string">&quot;root&quot;</span>);<br>        dataSource.setPassword(<span class="hljs-string">&quot;123456&quot;</span>);<br>        dataSource.setUrl(<span class="hljs-string">&quot;jdbc:mysql://localhost:3306/spring-study&quot;</span>);<br>        dataSource.setDriverClassName(<span class="hljs-string">&quot;com.mysql.jdbc.Driver&quot;</span>);<br>        <span class="hljs-keyword">return</span> dataSource;<br>    &#125;<br><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> JdbcTemplate <span class="hljs-title">jdbcTemplate</span><span class="hljs-params">(DataSource dataSource)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> JdbcTemplate(dataSource);<br>    &#125;<br><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> PlatformTransactionManager <span class="hljs-title">transactionManager</span><span class="hljs-params">(DataSource dataSource)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> DataSourceTransactionManager(dataSource);<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>如代码所示</p>
+<p>​    payservice.pay()  隔离级别是 Propagation.REQUIRED,加入事务：如果不存在事务，新建事务，存在事务则加入该事务</p>
+<p>​    payService.updateProductStore()  隔离级别是 Propagation.REQUIRES_NEW 新建事务：不管是否存在事务，新建一个事务</p>
+<p>具体执行过程如下</p>
+<p><img src="/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/%E4%BA%8B%E7%89%A9%E6%B5%81%E7%A8%8B%E7%AE%80%E5%9B%BE-1626104047827.svg" alt="事物流程简图"></p>
+<p>穷举所有情况：</p>
+<p><img src="/images/Spring06-%E4%BA%8B%E5%8A%A1%E5%8E%9F%E7%A0%81/%E4%BA%8B%E7%89%A9%E4%BB%A3%E7%90%86%E5%AF%B9%E8%B1%A1%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B%E5%9B%BE.svg" alt="事物代理对象调用流程图"></p>
+<h1 id="事务提交后执行的原理"><a href="#事务提交后执行的原理" class="headerlink" title="事务提交后执行的原理"></a>事务提交后执行的原理</h1><p>案例代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">VoidSupplier</span> </span>&#123;<br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * Gets a result.</span><br><span class="hljs-comment">     *</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@throws</span> Exception</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">get</span><span class="hljs-params">()</span></span>;<br>&#125;<br><br><span class="hljs-meta">@Slf4j</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ThreadPoolUtil</span> </span>&#123;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 线程池execute</span><br><span class="hljs-comment">     *</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> threadPoolName</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> supplier</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">execute</span><span class="hljs-params">(String threadPoolName, VoidSupplier supplier)</span> </span>&#123;<br>        ThreadPoolTaskExecutor executor = SpringUtil.getBean(threadPoolName, ThreadPoolTaskExecutor.class);<br>        executor.execute(() -&gt; &#123;<br>            <span class="hljs-keyword">try</span> &#123;<br>                supplier.get();<br>            &#125; <span class="hljs-keyword">catch</span> (Throwable e) &#123;<br>                log.error(<span class="hljs-string">&quot;Unexpected error occurred invoking thread pool execute&quot;</span>, e);<br>            &#125;<br>        &#125;);<br>    &#125;<br>&#125;<br><br><span class="hljs-meta">@Slf4j</span><br><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TransactionalUtil</span> </span>&#123;<br>    <span class="hljs-meta">@Resource</span><br>    <span class="hljs-keyword">private</span> DataSource dataSource;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> DataSource MY_DATA_SOURCE;<br><br>    <span class="hljs-meta">@PostConstruct</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">init</span><span class="hljs-params">()</span> </span>&#123;<br>        MY_DATA_SOURCE = dataSource;<br>    &#125;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     *</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> supplier 执行任务</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">afterCommit</span><span class="hljs-params">(VoidSupplier supplier)</span> <span class="hljs-keyword">throws</span> Exception </span>&#123;<br>        <span class="hljs-keyword">if</span> (!TransactionSynchronizationManager.isSynchronizationActive()) &#123;<br>            supplier.get();<br>            <span class="hljs-keyword">return</span>;<br>        &#125;<br><br>        TransactionSynchronizationManager.registerSynchronization(<span class="hljs-keyword">new</span> TransactionSynchronizationAdapter() &#123;<br>            <span class="hljs-meta">@Override</span><br>            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">afterCommit</span><span class="hljs-params">()</span> </span>&#123;<br>                supplier.get();<br>            &#125;<br>        &#125;);<br>    &#125;<br>    <br>    <br>    <br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 事务提交后异步操作</span><br><span class="hljs-comment">     * 可指定线程池</span><br><span class="hljs-comment">     *</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> threadPoolName 线程池名称</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> supplier       执行任务</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">asyncAfterCommit</span><span class="hljs-params">(String threadPoolName,VoidSupplier supplier)</span> </span>&#123;<br>        <span class="hljs-keyword">if</span> (!TransactionSynchronizationManager.isSynchronizationActive()) &#123;<br>            ThreadPoolUtil.execute(threadPoolName, supplier);<br>            <span class="hljs-keyword">return</span>;<br>        &#125;<br>        TransactionSynchronizationManager.registerSynchronization(<span class="hljs-keyword">new</span> TransactionSynchronizationAdapter() &#123;<br>            <span class="hljs-meta">@Override</span><br>            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">afterCommit</span><span class="hljs-params">()</span> </span>&#123;<br>                ThreadPoolUtil.execute(threadPoolName, supplier);<br>            &#125;<br>        &#125;);<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>其中关键代码TransactionalUtil.afterCommit的原理是什么，我们来一步一步分析</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs java">	<span class="hljs-comment">/**</span><br><span class="hljs-comment">	 * 1. 如果当前线程没有开启事务，将立即进行操作</span><br><span class="hljs-comment">    * 2. 事务提交后，在当前线程执行任务操作</span><br><span class="hljs-comment">    * <span class="hljs-doctag">@param</span> supplier 执行任务</span><br><span class="hljs-comment">    */</span><br>   <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">afterCommit</span><span class="hljs-params">(VoidSupplier supplier)</span> <span class="hljs-keyword">throws</span> Exception </span>&#123;<br>       <span class="hljs-comment">//1、判断当前线程是否开启了事务</span><br>       <span class="hljs-keyword">if</span> (!TransactionSynchronizationManager.isSynchronizationActive()) &#123;<br>           supplier.get();<br>           <span class="hljs-keyword">return</span>;<br>       &#125;<br><br>       TransactionSynchronizationManager.registerSynchronization(<span class="hljs-keyword">new</span> TransactionSynchronizationAdapter() &#123;<br>           <span class="hljs-comment">//2. 事务提交后，在当前线程执行任务操作</span><br>           <span class="hljs-meta">@Override</span><br>           <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">afterCommit</span><span class="hljs-params">()</span> </span>&#123;<br>               supplier.get();<br>           &#125;<br>       &#125;);<br>   &#125;<br><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">isSynchronizationActive</span><span class="hljs-params">()</span> </span>&#123;<br>	<span class="hljs-keyword">return</span> (synchronizations.get() != <span class="hljs-keyword">null</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>第1处标注的原理是，以payservice.pay 举例，方法开启了事务，则在执行代理对象执行时</p>
+<ul>
+<li>invokeWithinTransaction<ul>
+<li>createTransactionIfNecessary<ul>
+<li>status = tm.getTransaction(txAttr);<ul>
+<li>doGetTransaction<ul>
+<li>isExistingTransaction(transaction)</li>
+<li>suspend(null)(挂机事务)由于不存在事务，不需要挂起当前的</li>
+<li>newTransactionStatus创建一个事务状态<ul>
+<li>doBegin</li>
+<li>prepareSynchronization</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">prepareSynchronization</span><span class="hljs-params">(DefaultTransactionStatus status, TransactionDefinition definition)</span> </span>&#123;<br>	<span class="hljs-keyword">if</span> (status.isNewSynchronization()) &#123;<br>		<span class="hljs-comment">//激活事务</span><br>		TransactionSynchronizationManager.setActualTransactionActive(status.hasTransaction());          <br>		<span class="hljs-comment">//事务隔离级别</span><br>		TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(<br>				definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT ?<br>						definition.getIsolationLevel() : <span class="hljs-keyword">null</span>);<br>		<span class="hljs-comment">//判断是否为只读</span><br>		TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly())	<br>		<span class="hljs-comment">//事务名称</span><br>           TransactionSynchronizationManager.setCurrentTransactionName(definition.getName());<br>		<span class="hljs-comment">//初始化同步：就是在这里初始化事务同步回调接口</span><br>		TransactionSynchronizationManager.initSynchronization();<br>	&#125;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initSynchronization</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> IllegalStateException </span>&#123;<br>	<span class="hljs-keyword">if</span> (isSynchronizationActive()) &#123;<br>		<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">&quot;Cannot activate transaction synchronization - already active&quot;</span>);<br>	&#125;<br>	logger.trace(<span class="hljs-string">&quot;Initializing transaction synchronization&quot;</span>);<br>	synchronizations.set(<span class="hljs-keyword">new</span> LinkedHashSet&lt;&gt;());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>第2处标注的原理是</p>
+<p>invokeWithinTransaction</p>
+<ul>
+<li>createTransactionIfNecessary</li>
+<li>retVal = invocation.proceedWithInvocation();</li>
+<li>commitTransactionAfterReturning(txInfo); 目标方法执行成功，触发事务提交<ul>
+<li>txInfo.getTransactionManager().commit(txInfo.getTransactionStatus());<ul>
+<li>processCommit(defStatus);<ul>
+<li>triggerAfterCommit(status);<ul>
+<li>TransactionSynchronizationUtils.triggerAfterCommit();<ul>
+<li>invokeAfterCommit(TransactionSynchronizationManager.getSynchronizations());</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>cleanupAfterCompletion(status);</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">invokeAfterCommit</span><span class="hljs-params">(<span class="hljs-meta">@Nullable</span> List&lt;TransactionSynchronization&gt; synchronizations)</span> </span>&#123;<br>	<span class="hljs-keyword">if</span> (synchronizations != <span class="hljs-keyword">null</span>) &#123;<br>		<span class="hljs-keyword">for</span> (TransactionSynchronization synchronization : synchronizations) &#123;<br>               <span class="hljs-comment">//触发执行我们手动新增的TransactionSynchronizationAdaptor的afterCommit</span><br>			synchronization.afterCommit();<br>		&#125;<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>小坑：最好不要在TransactionSynchronization.afterCommit方法里执行DML操作，如果在事务提交后抛出异常，这个时候对于对于</p>
+<p>DataSourceTransactionManager<br>    cleanupAfterCompletion(status)  会把连接设置为自动提交，导致DML操作回滚不了（原事务已提交，afterCommit 方法报错，afterCommit 的数据操作回滚不了）</p>
+<p>JPASourceTransactionManager</p>
+<p>​    正常回归</p>
+<p>最佳时间：</p>
+<p>​    1、尽量不在aftercommit里做事务操作，</p>
+<p>​    2、如果有，也是现实声明为 @Transactional(propagation =Propagation.REQUIRES_NEW)</p>
+<p>​    3、在aftercommit手动捕获异常，避免aftercommit的操作无法回滚</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%BA%90%E7%A0%81/" rel="tag"># 源码</a>
+              <a href="/tags/Spring/" rel="tag"># Spring</a>
+              <a href="/tags/AOP/" rel="tag"># AOP</a>
+              <a href="/tags/%E4%BA%8B%E5%8A%A1/" rel="tag"># 事务</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/07/01/Spring05-AOP%E6%BA%90%E7%A0%81/" rel="prev" title="Spring05-AOP源码">
+      <i class="fa fa-chevron-left"></i> Spring05-AOP源码
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/07/11/Spring07-%E5%88%87%E9%9D%A2%E7%9A%84%E5%BA%94%E7%94%A8/" rel="next" title="Spring07-切面的应用">
+      Spring07-切面的应用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8B%E7%89%A9%E6%A6%82%E5%BF%B5%E8%A7%A3%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">事物概念解析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%8B%E5%8A%A1"><span class="nav-number">1.1.</span> <span class="nav-text">什么是事务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E7%9A%84%E7%89%B9%E6%80%A7%EF%BC%88ACID%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">事务的特性（ACID）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring%E4%BA%8B%E5%8A%A1%E4%B8%89%E5%A4%A7%E6%8E%A5%E5%8F%A3%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.3.</span> <span class="nav-text">Spring事务三大接口介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PlatformTransactionManager%EF%BC%9A%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86%E5%99%A8"><span class="nav-number">1.3.1.</span> <span class="nav-text">PlatformTransactionManager：事务管理器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TransactionDefinition%EF%BC%9A%E4%BA%8B%E7%89%A9%E5%B1%9E%E6%80%A7%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">1.3.2.</span> <span class="nav-text">TransactionDefinition：事物属性的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TransactionStatus%EF%BC%9A%E4%BA%8B%E5%8A%A1%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81"><span class="nav-number">1.3.3.</span> <span class="nav-text">TransactionStatus：事务运行状态</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EnableTransactionManagement"><span class="nav-number">2.</span> <span class="nav-text">@EnableTransactionManagement</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%A8%E5%85%A5%E4%BA%86%E5%93%AA%E4%BA%9B%E7%BB%84%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">注入了哪些组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#InfrastructureAdvisorAutoProxyCreator"><span class="nav-number">2.1.1.</span> <span class="nav-text">InfrastructureAdvisorAutoProxyCreator</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E4%BB%A3%E7%A0%81%E8%BF%90%E8%A1%8C%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">事务代码运行调用流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E6%8F%90%E4%BA%A4%E5%90%8E%E6%89%A7%E8%A1%8C%E7%9A%84%E5%8E%9F%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">事务提交后执行的原理</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>
