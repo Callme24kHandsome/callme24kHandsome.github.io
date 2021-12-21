@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Mysql索引优化实战">
+<meta property="og:type" content="article">
+<meta property="og:title" content="性能调优04-Mysql锁与事务隔离级别">
+<meta property="og:url" content="http://example.com/2021/12/19/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9804-Mysql%E9%94%81%E4%B8%8E%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="Mysql索引优化实战">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9804-Mysql%E9%94%81%E4%B8%8E%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/image-20211220212824765.png">
+<meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9804-Mysql%E9%94%81%E4%B8%8E%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/image-20211220223800568.png">
+<meta property="article:published_time" content="2021-12-19T13:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-21T15:30:20.769Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="性能调优">
+<meta property="article:tag" content="Mysql">
+<meta property="article:tag" content="事务">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9804-Mysql%E9%94%81%E4%B8%8E%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/image-20211220212824765.png">
+
+<link rel="canonical" href="http://example.com/2021/12/19/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9804-Mysql%E9%94%81%E4%B8%8E%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>性能调优04-Mysql锁与事务隔离级别 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/19/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9804-Mysql%E9%94%81%E4%B8%8E%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          性能调优04-Mysql锁与事务隔离级别
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-12-19 21:00:00" itemprop="dateCreated datePublished" datetime="2021-12-19T21:00:00+08:00">2021-12-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-12-21 23:30:20" itemprop="dateModified" datetime="2021-12-21T23:30:20+08:00">2021-12-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Mysql/" itemprop="url" rel="index"><span itemprop="name">Mysql</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">Mysql索引优化实战</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Mysql锁与事务隔离级别"><a href="#Mysql锁与事务隔离级别" class="headerlink" title="Mysql锁与事务隔离级别"></a>Mysql锁与事务隔离级别</h1><h2 id="1、锁定义"><a href="#1、锁定义" class="headerlink" title="1、锁定义"></a>1、锁定义</h2><p>​        锁是计算机协调多个进程或线程并发访问某一资源的机制。 在数据库中，除了传统的计算资源（如CPU、RAM、I/O等）的争用以外， 数据也是一种供需要用户共享的资源。如何保证数据并发访问的一致性、有效性 是所有数据库必须解决的一个问题，锁冲突也是影响数据库并发访问性能的一个 重要因素。</p>
+<h2 id="2、锁分类"><a href="#2、锁分类" class="headerlink" title="2、锁分类"></a>2、锁分类</h2><p>1、从性能上分为<strong>悲观锁</strong> 和<strong>乐观锁</strong>(用版本对比来实现)</p>
+<p>2、从对数据库操作的类型分，分为<strong>读锁</strong>和<strong>写锁</strong>(<strong>==都属于悲观锁==</strong>) </p>
+<p>​        1、读锁（共享锁）：针对同一份数据，<strong>多个读操作可以同时进行而不会互相影响</strong> </p>
+<p>​        2、写锁（排它锁）：当前写操作没有完成前，它<strong>会阻断其他写锁和读锁</strong> </p>
+<p>​                1、从对数据操作的粒度分，分为表锁和行锁</p>
+<h3 id="2-1-表锁"><a href="#2-1-表锁" class="headerlink" title="2.1 表锁"></a>2.1 表锁</h3><p>​        每次操作锁住整张表。</p>
+<p>​        开销小，加锁快；不会出现死锁；</p>
+<p>​        锁定粒度大，发生锁冲突的概率最高，并发度最低</p>
+<h4 id="2-1-1-基本操作"><a href="#2-1-1-基本操作" class="headerlink" title="2.1.1 基本操作"></a>2.1.1 基本操作</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> `mylock` (<br>	`id` <span class="hljs-type">INT</span> ( <span class="hljs-number">11</span> ) <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> AUTO_INCREMENT, <br>	`NAME` <span class="hljs-type">VARCHAR</span> ( <span class="hljs-number">20</span> ) <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">NULL</span>, <br>	<span class="hljs-keyword">PRIMARY</span> KEY ( `id` ) <br>) ENGINE <span class="hljs-operator">=</span> MyISAM <span class="hljs-keyword">DEFAULT</span> CHARSET <span class="hljs-operator">=</span> utf8;<br><span class="hljs-comment">-- 插入数据 </span><br><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> `mylock` ( `id`, `NAME` )<br><span class="hljs-keyword">VALUES</span><br>	( <span class="hljs-string">&#x27;1&#x27;</span>, <span class="hljs-string">&#x27;a&#x27;</span> )，<br>	( <span class="hljs-string">&#x27;2&#x27;</span>, <span class="hljs-string">&#x27;b&#x27;</span> )，<br>	( <span class="hljs-string">&#x27;3&#x27;</span>, <span class="hljs-string">&#x27;c&#x27;</span> )，<br>	( <span class="hljs-string">&#x27;4&#x27;</span>, <span class="hljs-string">&#x27;d&#x27;</span> );<br>	<br>	<br>session <span class="hljs-number">1</span>	<br><span class="hljs-comment">-- 手动增加表锁</span><br>lock <span class="hljs-keyword">table</span> mylock read<br><span class="hljs-comment">-- 查看表上加过的锁</span><br><span class="hljs-keyword">show</span> <span class="hljs-keyword">open</span> tables;<br><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> mylock<br><span class="hljs-comment">-- 删除表锁</span><br>unlock tables<br><br></code></pre></td></tr></table></figure>
+
+<p>存在锁<br><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9804-Mysql%E9%94%81%E4%B8%8E%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/image-20211220212824765.png" alt="image-20211220212824765"></p>
+<h4 id="2-1-2-案例分析-加读锁）"><a href="#2-1-2-案例分析-加读锁）" class="headerlink" title="2.1.2 案例分析(加读锁）"></a>2.1.2 案例分析(加读锁）</h4><p>​    当前session和其他session都可以读该表 </p>
+<p>​    当前session中插入或者更新锁定的表都会报错，其他session插入或更新则会等待</p>
+<h4 id="2-1-3-案例分析-加写锁）"><a href="#2-1-3-案例分析-加写锁）" class="headerlink" title="2.1.3 案例分析(加写锁）"></a>2.1.3 案例分析(加写锁）</h4><p>​    当前session对该表的增删改查都没有问题，其他session对该表的所有操作被阻塞</p>
+<h4 id="2-1-4-案例结论"><a href="#2-1-4-案例结论" class="headerlink" title="2.1.4 案例结论"></a>2.1.4 案例结论</h4><p>​        MyISAM在执行查询语句(SELECT)前,会自动给涉及的所有表加读锁,在执行增删改操作前,会自动给涉及的表加写锁。 </p>
+<p>​    1、对MyISAM表的读操作(加读锁) ,不会阻寒其他进程对同一表的读请求,但会阻赛对同一表的写请求。只有当读锁释放后,才会执行其它进程的写操作。 </p>
+<p>​    2、对MylSAM表的写操作(加写锁) ,会阻塞其他进程对同一表的读和写操作,只有当写锁释放后,才会执行其它进程的读写操作 </p>
+<p><strong>总结：</strong> <strong>读锁会阻塞写，但是不会阻塞读。而写锁则会把读和写都阻塞</strong>。</p>
+<h3 id="2-2-行锁"><a href="#2-2-行锁" class="headerlink" title="2.2 行锁"></a>2.2 行锁</h3><p>​    每次操作锁住一行数据。开销大，加锁慢；会出现死锁；锁定粒度最小，发生锁冲突的概率最低，并发度最高。</p>
+<p> InnoDB与MYISAM的最大不同有两点：</p>
+<p>​    <strong>支持事务（TRANSACTION）</strong> </p>
+<p>​    <strong>支持行级锁</strong> </p>
+<h4 id="2-2-1行锁支持事务"><a href="#2-2-1行锁支持事务" class="headerlink" title="2.2.1行锁支持事务"></a>2.2.1行锁支持事务</h4><h5 id="事务（Transaction）及其ACID属性"><a href="#事务（Transaction）及其ACID属性" class="headerlink" title="事务（Transaction）及其ACID属性"></a>事务（Transaction）及其ACID属性</h5><p>​        1、<strong>原子性(Atomicity)</strong> ：事务是一个原子操作单元,其对数据的修改,要么全都执 行,要么全都不执行。</p>
+<p>​        2、<strong>一致性(Consistent)</strong> ：在事务开始和完成时,数据都必须保持一致状态。这意 味着所有相关的数据规则都必须应用于事务的修改,以保持数据的完整性;事务结束 时,所有的内部数据结构(如B树索引或双向链表)也都必须是正确的。 </p>
+<p>​        3、<strong>隔离性(Isolation)</strong> ：数据库系统提供一定的隔离机制,保证事务在不受外部并 发操作影响的“独立”环境执行。这意味着事务处理过程中的中间状态对外部是 不可见的,反之亦然。</p>
+<pre><code>     4、**持久性(Durable)** ：事务完成之后,它对于数据的修改是永久性的,即使出现系 统故障也能够保持
+</code></pre>
+<h5 id="并发事务处理带来的问题"><a href="#并发事务处理带来的问题" class="headerlink" title="并发事务处理带来的问题"></a>并发事务处理带来的问题</h5><p>​        1、**更新丢失（Lost Update）(脏写)**当两个或多个事务选择同一行，然后基于最初选定的值更新该行时，由于每 个事务都不知道其他事务的存在，就会发生丢失更新问题–最后的更新覆盖了由其他事务所做的更新。</p>
+<p>​        解决办法：乐观锁加版本号或者悲观锁加行锁</p>
+<p>​        2、<strong>脏读（Dirty Reads）</strong>一个事务正在对一条记录做修改，在这个事务完成并提交前，这条记录的数 据就处于不一致的状态；这时，另一个事务也来读取同一条记录，如果不加控 制，第二个事务读取了这些“脏”数据，并据此作进一步的处理，就会产生未提 交的数据依赖关系。这种现象被形象的叫做“脏读”。 一句话：事务A读取到了事务B已经修改但尚未提交的数据，还在这个数据基 础上做了操作。此时，如果B事务回滚，A读取的数据无效，不符合一致性要求。</p>
+<p>​        3、<strong>不可重读（Non-Repeatable Reads）</strong>一个事务在读取某些数据后的某个时间，再次读取以前读过的数据，却发现 其读出的数据已经发生了改变、或某些记录已经被删除了！这种现象就叫做“不 可重复读”。 一句话：事务A读取到了事务B已经提交的修改数据，不符合隔离性</p>
+<p>​        4、<strong>幻读（Phantom Reads）</strong> 一个事务按相同的查询条件重新读取以前检索过的数据，却发现其他事务插 入了满足其查询条件的新数据，这种现象就称为“幻读”。 一句话：事务A读取到了事务B提交的新增数据，不符合隔离性</p>
+<h5 id="事务隔离级别"><a href="#事务隔离级别" class="headerlink" title="事务隔离级别"></a>事务隔离级别</h5><p>​    脏读”、“不可重复读”和“幻读”,其实都是数据库读一致性问题,必须由数 据库提供一定的事务隔离机制来解决。</p>
+<p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9804-Mysql%E9%94%81%E4%B8%8E%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/image-20211220223800568.png" alt="image-20211220223800568"></p>
+<p>​    数据库的事务隔离越严格,并发副作用越小,但付出的代价也就越大,因为事务隔 离实质上就是使事务在一定程度上“串行化”进行,这显然与“并发”是矛盾的。 </p>
+<p>​    同时,不同的应用对读一致性和事务隔离程度的要求也是不同的,比如许多应用 对“不可重复读”和“幻读”并不敏感,可能更关心数据并发访问的能力。 </p>
+<p>​    <strong>常看当前数据库的事务隔离级别: show variables like ‘tx_isolation’;</strong> </p>
+<p>​    <strong>设置事务隔离级别：set tx_isolation=’REPEATABLE-READ’;</strong></p>
+<h4 id="2-2-2-行锁与隔离级别案例分析"><a href="#2-2-2-行锁与隔离级别案例分析" class="headerlink" title="2.2.2 行锁与隔离级别案例分析"></a>2.2.2 行锁与隔离级别案例分析</h4><h5 id="1、行锁演示"><a href="#1、行锁演示" class="headerlink" title="1、行锁演示"></a>1、行锁演示</h5><p>​    一个session开启事务更新不提交，另一个session更新同一条记录会阻塞，更新不同记录不会阻塞 </p>
+<h5 id="2、读未提交"><a href="#2、读未提交" class="headerlink" title="2、读未提交"></a>2、读未提交</h5><p>（1）打开一个客户端A，并设置当前事务模式为read uncommitted（未提交 读），查询表account的初始值： set tx_isolation=’read-uncommitted’; </p>
+<p>（2）在客户端A的事务提交之前，打开另一个客户端B，更新表account：</p>
+<p>（3）这时，虽然客户端B的事务还没提交，但是客户端A就可以查询到B已经更新的数据：</p>
+<p>（4）一旦客户端B的事务因为某种原因回滚，所有的操作都将会被撤销，那 客户端A查询到的数据其实就是脏数据： </p>
+<p>（5）在客户端A执行更新语句update account set balance = balance - 50 where id =1，lilei的balance没有变成350，居然是400，是不是很奇怪，数据不 一致啊，如果你这么想就太天真 了，在应用程序中，并 不知道其他会话回滚了，要想解决这个问题可以采用<strong>读已提交</strong>的隔离级别</p>
+<h5 id="3、读已提交"><a href="#3、读已提交" class="headerlink" title="3、读已提交"></a>3、读已提交</h5><p>（1）打开一个客户端A，并设置当前事务模式为read committed（读已提交 ），查询表account的所有记录： set tx_isolation=’read-committed’; </p>
+<p>（2）在客户端A的事务提交之前，打开另一个客户端B，更新表account： </p>
+<p>（3）这时，客户端B的事务还没提交，客户端A不能查询到B已经更新的数据，解决了脏读问题：</p>
+<p>（4）客户端B的事务提交 </p>
+<p>（5）客户端A执行与上一步相同的查询，结果 与上一步不一致，即产生了不可重复读的问题</p>
+<h5 id="4、可重复读"><a href="#4、可重复读" class="headerlink" title="4、可重复读"></a>4、可重复读</h5><p>（1）打开一个客户端A，并设置当前事务模式为repeatable read，查询表 account的所有记录 </p>
+<p>​        set tx_isolation=’repeatable-read’; </p>
+<p>（2）在客户端A的事务提交之前，打开另一个客户端B，更新表account并提 交</p>
+<p>（3）在客户端A查询表account的所有记录，与步骤（1）查询结果一致，没 有出现不可重复读的问题 </p>
+<p>（4）在客户端A，接着执行update account set balance = balance - 50 where id = 1，balance没有变成400-50=350，balance值用的是步骤 （2）中的350来算的，所以是300，数据的一致性倒是没有被破坏。可重复读的 隔离级别下使用了MVCC(multi-version concurrency control)机制，</p>
+<p>​    select操作不会更新版本号，是快照读（历史版本）；insert、update和delete会更新版本 号，是当前读（当前版本）。</p>
+<h5 id="5、串行化"><a href="#5、串行化" class="headerlink" title="5、串行化"></a>5、串行化</h5><p>（1）打开一个客户端A，并设置当前事务模式为serializable，查询表account 的初始值： </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">set</span> session transaction isolation level serializable; <br><span class="hljs-keyword">start</span> transaction; <br><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> account; <br><span class="hljs-operator">|</span> id <span class="hljs-operator">|</span> name <span class="hljs-operator">|</span> balance <span class="hljs-operator">|</span> <br><span class="hljs-operator">|</span> <span class="hljs-number">1</span> <span class="hljs-operator">|</span> lilei <span class="hljs-operator">|</span> <span class="hljs-number">10000</span> <span class="hljs-operator">|</span> <br><span class="hljs-operator">|</span> <span class="hljs-number">2</span> <span class="hljs-operator">|</span> hanmei <span class="hljs-operator">|</span> <span class="hljs-number">10000</span> <span class="hljs-operator">|</span> <br><span class="hljs-operator">|</span> <span class="hljs-number">3</span> <span class="hljs-operator">|</span> lucy <span class="hljs-operator">|</span> <span class="hljs-number">10000</span> <span class="hljs-operator">|</span> <br><span class="hljs-operator">|</span> <span class="hljs-number">4</span> <span class="hljs-operator">|</span> lily <span class="hljs-operator">|</span> <span class="hljs-number">10000</span> <span class="hljs-operator">|</span> <br></code></pre></td></tr></table></figure>
+
+<p>（2）打开一个客户端B，并设置当前事务模式为serializable，插入一条记录 报错，表被锁了插入失败，mysql中事务隔离级别为serializable时会锁表，因此不会出现幻读的情况，<strong>这种隔离级别并发性极低</strong>，开发中很少会用到。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">set</span> session transaction isolation level serializable;<br><span class="hljs-keyword">start</span> transaction;<br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> account <span class="hljs-keyword">values</span>(<span class="hljs-number">5</span>,<span class="hljs-string">&#x27;tom&#x27;</span>,<span class="hljs-number">0</span>); <br>Lock wait timeout exceeded; <br>try restarting transaction<br></code></pre></td></tr></table></figure>
+
+<h5 id="Mysql默认级别是repeatable-read，有办法解决幻读问题吗？"><a href="#Mysql默认级别是repeatable-read，有办法解决幻读问题吗？" class="headerlink" title="Mysql默认级别是repeatable-read，有办法解决幻读问题吗？"></a>Mysql默认级别是repeatable-read，有办法解决幻读问题吗？</h5><p>​    <strong>间隙锁在某些情况下可以解决幻读问题</strong></p>
+<p>​    要避免幻读可以用间隙锁在Session_1下面执行update account set name = ‘zhuge’ where id &gt; 10 and id &lt;=20;，则其他Session没法在这个范围所包含的 间隙里插入或修改任何数据</p>
+<h5 id="无索引行锁会升级为表锁"><a href="#无索引行锁会升级为表锁" class="headerlink" title="无索引行锁会升级为表锁"></a>无索引行锁会升级为表锁</h5><p>​    锁主要是加在索引上，如果对非索引字段更新, 行锁可能会变表锁 ，**==且InnoDB的行锁是针对索引加的锁，不是针对记录加的锁。并且该索引不能失效，否则都会从行锁升级为表锁。==**</p>
+<h5 id="其他加锁方式"><a href="#其他加锁方式" class="headerlink" title="其他加锁方式"></a>其他加锁方式</h5><p>​    SELECT … LOCK IN SHARE MODE走的是IS锁(意向共享锁)</p>
+<blockquote>
+<p>​    一个表是child表，一个是parent表，假设child表的某一列child_id映射到parent表的c_child_id列，那么从业务角度讲，此时我直接insert一条child_id=100记录到child表是存在风险的，因为刚insert的时候可能在parent表里删除了这条c_child_id=100的记录，那么业务数据就存在不一致的风险。正确的方法是再插入时执行select * from parent where c_child_id=100 lock in share mode,锁定了parent表的这条记录，然后执行insert into child(child_id) values (100)就ok了。</p>
+</blockquote>
+<p>​    SELECT … FOR UPDATE 走的是IX锁(意向排它锁)</p>
+<h4 id="2-2-3-案例结论"><a href="#2-2-3-案例结论" class="headerlink" title="2.2.3 案例结论"></a>2.2.3 案例结论</h4><p>​    Innodb存储引擎由于实现了<strong>行级锁</strong>定，虽然在锁定机制的实现方面所带来的性能损耗可能比表级锁定会要更高一下，但是在整体<strong>并发处理能力</strong>方面要远远优 于MYISAM的表级锁定的。当系统并发量高的时候，Innodb的整体性能和 MYISAM相比就会有比较明显的优势了。</p>
+<p>​    相对来说，Innodb的风险更高，容易锁死锁</p>
+<h4 id="2-2-4-行锁分析"><a href="#2-2-4-行锁分析" class="headerlink" title="2.2.4 行锁分析"></a>2.2.4 行锁分析</h4><p>通过检查InnoDB_row_lock状态变量来分析系统上的行锁的争夺情况 </p>
+<p>show status like’innodb_row_lock%’; </p>
+<p>对各个状态量的说明如下： </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs sql">Innodb_row_lock_current_waits: 当前正在等待锁定的数量 <br>Innodb_row_lock_time: 从系统启动到现在锁定总时间长度 <br>Innodb_row_lock_time_avg: 每次等待所花平均时间 <br>Innodb_row_lock_time_max：从系统启动到现在等待最长的一次所花时间 <br>Innodb_row_lock_waits:系统启动后到现在总共等待的次数 <br>对于这<span class="hljs-number">5</span>个状态变量，比较重要的主要是： <br>Innodb_row_lock_time_avg （等待平均时长） <br>Innodb_row_lock_waits （等待总次数） <br>Innodb_row_lock_time（等待总时长）<br></code></pre></td></tr></table></figure>
+
+<p>尤其是当等待次数很高，而且每次等待时长也不小的时候，我们就需要分析系统 中为什么会有如此多的等待，然后根据分析结果着手制定优化计划。</p>
+<h4 id="2-2-5-死锁"><a href="#2-2-5-死锁" class="headerlink" title="2.2.5 死锁"></a>2.2.5 死锁</h4><p><strong>set tx_isolation=’<strong>repeatable-read</strong>‘;</strong> </p>
+<p>Session_1执行：select * from account where id=1 for update; </p>
+<p>Session_2执行：select * from account where id=2 for update; </p>
+<p>Session_1执行：select * from account where id=2 for update; </p>
+<p>Session_2执行：select * from account where id=1 for update;</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br></pre></td><td class="code"><pre><code class="hljs SQL"><span class="hljs-comment">-- 查看近期死锁日志信息：show engine innodb status</span><br><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><br><span class="hljs-number">2021</span><span class="hljs-number">-12</span><span class="hljs-number">-21</span> <span class="hljs-number">23</span>:<span class="hljs-number">27</span>:<span class="hljs-number">24</span> <span class="hljs-number">0x750c</span> INNODB MONITOR OUTPUT<br><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><span class="hljs-operator">=</span><br><span class="hljs-keyword">Per</span> <span class="hljs-keyword">second</span> averages calculated <span class="hljs-keyword">from</span> the <span class="hljs-keyword">last</span> <span class="hljs-number">39</span> seconds<br><span class="hljs-comment">-----------------</span><br>BACKGROUND THREAD<br><span class="hljs-comment">-----------------</span><br>srv_master_thread loops: <span class="hljs-number">698</span> srv_active, <span class="hljs-number">0</span> srv_shutdown, <span class="hljs-number">695589</span> srv_idle<br>srv_master_thread log flush <span class="hljs-keyword">and</span> writes: <span class="hljs-number">696287</span><br><span class="hljs-comment">----------</span><br>SEMAPHORES<br><span class="hljs-comment">----------</span><br>OS WAIT <span class="hljs-keyword">ARRAY</span> INFO: reservation count <span class="hljs-number">585</span><br>OS WAIT <span class="hljs-keyword">ARRAY</span> INFO: signal count <span class="hljs-number">545</span><br>RW<span class="hljs-operator">-</span>shared spins <span class="hljs-number">548</span>, rounds <span class="hljs-number">960</span>, OS waits <span class="hljs-number">417</span><br>RW<span class="hljs-operator">-</span>excl spins <span class="hljs-number">25</span>, rounds <span class="hljs-number">595</span>, OS waits <span class="hljs-number">27</span><br>RW<span class="hljs-operator">-</span>sx spins <span class="hljs-number">3</span>, rounds <span class="hljs-number">61</span>, OS waits <span class="hljs-number">2</span><br>Spin rounds <span class="hljs-keyword">per</span> wait: <span class="hljs-number">1.75</span> RW<span class="hljs-operator">-</span>shared, <span class="hljs-number">23.80</span> RW<span class="hljs-operator">-</span>excl, <span class="hljs-number">20.33</span> RW<span class="hljs-operator">-</span>sx<br><span class="hljs-comment">------------------------</span><br>LATEST DETECTED DEADLOCK<br><span class="hljs-comment">------------------------</span><br><span class="hljs-number">2021</span><span class="hljs-number">-12</span><span class="hljs-number">-21</span> <span class="hljs-number">23</span>:<span class="hljs-number">27</span>:<span class="hljs-number">01</span> <span class="hljs-number">0xe360</span><br><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span> (<span class="hljs-number">1</span>) TRANSACTION:<br>TRANSACTION <span class="hljs-number">399250</span>, ACTIVE <span class="hljs-number">30</span> sec starting index read<br>mysql tables <span class="hljs-keyword">in</span> use <span class="hljs-number">1</span>, locked <span class="hljs-number">1</span><br>LOCK WAIT <span class="hljs-number">3</span> lock struct(s), heap size <span class="hljs-number">1136</span>, <span class="hljs-number">2</span> <span class="hljs-type">row</span> lock(s)<br>MySQL thread id <span class="hljs-number">33</span>, OS thread handle <span class="hljs-number">23912</span>, query id <span class="hljs-number">802533</span> localhost ::<span class="hljs-number">1</span> root statistics<br><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> account <span class="hljs-keyword">where</span> id<span class="hljs-operator">=</span> <span class="hljs-number">2</span> <span class="hljs-keyword">for</span> update<br><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span> (<span class="hljs-number">1</span>) WAITING <span class="hljs-keyword">FOR</span> THIS LOCK <span class="hljs-keyword">TO</span> BE GRANTED:<br>RECORD LOCKS space id <span class="hljs-number">2822</span> page <span class="hljs-keyword">no</span> <span class="hljs-number">5</span> n bits <span class="hljs-number">80</span> index <span class="hljs-keyword">PRIMARY</span> <span class="hljs-keyword">of</span> <span class="hljs-keyword">table</span> `study_imysql_ndex`.`account` trx id <span class="hljs-number">399250</span> lock_mode X locks rec but <span class="hljs-keyword">not</span> gap waiting<br>Record lock, heap <span class="hljs-keyword">no</span> <span class="hljs-number">2</span> PHYSICAL RECORD: n_fields <span class="hljs-number">5</span>; compact format; info bits <span class="hljs-number">0</span><br> <span class="hljs-number">0</span>: len <span class="hljs-number">4</span>; hex <span class="hljs-number">80000002</span>; <span class="hljs-keyword">asc</span>     ;;<br> <span class="hljs-number">1</span>: len <span class="hljs-number">6</span>; hex <span class="hljs-number">000000061775</span>; <span class="hljs-keyword">asc</span>      u;;<br> <span class="hljs-number">2</span>: len <span class="hljs-number">7</span>; hex a90000011e0110; <span class="hljs-keyword">asc</span>        ;;<br> <span class="hljs-number">3</span>: len <span class="hljs-number">4</span>; hex <span class="hljs-number">6e616</span>d65; <span class="hljs-keyword">asc</span> name;;<br> <span class="hljs-number">4</span>: len <span class="hljs-number">4</span>; hex <span class="hljs-number">80003e80</span>; <span class="hljs-keyword">asc</span>   <span class="hljs-operator">&gt;</span> ;;<br><br><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span> (<span class="hljs-number">2</span>) TRANSACTION:<br>TRANSACTION <span class="hljs-number">399251</span>, ACTIVE <span class="hljs-number">15</span> sec starting index read, thread declared inside InnoDB <span class="hljs-number">5000</span><br>mysql tables <span class="hljs-keyword">in</span> use <span class="hljs-number">1</span>, locked <span class="hljs-number">1</span><br><span class="hljs-number">3</span> lock struct(s), heap size <span class="hljs-number">1136</span>, <span class="hljs-number">2</span> <span class="hljs-type">row</span> lock(s)<br>MySQL thread id <span class="hljs-number">34</span>, OS thread handle <span class="hljs-number">58208</span>, query id <span class="hljs-number">802537</span> localhost ::<span class="hljs-number">1</span> root statistics<br><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> account <span class="hljs-keyword">where</span> id<span class="hljs-operator">=</span> <span class="hljs-number">1</span> <span class="hljs-keyword">for</span> update<br><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span> (<span class="hljs-number">2</span>) HOLDS THE LOCK(S):<br>RECORD LOCKS space id <span class="hljs-number">2822</span> page <span class="hljs-keyword">no</span> <span class="hljs-number">5</span> n bits <span class="hljs-number">80</span> index <span class="hljs-keyword">PRIMARY</span> <span class="hljs-keyword">of</span> <span class="hljs-keyword">table</span> `study_imysql_ndex`.`account` trx id <span class="hljs-number">399251</span> lock_mode X locks rec but <span class="hljs-keyword">not</span> gap<br>Record lock, heap <span class="hljs-keyword">no</span> <span class="hljs-number">2</span> PHYSICAL RECORD: n_fields <span class="hljs-number">5</span>; compact format; info bits <span class="hljs-number">0</span><br> <span class="hljs-number">0</span>: len <span class="hljs-number">4</span>; hex <span class="hljs-number">80000002</span>; <span class="hljs-keyword">asc</span>     ;;<br> <span class="hljs-number">1</span>: len <span class="hljs-number">6</span>; hex <span class="hljs-number">000000061775</span>; <span class="hljs-keyword">asc</span>      u;;<br> <span class="hljs-number">2</span>: len <span class="hljs-number">7</span>; hex a90000011e0110; <span class="hljs-keyword">asc</span>        ;;<br> <span class="hljs-number">3</span>: len <span class="hljs-number">4</span>; hex <span class="hljs-number">6e616</span>d65; <span class="hljs-keyword">asc</span> name;;<br> <span class="hljs-number">4</span>: len <span class="hljs-number">4</span>; hex <span class="hljs-number">80003e80</span>; <span class="hljs-keyword">asc</span>   <span class="hljs-operator">&gt;</span> ;;<br><br><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span> (<span class="hljs-number">2</span>) WAITING <span class="hljs-keyword">FOR</span> THIS LOCK <span class="hljs-keyword">TO</span> BE GRANTED:<br>RECORD LOCKS space id <span class="hljs-number">2822</span> page <span class="hljs-keyword">no</span> <span class="hljs-number">5</span> n bits <span class="hljs-number">80</span> index <span class="hljs-keyword">PRIMARY</span> <span class="hljs-keyword">of</span> <span class="hljs-keyword">table</span> `study_imysql_ndex`.`account` trx id <span class="hljs-number">399251</span> lock_mode X locks rec but <span class="hljs-keyword">not</span> gap waiting<br>Record lock, heap <span class="hljs-keyword">no</span> <span class="hljs-number">6</span> PHYSICAL RECORD: n_fields <span class="hljs-number">5</span>; compact format; info bits <span class="hljs-number">0</span><br> <span class="hljs-number">0</span>: len <span class="hljs-number">4</span>; hex <span class="hljs-number">80000001</span>; <span class="hljs-keyword">asc</span>     ;;<br> <span class="hljs-number">1</span>: len <span class="hljs-number">6</span>; hex <span class="hljs-number">000000061771</span>; <span class="hljs-keyword">asc</span>      q;;<br> <span class="hljs-number">2</span>: len <span class="hljs-number">7</span>; hex a7000001df0110; <span class="hljs-keyword">asc</span>        ;;<br> <span class="hljs-number">3</span>: len <span class="hljs-number">5</span>; hex <span class="hljs-number">6</span>c696c6569; <span class="hljs-keyword">asc</span> lilei;;<br> <span class="hljs-number">4</span>: len <span class="hljs-number">4</span>; hex <span class="hljs-number">800001</span>c2; <span class="hljs-keyword">asc</span>     ;;<br><br><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span> WE ROLL BACK TRANSACTION (<span class="hljs-number">2</span>)<br><span class="hljs-comment">------------</span><br>TRANSACTIONS<br><span class="hljs-comment">------------</span><br>Trx id counter <span class="hljs-number">399252</span><br>Purge done <span class="hljs-keyword">for</span> trx<span class="hljs-string">&#x27;s n:o &lt; 399236 undo n:o &lt; 0 state: running but idle</span><br><span class="hljs-string">History list length 540</span><br><span class="hljs-string">LIST OF TRANSACTIONS FOR EACH SESSION:</span><br><span class="hljs-string">---TRANSACTION 283720369143296, not started</span><br><span class="hljs-string">0 lock struct(s), heap size 1136, 0 row lock(s)</span><br><span class="hljs-string">---TRANSACTION 283720369145040, not started</span><br><span class="hljs-string">0 lock struct(s), heap size 1136, 0 row lock(s)</span><br><span class="hljs-string">---TRANSACTION 283720369141552, not started</span><br><span class="hljs-string">0 lock struct(s), heap size 1136, 0 row lock(s)</span><br><span class="hljs-string">---TRANSACTION 399250, ACTIVE 53 sec</span><br><span class="hljs-string">3 lock struct(s), heap size 1136, 2 row lock(s)</span><br><span class="hljs-string">MySQL thread id 33, OS thread handle 23912, query id 802544 localhost ::1 root</span><br><span class="hljs-string">--------</span><br><span class="hljs-string">FILE I/O</span><br><span class="hljs-string">--------</span><br><span class="hljs-string">I/O thread 0 state: wait Windows aio (insert buffer thread)</span><br><span class="hljs-string">I/O thread 1 state: wait Windows aio (log thread)</span><br><span class="hljs-string">I/O thread 2 state: wait Windows aio (read thread)</span><br><span class="hljs-string">I/O thread 3 state: wait Windows aio (read thread)</span><br><span class="hljs-string">I/O thread 4 state: wait Windows aio (read thread)</span><br><span class="hljs-string">I/O thread 5 state: wait Windows aio (read thread)</span><br><span class="hljs-string">I/O thread 6 state: wait Windows aio (write thread)</span><br><span class="hljs-string">I/O thread 7 state: wait Windows aio (write thread)</span><br><span class="hljs-string">I/O thread 8 state: wait Windows aio (write thread)</span><br><span class="hljs-string">I/O thread 9 state: wait Windows aio (write thread)</span><br><span class="hljs-string">Pending normal aio reads: [0, 0, 0, 0] , aio writes: [0, 0, 0, 0] ,</span><br><span class="hljs-string"> ibuf aio reads:, log i/o&#x27;</span>s:, sync i<span class="hljs-operator">/</span>o<span class="hljs-string">&#x27;s:</span><br><span class="hljs-string">Pending flushes (fsync) log: 0; buffer pool: 0</span><br><span class="hljs-string">11388 OS file reads, 275231 OS file writes, 268926 OS fsyncs</span><br><span class="hljs-string">0.00 reads/s, 0 avg bytes/read, 0.15 writes/s, 0.00 fsyncs/s</span><br><span class="hljs-string">-------------------------------------</span><br><span class="hljs-string">INSERT BUFFER AND ADAPTIVE HASH INDEX</span><br><span class="hljs-string">-------------------------------------</span><br><span class="hljs-string">Ibuf: size 1, free list len 113, seg size 115, 51 merges</span><br><span class="hljs-string">merged operations:</span><br><span class="hljs-string"> insert 76, delete mark 78, delete 42</span><br><span class="hljs-string">discarded operations:</span><br><span class="hljs-string"> insert 0, delete mark 0, delete 0</span><br><span class="hljs-string">Hash table size 2267, node heap has 1 buffer(s)</span><br><span class="hljs-string">Hash table size 2267, node heap has 1 buffer(s)</span><br><span class="hljs-string">Hash table size 2267, node heap has 1 buffer(s)</span><br><span class="hljs-string">Hash table size 2267, node heap has 1 buffer(s)</span><br><span class="hljs-string">Hash table size 2267, node heap has 1 buffer(s)</span><br><span class="hljs-string">Hash table size 2267, node heap has 1 buffer(s)</span><br><span class="hljs-string">Hash table size 2267, node heap has 3 buffer(s)</span><br><span class="hljs-string">Hash table size 2267, node heap has 1 buffer(s)</span><br><span class="hljs-string">0.36 hash searches/s, 0.38 non-hash searches/s</span><br><span class="hljs-string">---</span><br><span class="hljs-string">LOG</span><br><span class="hljs-string">---</span><br><span class="hljs-string">Log sequence number 3913168090</span><br><span class="hljs-string">Log flushed up to   3913168090</span><br><span class="hljs-string">Pages flushed up to 3913168090</span><br><span class="hljs-string">Last checkpoint at  3913168081</span><br><span class="hljs-string">0 pending log flushes, 0 pending chkp writes</span><br><span class="hljs-string">267248 log i/o&#x27;</span>s done, <span class="hljs-number">0.00</span> log i<span class="hljs-operator">/</span>o<span class="hljs-string">&#x27;s/second</span><br><span class="hljs-string">----------------------</span><br><span class="hljs-string">BUFFER POOL AND MEMORY</span><br><span class="hljs-string">----------------------</span><br><span class="hljs-string">Total large memory allocated 8585216</span><br><span class="hljs-string">Dictionary memory allocated 3494975</span><br><span class="hljs-string">Buffer pool size   512</span><br><span class="hljs-string">Free buffers       246</span><br><span class="hljs-string">Database pages     256</span><br><span class="hljs-string">Old database pages 0</span><br><span class="hljs-string">Modified db pages  0</span><br><span class="hljs-string">Pending reads      0</span><br><span class="hljs-string">Pending writes: LRU 0, flush list 0, single page 0</span><br><span class="hljs-string">Pages made young 0, not young 0</span><br><span class="hljs-string">0.00 youngs/s, 0.00 non-youngs/s</span><br><span class="hljs-string">Pages read 10815, created 2268, written 6967</span><br><span class="hljs-string">0.00 reads/s, 0.00 creates/s, 0.15 writes/s</span><br><span class="hljs-string">Buffer pool hit rate 1000 / 1000, young-making rate 0 / 1000 not 0 / 1000</span><br><span class="hljs-string">Pages read ahead 0.00/s, evicted without access 0.00/s, Random read ahead 0.00/s</span><br><span class="hljs-string">LRU len: 256, unzip_LRU len: 0</span><br><span class="hljs-string">I/O sum[9]:cur[0], unzip sum[0]:cur[0]</span><br><span class="hljs-string">--------------</span><br><span class="hljs-string">ROW OPERATIONS</span><br><span class="hljs-string">--------------</span><br><span class="hljs-string">0 queries inside InnoDB, 0 queries in queue</span><br><span class="hljs-string">0 read views open inside InnoDB</span><br><span class="hljs-string">Process ID=5632, Main thread ID=0000000000000B1C , state=sleeping</span><br><span class="hljs-string">Number of rows inserted 279451, updated 682, deleted 187, read 1383947</span><br><span class="hljs-string">0.15 inserts/s, 0.00 updates/s, 0.00 deletes/s, 0.97 reads/s</span><br><span class="hljs-string">----------------------------</span><br><span class="hljs-string">END OF INNODB MONITOR OUTPUT</span><br><span class="hljs-string">============================</span><br><span class="hljs-string"></span><br></code></pre></td></tr></table></figure>
+
+<h4 id="2-2-6-优化建议"><a href="#2-2-6-优化建议" class="headerlink" title="2.2.6 优化建议"></a>2.2.6 优化建议</h4><p>尽可能让所有数据检索都通过索引来完成，避免无索引行锁升级为表锁 </p>
+<p>合理设计索引，尽量缩小锁的范围 </p>
+<p>尽可能减少检索条件范围，避免间隙锁 </p>
+<p>尽量控制事务大小，减少锁定资源量和时间长度，涉及事务加锁的sql </p>
+<p>尽量放在事务最后执行 </p>
+<p>尽可能低级别事务隔离</p>
+<h2 id="MVCC机制详解"><a href="#MVCC机制详解" class="headerlink" title="MVCC机制详解"></a>MVCC机制详解</h2><h4 id><a href="#" class="headerlink" title></a></h4>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/" rel="tag"># 性能调优</a>
+              <a href="/tags/Mysql/" rel="tag"># Mysql</a>
+              <a href="/tags/%E4%BA%8B%E5%8A%A1/" rel="tag"># 事务</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/12/19/images/Mybati%E6%89%A7%E8%A1%8C%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E8%BF%87%E7%A8%8B%E4%B8%8E%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90(1)/oops/" rel="prev" title="">
+      <i class="fa fa-chevron-left"></i> 
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Mysql%E9%94%81%E4%B8%8E%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="nav-number">1.</span> <span class="nav-text">Mysql锁与事务隔离级别</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E9%94%81%E5%AE%9A%E4%B9%89"><span class="nav-number">1.1.</span> <span class="nav-text">1、锁定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81%E9%94%81%E5%88%86%E7%B1%BB"><span class="nav-number">1.2.</span> <span class="nav-text">2、锁分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E8%A1%A8%E9%94%81"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1 表锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-1-%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">2.1.1 基本操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-2-%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90-%E5%8A%A0%E8%AF%BB%E9%94%81%EF%BC%89"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">2.1.2 案例分析(加读锁）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-3-%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90-%E5%8A%A0%E5%86%99%E9%94%81%EF%BC%89"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">2.1.3 案例分析(加写锁）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-4-%E6%A1%88%E4%BE%8B%E7%BB%93%E8%AE%BA"><span class="nav-number">1.2.1.4.</span> <span class="nav-text">2.1.4 案例结论</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E8%A1%8C%E9%94%81"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2 行锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-1%E8%A1%8C%E9%94%81%E6%94%AF%E6%8C%81%E4%BA%8B%E5%8A%A1"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">2.2.1行锁支持事务</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%EF%BC%88Transaction%EF%BC%89%E5%8F%8A%E5%85%B6ACID%E5%B1%9E%E6%80%A7"><span class="nav-number">1.2.2.1.1.</span> <span class="nav-text">事务（Transaction）及其ACID属性</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">1.2.2.1.2.</span> <span class="nav-text">并发事务处理带来的问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="nav-number">1.2.2.1.3.</span> <span class="nav-text">事务隔离级别</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-2-%E8%A1%8C%E9%94%81%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">2.2.2 行锁与隔离级别案例分析</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1%E3%80%81%E8%A1%8C%E9%94%81%E6%BC%94%E7%A4%BA"><span class="nav-number">1.2.2.2.1.</span> <span class="nav-text">1、行锁演示</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2%E3%80%81%E8%AF%BB%E6%9C%AA%E6%8F%90%E4%BA%A4"><span class="nav-number">1.2.2.2.2.</span> <span class="nav-text">2、读未提交</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3%E3%80%81%E8%AF%BB%E5%B7%B2%E6%8F%90%E4%BA%A4"><span class="nav-number">1.2.2.2.3.</span> <span class="nav-text">3、读已提交</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4%E3%80%81%E5%8F%AF%E9%87%8D%E5%A4%8D%E8%AF%BB"><span class="nav-number">1.2.2.2.4.</span> <span class="nav-text">4、可重复读</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5%E3%80%81%E4%B8%B2%E8%A1%8C%E5%8C%96"><span class="nav-number">1.2.2.2.5.</span> <span class="nav-text">5、串行化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Mysql%E9%BB%98%E8%AE%A4%E7%BA%A7%E5%88%AB%E6%98%AFrepeatable-read%EF%BC%8C%E6%9C%89%E5%8A%9E%E6%B3%95%E8%A7%A3%E5%86%B3%E5%B9%BB%E8%AF%BB%E9%97%AE%E9%A2%98%E5%90%97%EF%BC%9F"><span class="nav-number">1.2.2.2.6.</span> <span class="nav-text">Mysql默认级别是repeatable-read，有办法解决幻读问题吗？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%97%A0%E7%B4%A2%E5%BC%95%E8%A1%8C%E9%94%81%E4%BC%9A%E5%8D%87%E7%BA%A7%E4%B8%BA%E8%A1%A8%E9%94%81"><span class="nav-number">1.2.2.2.7.</span> <span class="nav-text">无索引行锁会升级为表锁</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E5%8A%A0%E9%94%81%E6%96%B9%E5%BC%8F"><span class="nav-number">1.2.2.2.8.</span> <span class="nav-text">其他加锁方式</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-3-%E6%A1%88%E4%BE%8B%E7%BB%93%E8%AE%BA"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">2.2.3 案例结论</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-4-%E8%A1%8C%E9%94%81%E5%88%86%E6%9E%90"><span class="nav-number">1.2.2.4.</span> <span class="nav-text">2.2.4 行锁分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-5-%E6%AD%BB%E9%94%81"><span class="nav-number">1.2.2.5.</span> <span class="nav-text">2.2.5 死锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-6-%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE"><span class="nav-number">1.2.2.6.</span> <span class="nav-text">2.2.6 优化建议</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MVCC%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3"><span class="nav-number">1.3.</span> <span class="nav-text">MVCC机制详解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">1.3.0.1.</span> <span class="nav-text"></span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">53</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>
