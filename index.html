@@ -188,6 +188,412 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/06/ES(ElasticSearch)%E7%AE%80%E4%BB%8B1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/01/06/ES(ElasticSearch)%E7%AE%80%E4%BB%8B1/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-01-06 00:00:55 / 修改时间：01:12:14" itemprop="dateCreated datePublished" datetime="2022-01-06T00:00:55+08:00">2022-01-06</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Elasticsearch-简介主要概念"><a href="#Elasticsearch-简介主要概念" class="headerlink" title="Elasticsearch 简介主要概念"></a>Elasticsearch 简介主要概念</h1><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/cn/elasticsearch/guide/current/index.html">Elasticsearch: 权威指南</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_37883866/article/details/106200618">ES入门</a></p>
+<h2 id="什么是Elastic-Search"><a href="#什么是Elastic-Search" class="headerlink" title="什么是Elastic Search"></a>什么是Elastic Search</h2><p>​    ElasticSearch 简称 ES ，是基于Apache Lucene构建的<strong>开源搜索引擎</strong>，是当前流行的企业级搜索引擎。Lucene本身就可以被认为迄今为止性能最好的一款开源搜索引擎工具包，但是lucene的API相对复杂，需要深厚的搜索理论。很难集成到实际的应用中去。但是ES是采用java语言编写，提供了简单易用的<strong>RestFul API</strong>，开发者可以使用其简单的RestFul API，开发相关的搜索功能，从而避免lucene的复杂性。</p>
+<p>​    </p>
+<h2 id="ES的应用场景"><a href="#ES的应用场景" class="headerlink" title="ES的应用场景"></a>ES的应用场景</h2><p>​        ES主要以轻量级JSON作为数据存储格式，它被用作<strong>全文检索</strong>、<strong>结构化搜索</strong>、<strong>分析</strong>以及这三个功能的组合（ELK）</p>
+<p>​    <strong>我们本次使用主要是使用ES的结构化搜索功能来替代Mysql搜索</strong></p>
+<h2 id="ES相关概念介绍"><a href="#ES相关概念介绍" class="headerlink" title="ES相关概念介绍"></a>ES相关概念介绍</h2><table>
+<thead>
+<tr>
+<th>ES</th>
+<th>Mysql</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Index</td>
+<td>数据库</td>
+</tr>
+<tr>
+<td>Type</td>
+<td>数据表</td>
+</tr>
+<tr>
+<td>Document</td>
+<td>行</td>
+</tr>
+<tr>
+<td>Mapping</td>
+<td>Schema</td>
+</tr>
+</tbody></table>
+<p><img src="images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/image-20220106005052880.png" alt="image-20220106005052880"></p>
+<h3 id="1、索引（-index）"><a href="#1、索引（-index）" class="headerlink" title="1、索引（_index）"></a>1、索引（_index）</h3><p>​    类似MYSQL的数据库</p>
+<h3 id="2、类型（-type）"><a href="#2、类型（-type）" class="headerlink" title="2、类型（_type）"></a>2、类型（_type）</h3><p>​    类似MYSQL的表</p>
+<h3 id="3、字段（field）"><a href="#3、字段（field）" class="headerlink" title="3、字段（field）"></a>3、字段（field）</h3><p>​    类型里的字段，类似MYSQL的表字段</p>
+<h3 id="4、文档（document）"><a href="#4、文档（document）" class="headerlink" title="4、文档（document）"></a>4、文档（document）</h3><p>​    类似MYSQL的行数据</p>
+<h3 id="5、映射-mapping"><a href="#5、映射-mapping" class="headerlink" title="5、映射(mapping)"></a>5、映射(mapping)</h3><p>​    类似MYSQL的DDL，声明索引与类型的关系、类型与字段的关系，是json格式</p>
+<h3 id="6、正向索引"><a href="#6、正向索引" class="headerlink" title="6、正向索引"></a>6、正向索引</h3><p>​    以文档的ID为关键字，表中记录文档中每个字的位置信息，查找时扫描表中每个文档中字的信息直到找出所有包含查询关键字的文档，比如Mysql的聚餐索引<br><img src="images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/image-20211206233052712.png" alt="image-20211206233052712"></p>
+<h3 id="7、倒排索引"><a href="#7、倒排索引" class="headerlink" title="7、倒排索引"></a>7、倒排索引</h3><p>​    倒排表以字或词为关键字进行索引，表中关键字所对应的记录表项记录了出现这个字或词的所有文档，一个表项就是一个字表段，它记录该文档的ID和字符在该文档中出现的位置情况，比如ES索引结构</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs json">PUT /dangdang             <br>&#123;<br>  <span class="hljs-attr">&quot;mappings&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;product&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;properties&quot;</span>: &#123;<br>        	<span class="hljs-attr">&quot;title&quot;</span>:    &#123; <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span>  &#125;,<br>        	<span class="hljs-attr">&quot;name&quot;</span>:     &#123; <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span>  &#125;,<br>       		<span class="hljs-attr">&quot;age&quot;</span>:      &#123; <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;integer&quot;</span> &#125;,<br>        	<span class="hljs-attr">&quot;created&quot;</span>:  &#123;<br>         		 <span class="hljs-attr">&quot;type&quot;</span>:   <span class="hljs-string">&quot;date&quot;</span><br>        		&#125;<br>      		&#125;<br>    	&#125;<br>  	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><img src="images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/image-20220106005312913.png" alt="image-20220106005312913"></p>
+<h2 id="7、面向文档"><a href="#7、面向文档" class="headerlink" title="7、面向文档"></a>7、面向文档</h2><p>​        应用中的对象很少只是简单的键值列表，更多时候它拥有复杂的数据结构，比如包含日期、地理位置、另一个对象或者数组。<br>​        总有一天你会想到把这些对象存储到数据库中。将这些数据保存到由行和列组成的关系数据库中，就好像是把一个丰富，信息表现力强的对象拆散了放入一个非常大的表格中：你不得不拆散对象以适应表模式（通常一列表示一个字段），然后又不得不在查询的时候重建它们。<br>​        Elasticsearch是面向文档(document oriented)的，这意味着它可以存储整个对象或文档(document)。然而它不仅仅是存储，还会索引(index)每个文档的内容使之可以被搜索。在Elasticsearch中，你可以对文档（而非成行成列的数据）进行索引、搜索、排序、过滤。这种理解数据的方式与以往完全不同，这也是Elasticsearch能够执行复杂的全文搜索的原因之一。</p>
+<h2 id="8、其他概念"><a href="#8、其他概念" class="headerlink" title="8、其他概念"></a>8、其他概念</h2><h3 id="节点-node-和集群-node"><a href="#节点-node-和集群-node" class="headerlink" title="节点(node)和集群(node)"></a>节点(node)和集群(node)</h3><p>Elasticsearch可以作为一个独立的单个搜索服务器。不过，为了能够处理大型数据集，实现容错和高可用性，Elasticsearch可以运行在许多互相合作的服务器上。这些服务器称为集群（cluster），形成集群的每个服务器称为节点（node）。</p>
+<h3 id="分片-shards"><a href="#分片-shards" class="headerlink" title="分片(shards )"></a>分片(shards )</h3><p>当有大量的文档时，由于内存的限制、硬盘能力、处理能力不足、无法足够快地响应客户端请求等，一个节点可能不够。在这种情况下，数据可以分为较小的称为分片（shard）的部分（其中每个分片都是一个独立的Apache Lucene索引）。每个分片可以放在不同的服务器上，因此，数据可以在集群的节点中传播。当你查询的索引分布在多个分片上时，Elasticsearch会把查询发送给每个相关的分片，并将结果合并在一起，而应用程序并不知道分片的存在。此外，多个分片可以加快索引。</p>
+<h3 id="副本-replicas"><a href="#副本-replicas" class="headerlink" title="副本(replicas)"></a>副本(replicas)</h3><p>为了提高查询吞吐量或实现高可用性，可以使用分片副本。副本（replica）只是一个分片的精确复制，每个分片可以有零个或多个副本。换句话说，Elasticsearch可以有许多相同的分片，其中之一被自动选择去更改索引操作。这种特殊的分片称为主分片（primary shard），其余称为副本分片（replica shard）。在主分片丢失时，例如该分片数据所在服务器不可用，集群将副本提升为新的主分片。</p>
+<p><img src="images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/image-20220106010538406.png" alt="image-20220106010538406"></p>
+<p><img src="images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/image-20220106011158094.png" alt="image-20220106011158094"></p>
+<h1 id="ES数据同步方案"><a href="#ES数据同步方案" class="headerlink" title="ES数据同步方案"></a>ES数据同步方案</h1><h2 id="1、业务层同步"><a href="#1、业务层同步" class="headerlink" title="1、业务层同步"></a>1、业务层同步</h2><p>​    在业务层完成数据操作提交事务后，同步数据至ES，常见的做法是在ORM的hooks钩子里编写监听相关表的增删改操作落表记录，发起延时调度触发ES同步</p>
+<p><img src="images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/ES%E6%8E%A5%E5%85%A5%E6%96%B9%E6%A1%88.png"></p>
+<p>优点：系统自身形成闭环，不依赖新的组件<br>风险点：从0到1开发，许多技术点待落实</p>
+<h2 id="2、基于binlog的日志订阅"><a href="#2、基于binlog的日志订阅" class="headerlink" title="2、基于binlog的日志订阅"></a>2、基于binlog的日志订阅</h2><p><img src="images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/Snipaste_2021-12-28_15-59-27.png"></p>
+<p>介绍：模拟mysql原生主从模式，server端dump binlog并持久化到本地，即使源库down机，client端依然可以从server端正常接收已被持久化的binlog<br>wiki:<a target="_blank" rel="noopener" href="https://wiki.dotfashion.cn/pages/viewpage.action?pageId=155944440">https://wiki.dotfashion.cn/pages/viewpage.action?pageId=155944440</a><br>优点：通过解析mysql的binlog同步数据的变更，适合实时性要求较高的场景<br>风险点：运维DB交互耗时<br>Binlogcenter：原理类似阿里的Canal<br><img src="images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/image-20211228164415510.png" alt="image-20211228164415510"></p>
+<h2 id="3、定时任务根据last-update-time字段同步"><a href="#3、定时任务根据last-update-time字段同步" class="headerlink" title="3、定时任务根据last_update_time字段同步"></a>3、定时任务根据last_update_time字段同步</h2><p><img src="images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/image2021-9-2_10-55-18.png"></p>
+<p>缺点：数据的更新存在一定的延迟，数据的删除无法同步更新</p>
+<p>优点：实现简单粗暴</p>
+<h1 id="引入ES"><a href="#引入ES" class="headerlink" title="引入ES"></a>引入ES</h1><h2 id="使用demo"><a href="#使用demo" class="headerlink" title="使用demo"></a>使用demo</h2><p>1、创建demo实体</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Document(indexName = &quot;mss-user-item&quot;,createIndex = false)</span><br><span class="hljs-meta">@Setting(settingPath = &quot;elasticsearch/settings.json&quot;)</span><br><span class="hljs-meta">@Data</span><br><span class="hljs-meta">@Accessors(chain = true)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MssEsUserItem</span></span>&#123;<br><br>    <span class="hljs-meta">@ApiModelProperty(value = &quot;用户管理事项关系(获取详情的id)id&quot;)</span><br>    <span class="hljs-meta">@Id</span><br>    <span class="hljs-meta">@Field(type = FieldType.Keyword)</span><br>    <span class="hljs-keyword">private</span> String itemUserId;<br><br>    <span class="hljs-meta">@ApiModelProperty(value = &quot;姓名&quot;)</span><br>    <span class="hljs-meta">@Field(type = FieldType.Text)</span><br>    <span class="hljs-keyword">private</span> String userName;<br><br>    <span class="hljs-meta">@ApiModelProperty(value = &quot;管理事项&quot;)</span><br>    <span class="hljs-meta">@Field(type = FieldType.Text)</span><br>    <span class="hljs-keyword">private</span> String content;<br><br><br>    <span class="hljs-meta">@ApiModelProperty(value = &quot;执行状态 5:待处理 10:未完成 15:待改善 20:改善中 25:正在改善 30:已改善 35:已完成&quot;)</span><br>    <span class="hljs-meta">@Field(type = FieldType.Integer)</span><br>    <span class="hljs-keyword">private</span> Integer performState;<br><br>    <span class="hljs-meta">@ApiModelProperty(&quot;执行开始日期&quot;)</span><br>    <span class="hljs-meta">@Field(type = FieldType.Date, format = DateFormat.custom, pattern = &quot;yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS&quot;)</span><br>    <span class="hljs-keyword">private</span> Date performStartDate;<br><br>    <span class="hljs-meta">@ApiModelProperty(&quot;执行结束日期)</span><span class="hljs-string">&quot;)</span><br><span class="hljs-string">    @Field(type = FieldType.Date, format = DateFormat.custom, pattern = &quot;</span>yyyy-MM-dd HH:mm:ss<span class="hljs-string">&quot;)</span><br><span class="hljs-string">    private Date performEndDate;</span><br><span class="hljs-string"></span><br><span class="hljs-string">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>2、创建索引+设置映射+设置别名</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs json">PUT /mss_user_item<br>&#123;<br>  <span class="hljs-attr">&quot;mappings&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;mssesuseritem&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;properties&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;itemUserId&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;keyword&quot;</span><br>        &#125;,<br>        <span class="hljs-attr">&quot;userName&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;keyword&quot;</span><br>        &#125;,<br>        <span class="hljs-attr">&quot;content&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span><br>        &#125;,<br>        <span class="hljs-attr">&quot;performState&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;integer&quot;</span><br>        &#125;,<br>        <span class="hljs-attr">&quot;performStartDate&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;date&quot;</span>,<br>          <span class="hljs-attr">&quot;format&quot;</span>: <span class="hljs-string">&quot;yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS||epoch_millis&quot;</span><br>        &#125;,<br>        <span class="hljs-attr">&quot;performEndDate&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;date&quot;</span>,<br>          <span class="hljs-attr">&quot;format&quot;</span>: <span class="hljs-string">&quot;yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS||epoch_millis&quot;</span><br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>索引文档的简单地增删改查–使用spring-data面向对象编程</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">ItemRepository</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ElasticsearchRepository</span>&lt;<span class="hljs-title">MssEsUserItem</span>,<span class="hljs-title">String</span>&gt; </span>&#123;<br>&#125;<br><br> <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testInsertById</span><span class="hljs-params">(String indexName)</span> <span class="hljs-keyword">throws</span> IOException</span>&#123;<br>        MssEsUserItem userItem = <span class="hljs-keyword">new</span> MssEsUserItem().setItemUserId(<span class="hljs-string">&quot;1&quot;</span>).setUserName(<span class="hljs-string">&quot;李&quot;</span>).setContent(<span class="hljs-string">&quot;lallala&quot;</span>)<br>                .setPerformEndDate(<span class="hljs-keyword">new</span> Date())<br>                .setPerformStartDate(<span class="hljs-keyword">new</span> Date()).setPerformState(<span class="hljs-number">1</span>);<br>        MssEsUserItem save = itemRepository.save(userItem);<br>        MssEsUserItem mssEsUserItem = itemRepository.findById(<span class="hljs-string">&quot;1&quot;</span>).orElse(<span class="hljs-keyword">null</span>);<br>        log.info(mssEsUserItem.toString());<br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>查询入参</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs json">&#123;<br>    <span class="hljs-attr">&quot;deptId&quot;</span>: [<br>        <span class="hljs-number">4102</span>,<br>        <span class="hljs-number">4107</span><br>    ],<br>    <span class="hljs-attr">&quot;gradeOrRoleId&quot;</span>: [<br>        <span class="hljs-number">498</span>,<br>        <span class="hljs-number">488</span><br>    ],<br>    <span class="hljs-attr">&quot;leaderUserId&quot;</span>: [<br>        <span class="hljs-number">28</span>,<br>        <span class="hljs-number">32</span><br>    ],<br>    <span class="hljs-attr">&quot;pageIndex&quot;</span>: <span class="hljs-number">1</span>,<br>    <span class="hljs-attr">&quot;pageSize&quot;</span>: <span class="hljs-number">20</span>,<br>    <span class="hljs-attr">&quot;performState&quot;</span>: [<br>        <span class="hljs-number">10</span>,<br>        <span class="hljs-number">5</span>,<br>        <span class="hljs-number">15</span>,<br>        <span class="hljs-number">20</span>,<br>        <span class="hljs-number">30</span>,<br>        <span class="hljs-number">35</span><br>    ],<br>    <span class="hljs-attr">&quot;performTimeEnd&quot;</span>: <span class="hljs-string">&quot;2022-01-01&quot;</span>,<br>    <span class="hljs-attr">&quot;performTimeStart&quot;</span>: <span class="hljs-string">&quot;2021-12-01&quot;</span>,<br>    <span class="hljs-attr">&quot;userId&quot;</span>: <span class="hljs-number">28</span>,<br>    <span class="hljs-attr">&quot;employeeId&quot;</span>: <span class="hljs-string">&quot;&quot;</span>,<br>    <span class="hljs-attr">&quot;isPersonMark&quot;</span>: <span class="hljs-number">0</span>,<br>    <span class="hljs-attr">&quot;isWorkMark&quot;</span>: <span class="hljs-number">0</span>,<br>    <span class="hljs-attr">&quot;ehrEmployeeId&quot;</span>: <span class="hljs-string">&quot;10007592&quot;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="mss管理清单执行明细列表页查询"><a href="#mss管理清单执行明细列表页查询" class="headerlink" title="mss管理清单执行明细列表页查询"></a>mss管理清单执行明细列表页查询</h2><p><strong>查询SQL</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span><br>       pmiu.id <span class="hljs-keyword">AS</span> itemUserId,<br>       (<span class="hljs-keyword">SELECT</span> ou.user_name <span class="hljs-keyword">FROM</span> org_user ou <span class="hljs-keyword">WHERE</span> ou.id <span class="hljs-operator">=</span> pmiu.user_id <span class="hljs-keyword">AND</span> ou.is_delete <span class="hljs-operator">=</span> <span class="hljs-number">0</span> <span class="hljs-keyword">AND</span> ou.user_state <span class="hljs-operator">=</span> <span class="hljs-number">1</span>) <span class="hljs-keyword">AS</span> userName,<br>       og.dept_id <span class="hljs-keyword">AS</span> ogDeptId,<br>       (<span class="hljs-keyword">SELECT</span> od.dept_name <span class="hljs-keyword">FROM</span> org_dept od <span class="hljs-keyword">WHERE</span> od.id <span class="hljs-operator">=</span> og.dept_id <span class="hljs-keyword">AND</span> od.is_delete <span class="hljs-operator">=</span> <span class="hljs-number">0</span>) deptName,<br>       pmiu.leader_user_id <span class="hljs-keyword">AS</span> leaderUserId,<br>       (<span class="hljs-keyword">SELECT</span> ou.user_name <span class="hljs-keyword">FROM</span> org_user ou <span class="hljs-keyword">WHERE</span> ou.id <span class="hljs-operator">=</span> pmiu.leader_user_id <span class="hljs-keyword">AND</span> ou.is_delete <span class="hljs-operator">=</span> <span class="hljs-number">0</span> <span class="hljs-keyword">AND</span> ou.user_state <span class="hljs-operator">=</span> <span class="hljs-number">1</span>) <span class="hljs-keyword">AS</span> leaderUserName ,<br>       GROUP_CONCAT((<span class="hljs-keyword">SELECT</span> bdc.config_value <span class="hljs-keyword">FROM</span> basic_data_config bdc <span class="hljs-keyword">WHERE</span> bdc.id <span class="hljs-operator">=</span> ouer.execute_role_id <span class="hljs-keyword">AND</span> bdc.is_delete <span class="hljs-operator">=</span> <span class="hljs-number">0</span> limit <span class="hljs-number">1</span>)) <span class="hljs-keyword">AS</span> performName,<br>       (<span class="hljs-keyword">SELECT</span> bdc.config_value <span class="hljs-keyword">FROM</span> basic_data_config bdc <span class="hljs-keyword">WHERE</span> bdc.id <span class="hljs-operator">=</span> pmi.type_id <span class="hljs-keyword">AND</span> bdc.is_delete <span class="hljs-operator">=</span> <span class="hljs-number">0</span>) <span class="hljs-keyword">AS</span> manageCategory,<br>       pmi.content <span class="hljs-keyword">AS</span> content, pmiu.improve_way <span class="hljs-keyword">AS</span> improveWay,<br>       (<span class="hljs-keyword">SELECT</span> pmir.content <span class="hljs-keyword">FROM</span> plan_manage_item_remark pmir <span class="hljs-keyword">WHERE</span> pmir.item_user_id <span class="hljs-operator">=</span> pmiu.id <span class="hljs-keyword">AND</span> pmir.is_delete <span class="hljs-operator">=</span> <span class="hljs-number">0</span> <span class="hljs-keyword">AND</span> pmir.remark_type <span class="hljs-operator">=</span> <span class="hljs-number">1</span>) <span class="hljs-keyword">AS</span> personMark,<br>       (<span class="hljs-keyword">SELECT</span> pmir.content <span class="hljs-keyword">FROM</span> plan_manage_item_remark pmir <span class="hljs-keyword">WHERE</span> pmir.item_user_id <span class="hljs-operator">=</span> pmiu.id <span class="hljs-keyword">AND</span> pmir.is_delete <span class="hljs-operator">=</span> <span class="hljs-number">0</span> <span class="hljs-keyword">AND</span> pmir.remark_type <span class="hljs-operator">=</span> <span class="hljs-number">3</span>) <span class="hljs-keyword">AS</span> workMark,<br>       pmiu.perform_state <span class="hljs-keyword">AS</span> performState,<br>       pmiu.perform_start_time <span class="hljs-keyword">AS</span> performStartDate,<br>       pmiu.perform_end_time <span class="hljs-keyword">AS</span> performEndDate,<br>       pmiu.period_value <span class="hljs-keyword">AS</span> periodValue<br><span class="hljs-keyword">FROM</span> plan_manage_item_user pmiu<br>    <span class="hljs-keyword">LEFT</span> <span class="hljs-keyword">JOIN</span> plan_manage_item pmi <span class="hljs-keyword">ON</span> pmiu.item_id <span class="hljs-operator">=</span> pmi.id <span class="hljs-keyword">AND</span> pmi.is_delete <span class="hljs-operator">=</span> <span class="hljs-number">0</span><br>    <span class="hljs-keyword">LEFT</span> <span class="hljs-keyword">JOIN</span> org_user og <span class="hljs-keyword">ON</span> og.id <span class="hljs-operator">=</span> pmiu.user_id <span class="hljs-keyword">AND</span> og.is_delete <span class="hljs-operator">=</span> <span class="hljs-number">0</span> <span class="hljs-keyword">AND</span> og.user_state <span class="hljs-operator">=</span> <span class="hljs-number">1</span><br>    <span class="hljs-keyword">LEFT</span> <span class="hljs-keyword">JOIN</span> org_user_exec_role ouer <span class="hljs-keyword">ON</span> ouer.user_id <span class="hljs-operator">=</span> og.id <span class="hljs-keyword">AND</span> ouer.is_delete <span class="hljs-operator">=</span> <span class="hljs-number">0</span><br><span class="hljs-keyword">WHERE</span> pmiu.is_delete <span class="hljs-operator">=</span> <span class="hljs-number">0</span><br>  <span class="hljs-keyword">AND</span> pmiu.perform_state <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">IN</span>(<span class="hljs-number">25</span>)<br>  <span class="hljs-keyword">AND</span> og.id <span class="hljs-operator">=</span> <span class="hljs-number">60</span><br>  <span class="hljs-keyword">AND</span> pmiu.is_exist_personal_remark <span class="hljs-operator">=</span> <span class="hljs-number">0</span><br>  <span class="hljs-keyword">AND</span> pmiu.is_exist_work_remark <span class="hljs-operator">=</span> <span class="hljs-number">0</span><br><span class="hljs-comment">--  AND og.dept_id IN ( 5384 , 5385 , 5383 , 5361 , 54 )</span><br> <span class="hljs-comment">-- AND( ouer.manage_grade_id IN ( 472 , 461 ) OR ouer.execute_role_id IN ( 472 , 461 ) )</span><br>  <span class="hljs-keyword">AND</span> pmiu.leader_user_id <span class="hljs-keyword">IN</span> ( <span class="hljs-number">904</span> , <span class="hljs-number">60</span> , <span class="hljs-number">14</span> )<br>  <span class="hljs-keyword">AND</span> pmiu.perform_start_time <span class="hljs-operator">&gt;=</span> <span class="hljs-string">&#x27;2021-09-01 00:00:00&#x27;</span><br>  <span class="hljs-keyword">AND</span> pmiu.perform_start_time <span class="hljs-operator">&lt;=</span> <span class="hljs-string">&#x27;2021-12-29 23:59:59&#x27;</span><br>  <span class="hljs-keyword">AND</span> pmiu.perform_state <span class="hljs-keyword">IN</span> ( <span class="hljs-number">10</span> , <span class="hljs-number">5</span> , <span class="hljs-number">15</span> , <span class="hljs-number">20</span> , <span class="hljs-number">30</span> , <span class="hljs-number">35</span> )<br><span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> pmiu.id<br><span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> pmiu.perform_state <span class="hljs-keyword">ASC</span>, pmiu.perform_start_time <span class="hljs-keyword">DESC</span><br></code></pre></td></tr></table></figure>
+
+<p>本次需求范围：</p>
+<p>1、梳理用户点检项列表的索引字段</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs sql">itemUserId <span class="hljs-comment">-- 用户点检id</span><br>userName <span class="hljs-comment">-- 用户名</span><br>ogDeptId <span class="hljs-comment">-- 部门id</span><br>deptName <span class="hljs-comment">-- 部门名称</span><br>leaderUserId <span class="hljs-comment">-- 上级id </span><br>leaderUserName <span class="hljs-comment">-- 上级姓名</span><br>performName <span class="hljs-comment">-- 执行角色</span><br>manageCategory <span class="hljs-comment">--管理类别</span><br>content <span class="hljs-comment">-- 管理事项</span><br>improveWay <span class="hljs-comment">-- 改善方式</span><br>personMark <span class="hljs-comment">-- 个人备注</span><br>workMark <span class="hljs-comment">-- 工作备注</span><br>performState <span class="hljs-comment">-- 执行状态</span><br>performStartDate <span class="hljs-comment">-- 执行开始日期</span><br>performEndDate <span class="hljs-comment">--执行结束日期</span><br>periodValue<br></code></pre></td></tr></table></figure>
+
+<p>2、展示字段</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@ApiModelProperty(value = &quot;用户管理事项关系(获取详情的id)id&quot;)</span><br><span class="hljs-keyword">private</span> Long itemUserId;<br><br><span class="hljs-meta">@ApiModelProperty(value = &quot;姓名&quot;)</span><br><span class="hljs-keyword">private</span> String userName;<br><br><span class="hljs-meta">@ApiModelProperty(value = &quot;OA部门&quot;)</span><br><span class="hljs-keyword">private</span> String deptName;<br><br><span class="hljs-meta">@ApiModelProperty(value = &quot;直接上级&quot;)</span><br><span class="hljs-keyword">private</span> String leaderUserName;<br><br><span class="hljs-meta">@ApiModelProperty(value = &quot;执行角色&quot;)</span><br><span class="hljs-keyword">private</span> String performName;<br><br><span class="hljs-meta">@ApiModelProperty(value = &quot;管理类别&quot;)</span><br><span class="hljs-keyword">private</span> String manageCategory;<br><br><span class="hljs-meta">@ApiModelProperty(value = &quot;管理事项&quot;)</span><br><span class="hljs-keyword">private</span> String content;<br><br><span class="hljs-meta">@ApiModelProperty(value = &quot;改善方式 1:自我提升 2:培训支撑&quot;)</span><br><span class="hljs-keyword">private</span> Integer improveWay;<br><br><span class="hljs-meta">@ApiModelProperty(value = &quot;个人备注&quot;)</span><br><span class="hljs-keyword">private</span> String personMark;<br><br><span class="hljs-meta">@ApiModelProperty(value = &quot;工作备注&quot;)</span><br><span class="hljs-keyword">private</span> String workMark;<br><br><span class="hljs-meta">@ApiModelProperty(value = &quot;执行状态 5:待处理 10:未完成 15:待改善 20:改善中 25:正在改善 30:已改善 35:已完成&quot;)</span><br><span class="hljs-keyword">private</span> Integer performState;<br><br><span class="hljs-meta">@ApiModelProperty(&quot;执行开始日期&quot;)</span><br><span class="hljs-meta">@JSONField(serializeUsing = DateFormatSerializer.class)</span><br><span class="hljs-keyword">private</span> Date performStartDate;<br><br><span class="hljs-meta">@ApiModelProperty(&quot;执行结束日期)</span><span class="hljs-string">&quot;)</span><br><span class="hljs-string">@JSONField(serializeUsing = DateFormatSerializer.class)</span><br><span class="hljs-string">private Date performEndDate;</span><br><span class="hljs-string"></span><br><span class="hljs-string">@ApiModelProperty(value = &quot;</span>年份-周期值 如 <span class="hljs-number">2021</span>-<span class="hljs-number">10</span><span class="hljs-string">&quot;)</span><br><span class="hljs-string">private String periodValue;</span><br></code></pre></td></tr></table></figure>
+
+<p>注意事项：<br>1、单次查询数量 form+size不大于5k</p>
+<p>2、禁用 wildcard</p>
+<p>3、充分利用倒排索引机制，能 keyword 类型尽量 keyword</p>
+<p>4、尽可能使用filter而不是query，但是要避免filter cache过大导致jvm飙升</p>
+<p>5、索引重建的准备 <a target="_blank" rel="noopener" href="https://wiki.dotfashion.cn/pages/viewpage.action?pageId=840730714">https://wiki.dotfashion.cn/pages/viewpage.action?pageId=840730714</a></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><code class="hljs json">GET mss-user-item/mssesuseritem/_search?<br>&#123;<br>  <span class="hljs-attr">&quot;query&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;bool&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;must&quot;</span>: [<br>        &#123;<br>          <span class="hljs-attr">&quot;terms&quot;</span>: &#123;<br>            <span class="hljs-attr">&quot;performState&quot;</span>: [<br>              <span class="hljs-number">2</span>,<br>              <span class="hljs-number">3</span>,<br>              <span class="hljs-number">4</span>,<br>              <span class="hljs-number">5</span>,<br>              <span class="hljs-number">6</span>,<br>              <span class="hljs-number">1</span><br>            ],<br>            <span class="hljs-attr">&quot;boost&quot;</span>: <span class="hljs-number">1</span><br>          &#125;<br>        &#125;,<br>        &#123;<br>          <span class="hljs-attr">&quot;terms&quot;</span>: &#123;<br>            <span class="hljs-attr">&quot;userName&quot;</span>: [<br>              <span class="hljs-string">&quot;李1&quot;</span>,<br>              <span class="hljs-string">&quot;李2&quot;</span>,<br>              <span class="hljs-string">&quot;李3&quot;</span>,<br>              <span class="hljs-string">&quot;李4&quot;</span>,<br>              <span class="hljs-string">&quot;李5&quot;</span>,<br>              <span class="hljs-string">&quot;李6&quot;</span><br>            ],<br>            <span class="hljs-attr">&quot;boost&quot;</span>: <span class="hljs-number">1</span><br>          &#125;<br>        &#125;,<br>        &#123;<br>          <span class="hljs-attr">&quot;prefix&quot;</span>: &#123;<br>            <span class="hljs-attr">&quot;userName&quot;</span>: &#123;<br>              <span class="hljs-attr">&quot;value&quot;</span>: <span class="hljs-string">&quot;李&quot;</span><br>            &#125;<br>          &#125;<br>        &#125;,<br>        &#123;<br>         <span class="hljs-attr">&quot;wildcard&quot;</span>: &#123;<br>           <span class="hljs-attr">&quot;userName&quot;</span>: &#123;<br>             <span class="hljs-attr">&quot;value&quot;</span>: <span class="hljs-string">&quot;李*&quot;</span><br>           &#125;<br>         &#125;<br>        &#125;<br>      ],<br>      <span class="hljs-attr">&quot;filter&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;range&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;performStartDate&quot;</span>: &#123;<br>          <br>            <span class="hljs-attr">&quot;lte&quot;</span>: <span class="hljs-string">&quot;2022-01-06 19:26:18&quot;</span><br>          &#125;<br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;,<br>  <span class="hljs-attr">&quot;sort&quot;</span>: [<br>    &#123;<br>      <span class="hljs-attr">&quot;itemUserId&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;order&quot;</span>: <span class="hljs-string">&quot;asc&quot;</span><br>      &#125;<br>    &#125;<br>  ]<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/06/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/01/06/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-01-06 00:00:55" itemprop="dateCreated datePublished" datetime="2022-01-06T00:00:55+08:00">2022-01-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-01-16 21:55:40" itemprop="dateModified" datetime="2022-01-16T21:55:40+08:00">2022-01-16</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Elasticsearch-简介主要概念"><a href="#Elasticsearch-简介主要概念" class="headerlink" title="Elasticsearch 简介主要概念"></a>Elasticsearch 简介主要概念</h1><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/cn/elasticsearch/guide/current/index.html">Elasticsearch: 权威指南</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_37883866/article/details/106200618">ES入门</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/6.4/query-filter-context.html">ES6.4官方文档</a></p>
+<h2 id="什么是Elastic-Search"><a href="#什么是Elastic-Search" class="headerlink" title="什么是Elastic Search"></a>什么是Elastic Search</h2><p>​    ElasticSearch 简称 ES ，是基于Apache Lucene构建的<strong>开源搜索引擎</strong>，是当前流行的企业级搜索引擎。Lucene本身就可以被认为迄今为止性能最好的一款开源搜索引擎工具包，但是lucene的API相对复杂，需要深厚的搜索理论。很难集成到实际的应用中去。但是ES是采用java语言编写，提供了简单易用的<strong>RestFul API</strong>，开发者可以使用其简单的RestFul API，开发相关的搜索功能，从而避免lucene的复杂性。</p>
+<p>​    </p>
+<h2 id="ES的应用场景"><a href="#ES的应用场景" class="headerlink" title="ES的应用场景"></a>ES的应用场景</h2><p>​        ES主要以轻量级JSON作为数据存储格式，它被用作<strong>全文检索</strong>、<strong>结构化搜索</strong>、<strong>分析</strong>以及这三个功能的组合（ELK）</p>
+<p>​    <strong>我们本次使用主要是使用ES的结构化搜索功能来替代Mysql搜索</strong></p>
+<h2 id="ES相关概念介绍"><a href="#ES相关概念介绍" class="headerlink" title="ES相关概念介绍"></a>ES相关概念介绍</h2><table>
+<thead>
+<tr>
+<th>ES</th>
+<th>Mysql</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Index</td>
+<td>数据库</td>
+</tr>
+<tr>
+<td>Type</td>
+<td>数据表</td>
+</tr>
+<tr>
+<td>Document</td>
+<td>行</td>
+</tr>
+<tr>
+<td>Mapping</td>
+<td>Schema</td>
+</tr>
+</tbody></table>
+<p><img src="/images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/image-20220106005052880.png" alt="image-20220106005052880"></p>
+<h3 id="1、索引（-index）"><a href="#1、索引（-index）" class="headerlink" title="1、索引（_index）"></a>1、索引（_index）</h3><p>​    类似MYSQL的数据库</p>
+<h3 id="2、类型（-type）"><a href="#2、类型（-type）" class="headerlink" title="2、类型（_type）"></a>2、类型（_type）</h3><p>​    类似MYSQL的表</p>
+<h3 id="3、字段（field）"><a href="#3、字段（field）" class="headerlink" title="3、字段（field）"></a>3、字段（field）</h3><p>​    类型里的字段，类似MYSQL的表字段</p>
+<h3 id="4、文档（document）"><a href="#4、文档（document）" class="headerlink" title="4、文档（document）"></a>4、文档（document）</h3><p>​    类似MYSQL的行数据</p>
+<h3 id="5、映射-mapping"><a href="#5、映射-mapping" class="headerlink" title="5、映射(mapping)"></a>5、映射(mapping)</h3><p>​    类似MYSQL的DDL，声明索引与类型的关系、类型与字段的关系，是json格式</p>
+<h3 id="6、正向索引"><a href="#6、正向索引" class="headerlink" title="6、正向索引"></a>6、正向索引</h3><p>​    以文档的ID为关键字，表中记录文档中每个字的位置信息，查找时扫描表中每个文档中字的信息直到找出所有包含查询关键字的文档，比如Mysql的B+聚餐索引<br><img src="/images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/image-20211206233052712.png" alt="image-20211206233052712"></p>
+<h3 id="7、倒排索引"><a href="#7、倒排索引" class="headerlink" title="7、倒排索引"></a>7、倒排索引</h3><p>​    倒排表以字或词为关键字进行索引，表中关键字所对应的记录表项记录了出现这个字或词的所有文档，一个表项就是一个字表段，它记录该文档的ID和字符在该文档中出现的位置情况，比如ES索引结构</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs json">PUT /dangdang             <br>&#123;<br>  <span class="hljs-attr">&quot;mappings&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;product&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;properties&quot;</span>: &#123;<br>        	<span class="hljs-attr">&quot;title&quot;</span>:    &#123; <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span>  &#125;,<br>        	<span class="hljs-attr">&quot;name&quot;</span>:     &#123; <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span>  &#125;,<br>       		<span class="hljs-attr">&quot;age&quot;</span>:      &#123; <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;integer&quot;</span> &#125;,<br>        	<span class="hljs-attr">&quot;created&quot;</span>:  &#123;<br>         		 <span class="hljs-attr">&quot;type&quot;</span>:   <span class="hljs-string">&quot;date&quot;</span><br>        		&#125;<br>      		&#125;<br>    	&#125;<br>  	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><img src="/images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/image-20220106005312913.png" alt="image-20220106005312913"></p>
+<h3 id="8、面向文档"><a href="#8、面向文档" class="headerlink" title="8、面向文档"></a>8、面向文档</h3><p>​        应用中的对象很少只是简单的键值列表，更多时候它拥有复杂的数据结构，比如包含日期、地理位置、另一个对象或者数组。<br>​        总有一天你会想到把这些对象存储到数据库中。将这些数据保存到由行和列组成的关系数据库中，就好像是把一个丰富，信息表现力强的对象拆散了放入一个非常大的表格中：你不得不拆散对象以适应表模式（通常一列表示一个字段），然后又不得不在查询的时候重建它们。<br>​        Elasticsearch是面向文档(document oriented)的，这意味着它可以存储整个对象或文档(document)。然而它不仅仅是存储，还会索引(index)每个文档的内容使之可以被搜索。在Elasticsearch中，你可以对文档（而非成行成列的数据）进行索引、搜索、排序、过滤。这种理解数据的方式与以往完全不同，这也是Elasticsearch能够执行复杂的全文搜索的原因之一。</p>
+<h3 id="9、节点-node-和集群-node"><a href="#9、节点-node-和集群-node" class="headerlink" title="9、节点(node)和集群(node)"></a>9、节点(node)和集群(node)</h3><p>Elasticsearch可以作为一个独立的单个搜索服务器。不过，为了能够处理大型数据集，实现容错和高可用性，Elasticsearch可以运行在许多互相合作的服务器上。这些服务器称为集群（cluster），形成集群的每个服务器称为节点（node）。</p>
+<h3 id="10、分片-shards"><a href="#10、分片-shards" class="headerlink" title="10、分片(shards )"></a>10、分片(shards )</h3><p>当有大量的文档时，由于内存的限制、硬盘能力、处理能力不足、无法足够快地响应客户端请求等，一个节点可能不够。在这种情况下，数据可以分为较小的称为分片（shard）的部分（其中每个分片都是一个独立的Apache Lucene索引）。每个分片可以放在不同的服务器上，因此，数据可以在集群的节点中传播。当你查询的索引分布在多个分片上时，Elasticsearch会把查询发送给每个相关的分片，并将结果合并在一起，而应用程序并不知道分片的存在。此外，多个分片可以加快索引。</p>
+<h3 id="11、副本-replicas"><a href="#11、副本-replicas" class="headerlink" title="11、副本(replicas)"></a>11、副本(replicas)</h3><p>为了提高查询吞吐量或实现高可用性，可以使用分片副本。副本（replica）只是一个分片的精确复制，每个分片可以有零个或多个副本。换句话说，Elasticsearch可以有许多相同的分片，其中之一被自动选择去更改索引操作。这种特殊的分片称为主分片（primary shard），其余称为副本分片（replica shard）。在主分片丢失时，例如该分片数据所在服务器不可用，集群将副本提升为新的主分片。</p>
+<p><img src="/images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/image-20220106010538406.png" alt="image-20220106010538406"></p>
+<p><img src="/images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/image-20220106011158094.png" alt="image-20220106011158094"></p>
+<h2 id="ES查询"><a href="#ES查询" class="headerlink" title="ES查询"></a>ES查询</h2><p>​    ES官方提供了两中检索方式:一种是通过 URL 参数进行搜索,另一种是通过 DSL(Domain Specified Language) 进行搜索。官方更推荐使用第二种方式第二种方式是基于传递JSON作为请求体(request body)格式与ES进行交互，这种方式更强大，更简洁。</p>
+<h1 id="ES数据同步方案"><a href="#ES数据同步方案" class="headerlink" title="ES数据同步方案"></a>ES数据同步方案</h1><h2 id="1、业务层同步"><a href="#1、业务层同步" class="headerlink" title="1、业务层同步"></a>1、业务层同步</h2><p>​    在业务层完成数据操作提交事务后，同步数据至ES，常见的做法是在ORM的hooks钩子里编写监听相关表的增删改操作落表记录，发起延时调度触发ES同步</p>
+<p><img src="/images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/ES%E6%8E%A5%E5%85%A5%E6%96%B9%E6%A1%88.png"></p>
+<p>优点：系统自身形成闭环，不依赖新的组件</p>
+<p>缺点：ES不支持事务</p>
+<p>风险点：从0到1开发，许多技术点待落实</p>
+<h2 id="2、基于binlog的日志订阅"><a href="#2、基于binlog的日志订阅" class="headerlink" title="2、基于binlog的日志订阅"></a>2、基于binlog的日志订阅</h2><p><img src="/images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/Snipaste_2021-12-28_15-59-27.png"></p>
+<p>介绍：模拟mysql原生主从模式，server端dump binlog并持久化到本地，即使源库down机，client端依然可以从server端正常接收已被持久化的binlog<br>优点：通过解析mysql的binlog同步数据的变更，适合实时性要求较高的场景<br>风险点：运维DB交互耗时<br>Binlogcenter(公司自研组件)：原理类似阿里的Canal<br><img src="/images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/image-20211228164415510.png" alt="image-20211228164415510"></p>
+<p><strong>MQ消费方案</strong><br><img src="/images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/image2022-1-6_15-54-57.png" alt="image-20220106124238205"></p>
+<h2 id="3、定时任务根据last-update-time字段同步"><a href="#3、定时任务根据last-update-time字段同步" class="headerlink" title="3、定时任务根据last_update_time字段同步"></a>3、定时任务根据last_update_time字段同步</h2><p><img src="/images/ES(ElasticSearch)%E7%AE%80%E4%BB%8B/image2021-9-2_10-55-18.png"></p>
+<p>缺点：数据的更新存在一定的延迟，数据的删除无法同步更新，数据最终达成一致</p>
+<p>优点：实现简单粗暴</p>
+<h1 id="使用ES（6-4-0）"><a href="#使用ES（6-4-0）" class="headerlink" title="使用ES（6.4.0）"></a>使用ES（6.4.0）</h1><h2 id="Spring-Data接入方式使用demo"><a href="#Spring-Data接入方式使用demo" class="headerlink" title="Spring-Data接入方式使用demo"></a>Spring-Data接入方式使用demo</h2><p>1、创建demo实体</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Document(indexName = &quot;user-item&quot;,createIndex = false)</span><br><span class="hljs-meta">@Setting(settingPath = &quot;elasticsearch/settings.json&quot;)</span><br><span class="hljs-meta">@Data</span><br><span class="hljs-meta">@Accessors(chain = true)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EsUserItem</span></span>&#123;<br><br>    <span class="hljs-meta">@ApiModelProperty(value = &quot;用户管理事项关系(获取详情的id)id&quot;)</span><br>    <span class="hljs-meta">@Id</span><br>    <span class="hljs-meta">@Field(type = FieldType.Keyword)</span><br>    <span class="hljs-keyword">private</span> String itemUserId;<br><br>    <span class="hljs-meta">@ApiModelProperty(value = &quot;姓名&quot;)</span><br>    <span class="hljs-meta">@Field(type = FieldType.Text)</span><br>    <span class="hljs-keyword">private</span> String userName;<br><br>    <span class="hljs-meta">@ApiModelProperty(value = &quot;管理事项&quot;)</span><br>    <span class="hljs-meta">@Field(type = FieldType.Text)</span><br>    <span class="hljs-keyword">private</span> String content;<br><br><br>    <span class="hljs-meta">@ApiModelProperty(value = &quot;执行状态&quot;)</span><br>    <span class="hljs-meta">@Field(type = FieldType.Integer)</span><br>    <span class="hljs-keyword">private</span> Integer performState;<br><br>    <span class="hljs-meta">@ApiModelProperty(&quot;执行开始日期&quot;)</span><br>    <span class="hljs-meta">@Field(type = FieldType.Date, format = DateFormat.custom, pattern = &quot;yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS&quot;)</span><br>    <span class="hljs-keyword">private</span> Date performStartDate;<br><br>    <span class="hljs-meta">@ApiModelProperty(&quot;执行结束日期)</span><span class="hljs-string">&quot;)</span><br><span class="hljs-string">    @Field(type = FieldType.Date, format = DateFormat.custom, pattern = &quot;</span>yyyy-MM-dd HH:mm:ss<span class="hljs-string">&quot;)</span><br><span class="hljs-string">    private Date performEndDate;</span><br><span class="hljs-string"></span><br><span class="hljs-string">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>2、创建索引+设置映射+查询语句（DSL）</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><code class="hljs json">PUT /mss_user_item<br>&#123;<br>  <span class="hljs-attr">&quot;mappings&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;UserItem&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;properties&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;itemUserId&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;keyword&quot;</span><br>        &#125;,<br>        <span class="hljs-attr">&quot;userName&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;keyword&quot;</span><br>        &#125;,<br>        <span class="hljs-attr">&quot;content&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span><br>        &#125;,<br>        <span class="hljs-attr">&quot;performState&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;integer&quot;</span><br>        &#125;,<br>        <span class="hljs-attr">&quot;performStartDate&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;date&quot;</span>,<br>          <span class="hljs-attr">&quot;format&quot;</span>: <span class="hljs-string">&quot;yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS||epoch_millis&quot;</span><br>        &#125;,<br>        <span class="hljs-attr">&quot;performEndDate&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;date&quot;</span>,<br>          <span class="hljs-attr">&quot;format&quot;</span>: <span class="hljs-string">&quot;yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS||epoch_millis&quot;</span><br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br><br>GET mss-user-item/UserItem/_search?<br>&#123;<br>  <span class="hljs-attr">&quot;query&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;bool&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;must&quot;</span>: [<br>        &#123;<br>          <span class="hljs-attr">&quot;terms&quot;</span>: &#123;<br>            <span class="hljs-attr">&quot;performState&quot;</span>: [<br>              <span class="hljs-number">2</span>,<br>              <span class="hljs-number">3</span>,<br>              <span class="hljs-number">4</span>,<br>              <span class="hljs-number">5</span>,<br>              <span class="hljs-number">6</span>,<br>              <span class="hljs-number">1</span><br>            ],<br>            <span class="hljs-attr">&quot;boost&quot;</span>: <span class="hljs-number">1</span><br>          &#125;<br>        &#125;,<br>        &#123;<br>          <span class="hljs-attr">&quot;terms&quot;</span>: &#123;<br>            <span class="hljs-attr">&quot;userName&quot;</span>: [<br>              <span class="hljs-string">&quot;李1&quot;</span>,<br>              <span class="hljs-string">&quot;李2&quot;</span>,<br>              <span class="hljs-string">&quot;李3&quot;</span>,<br>              <span class="hljs-string">&quot;李4&quot;</span>,<br>              <span class="hljs-string">&quot;李5&quot;</span>,<br>              <span class="hljs-string">&quot;李6&quot;</span><br>            ],<br>            <span class="hljs-attr">&quot;boost&quot;</span>: <span class="hljs-number">1</span><br>          &#125;<br>        &#125;,<br>        &#123;<br>          <span class="hljs-attr">&quot;prefix&quot;</span>: &#123;<br>            <span class="hljs-attr">&quot;userName&quot;</span>: &#123;<br>              <span class="hljs-attr">&quot;value&quot;</span>: <span class="hljs-string">&quot;李&quot;</span><br>            &#125;<br>          &#125;<br>        &#125;,<br>        &#123;<br>         <span class="hljs-attr">&quot;wildcard&quot;</span>: &#123;<br>           <span class="hljs-attr">&quot;userName&quot;</span>: &#123;<br>             <span class="hljs-attr">&quot;value&quot;</span>: <span class="hljs-string">&quot;李*&quot;</span><br>           &#125;<br>         &#125;<br>        &#125;<br>      ],<br>      <span class="hljs-attr">&quot;filter&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;range&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;performStartDate&quot;</span>: &#123;<br>          <br>            <span class="hljs-attr">&quot;lte&quot;</span>: <span class="hljs-string">&quot;2022-01-06 19:26:18&quot;</span><br>          &#125;<br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;,<br>  <span class="hljs-attr">&quot;sort&quot;</span>: [<br>    &#123;<br>      <span class="hljs-attr">&quot;itemUserId&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;order&quot;</span>: <span class="hljs-string">&quot;asc&quot;</span><br>      &#125;<br>    &#125;<br>  ]<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>索引文档的简单地增删改查–使用spring-data面向对象编程</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">ItemRepository</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ElasticsearchRepository</span>&lt;<span class="hljs-title">UserItem</span>,<span class="hljs-title">Long</span>&gt; </span>&#123;<br>&#125;<br><br> <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testInsertById</span><span class="hljs-params">(String indexName)</span> <span class="hljs-keyword">throws</span> IOException</span>&#123;<br>        UserItem userItem = <span class="hljs-keyword">new</span> UserItem().setItemUserId(<span class="hljs-number">1</span>).setUserName(<span class="hljs-string">&quot;李&quot;</span>).setContent(<span class="hljs-string">&quot;lallala&quot;</span>)<br>                .setPerformEndDate(<span class="hljs-keyword">new</span> Date())<br>                .setPerformStartDate(<span class="hljs-keyword">new</span> Date()).setPerformState(<span class="hljs-number">1</span>);<br>        UserItem save = itemRepository.save(userItem);<br>        UserItem UserItem = itemRepository.findById(<span class="hljs-string">&quot;1&quot;</span>).orElse(<span class="hljs-keyword">null</span>);<br>        log.info(UserItem.toString());<br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="XXX列表页查询接入使用"><a href="#XXX列表页查询接入使用" class="headerlink" title="XXX列表页查询接入使用"></a>XXX列表页查询接入使用</h3><p><strong>查询入参</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs json">&#123;<br>    <span class="hljs-attr">&quot;deptId&quot;</span>: [<br>        <span class="hljs-number">4102</span>,<br>        <span class="hljs-number">4107</span><br>    ],<br>    <span class="hljs-attr">&quot;gradeOrRoleId&quot;</span>: [<br>        <span class="hljs-number">498</span>,<br>        <span class="hljs-number">488</span><br>    ],<br>    <span class="hljs-attr">&quot;leaderUserId&quot;</span>: [<br>        <span class="hljs-number">28</span>,<br>        <span class="hljs-number">32</span><br>    ],<br>    <span class="hljs-attr">&quot;pageIndex&quot;</span>: <span class="hljs-number">1</span>,<br>    <span class="hljs-attr">&quot;pageSize&quot;</span>: <span class="hljs-number">20</span>,<br>    <span class="hljs-attr">&quot;performState&quot;</span>: [<br>        <span class="hljs-number">10</span>,<br>        <span class="hljs-number">5</span>,<br>        <span class="hljs-number">15</span>,<br>        <span class="hljs-number">20</span>,<br>        <span class="hljs-number">30</span>,<br>        <span class="hljs-number">35</span><br>    ],<br>    <span class="hljs-attr">&quot;performTimeEnd&quot;</span>: <span class="hljs-string">&quot;2022-01-01&quot;</span>,<br>    <span class="hljs-attr">&quot;performTimeStart&quot;</span>: <span class="hljs-string">&quot;2021-12-01&quot;</span>,<br>    <span class="hljs-attr">&quot;userId&quot;</span>: <span class="hljs-number">28</span>,<br>    <span class="hljs-attr">&quot;employeeId&quot;</span>: <span class="hljs-string">&quot;&quot;</span>,<br>    <span class="hljs-attr">&quot;isPersonMark&quot;</span>: <span class="hljs-number">0</span>,<br>    <span class="hljs-attr">&quot;isWorkMark&quot;</span>: <span class="hljs-number">0</span>,<br>    <span class="hljs-attr">&quot;ehrEmployeeId&quot;</span>: <span class="hljs-string">&quot;111111&quot;</span><br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p><strong>查询SQL</strong>：略</p>
+<p>根据前端查询检索入参和原SQL查询条件得到索引类型结构</p>
+<p>1、梳理用户点检项列表的索引字段</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs sql">itemUserId <span class="hljs-comment">--用户点检id</span><br>ogDeptId <span class="hljs-comment">--部门id</span><br>leaderUserId <span class="hljs-comment">--上级id </span><br>manage_grade_id <span class="hljs-comment">--管理职级id</span><br>is_exist_personal_remark <span class="hljs-comment">--是否存在个人备注</span><br>is_exist_work_remark  <span class="hljs-comment">--是否存在工作备注</span><br>execute_role_id <span class="hljs-comment">--执行角色id</span><br>perform_start_time <span class="hljs-comment">--执行开始时间</span><br>perform_end_time <span class="hljs-comment">--执行结束时间</span><br>perform_state <span class="hljs-comment">--点检项状态</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="RestHighLevelClient接入-amp-封装"><a href="#RestHighLevelClient接入-amp-封装" class="headerlink" title="RestHighLevelClient接入&amp;封装"></a>RestHighLevelClient接入&amp;封装</h2><p>​    Java 高级 REST 客户端现在是 Elasticsearch 的默认客户端，它提供了对 TransportClient 的直接替代，因为它接受并返回完全相同的请求/响应对象，因此依赖于 Elasticsearch 核心项目。异步调用在客户端管理的线程池上进行操作，并且需要在请求完成时通知回调，总之SpringBoot项目使用它不会有那么多垃圾兼容问题</p>
+<h3 id="1、说在前面"><a href="#1、说在前面" class="headerlink" title="1、说在前面"></a>1、说在前面</h3><p>1、因为博主公司对日志输出有限制，只有info级别以上的日志才会上传Kibana，所以需要对ES的日志打印进行调整</p>
+<p>2、RestHighLevelClient没有提供链式调用的封装方法和字段名设置解耦（像spring-data-es封装），所以为了后续字段修改扩展和方便调用，需要对API进行一定的封装</p>
+<h3 id="2、开始引入"><a href="#2、开始引入" class="headerlink" title="2、开始引入"></a>2、开始引入</h3><h4 id="1、maven依赖引入"><a href="#1、maven依赖引入" class="headerlink" title="1、maven依赖引入"></a>1、maven依赖引入</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.elasticsearch.client<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>elasticsearch-rest-high-level-client<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="2、封装ES-Service操作接口"><a href="#2、封装ES-Service操作接口" class="headerlink" title="2、封装ES Service操作接口"></a>2、封装ES Service操作接口</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">EsIService</span>&lt;<span class="hljs-title">T</span>&gt; </span>&#123;<br>    <span class="hljs-function">List&lt;T&gt; <span class="hljs-title">search</span><span class="hljs-params">(SearchRequest searchRequest)</span> <span class="hljs-keyword">throws</span> IOException</span>;<br><br>    <span class="hljs-function">MssRestHighLevelClient <span class="hljs-title">getRestHighLevelClient</span><span class="hljs-params">()</span></span>;<br><br>    <span class="hljs-function"><span class="hljs-keyword">default</span> BaseEsQueryChainWrapper&lt;T&gt; <span class="hljs-title">lambdaQuery</span><span class="hljs-params">()</span></span>&#123;<br>        BaseEsQueryChainWrapper&lt;T&gt; wrapper = <span class="hljs-keyword">new</span> BaseEsQueryChainWrapper&lt;&gt;();<br>        wrapper.setIndex(getIndex());<br>        wrapper.setType(getType());<br>        wrapper.setClazz(getClazz());<br>        wrapper.setRestHighLevelClient(getRestHighLevelClient());<br>        <span class="hljs-keyword">return</span> wrapper;<br>    &#125;<br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 获取索引</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@return</span></span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function">String <span class="hljs-title">getIndex</span><span class="hljs-params">()</span></span>;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 获取类型</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@return</span></span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function">String <span class="hljs-title">getType</span><span class="hljs-params">()</span></span>;<br><br>    <span class="hljs-function">Class&lt;T&gt; <span class="hljs-title">getClazz</span><span class="hljs-params">()</span></span>;<br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EsIServiceImpl</span>&lt;<span class="hljs-title">T</span>&gt; <span class="hljs-keyword">implements</span> <span class="hljs-title">EsIService</span>&lt;<span class="hljs-title">T</span>&gt; </span>&#123;<br>	<span class="hljs-comment">//记录T的Class</span><br>    <span class="hljs-keyword">private</span> Class&lt;T&gt; clazz;<br><br>    <span class="hljs-meta">@Resource</span><br>    <span class="hljs-keyword">private</span> MssRestHighLevelClient mssRestHighLevelClient;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">EsIServiceImpl</span><span class="hljs-params">()</span> </span>&#123;<br>      clazz = (Class)((ParameterizedType) <span class="hljs-keyword">this</span>.getClass().getGenericSuperclass()).getActualTypeArguments()[<span class="hljs-number">0</span>];<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> List&lt;T&gt; <span class="hljs-title">doSearch</span><span class="hljs-params">(SearchRequest searchRequest)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;<br><br>        SearchResponse search = mssRestHighLevelClient.search(searchRequest);<br>        List&lt;T&gt; list = Stream.of(search.getHits().getHits()).map(e -&gt; <span class="hljs-keyword">new</span> JSONObject(e.getSourceAsMap()).toJavaObject(clazz)).collect(Collectors.toList());<br>        <span class="hljs-keyword">return</span> list;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> MssRestHighLevelClient <span class="hljs-title">getRestHighLevelClient</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> mssRestHighLevelClient;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getIndex</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;mss-user-item&quot;</span>;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getType</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;mssesuseritem&quot;</span>;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Class&lt;T&gt; <span class="hljs-title">getClazz</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> clazz;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="3、封装Lambda调用-举例封装must、should、filter"><a href="#3、封装Lambda调用-举例封装must、should、filter" class="headerlink" title="3、封装Lambda调用(举例封装must、should、filter)"></a>3、封装Lambda调用(举例封装must、should、filter)</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@FunctionalInterface</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">ColumnFunction</span>&lt;<span class="hljs-title">T</span>, <span class="hljs-title">R</span>&gt; <span class="hljs-keyword">extends</span> <span class="hljs-title">Function</span>&lt;<span class="hljs-title">T</span>, <span class="hljs-title">R</span>&gt;, <span class="hljs-title">Serializable</span></span>&#123;<br><br>&#125;<br><span class="hljs-comment">//根据传进来的get方法获取字段属性名</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ColumnUtil</span></span>&#123;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> String GET = <span class="hljs-string">&quot;get&quot;</span>;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> String <span class="hljs-title">getColumn</span><span class="hljs-params">(ColumnFunction&lt;?,?&gt; fn)</span></span>&#123;<br>        Method writeReplaceMethod;<br>        <span class="hljs-keyword">try</span> &#123;<br>            writeReplaceMethod = fn.getClass().getDeclaredMethod(<span class="hljs-string">&quot;writeReplace&quot;</span>);<br>        &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> MssBizException(<span class="hljs-string">&quot;es入参序列化失败,e&quot;</span>,e);<br>        &#125;<br><br>        ReflectionUtils.makeAccessible(writeReplaceMethod);<br>        SerializedLambda serializedLambda;<br>        <span class="hljs-keyword">try</span> &#123;<br>            serializedLambda = (SerializedLambda) writeReplaceMethod.invoke(fn);<br>        &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> MssBizException(<span class="hljs-string">&quot;es入参序列化失败,e&quot;</span>,e);<br>        &#125;<br><br>        <span class="hljs-comment">// 从lambda信息取出methodName</span><br>        String implMethodName = serializedLambda.getImplMethodName();<br>        <span class="hljs-comment">// 确保方法是符合规范的get方法</span><br>        <span class="hljs-keyword">if</span> (!implMethodName.startsWith(GET)) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> MssBizException(<span class="hljs-string">&quot;只允许传入get方法: &quot;</span> + implMethodName);<br>        &#125;<br><br>        String fieldName = implMethodName.substring(GET.length());<br>        String firstChar = fieldName.substring(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>);<br>        fieldName = fieldName.replaceFirst(firstChar, firstChar.toLowerCase());<br>        <span class="hljs-keyword">return</span> fieldName;<br>    &#125;<br>&#125;<br><span class="hljs-comment">//链式调用构造SearchRequest</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BaseEsQueryChainWrapper</span>&lt;<span class="hljs-title">T</span>&gt;</span>&#123;<br>    <span class="hljs-keyword">protected</span> SearchSourceBuilder builder = <span class="hljs-keyword">new</span> SearchSourceBuilder();<br>    <span class="hljs-keyword">protected</span> MssRestHighLevelClient restHighLevelClient;<br><br>    <span class="hljs-keyword">protected</span> String index;<br>    <span class="hljs-keyword">public</span> Class&lt;T&gt; clazz;<br><br>    <span class="hljs-keyword">protected</span> String type;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setClazz</span><span class="hljs-params">(Class&lt;T&gt; clazz)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.clazz = clazz;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getColumn</span><span class="hljs-params">(ColumnFunction&lt;T,?&gt; fn)</span></span>&#123;<br>        String column = ColumnUtil.getColumn(fn);<br>        <span class="hljs-keyword">return</span> column;<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setRestHighLevelClient</span><span class="hljs-params">(MssRestHighLevelClient restHighLevelClient)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.restHighLevelClient = restHighLevelClient;<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getIndex</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> index;<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getType</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> type;<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setIndex</span><span class="hljs-params">(String index)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.index = index;<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setType</span><span class="hljs-params">(String type)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.type = type;<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">BaseEsQueryChainWrapper</span><span class="hljs-params">()</span> </span>&#123;<br>        builder.query(QueryBuilders.boolQuery());<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> BaseEsQueryChainWrapper&lt;T&gt; <span class="hljs-title">mustEq</span><span class="hljs-params">(ColumnFunction&lt;T, ?&gt; column , Object value)</span></span>&#123;<br>        BoolQueryBuilder boolQueryBuilder = (BoolQueryBuilder) builder.query();<br>        boolQueryBuilder.must(QueryBuilders.termQuery(getColumn(column),value));<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> BaseEsQueryChainWrapper&lt;T&gt; <span class="hljs-title">filterEq</span><span class="hljs-params">(ColumnFunction&lt;T, ?&gt; column , Object value)</span></span>&#123;<br>        BoolQueryBuilder boolQueryBuilder = (BoolQueryBuilder) builder.query();<br>        boolQueryBuilder.filter(QueryBuilders.termQuery(getColumn(column),value));<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> BaseEsQueryChainWrapper&lt;T&gt; <span class="hljs-title">shouldEq</span><span class="hljs-params">(ColumnFunction&lt;T, ?&gt; column , Object value)</span></span>&#123;<br>        BoolQueryBuilder boolQueryBuilder = (BoolQueryBuilder) builder.query();<br>        boolQueryBuilder.should(QueryBuilders.termQuery(getColumn(column),value));<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> BaseEsQueryChainWrapper&lt;T&gt; <span class="hljs-title">nestedMustEq</span><span class="hljs-params">(BoolQueryBuilder nestedQueryBuilder)</span></span>&#123;<br>        BoolQueryBuilder boolQueryBuilder = (BoolQueryBuilder) builder.query();<br>        boolQueryBuilder.must(nestedQueryBuilder);<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> SearchRequest <span class="hljs-title">getSearchRequest</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;<br>        SearchRequest request = <span class="hljs-keyword">new</span> SearchRequest(index);<br>        request.types(type);<br>        request.source(builder);<br>        <span class="hljs-keyword">return</span> request;<br>    &#125;<br><br>&#125;<br><span class="hljs-comment">//嵌套链式调用</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BaseNestedEsQueryChainWrapper</span>&lt;<span class="hljs-title">T</span>&gt;</span>&#123;<br>    <span class="hljs-keyword">private</span> BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery(); ;<br><br>    <span class="hljs-keyword">public</span> Class&lt;T&gt; clazz;<br><br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setClazz</span><span class="hljs-params">(Class&lt;T&gt; clazz)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.clazz = clazz;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getColumn</span><span class="hljs-params">(ColumnFunction&lt;T,?&gt; fn)</span></span>&#123;<br>        String column = ColumnUtil.getColumn(fn);<br>        <span class="hljs-keyword">return</span> column;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> BaseNestedEsQueryChainWrapper&lt;T&gt; <span class="hljs-title">mustEq</span><span class="hljs-params">(ColumnFunction&lt;T, ?&gt; column , Object value)</span></span>&#123;<br>        boolQueryBuilder.must(QueryBuilders.termQuery(getColumn(column),value));<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> BaseNestedEsQueryChainWrapper&lt;T&gt; <span class="hljs-title">filterEq</span><span class="hljs-params">(ColumnFunction&lt;T, ?&gt; column , Object value)</span></span>&#123;<br>        boolQueryBuilder.filter(QueryBuilders.termQuery(getColumn(column),value));<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> BaseNestedEsQueryChainWrapper&lt;T&gt; <span class="hljs-title">shouldEq</span><span class="hljs-params">(ColumnFunction&lt;T, ?&gt; column , Object value)</span></span>&#123;<br>        boolQueryBuilder.should(QueryBuilders.termQuery(getColumn(column),value));<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> BoolQueryBuilder <span class="hljs-title">getBoolQueryBuilder</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> boolQueryBuilder;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h4 id="4、日志切面"><a href="#4、日志切面" class="headerlink" title="4、日志切面"></a>4、日志切面</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Slf4j</span><br><span class="hljs-meta">@Aspect</span><br><span class="hljs-meta">@Component</span><br><span class="hljs-meta">@Order</span><br><span class="hljs-meta">@Profile(&#123;&quot;local&quot;, &quot;dev&quot;, &quot;test&quot;, &quot;ys&quot;&#125;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EsLogAspect</span> </span>&#123;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">static</span> Integer PRINT_LIMIT = <span class="hljs-number">10</span>;<br><br>    <span class="hljs-comment">//切EsIServiceImpl的do开头的方法</span><br>    <span class="hljs-meta">@Pointcut(&quot;execution(public * *.EsIServiceImpl.do*(..))&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">pointcut</span><span class="hljs-params">()</span> </span>&#123;&#125;<br><br>    <span class="hljs-meta">@Around(&quot;pointcut()&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Object <span class="hljs-title">around</span><span class="hljs-params">(ProceedingJoinPoint point)</span> </span>&#123;<br>        <span class="hljs-comment">// 获取切入点的方法参数</span><br>        Object[] args = point.getArgs();<br>        <span class="hljs-keyword">for</span> (Object arg : args) &#123;<br>            <span class="hljs-keyword">if</span> (arg <span class="hljs-keyword">instanceof</span> SearchRequest) &#123;<br>                SearchRequest searchRequest = (SearchRequest) arg;<br>                log.info(<span class="hljs-string">&quot;ES查询参数：&#123;&#125;&quot;</span>, searchRequest);<br>            &#125;<br>        &#125;<br><br>        Object ret = <span class="hljs-keyword">null</span>;<br>        <span class="hljs-keyword">try</span> &#123;<br>            <span class="hljs-keyword">long</span> start = System.currentTimeMillis();<br>            ret = point.proceed();<br>            <span class="hljs-keyword">long</span> end = System.currentTimeMillis();<br>            <span class="hljs-keyword">if</span> (ret <span class="hljs-keyword">instanceof</span> SearchResponse) &#123;<br>                SearchResponse searchResponse = (SearchResponse) ret;<br>                Aggregations aggs = searchResponse.getAggregations();<br>                SearchHit[] hits = searchResponse.getHits().getHits();<br>                <span class="hljs-comment">// 防止查询出来的记录数太多打印不了，最多打印10条</span><br>                <span class="hljs-keyword">int</span> toIndex = hits.length &gt; PRINT_LIMIT? PRINT_LIMIT:  hits.length;<br>                List&lt;SearchHit&gt; hitList = Arrays.stream(hits).limit(toIndex).collect(Collectors.toList());<br>                String data = hitList.stream().map(SearchHit::getSourceAsString).collect(Collectors.joining(<span class="hljs-string">&quot;,&quot;</span>));<br>                log.info(<span class="hljs-string">&quot;ES查询耗时：&#123;&#125;ms, ES查询结果：contents=&#123;&#125;, 聚合结果：aggregations=&#123;&#125;&quot;</span>,<br>                        end - start, data, aggs == <span class="hljs-keyword">null</span> ? <span class="hljs-string">&quot;&quot;</span> : JSON.toJSON(aggs.asList()));<br>            &#125;<span class="hljs-keyword">else</span>&#123;<br>                log.info(<span class="hljs-string">&quot;ES查询耗时：&#123;&#125;ms, ES查询结果：contents=&#123;&#125;&quot;</span>,end - start,ret);<br>            &#125;<br>        &#125; <span class="hljs-keyword">catch</span> (Throwable e) &#123;<br>            log.error(<span class="hljs-string">&quot;ES请求错误：&#123;&#125;&quot;</span>, e);<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> MssBizException(<span class="hljs-string">&quot;ES请求错误&quot;</span>);<br>        &#125;<br><br>        <span class="hljs-keyword">return</span> ret;<br>    &#125;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="5、测试类"><a href="#5、测试类" class="headerlink" title="5、测试类"></a>5、测试类</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Slf4j</span><br><span class="hljs-meta">@Service</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ItemEsMapper</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">EsIServiceImpl</span>&lt;<span class="hljs-title">MssEsUserItem</span>&gt; </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">test</span><span class="hljs-params">(String index,String type)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;<br>        <span class="hljs-comment">//原生构造</span><br>        SearchRequest request = <span class="hljs-keyword">new</span> SearchRequest(index);<br>        request.types(type);<br>        SearchSourceBuilder builder = <span class="hljs-keyword">new</span> SearchSourceBuilder();<br>        BoolQueryBuilder query = QueryBuilders.boolQuery();<br>        query.filter(QueryBuilders.termsQuery(<span class="hljs-string">&quot;itemUserId&quot;</span>, Arrays.asList(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">4</span>,<span class="hljs-number">5</span>,<span class="hljs-number">6</span>,<span class="hljs-number">7</span>)));<br>        query.must(QueryBuilders.prefixQuery(<span class="hljs-string">&quot;userName&quot;</span>, <span class="hljs-string">&quot;李&quot;</span>));<br>        query.must(QueryBuilders.rangeQuery(<span class="hljs-string">&quot;itemUserId&quot;</span>).lte(<span class="hljs-number">9</span>).gte(<span class="hljs-number">1</span>));<br>        builder.query(query);<br>        builder.from(<span class="hljs-number">0</span>).size(<span class="hljs-number">10</span>);<br>        builder.sort(<span class="hljs-string">&quot;itemUserId&quot;</span>);<br>        builder.aggregation(AggregationBuilders.count(<span class="hljs-string">&quot;userName&quot;</span>).field(<span class="hljs-string">&quot;userName&quot;</span>));<br>        request.source(builder);<br>        List&lt;MssEsUserItem&gt; search = itemEsMapper.doSearch(request);<br>        <span class="hljs-comment">//链式构造</span><br>        BoolQueryBuilder nested = itemEsMapper.lambdaNestedQuery().shouldEq(MssEsUserItem::getUserName, <span class="hljs-string">&quot;李1&quot;</span>).shouldEq(MssEsUserItem::getUserName, <span class="hljs-string">&quot;李2&quot;</span>).getBoolQueryBuilder();<br>        SearchRequest searchRequest = itemEsMapper.lambdaQuery()<br>                .mustEq(MssEsUserItem::getItemUserId, <span class="hljs-number">1L</span>).nestedMustEq(nested).getSearchRequest();<br>        List&lt;MssEsUserItem&gt; list = itemEsMapper.doSearch(searchRequest);<br><br>    &#125;<br>    <br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//测试接口</span><br><span class="hljs-meta">@PostMapping(value = &quot;/testQuery&quot;)</span><br><span class="hljs-meta">@Menu(MenuConfig.DATA_REPAIR)</span><br><span class="hljs-meta">@ApiOperation(value = &quot;测试查询&quot;, notes = &quot; 测试查询&quot;)</span><br><span class="hljs-keyword">public</span> Response&lt;PageResult&lt;MssEsUserItem&gt;&gt; testQuery(<span class="hljs-meta">@RequestBody</span> VisitTagDTO visitTagDTO) <span class="hljs-keyword">throws</span> IOException &#123;<br>    esTestService.test(<span class="hljs-string">&quot;mss-user-item&quot;</span>,<span class="hljs-string">&quot;mssesuseritem&quot;</span>);<br>    <span class="hljs-keyword">return</span> RestResponse.buildSuccessInfo(<span class="hljs-keyword">null</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h1><p>1、单次查询数量 form+size不大于5k</p>
+<blockquote>
+<p>假如每页是 10 条数据，现在要查询第 100 页的10条数据，实际上是会把每个 shard 上存储的前 1000 条数据都查到一个协调节点上。如果有个 5 个 shard，那么就有 5000 条数据，接着协调节点对这 5000 条数据进行一些合并、处理，再获取到最终第 100 页的 10 条数据。</p>
+<p>ES作为分布式程序，要查第 100 页的 10 条数据，不可能说从 5 个 shard，每个 shard 就查 2 条数据，最后到协调节点合并成 10 条数据，必须得从每个 shard 都查 1000 条数据过来，然后根据的需求进行排序、筛选等等操作，最后再次分页，拿到里面第 100 页的数据。翻页的时候，翻的越深，每个 shard 返回的数据就越多，而且协调节点处理的时间越长，所以用 es 做分页的时候，会发现越翻到后面，就越是慢。</p>
+<p>解决方案：</p>
+<ol>
+<li><p>不允许深度分页。（目前使用的是这种方法）</p>
+</li>
+<li><p>scroll api</p>
+<p>scroll 会一次性给你生成所有数据的一个快照，然后每次滑动向后翻页就是通过游标 scroll_id移动，获取下一页下一页这样子，性能会比上面说的那种分页性能要高很多很多，基本上都是毫秒级的。但是这一种不能随意跳到任何一页。</p>
+</li>
+<li><p>search_after</p>
+<p>search_after 的思想是使用前一页的结果来帮助检索下一页的数据，显然，这种方式也不允许你随意翻页，你只能一页页往后翻。初始化时，需要使用一个唯一值的字段作为 sort 字段。</p>
+</li>
+</ol>
+</blockquote>
+<p>2、禁用 wildcard（keyword前后模糊必须使用）</p>
+<p>3、充分利用倒排索引机制，能 keyword 类型尽量 keyword</p>
+<p>4、尽可能使用filter而不是query，但是要避免filter cache过大导致jvm飙升</p>
+<p>5、做好索引重建的准备（起别名）</p>
+<p>6、 java使用es的客户端时，不要使用TransportClient sdk啦。直接使用high level rest client以及low level rest client就好了。（如果不看文档，很多人直接选择 TransportClient ，里面好多query dsl的java类，刚刚接触可能选择这个了，但，这个7.0时就被废弃了；8.0之后直接就删除了） </p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/29/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9807-Tomcat%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B%E4%B8%8E%E5%BA%94%E7%94%A8%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/12/29/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9807-Tomcat%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B%E4%B8%8E%E5%BA%94%E7%94%A8%E8%A7%A3%E6%9E%90/" class="post-title-link" itemprop="url">性能调优07-Tomcat网络通信模型与应用解析</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-12-29 21:00:00" itemprop="dateCreated datePublished" datetime="2021-12-29T21:00:00+08:00">2021-12-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-01-03 23:50:41" itemprop="dateModified" datetime="2022-01-03T23:50:41+08:00">2022-01-03</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Tomcat/" itemprop="url" rel="index"><span itemprop="name">Tomcat</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>性能调优07-Tomcat网络通信模型与应用解析</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/12/29/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9807-Tomcat%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B%E4%B8%8E%E5%BA%94%E7%94%A8%E8%A7%A3%E6%9E%90/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/26/images/Mybati%E6%89%A7%E8%A1%8C%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E8%BF%87%E7%A8%8B%E4%B8%8E%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90(1)/oops/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -687,243 +1093,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/29/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9801Mysql%E7%B4%A2%E5%BC%95%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="24khandsome">
-      <meta itemprop="description" content="24khandsome's Blog">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="24khandsome's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/11/29/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9801Mysql%E7%B4%A2%E5%BC%95%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/" class="post-title-link" itemprop="url">性能调优01Mysql索引底层原理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-11-29 21:00:00" itemprop="dateCreated datePublished" datetime="2021-11-29T21:00:00+08:00">2021-11-29</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-12-08 23:43:17" itemprop="dateModified" datetime="2021-12-08T23:43:17+08:00">2021-12-08</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Mysql/" itemprop="url" rel="index"><span itemprop="name">Mysql</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Mysql索引底层原理</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/11/29/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9801Mysql%E7%B4%A2%E5%BC%95%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/28/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B09-%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1&%E5%AE%9A%E6%97%B6%E7%BA%BF%E7%A8%8B%E6%B1%A0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="24khandsome">
-      <meta itemprop="description" content="24khandsome's Blog">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="24khandsome's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/11/28/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B09-%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1&%E5%AE%9A%E6%97%B6%E7%BA%BF%E7%A8%8B%E6%B1%A0/" class="post-title-link" itemprop="url">并发编程09-定时任务&定时线程池(非重点)</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-11-28 21:00:00 / 修改时间：17:37:50" itemprop="dateCreated datePublished" datetime="2021-11-28T21:00:00+08:00">2021-11-28</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>介绍定时任务与定时线程池</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/11/28/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B09-%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1&%E5%AE%9A%E6%97%B6%E7%BA%BF%E7%A8%8B%E6%B1%A0/">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/22/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B08-ForkJoin%E5%8E%9F%E7%90%86%E4%B8%8E%E5%BA%94%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="24khandsome">
-      <meta itemprop="description" content="24khandsome's Blog">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="24khandsome's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/11/22/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B08-ForkJoin%E5%8E%9F%E7%90%86%E4%B8%8E%E5%BA%94%E7%94%A8/" class="post-title-link" itemprop="url">并发编程08-ForkJoin原理与应用</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-11-22 21:00:00" itemprop="dateCreated datePublished" datetime="2021-11-22T21:00:00+08:00">2021-11-22</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-11-28 22:06:09" itemprop="dateModified" datetime="2021-11-28T22:06:09+08:00">2021-11-28</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">并发编程</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>介绍并发与并行、计算任务类型、ForkJoin简介、ForkJoin原理与应用</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/11/22/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B08-ForkJoin%E5%8E%9F%E7%90%86%E4%B8%8E%E5%BA%94%E7%94%A8/">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -995,20 +1164,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">53</span>
+          <span class="site-state-item-count">56</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">51</span>
+        <span class="site-state-item-count">52</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -1043,7 +1212,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="user"></i>
   </span>
