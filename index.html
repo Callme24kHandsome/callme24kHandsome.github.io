@@ -188,7 +188,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/23/HTTP/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/22/HTTP/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
@@ -202,7 +202,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/02/23/HTTP/" class="post-title-link" itemprop="url">未命名</a>
+            <a href="/2022/02/22/HTTP/" class="post-title-link" itemprop="url">HTTP介绍与背景</a>
         </h2>
 
         <div class="post-meta">
@@ -212,15 +212,24 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2022-02-23 21:04:37" itemprop="dateCreated datePublished" datetime="2022-02-23T21:04:37+08:00">2022-02-23</time>
+              <time title="创建时间：2022-02-22 21:00:00" itemprop="dateCreated datePublished" datetime="2022-02-22T21:00:00+08:00">2022-02-22</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-02-24 22:59:00" itemprop="dateModified" datetime="2022-02-24T22:59:00+08:00">2022-02-24</time>
+                <time title="修改时间：2022-02-24 23:07:11" itemprop="dateModified" datetime="2022-02-24T23:07:11+08:00">2022-02-24</time>
               </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">单元测试</span></a>
+                </span>
+            </span>
 
           
 
@@ -233,119 +242,96 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="HTTP介绍与背景"><a href="#HTTP介绍与背景" class="headerlink" title="HTTP介绍与背景"></a>HTTP介绍与背景</h1><p><a target="_blank" rel="noopener" href="http://www.blogjava.net/zjusuyong/articles/304788.html">参考文献</a></p>
-<h2 id="网络科普"><a href="#网络科普" class="headerlink" title="网络科普"></a>网络科普</h2><h3 id="OSI与TCP-IP模型"><a href="#OSI与TCP-IP模型" class="headerlink" title="OSI与TCP/IP模型"></a>OSI与TCP/IP模型</h3><h4 id="OSI"><a href="#OSI" class="headerlink" title="OSI"></a>OSI</h4><p>​    OSI（Open System Interconnect），即开放式系统互联。 一般都叫OSI参考模型，是ISO（国际标准化组织）组织在1985年研究的网络互连模型。ISO为了更好的使网络应用更为普及，推出了OSI参考模型。其含义就是推荐所有公司使用这个规范来控制网络。这样所有公司都有相同的规范，就能互联了。</p>
-<h4 id="TCP-IP"><a href="#TCP-IP" class="headerlink" title="TCP/IP"></a>TCP/IP</h4><p>​    TCP/IP是一个协议簇，是在 IP 协议的通信过程中，使用到的协议族的统称。</p>
-<p>TCPl(Transmission Control Protocol):传输控制协议</p>
-<p>IP(Internet Protocol):网际协议</p>
-<p><img src="/images/HTTP/20180411120702438.png" alt="img"></p>
-<p><img src="/images/HTTP/image-20220222145256978.png" alt="image-20220222145256978"></p>
-<h4 id="TCP与UDP"><a href="#TCP与UDP" class="headerlink" title="TCP与UDP"></a>TCP与UDP</h4><p>TCPl(Transmission Control Protocol):传输控制协议</p>
-<p>UDP(User Datagram Protocol):用户数据报协议</p>
-<table>
-<thead>
-<tr>
-<th align="left"></th>
-<th align="left">UDP</th>
-<th>TCP</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">是否连接</td>
-<td align="left">无连接</td>
-<td>面向连接（三次握手，四次挥手）</td>
-</tr>
-<tr>
-<td align="left">是否可靠</td>
-<td align="left">不可靠传输，不使用流量控制和拥塞控制</td>
-<td>可靠传输，使用流量控制和拥塞控制</td>
-</tr>
-<tr>
-<td align="left">连接对象个数</td>
-<td align="left">支持一对一，一对多，多对一和多对多交互通信</td>
-<td>只能是一对一通信</td>
-</tr>
-<tr>
-<td align="left">传输方式</td>
-<td align="left">面向报文</td>
-<td>面向字节流</td>
-</tr>
-<tr>
-<td align="left">首部开销</td>
-<td align="left">首部开销小，仅8字节</td>
-<td>首部最小20字节，最大60字节</td>
-</tr>
-<tr>
-<td align="left">适用场景</td>
-<td align="left">适用于实时应用（IP电话、视频会议、直播等）</td>
-<td>适用于要求可靠传输的应用，例如文件传输</td>
-</tr>
-</tbody></table>
-<p><img src="/images/HTTP/2019-03-21-02.gif" alt="img"></p>
-<p><img src="/images/HTTP/2019-03-21-05.gif" alt="img"></p>
-<h2 id="HTTP介绍"><a href="#HTTP介绍" class="headerlink" title="HTTP介绍"></a>HTTP介绍</h2><p>​    <strong>HTTP是Hyper Text Transfer Protocol 超文本传输协议</strong>。是用于从WWW服务器传输超文本到本地浏览器的传送协议。它可以使浏览器更加高效，使网络传输减少。它不仅保证计算机正确快速地传输超文本文档，还确定传输文档中的哪一部分，以及哪部分内容首先显示(如文本先于图形)等,，请求端口是80。</p>
-<p><strong>HTTP是无状态的<span style="color:red">半双工</span>应用层协议</strong></p>
-<p>​    HTTP是⽆状态的，也就是说，它是不对通信状态进⾏保存的。它并不知道之前通信的对⽅是谁，这样设计的⽬的就是为了让HTTP简单化，能够快速处理⼤量的事务！但是，我们经常是需要知道访问的⼈是谁，于是就有了<strong>Cookie技术</strong>或者通过<strong>请求头传递身份认证令牌</strong></p>
-<h3 id="HTTP请求方法介绍"><a href="#HTTP请求方法介绍" class="headerlink" title="HTTP请求方法介绍"></a>HTTP请求方法介绍</h3><p>GET：用作于获取资源</p>
-<p>POST：用来传输实体的主体（RESTFUL中主要用来创建单个资源）</p>
-<p>PUT：要用来传输文件（RESTFUL中主要用来更新单个资源）</p>
-<p>DELETE：删除资源</p>
-<p>OPTIONS：查询请求的指定资源都服务端支持什么http方法</p>
-<p>HEAD：获得报⽂⾸部，与GET⽅法类似，只是不返回报⽂主体，⼀般⽤于验证URI是否有效。</p>
-<h3 id="HTTP常⽤的状态码"><a href="#HTTP常⽤的状态码" class="headerlink" title="HTTP常⽤的状态码"></a>HTTP常⽤的状态码</h3><h4 id="2XX：一般是请求成功"><a href="#2XX：一般是请求成功" class="headerlink" title="2XX：一般是请求成功"></a>2XX：一般是请求成功</h4><p>200：正常处理</p>
-<p>204：成功处理，但是服务器没有新数据返回，显示页面不更新</p>
-<p>206：对服务器进行范围请求，只返回一部分数据</p>
-<h4 id="3XX：一般表示重定向重定向区分解释"><a href="#3XX：一般表示重定向重定向区分解释" class="headerlink" title="3XX：一般表示重定向重定向区分解释"></a>3XX：一般表示重定向<a target="_blank" rel="noopener" href="https://www.cnblogs.com/wuguanglin/p/redirect.html">重定向区分解释</a></h4><p>301：永久重新向：请求的资源已分配了新的URI中，URL地址改变了</p>
-<p>302：临时重新向：请求的资源临时分配了新的URI中，URL地址没变</p>
-<p>303：同302，明确客户端用GET方式请求资源</p>
-<p>307：同302，请求方法不变（如不会把POST请求变成GET）</p>
-<p>308：同301，请求方法不变（如不会把POST请求变成GET）</p>
-<h4 id="4XX：表示客户端出错了"><a href="#4XX：表示客户端出错了" class="headerlink" title="4XX：表示客户端出错了"></a>4XX：表示客户端出错了</h4><p>400：请求报文语法出错</p>
-<p>401：需要身份认证</p>
-<p>403：没有权限访问</p>
-<p>404：服务器没有这个资源</p>
-<h4 id="5XX：服务器出错"><a href="#5XX：服务器出错" class="headerlink" title="5XX：服务器出错"></a>5XX：服务器出错</h4><p>500：服务器内部异常</p>
-<p>502：错误的网关（网站的服务器暂时挂了(不响应)），可能是服务器正在发版重启，或者响应不过来</p>
-<p>503：服务器正忙</p>
-<h3 id="HTTP请求报文介绍"><a href="#HTTP请求报文介绍" class="headerlink" title="HTTP请求报文介绍"></a>HTTP请求报文介绍</h3><h4 id="请求报文"><a href="#请求报文" class="headerlink" title="请求报文"></a>请求报文</h4><p>请求行（请求方法 + URI + HTTP版本） + 请求头 +请求体</p>
-<p>POST /cms/web/tms/check/pageCheckJira HTTP/1.1<br>Host: mss-dev01.dotfashion.cn<br>Proxy-Connection: keep-alive<br>Content-Length: 115<br>Accept: application/json, text/plain, <em>/</em><br>User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36<br>Content-Type: application/json;charset=UTF-8<br>Origin: <a target="_blank" rel="noopener" href="http://www.example.com/">www.example.com</a><br>Referer: <a target="_blank" rel="noopener" href="http://www.example.com/system-cms/">www.example.com/system-cms/</a><br>Accept-Encoding: gzip, deflate<br>Accept-Language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7<br>空行<br>request请求体：{}</p>
-<p><img src="/images/HTTP/1444829-20180719145047278-258771729.png" alt="img"></p>
-<h4 id="响应报文"><a href="#响应报文" class="headerlink" title="响应报文"></a>响应报文</h4><p>响应行 +响应头 +响应体</p>
-<p>HTTP/1.1 200 OK<br>Server: openresty<br>Date: Wed, 23 Feb 2022 07:54:42 GMT<br>Content-Type: application/json<br>Transfer-Encoding: chunked<br>Connection: keep-alive<br>Vary: Accept-Encoding<br>Vary: Accept-Encoding<br>P-Version: 220224<br>Trace-Id: 2937c15ea18fea3f<br>Access-Control-Allow-Origin: <a target="_blank" rel="noopener" href="http://www.example.com/">www.example.com</a><br>Vary: Origin<br>Vary: Access-Control-Request-Method<br>Vary: Access-Control-Request-Headers<br>Access-Control-Allow-Credentials: true<br>Content-Encoding: gzip<br>空行<br>response请求体：{}<br><img src="/images/HTTP/1444829-20180719145056458-1519744336.png" alt="img"></p>
-<h4 id="Header举例"><a href="#Header举例" class="headerlink" title="Header举例"></a>Header举例</h4><p>Location: <a target="_blank" rel="noopener" href="http://www.it315.org/index.jsp">http://www.it315.org/index.jsp</a> 【服务器告诉浏览器要跳转到哪个⻚⾯】<br>Server:apache tomcat【服务器告诉浏览器，服务器的型号是什么】<br>Content-Encoding: gzip 【服务器告诉浏览器数据压缩的格式】<br><strong>Content-Length: 80</strong> 【服务器告诉浏览器回送数据的⻓度】<br>Content-Language: zh-cn 【服务器告诉浏览器，服务器的语⾔环境】<br>Content-Type: text/html; charset=GB2312 【服务器告诉浏览器，回送数据的类型】<br>Last-Modified: Tue, 11 Jul 2000 18:23:51 GMT【服务器告诉浏览器该资源上次更新时间】<br>Refresh: 1;url=<a target="_blank" rel="noopener" href="http://www.it315.org【服务器告诉浏览器要定时刷新】/">http://www.it315.org【服务器告诉浏览器要定时刷新】</a><br>Content-Disposition: attachment; filename=aaa.zip【服务器告诉浏览器以下载⽅式打开数据】<br>Transfer-Encoding: chunked 【服务器告诉浏览器数据以分块⽅式回送】<br>Set-Cookie:SS=Q0=5Lb_nQ; path=/search【服务器告诉浏览器要保存Cookie】<br>Expires: -1【服务器告诉浏览器不要设置缓存】<br>Cache-Control: no-cache 【服务器告诉浏览器不要设置缓存】<br>Pragma: no-cache 【服务器告诉浏览器不要设置缓存】<br><strong>Connection: close/Keep-Alive</strong> 【服务器告诉浏览器连接⽅式】<br>Date: Tue, 11 Jul 2000 18:23:51 GMT【服务器告诉浏览器回送数据的时间】</p>
-<h3 id="网页通信的大致过程"><a href="#网页通信的大致过程" class="headerlink" title="网页通信的大致过程"></a>网页通信的大致过程</h3><p><img src="/images/HTTP/v2-e16868f6d6ccbb120a34de3e4dde8805_720w.jpg" alt="img"></p>
-<p>​    我们知道HTTP是在应⽤层中的，显然，我们在Web通信的过程中，不仅仅是需要HTTP协议的，还会涉<br>及到其他的协议的。<br><strong>DNS：负责解析域名</strong><br>​    我们访问⼀个⽹⻚的时候，往往是通过域名来访问的 <a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a> ,⽽计算机通信只<br>认的是我们的主机地址(192.168.xxx.xxx)，因此，当我们输⼊域名的时候，需要DNS把域名解析成<br>主机来进⾏访问。<br><strong>HTTP：产⽣请求报⽂数据</strong><br>​    当我们对Web⻚⾯进⾏操作的时候，就会产⽣HTTP报⽂数据，请求对应的服务端进⾏响应。<br><strong>TCP协议：分割HTTP数据，保证数据运输</strong><br>​    TCP协议采⽤了三次握⼿的⽅式来保证数据的准确运输，在运输的数据的时候，发送标识过去给服<br>务器，服务器也返回标识给客户端，⽽客户端收到消息后再次返回标识给服务器。这样⼀来就保证<br>了数据运输是可靠的。<br><strong>IP协议：传输数据包，找到通信⽬的地地址。</strong><br>​    IP协议把我们的产⽣的数据包发送给对⽅，IP地址指明了节点被分配的地址，但IP地址可能会变<br>换，我们可以使⽤ARP协议来将IP地址反射为MAC地址。MAC地址是不会更改的，是⽹卡所属的<br>固定地址。在找到通信⽬的地之前，我们是需要不断的中转的，这过程我们称作为：“路由中转”，我们并不知<br>道路由中转了多少次的。因此是不能全⾯了解到互联⽹中的传输状况的。<br>​    我们⽹⻚上请求数据就是这么⼀个流程</p>
-<h3 id="HTTP版本差异"><a href="#HTTP版本差异" class="headerlink" title="HTTP版本差异"></a>HTTP版本差异</h3><p><img src="/images/HTTP/0.png" alt="img"></p>
-<p><img src="/images/HTTP/image-20220221175140721.png" alt="image-20220221175140721"></p>
-<h4 id="HTTP1-1新改动"><a href="#HTTP1-1新改动" class="headerlink" title="HTTP1.1新改动"></a>HTTP1.1新改动</h4><p>1、持久连接（一次TCP连接可以多次使用，当然如果并发发起多个HTTP请求，也会有多个TCP连接）</p>
-<p>2、提出管线化理论（<strong>由于实践中存在很多问题无法解决，所以浏览器默认是关闭，所以可以认为是不支持同时多个请求</strong>，依然阻塞，HTTP Pipelining其实是把多个HTTP请求放到⼀个TCP连接中⼀⼀发送，⽽在发送过程中不需要等待服务器对前⼀个请求的响应；只不过，客户端还是要按照发送请求的顺序来接收响应）</p>
-<p>3、增加host字段，支持断点传输（将实体主体分块传输，资源下载终端后，下载剩余部分即可，无需重新下载）</p>
-<p>4、增加缓存处理（新的header如Cache-Control）</p>
-<p>补充说明：</p>
-<p>1、浏览器http请求的并发性是如何体现的？并发请求的数量有没有限制？</p>
-<p>​    页面资源请求时，浏览器会同时和服务器建立多个TCP连接，<strong>在同一个TCP连接上顺序处理多个HTTP请求</strong>。所以浏览器的并发性就体现在可以建立多个TCP连接，来支持多个http同时请求。<strong>Chrome浏览器最多允许对同一个域名Host建立6个TCP连接</strong>，不同的浏览器有所区别</p>
-<h4 id="HTTP2-0新改动"><a href="#HTTP2-0新改动" class="headerlink" title="HTTP2.0新改动"></a>HTTP2.0新改动</h4><p>1、二进制分帧</p>
-<p>2、多路复用，请求不阻塞</p>
-<p>3、头部压缩</p>
-<p>4、服务器推送</p>
-<h3 id="HTTP优化方案"><a href="#HTTP优化方案" class="headerlink" title="HTTP优化方案"></a>HTTP优化方案</h3><p><a target="_blank" rel="noopener" href="https://blog.51cto.com/gaibianziji/1211940">参考文档</a></p>
-<ul>
-<li>TCP复⽤：TCP连接复⽤是将多个客户端的HTTP请求复⽤到⼀个服务器端TCP连接上，⽽HTTP复<br>⽤则是⼀个客户端的多个HTTP请求通过⼀个TCP连接进⾏处理。前者是负载均衡设备的独特功<br>能；⽽后者是HTTP 1.1协议所⽀持的新功能</li>
-<li>内容缓存：将经常⽤到的内容进⾏缓存起来，那么客户端就可以直接在内存中获取相应的数据了。</li>
-<li>压缩：将⽂本数据进⾏压缩，减少带宽</li>
-<li>SSL加速（SSL Acceleration）：使⽤SSL协议对HTTP协议进⾏加密，在通道内加密并加速</li>
-<li>TCP缓冲：通过采⽤TCP缓冲技术，可以提⾼服务器端响应时间和处理效率，减少由于通信链路问<br>题给服务器造成的连接负担。</li>
-</ul>
-<h2 id="HTTPS介绍"><a href="#HTTPS介绍" class="headerlink" title="HTTPS介绍"></a>HTTPS介绍</h2><h3 id="HTTP的安全隐患"><a href="#HTTP的安全隐患" class="headerlink" title="HTTP的安全隐患"></a>HTTP的安全隐患</h3><p>1、通信使⽤明⽂【没有加密过内容的】<br>2、不验证身份，无论是客户端还是服务端【HTTP无状态】（可以通过请求头带JWT-token来验证客户端身份）<br>3、无法保证所见即所得【可以被篡改】（可以设置数字验签（哈希整个json体），把双方约定的某个secret字段作为其中一个字段参与签名字段生成后移除）</p>
-<h3 id="HTTPS相关概念介绍"><a href="#HTTPS相关概念介绍" class="headerlink" title="HTTPS相关概念介绍"></a>HTTPS相关概念介绍</h3><p>​    <strong>HTTPS</strong>（全称：Hypertext Transfer Protocol over <strong>Secure Socket Layer（SSL）</strong>），是以安全为目标的HTTP通道，简单讲是HTTP的安全版，端口号是443。即HTTP下加入SSL层.</p>
-<p>​    <strong>SSL</strong>(Secure Socket Layer):安全套接字协议，SSL是基于HTTP之下TCP之上的一个协议层，是基于HTTP标准并对TCP传输数据时进行加密，所以HPPTS是HTTP+SSL/TCP的简称。</p>
-<p>​    <strong>TLS</strong>(Transport Layer Security)安全传输层协议,是SSL的3.0版本</p>
-<p><img src="/images/HTTP/o_http%E5%8D%8F%E8%AE%AE%E5%AD%A6%E4%B9%A0%E5%92%8C%E6%80%BB%E7%BB%93%E7%B3%BB%E5%88%97-3-4.jpg" alt="img"></p>
-<h3 id="HTTPS的通信过程"><a href="#HTTPS的通信过程" class="headerlink" title="HTTPS的通信过程"></a>HTTPS的通信过程</h3><p><img src="/images/HTTP/o_http%E5%8D%8F%E8%AE%AE%E5%AD%A6%E4%B9%A0%E5%92%8C%E6%80%BB%E7%BB%93%E7%B3%BB%E5%88%97-3-5.jpg" alt="img"></p>
-<h2 id="HTTPS通信的优点"><a href="#HTTPS通信的优点" class="headerlink" title="HTTPS通信的优点"></a>HTTPS通信的优点</h2><p>1、所有信息都是加密传播，⿊客⽆法窃听</p>
-<p>2、具有校验机制，⼀旦被篡改，通信双⽅会⽴刻发现</p>
-<p>3、配备身份证书，防⽌身份被冒充。</p>
+          <p>HTTP介绍与背景(涉及HTTP、HTTPS、TCP、IP、网络架构等内容)</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/02/22/HTTP/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
 
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/22/TCP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/02/22/TCP/" class="post-title-link" itemprop="url">TCP介绍</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-02-22 21:00:00" itemprop="dateCreated datePublished" datetime="2022-02-22T21:00:00+08:00">2022-02-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-02-24 23:09:50" itemprop="dateModified" datetime="2022-02-24T23:09:50+08:00">2022-02-24</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/TCP/" itemprop="url" rel="index"><span itemprop="name">TCP</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>TCP介绍，TCP报文格式，状态，包含三次握手、四次挥手</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/02/22/TCP/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -427,127 +413,6 @@
             </div>
           <!--/noindex-->
         
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/17/TCP/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="24khandsome">
-      <meta itemprop="description" content="24khandsome's Blog">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="24khandsome's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/02/17/TCP/" class="post-title-link" itemprop="url">未命名</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-02-17 21:23:01" itemprop="dateCreated datePublished" datetime="2022-02-17T21:23:01+08:00">2022-02-17</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-02-24 22:59:40" itemprop="dateModified" datetime="2022-02-24T22:59:40+08:00">2022-02-24</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="TCP"><a href="#TCP" class="headerlink" title="TCP"></a>TCP</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>​    TCP是在IP网络层之上的传输层协议，用于提供port到port面向连接的可靠的字节流传输</p>
-<h2 id="TCP结构"><a href="#TCP结构" class="headerlink" title="TCP结构"></a>TCP结构</h2><p><img src="/images/TCP/image-20220216155444211.png" alt="image-20220216155444211"></p>
-<p>序列号：<strong>在初次建立连接的时候，客户端和服务端都会为「本次的连接」随机初始化一个序列号。</strong>（纵观整个TCP流程中，序列号可以用来解决网络包乱序的问题）</p>
-<p>确认号：<strong>该字段表示「接收端」告诉「发送端」对上一个数据包已经成功接收</strong>，一般而言确认号等于上一次接收到的[序列号+1]（确认号可以⽤来解决网络包丢失的问题）</p>
-<p>flag标志位：</p>
-<p>​    SYN=1，表示希望创建连接</p>
-<p>​    ACK=1，表示接收到消息，确认号字段有效</p>
-<p>​    FIN=1，表示希望断开连接</p>
-<p>​    RST=1，表示TCP连接出现异常，需要断开</p>
-<h2 id="TCP三次握手"><a href="#TCP三次握手" class="headerlink" title="TCP三次握手"></a>TCP三次握手</h2><p>​    <strong>TCP三次握手的目的</strong>：确认客户端和服务端通信双方的序列号</p>
-<p><img src="/images/TCP/image-20220216161823436.png" alt="image-20220216161823436"></p>
-<p>过程如下：</p>
-<p>1、在最开始的时候，客户端和服务端都处于 CLOSE 状态</p>
-<p>2、客户端：SYN    seq=client_isn(ISN:internal statement number序列号随机生成)，状态变成 SYN_SEND</p>
-<p>3、服务端：SYN、ACK     seq=server_isn，ack=client_isn+1    状态变成 SYN-REVD</p>
-<p>4、客户端 ：ACK    ack=server_isn+1    进入 ESTABLISHED 状态<br>    明确server端接收到了我的序列号（从ack=client_isn+1得知），需要让服务端也知道我能接收到他的消息。</p>
-<p>5、服务端：服务端接收到客户端的报文之后，也进入 ESTABLISHED 状态</p>
-<p><strong>TCP连接两次握手行吗？</strong></p>
-<p>​    不行，两次握手只能保证客户端知道自己的序列号同步给服务端了，但服务端不清楚自己的序列号能否被客户端接受</p>
-<p><strong>序列号为什么是随机的？</strong></p>
-<p>​    1、安全性考虑 2、方便通信双方丢弃非本连接的报文</p>
-<p><strong>网络是不可靠的，那建立连接不是会经过三次握手吗？那要是在中途丢了，怎么办？</strong></p>
-<ul>
-<li>第一个包丢了<ul>
-<li>客户端迟迟没接收到服务端的ACK包，会周期性超时重传，直到收到服务端的ACK</li>
-</ul>
-</li>
-<li>第二个包丢了<ul>
-<li>服务端迟迟没接收到客户端的SYN、ACK包，会周期性超时重传，直到收到客户端的ACK</li>
-</ul>
-</li>
-<li>第三个包丢了，客户端单方面进入ESTABLISHED <ul>
-<li>客户端和服务端都没有发送数据<ul>
-<li>服务端周期性超时重传</li>
-</ul>
-</li>
-<li>如果这时候客户端已经要发送数据了，服务端接收到了ACK + Data数据包，那自然就切换到 ESTABLISHED 状态下，并且接收客户端的Data数据包</li>
-<li>如果此时服务端要发送数据了，但发送不了，会一直周期性超时重传SYN + ACK，直到接收到客户端的ACK包</li>
-</ul>
-</li>
-</ul>
-<h2 id="四次挥手"><a href="#四次挥手" class="headerlink" title="四次挥手"></a>四次挥手</h2><p><img src="/images/TCP/image-20220221145750654.png" alt="image-20220221145750654"></p>
-<p><strong>四次挥手的过程</strong></p>
-<p>​    （客户端说我要断开了，服务端说收到，等等，马上，服务端说来吧断开吧，客户端 收到）</p>
-<p>1、建立连接后，客户端和服务端都处于ESTABLISHED状态，双方都可以发起断开连接，以客户端为例</p>
-<p>2、客户端：FIN，然后进入FIN_WAIT_1状态</p>
-<p>3、服务端：ACK，然后进入CLOSE_WAIT状态</p>
-<p>4、客户单：接收到ACK后，进入FIN_WAIT_2状态</p>
-<p>5、服务端确认完没有待发送数据后，发送 FIN ACK ，自己进入LAST_WAIT状态</p>
-<p>6、客户端：ACK，然后进入FIN_WAIT_1状态</p>
-<p>7、服务端：进入CLOSE状态</p>
-<p>9、客户端：等待2MSL（Maximum Segment Lifetime：最长报文段寿命）后，进入close状态</p>
-<p> <strong>TIME_WAIT （等待 2MSL）状态的作用</strong></p>
-<p>1、连接断开后，创建新连接时，网络中的残余数据都丢失了，不会影响到新连接</p>
-<p>2、确保服务端能接受到最后一个ACK报文段，从而进入都进入CLOSE状态(如果server接受不到client的ACK，会超时重发 FIN+ACK)，客户端重新等待2MSL，知道服务端接受成功，双方都进入CLOSE状态</p>
-<p><strong>TCP连接到底是什么？如何理解</strong></p>
-<p>TCP连接其实是客户端服务端双方之间确认状态信息，比如建立连接时序列号等等，本质上是维持一个一个状态，具有连接特性</p>
-
       
     </div>
 
@@ -1159,13 +1024,13 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-count">20</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-count">60</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
