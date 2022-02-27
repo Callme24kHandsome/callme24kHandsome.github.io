@@ -8553,7 +8553,35 @@
 <h3 id="HttpServerCodec（INT-amp-OUT）"><a href="#HttpServerCodec（INT-amp-OUT）" class="headerlink" title="HttpServerCodec（INT &amp; OUT）"></a>HttpServerCodec（INT &amp; OUT）</h3><p>HttpServerCodec = HttpRequestDecoder + HttpResponseEncoder</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java">ChannelPipeline pipeline = ch.pipeline();<br>pipeline.addLast(<span class="hljs-string">&quot;http-decodec&quot;</span>,<span class="hljs-keyword">new</span> HttpRequestDecoder());<br>pipeline.addLast(<span class="hljs-string">&quot;http-encodec&quot;</span>,<span class="hljs-keyword">new</span> HttpResponseEncoder());<br>pipeline.addLast(<span class="hljs-string">&quot;http-aggregator&quot;</span>,<span class="hljs-keyword">new</span> HttpObjectAggregator(<span class="hljs-number">65536</span>));<br>pipeline.addLast(<span class="hljs-string">&quot;http-chunked&quot;</span>,<span class="hljs-keyword">new</span> ChunkedWriteHandler());<br>     <span class="hljs-comment">/*</span><br><span class="hljs-comment">   pipeline.addLast(new HttpServerCodec());</span><br><span class="hljs-comment">   pipeline.addLast(new HttpObjectAggregator(64*1024));</span><br><span class="hljs-comment">   pipeline.addLast(new ChunkedWriteHandler());</span><br><span class="hljs-comment">*/</span><br></code></pre></td></tr></table></figure>
 
-
+<h2 id="常用ChannelOption"><a href="#常用ChannelOption" class="headerlink" title="常用ChannelOption"></a>常用ChannelOption</h2><p>​    ChannelOption的各种属性在套接字选项中都有对应，下面简单的总结一下ChannelOption的含义已及使用的场景。</p>
+<h3 id="ChannelOption-SO-BACKLOG"><a href="#ChannelOption-SO-BACKLOG" class="headerlink" title="ChannelOption.SO_BACKLOG"></a>ChannelOption.SO_BACKLOG</h3><blockquote>
+<p>​    ChannelOption.SO_BACKLOG对应的是tcp/ip协议listen函数中的backlog。函数listen(int socketfd, int backlog)用来初始化服务端可连接队列。</p>
+<p>​    服务端处理客户端连接请求是顺序处理的，所以同一时间只能处理一个客户端连接，多个客户端来的时候，服务端将不能处理的客户端连接请求放在队列中等待处理，<strong>backlog参数指定了阻塞等待队列的大小</strong>。</p>
+</blockquote>
+<h3 id="ChannelOption-SO-REUSEADDR"><a href="#ChannelOption-SO-REUSEADDR" class="headerlink" title="ChannelOption.SO_REUSEADDR"></a>ChannelOption.SO_REUSEADDR</h3><blockquote>
+<p>​    ChanneOption.SO_REUSEADDR对应于套接字选项中的SO_REUSEADDR，这个参数表示允许重复使用本地地址和端口。</p>
+<p>​    比如，某个服务器进程占用了TCP的80端口进行监听，此时再次监听该端口就会返回错误，使用该参数就可以解决问题，该参数允许共用该端口，这个在服务器程序中比较常使用。比如某个进程非正常退出，该程序占用的端口可能要被占用一段时间才能允许其他进程使用，而且程序死掉以后，内核一需要一定的时间才能够释放此端口，不设置SO_REUSEADDR就无法正常使用该端口。</p>
+</blockquote>
+<h3 id="ChannelOption-SO-KEEPALIVE"><a href="#ChannelOption-SO-KEEPALIVE" class="headerlink" title="ChannelOption.SO_KEEPALIVE"></a>ChannelOption.SO_KEEPALIVE</h3><blockquote>
+<p>​    Channeloption.SO_KEEPALIVE参数对应于套接字选项中的SO_KEEPALIVE，该参数用于设置TCP连接，当设置该选项以后，连接会测试链接的状态，这个选项用于可能长时间没有数据交流的连接。</p>
+<p>​    当设置该选项以后，如果在两小时内没有数据的通信时，TCP会自动发送一个活动探测数据报文。</p>
+</blockquote>
+<h3 id="ChannelOption-SO-SNDBUF-SO-RCVBUF"><a href="#ChannelOption-SO-SNDBUF-SO-RCVBUF" class="headerlink" title="ChannelOption.SO_SNDBUF/SO_RCVBUF"></a>ChannelOption.SO_SNDBUF/SO_RCVBUF</h3><blockquote>
+<p>​    ChannelOption.SO_SNDBUF参数对应于套接字选项中的SO_SNDBUF，ChannelOption.SO_RCVBUF参数对应于套接字选项中的SO_RCVBUF这两个参数用于操作发送缓冲区大小和接受缓冲区大小。</p>
+<p>​    接收缓冲区用于保存网络协议站内收到的数据，直到应用程序读取成功.</p>
+<p>​    发送缓冲区用于保存发送数据，直到发送成功。</p>
+<p><a href="https://www.cnblogs.com/kex1n/p/7801343.html">为了达到最大网络吞吐，socket send buffer size(SO_SNDBUF)不应该小于带宽和延迟的乘积</a></p>
+</blockquote>
+<h3 id="ChannelOption-SO-LINGER"><a href="#ChannelOption-SO-LINGER" class="headerlink" title="ChannelOption.SO_LINGER"></a>ChannelOption.SO_LINGER</h3><blockquote>
+<p>​    ChannelOption.SO_LINGER参数对应于套接字选项中的SO_LINGER，Linux内核默认的处理方式是当用户调用close（）方法的时候，函数返回，在可能的情况下，尽量发送数据，不一定保证会发送剩余的数据，造成了数据的不确定性，使用SO_LINGER可以阻塞close()的调用时间，直到数据完全发送。</p>
+</blockquote>
+<h3 id="ChannelOption-TCP-NODELAY"><a href="#ChannelOption-TCP-NODELAY" class="headerlink" title="ChannelOption.TCP_NODELAY"></a>ChannelOption.TCP_NODELAY</h3><blockquote>
+<p>​    ChannelOption.TCP_NODELAY参数对应于套接字选项中的TCP_NODELAY,该参数的使用与Nagle算法有关。</p>
+<p>​    Nagle算法是将小的数据包组装为更大的帧然后进行发送，而不是输入一次发送一次，因此在数据包不足的时候会等待其他数据的到来，组装成大的数据包进行发送，虽然该算法有效提高了网络的有效负载，但是却造成了延时。</p>
+<p>​    而该参数的作用就是禁止使用Nagle算法，使用于小数据即时传输。和TCP_NODELAY相对应的是TCP_CORK，该选项是需要等到发送的数据量最大的时候，一次性发送数据，适用于文件传输。</p>
+</blockquote>
+<h3 id="TCP参数表"><a href="#TCP参数表" class="headerlink" title="TCP参数表"></a>TCP参数表</h3><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F04-Netty-%E6%A0%B8%E5%BF%83%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/20170703144810032.jfif" alt="img"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F04-Netty-%E6%A0%B8%E5%BF%83%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/20170703144854985.jfif" alt="img"></p>
 <h1 id="Netty应用"><a href="#Netty应用" class="headerlink" title="Netty应用"></a>Netty应用</h1><h2 id="弹幕系统应用"><a href="#弹幕系统应用" class="headerlink" title="弹幕系统应用"></a>弹幕系统应用</h2><h3 id="弹幕系统概要设计"><a href="#弹幕系统概要设计" class="headerlink" title="弹幕系统概要设计"></a>弹幕系统概要设计</h3><h4 id="弹幕系统特点-参考B站"><a href="#弹幕系统特点-参考B站" class="headerlink" title="弹幕系统特点(参考B站)"></a>弹幕系统特点(参考B站)</h4><p>1、实时性高</p>
 <p>2、并发量大</p>
 <h4 id="弹幕系统架构设计"><a href="#弹幕系统架构设计" class="headerlink" title="弹幕系统架构设计"></a>弹幕系统架构设计</h4><p>业务架构</p>
