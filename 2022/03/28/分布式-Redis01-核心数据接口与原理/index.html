@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Redis核心数据接口与原理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式-Redis01-核心数据接口与原理">
+<meta property="og:url" content="http://example.com/2022/03/28/%E5%88%86%E5%B8%83%E5%BC%8F-Redis01-%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="Redis核心数据接口与原理">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis01-%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220410105536743.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220328223125611.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220329211712401.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220329212006826.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220330220809036.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220330221547322.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220330222741101.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220330222922268.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220330223600732.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220330224305930.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis01-%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220404200315343.png">
+<meta property="article:published_time" content="2022-03-28T13:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-01T00:15:58.873Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis01-%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220410105536743.png">
+
+<link rel="canonical" href="http://example.com/2022/03/28/%E5%88%86%E5%B8%83%E5%BC%8F-Redis01-%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>分布式-Redis01-核心数据接口与原理 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/28/%E5%88%86%E5%B8%83%E5%BC%8F-Redis01-%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          分布式-Redis01-核心数据接口与原理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-03-28 21:00:00" itemprop="dateCreated datePublished" datetime="2022-03-28T21:00:00+08:00">2022-03-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-06-01 08:15:58" itemprop="dateModified" datetime="2022-06-01T08:15:58+08:00">2022-06-01</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">Redis核心数据接口与原理</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Redis安装与使用"><a href="#Redis安装与使用" class="headerlink" title="Redis安装与使用"></a>Redis安装与使用</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs ··cmd">下载地址：http:&#x2F;&#x2F;redis.io&#x2F;download <br>安装步骤： <br># 安装gcc <br>yum install gcc <br># 把下载好的redis‐5.0.3.tar.gz放在&#x2F;usr&#x2F;local文件夹下，并解压 <br>wget http:&#x2F;&#x2F;download.redis.io&#x2F;releases&#x2F;redis‐5.0.3.tar.gz <br>tar xzf redis‐5.0.3.tar.gz<br>cd redis‐5.0.3 <br># 进入到解压好的redis‐5.0.3目录下，进行编译与安装 <br>make <br># 启动并指定配置文件 <br>src&#x2F;redis‐server redis.conf（注意要使用后台启动，所以修改redis.conf里的daemonize改为y es)<br># 验证启动是否成功 <br>ps ‐ef | grep redis <br># 进入redis客户端 <br>src&#x2F;redis‐cli <br># 退出客户端 <br>quit <br># 退出redis服务： <br>（1）pkill redis‐server <br>（2）kill 进程号 <br>（3）src&#x2F;redis‐cli shutdown<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs redis-6379.conf">pidfile &#x2F;var&#x2F;run&#x2F;redis_6379.pid<br>logfile &quot;6379.log&quot;<br>protected-mode no<br>port 6379<br>logfile &quot;6380.log&quot; <br>dir &#x2F;soft&#x2F;redis‐5.0.3&#x2F;6380 <br># bind 127.0.0.1 注释改行<br></code></pre></td></tr></table></figure>
+
+<h2 id="StringRedisTemplate与RedisTemplate"><a href="#StringRedisTemplate与RedisTemplate" class="headerlink" title="StringRedisTemplate与RedisTemplate"></a><strong>StringRedisTemplate与RedisTemplate</strong></h2><p>spring 封装了 RedisTemplate 对象来进行对redis的各种操作，它支持所有的 redis 原生的 api。在 RedisTemplate中提供了几个常用的接口方法的使用，分别是:</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis01-%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220410105536743.png" alt="image-20220410105536743"></p>
+<p>StringRedisTemplate继承自RedisTemplate，也一样拥有上面这些操作。 StringRedisTemplate默认采用的是String的序列化策略，保存的key和value都是采用此策略序列化保存 的。RedisTemplate默认采用的是JDK的序列化策略，保存的key和value都是采用此策略序列化保存的。</p>
+<p><strong>Redis客户端命令对应的RedisTemplate中的方法列表：</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>String类型结构</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Redis</td>
+<td>RedisTemplate rt</td>
+</tr>
+<tr>
+<td>set key value</td>
+<td>rt.opsForValue().set(“key”,”value”)</td>
+</tr>
+<tr>
+<td>get key</td>
+<td>rt.opsForValue().get(“key”)</td>
+</tr>
+<tr>
+<td>del key</td>
+<td>rt.delete(“key”)</td>
+</tr>
+<tr>
+<td>strlen key</td>
+<td>rt.opsForValue().size(“key”)</td>
+</tr>
+<tr>
+<td>getset key value</td>
+<td>rt.opsForValue().getAndSet(“key”,”value”)</td>
+</tr>
+<tr>
+<td>getrange key start end</td>
+<td>rt.opsForValue().get(“key”,start,end)</td>
+</tr>
+<tr>
+<td>append key value</td>
+<td>rt.opsForValue().append(“key”,”value”)</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Hash结构</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>hmset key field1 value1 field2 value2…</td>
+<td>rt.opsForHash().putAll(“key”,map) //map是一个集合对象</td>
+</tr>
+<tr>
+<td>hset key field value</td>
+<td>rt.opsForHash().put(“key”,”field”,”value”)</td>
+</tr>
+<tr>
+<td>hexists key field</td>
+<td>rt.opsForHash().hasKey(“key”,”field”)</td>
+</tr>
+<tr>
+<td>hgetall key</td>
+<td>rt.opsForHash().entries(“key”) //返回Map对象</td>
+</tr>
+<tr>
+<td>hvals key</td>
+<td>rt.opsForHash().values(“key”) //返回List对象</td>
+</tr>
+<tr>
+<td>hkeys key</td>
+<td>rt.opsForHash().keys(“key”) //返回List对象</td>
+</tr>
+<tr>
+<td>hmget key field1 field2…</td>
+<td>rt.opsForHash().multiGet(“key”,keyList)</td>
+</tr>
+<tr>
+<td>hsetnx key field value</td>
+<td>rt.opsForHash().putIfAbsent(“key”,”field”,”value”</td>
+</tr>
+<tr>
+<td>hdel key field1 field2</td>
+<td>rt.opsForHash().delete(“key”,”field1”,”field2”)</td>
+</tr>
+<tr>
+<td>hget key field</td>
+<td>rt.opsForHash().get(“key”,”field”)</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>List结构</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>lpush list node1 node2 node3…</td>
+<td>rt.opsForList().leftPush(“list”,”node”)</td>
+</tr>
+<tr>
+<td>rt.opsForList().leftPushAll(“list”,list) //list是集合对象</td>
+<td></td>
+</tr>
+<tr>
+<td>rpush list node1 node2 node3…</td>
+<td>rt.opsForList().rightPush(“list”,”node”)</td>
+</tr>
+<tr>
+<td>rt.opsForList().rightPushAll(“list”,list) //list是集合对象</td>
+<td></td>
+</tr>
+<tr>
+<td>lindex key index</td>
+<td>rt.opsForList().index(“list”, index)</td>
+</tr>
+<tr>
+<td>llen key</td>
+<td>rt.opsForList().size(“key”)</td>
+</tr>
+<tr>
+<td>lpop key</td>
+<td>rt.opsForList().leftPop(“key”)</td>
+</tr>
+<tr>
+<td>rpop key</td>
+<td>rt.opsForList().rightPop(“key”)</td>
+</tr>
+<tr>
+<td>lpushx list node</td>
+<td>rt.opsForList().leftPushIfPresent(“list”,”node”)</td>
+</tr>
+<tr>
+<td>rpushx list node</td>
+<td>rt.opsForList().rightPushIfPresent(“list”,”node”)</td>
+</tr>
+<tr>
+<td>lrange list start end</td>
+<td>rt.opsForList().range(“list”,start,end)</td>
+</tr>
+<tr>
+<td>lrem list count value</td>
+<td>rt.opsForList().remove(“list”,count,”value”)</td>
+</tr>
+<tr>
+<td>lset key index value</td>
+<td>rt.opsForList().set(“list”,index,”value”)</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Set结构</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>sadd key member1 member2…</td>
+<td>rt.boundSetOps(“key”).add(“member1”,”member2”,…)</td>
+</tr>
+<tr>
+<td>rt.opsForSet().add(“key”, set) //set是一个集合对象</td>
+<td></td>
+</tr>
+<tr>
+<td>scard key</td>
+<td>rt.opsForSet().size(“key”)</td>
+</tr>
+<tr>
+<td>sidff key1 key2</td>
+<td>rt.opsForSet().difference(“key1”,”key2”) //返回一个集合对象</td>
+</tr>
+<tr>
+<td>sinter key1 key2</td>
+<td>rt.opsForSet().intersect(“key1”,”key2”)//同上</td>
+</tr>
+<tr>
+<td>sunion key1 key2</td>
+<td>rt.opsForSet().union(“key1”,”key2”)//同上</td>
+</tr>
+<tr>
+<td>sdiffstore des key1 key2</td>
+<td>rt.opsForSet().differenceAndStore(“key1”,”key2”,”des”)</td>
+</tr>
+<tr>
+<td>sinter des key1 key2</td>
+<td>rt.opsForSet().intersectAndStore(“key1”,”key2”,”des”)</td>
+</tr>
+<tr>
+<td>sunionstore des key1 key2</td>
+<td>rt.opsForSet().unionAndStore(“key1”,”key2”,”des”)</td>
+</tr>
+<tr>
+<td>sismember key member</td>
+<td>rt.opsForSet().isMember(“key”,”member”)</td>
+</tr>
+<tr>
+<td>smembers key</td>
+<td>rt.opsForSet().members(“key”)</td>
+</tr>
+<tr>
+<td>spop key</td>
+<td>rt.opsForSet().pop(“key”)</td>
+</tr>
+<tr>
+<td>srandmember key count</td>
+<td>rt.opsForSet().randomMember(“key”,count)</td>
+</tr>
+<tr>
+<td>srem key member1 member2…</td>
+<td>rt.opsForSet().remove(“key”,”member1”,”member2”,…)</td>
+</tr>
+</tbody></table>
+<h1 id="Lua脚本"><a href="#Lua脚本" class="headerlink" title="Lua脚本"></a>Lua脚本</h1><p>代码示例上面已经给出：</p>
+<p><strong>管道（Pipeline）</strong> </p>
+<p><strong>客户端可以一次性发送多个请求而不用等待服务器的响应，待所有命令都发送完后再一次性读取服务的响应</strong>，这样可以极大的降低多条命令执行的网络传输开销，管道执行多条命令的网络开销实际上只相当于<strong>一 次命令执行的网络开销</strong>。需要注意到是用pipeline方式打包命令发送，<strong>redis必须在处理完所有命令前先缓存起所有命令的处理结果</strong>。打包的命令越多，缓存消耗内存也越多。所以并不是打包的命令越多越好。 pipeline中发送的每个command都会被server立即执行，如果执行失败，将会在此后的响应中得到信 息；也就是pipeline并不是表达“所有command都一起成功”的语义，管道中前面命令失败，后面命令 不会有影响，继续执行。</p>
+<p><strong>特定</strong></p>
+<p>1、<strong>减少网络开销</strong>：本来5次网络请求的操作，可以用一个请求完成，原先5次请求的逻辑放在redis服务器 上完成。使用脚本，减少了网络往返时延。这点跟管道类似</p>
+<p>2、<strong>原子操作</strong>：Redis会将整个脚本作为一个整体执行，中间不会被其他命令插入。管道不是原子的，不过 redis的批量操作命令(类似mset)是原子的</p>
+<p>3、<strong>替代redis的事务功能</strong>：redis自带的事务功能很鸡肋，报错不支持回滚，而redis的lua脚本几乎实现了 常规的事务功能，支持报错回滚操作，官方推荐如果要使用redis的事务功能可以用redis lua替代</p>
+<p>注意，不要在Lua脚本中出现死循环和耗时的运算，否则redis会阻塞，将不接受其他的命令， 所以使用 时要注意不能出现死循环、耗时的运算。redis是单进程、单线程执行脚本。管道不会阻塞redis。</p>
+<h1 id="Redis核心数据结构与原理"><a href="#Redis核心数据结构与原理" class="headerlink" title="Redis核心数据结构与原理"></a>Redis核心数据结构与原理</h1><h2 id="Redis核心数据结构与应用"><a href="#Redis核心数据结构与应用" class="headerlink" title="Redis核心数据结构与应用"></a>Redis核心数据结构与应用</h2><h3 id="Redis核心数据结构"><a href="#Redis核心数据结构" class="headerlink" title="Redis核心数据结构"></a>Redis核心数据结构</h3><p><strong>5种核心数据结构</strong></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220328223125611.png" alt="image-20220328223125611"></p>
+<h4 id="String"><a href="#String" class="headerlink" title="String"></a>String</h4><p><strong>字符串常用操作</strong></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cmd"><span class="hljs-built_in">SET</span>  key  value 			//存入字符串键值对<br>MSET  key  value [key value ...] 	//批量存储字符串键值对<br>SETNX  key  value 		//存入一个不存在的字符串键值对<br>GET  key 			//获取一个字符串键值<br>MGET  key  [key ...]	 	//批量获取字符串键值<br><span class="hljs-built_in">DEL</span>  key  [key ...] 		//删除一个键<br>EXPIRE  key  seconds 		//设置一个键的过期时间(秒)<br></code></pre></td></tr></table></figure>
+
+<p><strong>原子加减</strong></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs cmd">INCR  key 			//将key中储存的数字值加<span class="hljs-number">1</span><br>DECR  key 			//将key中储存的数字值减<span class="hljs-number">1</span><br>INCRBY  key  increment 		//将key所储存的值加上increment<br>DECRBY  key  decrement 	//将key所储存的值减去decrement<br></code></pre></td></tr></table></figure>
+
+<p><strong>String应用场景</strong></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs cmd">单值缓存<br><span class="hljs-built_in">SET</span>  key  value 	<br>GET  key <br><br>对象缓存<br><span class="hljs-number">1</span>) <span class="hljs-built_in">SET</span>  user:<span class="hljs-number">1</span>  value(json格式数据)<br><span class="hljs-number">2</span>) MSET  user:<span class="hljs-number">1</span>:name  zhuge   user:<span class="hljs-number">1</span>:balance  <span class="hljs-number">1888</span><br>   MGET  user:<span class="hljs-number">1</span>:name   user:<span class="hljs-number">1</span>:balance <br>   <br>分布式锁<br>SETNX  product:<span class="hljs-number">10001</span>  true 		//返回<span class="hljs-number">1</span>代表获取锁成功<br>SETNX  product:<span class="hljs-number">10001</span>  true 		//返回<span class="hljs-number">0</span>代表获取锁失败<br>。。。执行业务操作<br><span class="hljs-built_in">DEL</span> product:<span class="hljs-number">10001</span>			//执行完业务释放锁<br><span class="hljs-built_in">SET</span> product:<span class="hljs-number">10001</span> true  ex  <span class="hljs-number">10</span>  nx	//防止程序意外终止导致死锁<br><br>计数器<br>INCR article:readcount:&#123;文章id&#125;  <br>GET article:readcount:&#123;文章id&#125; <br><br>Web集群session共享<br>spring session + redis实现session共享<br><br>分布式系统全局序列号(一个机器一次拿<span class="hljs-number">1000</span>个缓存在本地，用完再继续拿)<br>INCRBY  orderId  <span class="hljs-number">1000</span>		//redis批量生成序列号提升性能<br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220329211712401.png" alt="image-20220329211712401"></p>
+<h4 id="Hash"><a href="#Hash" class="headerlink" title="Hash"></a>Hash</h4><p><strong>Hash常用操作</strong></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs cmd">HSET  key  field  value 			//存储一个哈希表key的键值<br>HSETNX  key  field  value 		//存储一个不存在的哈希表key的键值<br>HMSET  key  field  value [field value ...] 	//在一个哈希表key中存储多个键值对<br>HGET  key  field 				//获取哈希表key对应的field键值<br>HMGET  key  field  [field ...] 		//批量获取哈希表key中多个field键值<br>HDEL  key  field  [field ...] 		//删除哈希表key中的field键值<br>HLEN  key					//返回哈希表key中field的数量<br>HGETALL  key				//返回哈希表key中所有的键值<br>HINCRBY  key  field  increment 		//为哈希表key中field键的值加上增量increment<br></code></pre></td></tr></table></figure>
+
+<p><strong>Hash应用场景</strong></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs cmd">对象缓存<br>HMSET  user  &#123;userId&#125;:name  zhuge &#123;userId&#125;:balance  <span class="hljs-number">1888</span><br>HMSET  user  <span class="hljs-number">1</span>:name  zhuge <span class="hljs-number">1</span>:balance  <span class="hljs-number">1888</span><br>HMGET  user  <span class="hljs-number">1</span>:name  <span class="hljs-number">1</span>:balance<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs cmd">电商购物车<br><span class="hljs-number">1</span>）以用户id为key<br><span class="hljs-number">2</span>）商品id为field<br><span class="hljs-number">3</span>）商品数量为value<br><br>购物车操作<br><span class="hljs-number">1</span>）添加商品hset cart:<span class="hljs-number">1001</span> <span class="hljs-number">10088</span> <span class="hljs-number">1</span><br><span class="hljs-number">2</span>）增加数量hincrby cart:<span class="hljs-number">1001</span> <span class="hljs-number">10088</span> <span class="hljs-number">1</span><br><span class="hljs-number">3</span>）商品总数hlen cart:<span class="hljs-number">1001</span><br><span class="hljs-number">4</span>）删除商品hdel cart:<span class="hljs-number">1001</span> <span class="hljs-number">10088</span><br><span class="hljs-number">5</span>）获取购物车所有商品hgetall cart:<span class="hljs-number">1001</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>优缺点</strong></p>
+<p><strong>优点</strong></p>
+<p>1）同类数据归类整合储存，方便数据管理<br>2）相比string操作消耗内存与cpu更小<br>3）相比string储存更节省空间</p>
+<p><strong>缺点</strong></p>
+<p>1）过期功能不能使用在field上，只能用在key上</p>
+<p>2）Redis集群架构下不适合大规模使用（由于集群模式根据key来确定存储在那个节点，如果某个hset存储内容过多，会造成某个节点的存储量偏大，造成数据分布不均匀）</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220329212006826.png" alt="image-20220329212006826"></p>
+<h4 id="List结构"><a href="#List结构" class="headerlink" title="List结构"></a>List结构</h4><p><strong>List常用操作</strong></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs cmd">LPUSH  key  value [value ...] 		//将一个或多个值value插入到key列表的表头(最左边)<br>RPUSH  key  value [value ...]	 	//将一个或多个值value插入到key列表的表尾(最右边)<br>LPOP  key			//移除并返回key列表的头元素<br>RPOP  key			//移除并返回key列表的尾元素<br>LLen  key    		//返回key的长度<br>LRANGE  key  <span class="hljs-built_in">start</span>  stop		//返回列表key中指定区间内的元素，区间以偏移量<span class="hljs-built_in">start</span>和stop指定<br><br>BLPOP  key  [key ...]  timeout	//从key列表表头弹出一个元素，若列表中没有元素，阻塞等待					timeout秒,如果timeout=<span class="hljs-number">0</span>,一直阻塞等待<br>BRPOP  key  [key ...]  timeout 	//从key列表表尾弹出一个元素，若列表中没有元素，阻塞等待					timeout秒,如果timeout=<span class="hljs-number">0</span>,一直阻塞等待<br></code></pre></td></tr></table></figure>
+
+<p><strong>List应用场景</strong></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cmd">Stack(栈) = LPUSH + LPOP  FILO<br>Queue(队列）= LPUSH + RPOP<br>Blocking MQ(阻塞队列）= LPUSH + BRPOP<br></code></pre></td></tr></table></figure>
+
+<p>诸葛微博消息和微信公号消息</p>
+<p>微博关注了MacTalk，备胎说车等大V</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cmd"><span class="hljs-number">1</span>）MacTalk发微博，消息ID为<span class="hljs-number">10018</span><br>LPUSH  msg:&#123;诸葛老师-ID&#125;  <span class="hljs-number">10018</span><br><span class="hljs-number">2</span>）备胎说车发微博，消息ID为<span class="hljs-number">10086</span><br>LPUSH  msg:&#123;诸葛老师-ID&#125; <span class="hljs-number">10086</span><br><span class="hljs-number">3</span>）查看最新的<span class="hljs-number">5</span>条关注微博消息<br>LRANGE  msg:&#123;诸葛老师-ID&#125;  <span class="hljs-number">0</span>  <span class="hljs-number">5</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220330220809036.png" alt="image-20220330220809036"></p>
+<h4 id="Set结构"><a href="#Set结构" class="headerlink" title="Set结构"></a>Set结构</h4><p><strong>Set常用操作</strong></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs cmd"><span class="hljs-built_in">Set</span>常用操作<br>SADD  key  member  [member ...]			//往集合key中存入元素，元素存在则忽略，						若key不存在则新建<br>SREM  key  member  [member ...]			//从集合key中删除元素<br>SMEMBERS  key					//获取集合key中所有元素<br>SCARD  key					//获取集合key的元素个数<br>SISMEMBER  key  member			//判断member元素是否存在于集合key中<br>SRANDMEMBER  key  [count]			//从集合key中选出count个元素，元素不从key中删除<br>SPOP  key  [count]				//从集合key中选出count个元素，元素从key中删除<br><br><span class="hljs-built_in">Set</span>运算操作<br>SINTER  key  [key ...] 				//交集运算<br>SINTERSTORE  destination  key  [key ..]		//将交集结果存入新集合destination中<br>SUNION  key  [key ..] 				//并集运算<br>SUNIONSTORE  destination  key  [key ...]		//将并集结果存入新集合destination中<br>SDIFF  key  [key ...] 				//差集运算<br>SDIFFSTORE  destination  key  [key ...]		//将差集结果存入新集合destination中<br><br></code></pre></td></tr></table></figure>
+
+<p><strong>Set应用场景</strong></p>
+<p>微信抽奖小程序</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cmd"><span class="hljs-number">1</span>）点击参与抽奖加入集合<br>SADD key &#123;userlD&#125;<br><span class="hljs-number">2</span>）查看参与抽奖所有用户<br>SMEMBERS key	  <br><span class="hljs-number">3</span>）抽取count名中奖者<br>SRANDMEMBER key [count] / SPOP key [count]<br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220330221547322.png" alt="image-20220330221547322"></p>
+<p>微信微博点赞，收藏，标签</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs cmd">微信微博点赞，收藏，标签<br><span class="hljs-number">1</span>) 点赞<br>SADD  like:&#123;消息ID&#125;  &#123;用户ID&#125;<br><span class="hljs-number">2</span>) 取消点赞<br>SREM like:&#123;消息ID&#125;  &#123;用户ID&#125;<br><span class="hljs-number">3</span>) 检查用户是否点过赞<br>SISMEMBER  like:&#123;消息ID&#125;  &#123;用户ID&#125;<br><span class="hljs-number">4</span>) 获取点赞的用户列表<br>SMEMBERS like:&#123;消息ID&#125;<br><span class="hljs-number">5</span>) 获取点赞用户数 <br>SCARD like:&#123;消息ID&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>集合操作</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cmd">SINTER set1 set2 set3   &#123; c &#125;<br>SUNION set1 set2 set3 	&#123; a,b,c,d,e &#125;<br>SDIFF set1 set2 set3 	&#123; a &#125;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220330222741101.png" alt="image-20220330222741101"></p>
+<p>集合操作实现微博微信关注模型</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs cmd">集合操作实现微博微信关注模型<br><span class="hljs-number">1</span>) 诸葛老师关注的人: <br>zhugeSet-&gt; &#123;yangguo, sima, luban&#125;<br><span class="hljs-number">2</span>) 杨过老师关注的人:<br> yangguoSet--&gt; &#123;zhuge, sima, luban,guojia&#125;<br><span class="hljs-number">3</span>) 司马老师关注的人: <br>simaSet-&gt; &#123;zhuge, yangguo, guojia, luban, xunyu)<br><span class="hljs-number">4</span>) 我和杨过老师共同关注: <br>SINTER zhugeSet yangguoSet--&gt; &#123;sima, luban&#125;<br><span class="hljs-number">5</span>) 我关注的人也关注他(杨过老师): <br>SISMEMBER simaSet yangguo <br>SISMEMBER lubanSet yangguo<br><span class="hljs-number">6</span>) 我可能认识的人: <br>SDIFF yangguoSet zhugeSet-&gt;(zhuge, guojia&#125;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220330222922268.png" alt="image-20220330222922268"></p>
+<p>集合操作实现电商商品筛选</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs cmd">集合操作实现电商商品筛选<br>SADD  brand:huawei  P30<br>SADD  brand:xiaomi  mi-<span class="hljs-number">6</span>X<br>SADD  brand:iPhone iphone8<br>SADD os:android  P30  mi-<span class="hljs-number">6</span>X<br>SADD cpu:brand:intel  P30  mi-<span class="hljs-number">6</span>X<br>SADD ram:<span class="hljs-number">8</span>G  P30  mi-<span class="hljs-number">6</span>X  iphone8<br><br>SINTER  os:android  cpu:brand:intel  ram:<span class="hljs-number">8</span>G   &#123;P30，mi-<span class="hljs-number">6</span>X&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220330223600732.png" alt="image-20220330223600732"></p>
+<h4 id="Zset结构"><a href="#Zset结构" class="headerlink" title="Zset结构"></a>Zset结构</h4><p><strong>ZSet常用操作</strong></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs cmd">ZSet常用操作<br>ZADD key score member [[score member]…]	//往有序集合key中加入带分值元素<br>ZREM key member [member …]		//从有序集合key中删除元素<br>ZSCORE key member 			//返回有序集合key中元素member的分值<br>ZINCRBY key increment member		//为有序集合key中元素member的分值加上increment <br>ZCARD key				//返回有序集合key中元素个数<br>ZRANGE key <span class="hljs-built_in">start</span> stop [WITHSCORES]	//正序获取有序集合key从<span class="hljs-built_in">start</span>下标到stop下标的元素<br>ZREVRANGE key <span class="hljs-built_in">start</span> stop [WITHSCORES]	//倒序获取有序集合key从<span class="hljs-built_in">start</span>下标到stop下标的元素<br>Zset集合操作<br>ZUNIONSTORE destkey numkeys key [key ...] 	//并集计算<br>ZINTERSTORE destkey numkeys key [key …]	//交集计算<br></code></pre></td></tr></table></figure>
+
+<p><strong>Zset应用场景</strong></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs cmd">Zset集合操作实现排行榜<br><span class="hljs-number">1</span>）点击新闻<br>ZINCRBY  hotNews:<span class="hljs-number">20190819</span>  <span class="hljs-number">1</span>  守护香港<br><span class="hljs-number">2</span>）展示当日排行前十<br>ZREVRANGE  hotNews:<span class="hljs-number">20190819</span>  <span class="hljs-number">0</span>  <span class="hljs-number">10</span>  WITHSCORES <br><span class="hljs-number">3</span>）七日搜索榜单计算<br>ZUNIONSTORE  hotNews:<span class="hljs-number">20190813</span>-<span class="hljs-number">20190819</span>  <span class="hljs-number">7</span> <br><span class="hljs-function">hotNews:20190813  <span class="hljs-title">hotNews</span>:20190814... <span class="hljs-title">hotNews</span>:20190819</span><br><span class="hljs-function">4）展示七日排行前十</span><br><span class="hljs-function"><span class="hljs-title">ZREVRANGE</span> <span class="hljs-title">hotNews</span>:20190813-20190819  0  10  <span class="hljs-title">WITHSCORES</span></span><br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F05-Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220330224305930.png" alt="image-20220330224305930"></p>
+<h4 id="HyperLogLog"><a href="#HyperLogLog" class="headerlink" title="HyperLogLog"></a>HyperLogLog</h4><p>​    Redis HyperLogLog 是用来做基数统计的算法</p>
+<p>​    基数计算（cardinality counting）指的是统计一批数据中的不重复元素的个数，常见于计算独立用户数（UV）、维度的独立取值数等等</p>
+<h4 id="Redis更多应用场景"><a href="#Redis更多应用场景" class="headerlink" title="Redis更多应用场景"></a>Redis更多应用场景</h4><p>微博、微信、陌陌&lt;附近的人&gt;<br>微信&lt;摇一摇&gt;&lt;抢红包&gt;<br>滴滴打车、摩拜单车&lt;附近的车&gt;<br>美团和饿了么&lt;附近的餐馆&gt;<br>搜索自动补全<br>布隆过滤器<br>。。。</p>
+<h2 id="Redis核心原理"><a href="#Redis核心原理" class="headerlink" title="Redis核心原理"></a>Redis核心原理</h2><h3 id="redis单线程和高性能"><a href="#redis单线程和高性能" class="headerlink" title="redis单线程和高性能"></a>redis单线程和高性能</h3><h4 id="Redis-单线程为什么还能这么快？"><a href="#Redis-单线程为什么还能这么快？" class="headerlink" title="Redis 单线程为什么还能这么快？"></a>Redis 单线程为什么还能这么快？</h4><p>1、所有数据都存在内存中，所有运算操作都是内存级别的运算，单线程即可实现高并发</p>
+<p>2、单线程避免了多线程切换带来的性能损耗（因此对耗时指令（keys *）或者大key存储要谨慎使用）</p>
+<h4 id="Redis单线程如何处理那么多的并发客户端连接"><a href="#Redis单线程如何处理那么多的并发客户端连接" class="headerlink" title="Redis单线程如何处理那么多的并发客户端连接"></a>Redis单线程如何处理那么多的并发客户端连接</h4><p>Redis的<strong>IO多路复用</strong>：redis利用<strong>epoll</strong>来实现IO多路复用，将连接信息和事件放到队列中，依次放到 </p>
+<p>文件事件分派器，事件分派器将事件分发给事件处理器。 </p>
+<p>Nginx也是采用IO多路复用原理解决C10K问题</p>
+<p>C10K问题：最初的服务器都是基于进程/线程模型的，新到来一个TCP连接，就需要分配1个进程（或者线程）。而进程又是操作系统最昂贵的资源，一台机器无法创建很多进程。如果是C10K就要创建1万个进程，那么操作系统是无法承受的。</p>
+<h2 id="其他高级命令"><a href="#其他高级命令" class="headerlink" title="其他高级命令"></a>其他高级命令</h2><h3 id="keys"><a href="#keys" class="headerlink" title="keys"></a>keys</h3><p>keys： 全量遍历键，用来列出所有满足特定正则字符串规则的key，当redis数据量比较大时， 性能比较差，要避免使用</p>
+<p>1、keys  *</p>
+<p>2、keys  a*</p>
+<h3 id="scan"><a href="#scan" class="headerlink" title="scan"></a>scan</h3><p><strong>scan：渐进式遍历键</strong>：SCAN cursor [MATCH pattern] [COUNT count] scan 参数提供了三个参数，第一个是 cursor 整数值，第二个是 key 的正则模式，第三个是一次遍 历的key的数量，并不是符合条件的结果数量。第一次遍历时，cursor 值为 0，然后将返回结果中第 一个整数值作为下一次遍历的 cursor。一直遍历到返回的 cursor 值为 0 时结束。</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis01-%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/image-20220404200315343.png" alt="image-20220404200315343"></p>
+<h3 id="Info"><a href="#Info" class="headerlink" title="Info"></a><strong>Info</strong></h3><p><strong>Info：</strong>查看redis服务运行信息，分为 9 大块，每个块都有非常多的参数，这 9 个块分别是: </p>
+<p>Server 服务器运行的环境参数 </p>
+<p>Clients 客户端相关信息 </p>
+<p>Memory 服务器运行内存统计数据 </p>
+<p>Persistence 持久化信息 </p>
+<p>Stats 通用统计数据 </p>
+<p>Replication 主从复制相关信息 </p>
+<p>CPU CPU 使用情况 </p>
+<p>Cluster 集群信息 </p>
+<p>KeySpace 键值对统计数量信息</p>
+<h2 id="Redis差异"><a href="#Redis差异" class="headerlink" title="Redis差异"></a>Redis差异</h2><h3 id="redis和memcached比较"><a href="#redis和memcached比较" class="headerlink" title="redis和memcached比较"></a>redis和memcached比较</h3><h4 id="redis-和-mongodb-比较"><a href="#redis-和-mongodb-比较" class="headerlink" title="redis 和 mongodb 比较"></a>redis 和 mongodb 比较</h4><h4 id="redis-和-Elasticsearch-比较"><a href="#redis-和-Elasticsearch-比较" class="headerlink" title="redis 和 Elasticsearch 比较"></a>redis 和 Elasticsearch 比较</h4><p>Redis</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Redis/" rel="tag"># Redis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/03/13/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/" rel="prev" title="性能调优15-JVM调优实战及常量池介绍">
+      <i class="fa fa-chevron-left"></i> 性能调优15-JVM调优实战及常量池介绍
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/04/04/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/" rel="next" title="分布式-Redis02-持久化和集群">
+      分布式-Redis02-持久化和集群 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">Redis安装与使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#StringRedisTemplate%E4%B8%8ERedisTemplate"><span class="nav-number">1.1.</span> <span class="nav-text">StringRedisTemplate与RedisTemplate</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lua%E8%84%9A%E6%9C%AC"><span class="nav-number">2.</span> <span class="nav-text">Lua脚本</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">Redis核心数据结构与原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E5%BA%94%E7%94%A8"><span class="nav-number">3.1.</span> <span class="nav-text">Redis核心数据结构与应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">3.1.1.</span> <span class="nav-text">Redis核心数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#String"><span class="nav-number">3.1.1.1.</span> <span class="nav-text">String</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hash"><span class="nav-number">3.1.1.2.</span> <span class="nav-text">Hash</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#List%E7%BB%93%E6%9E%84"><span class="nav-number">3.1.1.3.</span> <span class="nav-text">List结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Set%E7%BB%93%E6%9E%84"><span class="nav-number">3.1.1.4.</span> <span class="nav-text">Set结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Zset%E7%BB%93%E6%9E%84"><span class="nav-number">3.1.1.5.</span> <span class="nav-text">Zset结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HyperLogLog"><span class="nav-number">3.1.1.6.</span> <span class="nav-text">HyperLogLog</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Redis%E6%9B%B4%E5%A4%9A%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">3.1.1.7.</span> <span class="nav-text">Redis更多应用场景</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86"><span class="nav-number">3.2.</span> <span class="nav-text">Redis核心原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#redis%E5%8D%95%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E6%80%A7%E8%83%BD"><span class="nav-number">3.2.1.</span> <span class="nav-text">redis单线程和高性能</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Redis-%E5%8D%95%E7%BA%BF%E7%A8%8B%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%98%E8%83%BD%E8%BF%99%E4%B9%88%E5%BF%AB%EF%BC%9F"><span class="nav-number">3.2.1.1.</span> <span class="nav-text">Redis 单线程为什么还能这么快？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Redis%E5%8D%95%E7%BA%BF%E7%A8%8B%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86%E9%82%A3%E4%B9%88%E5%A4%9A%E7%9A%84%E5%B9%B6%E5%8F%91%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%BF%9E%E6%8E%A5"><span class="nav-number">3.2.1.2.</span> <span class="nav-text">Redis单线程如何处理那么多的并发客户端连接</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E9%AB%98%E7%BA%A7%E5%91%BD%E4%BB%A4"><span class="nav-number">3.3.</span> <span class="nav-text">其他高级命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#keys"><span class="nav-number">3.3.1.</span> <span class="nav-text">keys</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#scan"><span class="nav-number">3.3.2.</span> <span class="nav-text">scan</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Info"><span class="nav-number">3.3.3.</span> <span class="nav-text">Info</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis%E5%B7%AE%E5%BC%82"><span class="nav-number">3.4.</span> <span class="nav-text">Redis差异</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#redis%E5%92%8Cmemcached%E6%AF%94%E8%BE%83"><span class="nav-number">3.4.1.</span> <span class="nav-text">redis和memcached比较</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#redis-%E5%92%8C-mongodb-%E6%AF%94%E8%BE%83"><span class="nav-number">3.4.1.1.</span> <span class="nav-text">redis 和 mongodb 比较</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redis-%E5%92%8C-Elasticsearch-%E6%AF%94%E8%BE%83"><span class="nav-number">3.4.1.2.</span> <span class="nav-text">redis 和 Elasticsearch 比较</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">71</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

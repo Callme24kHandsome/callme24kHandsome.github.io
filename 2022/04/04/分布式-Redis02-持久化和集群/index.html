@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Redis持久化和集群">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式-Redis02-持久化和集群">
+<meta property="og:url" content="http://example.com/2022/04/04/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="Redis持久化和集群">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220405212052206.png">
+<meta property="og:image" content="http://example.com/images/分布式-Redis02-持久化和集群/image-20220405215418953.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220405220449763.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220405220554914.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220407214902817.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220407215205669.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220407223143755.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220408091050994.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220410125124943.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220410125706773.png">
+<meta property="og:image" content="http://example.com/2022/04/04/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411085210207.png">
+<meta property="og:image" content="http://example.com/2022/04/04/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411085223187.png">
+<meta property="og:image" content="http://example.com/2022/04/04/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411085245118.png">
+<meta property="og:image" content="http://example.com/2022/04/04/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/images/分布式-Redis02-持久化和集群/image-20220411085508108.png">
+<meta property="og:image" content="http://example.com/2022/04/04/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411091336869.png">
+<meta property="og:image" content="http://example.com/2022/04/04/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411092207999.png">
+<meta property="og:image" content="http://example.com/2022/04/04/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411092342046.png">
+<meta property="og:image" content="http://example.com/2022/04/04/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411092451299.png">
+<meta property="og:image" content="http://example.com/2022/04/04/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411092631159.png">
+<meta property="og:image" content="http://example.com/2022/04/04/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411092653605.png">
+<meta property="article:published_time" content="2022-04-04T13:00:00.000Z">
+<meta property="article:modified_time" content="2022-05-02T13:43:27.975Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220405212052206.png">
+
+<link rel="canonical" href="http://example.com/2022/04/04/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>分布式-Redis02-持久化和集群 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/04/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          分布式-Redis02-持久化和集群
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-04-04 21:00:00" itemprop="dateCreated datePublished" datetime="2022-04-04T21:00:00+08:00">2022-04-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-05-02 21:43:27" itemprop="dateModified" datetime="2022-05-02T21:43:27+08:00">2022-05-02</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">Redis持久化和集群</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Redis持久化"><a href="#Redis持久化" class="headerlink" title="Redis持久化"></a>Redis持久化</h1><h2 id="RDB快照（snapshot）"><a href="#RDB快照（snapshot）" class="headerlink" title="RDB快照（snapshot）"></a>RDB快照（snapshot）</h2><p>​    在默认情况下，Redis将内存数据库快照保存在名字为<strong>dump.rdb</strong>的<strong>二进制</strong>文件中，你可以对Redis进行设置，让它在“N秒内数据集至少有M个改动”这一条件被满足时，自动保存一次数据集。比如说，以下设置会让Redis在满足“60秒内有至少有1000个键被改动”这一条件时，自动保存一次数据集：</p>
+<p><strong>save 60 1000</strong></p>
+<p>关闭RDB只需要将所有的save保存策略注释掉即可，还可以手动执行命令生成RDB快照，进入redis客户端执行命令save或bgsave可以生成dump.rdb文件，每次命令执行都会将所有redis内存快照到一个新的rdb文件里，并覆盖原有rdb快照文件。save是同步命令，bgsave是异步命令，bgsave会从redis主进程fork（fork()是linux函数）出一个子进程专门用来生成rdb快照文件</p>
+<p><strong>save与bgsave对比：</strong></p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>save</th>
+<th>bgsave</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>IO类型</td>
+<td>同步</td>
+<td>异步</td>
+</tr>
+<tr>
+<td>是否阻塞其他redis命令</td>
+<td>阻塞</td>
+<td>非阻塞</td>
+</tr>
+<tr>
+<td>复杂度</td>
+<td>O(n)</td>
+<td>O(n)</td>
+</tr>
+<tr>
+<td>优点</td>
+<td>不会消耗额外内存</td>
+<td>阻塞客户端命令</td>
+</tr>
+<tr>
+<td>缺点</td>
+<td>阻塞客户端命令</td>
+<td>需要fork子进程，消耗内存</td>
+</tr>
+</tbody></table>
+<p><strong>配置自动生成rdb文件后台使用的是bgsave方式。</strong></p>
+<h2 id="AOF（append-only-file）"><a href="#AOF（append-only-file）" class="headerlink" title="AOF（append-only file）"></a>AOF（append-only file）</h2><p>​    快照功能并不是非常耐久（durable）：如果Redis因为某些原因而造成故障停机，那么服务器将丢失最近写入、且仍未保存到快照中的那些数据。从1.1版本开始，Redis增加了一种完全耐久的持久化方式：AOF持久化，将修改的每一条指令记录进文件appendonly.aof中你可以通过修改配置文件来打开AOF功能：</p>
+<p><strong>appendonly yes</strong> </p>
+<p>从现在开始，每当Redis执行一个改变数据集的命令时（比如SET），这个命令就会被追加到AOF文件的末尾。这样的话，当Redis重新启动时，程序就可以通过重新执行AOF文件中的命令来达到重建数据集的目的。你可以配置Redis多久才将数据fsync 到磁盘一次。</p>
+<p>有三个选项：</p>
+<p><strong>appendfsync always</strong>：每次有新命令追加到AOF文件时就执行一次fsync，非常慢，也非常安全。<strong>appendfsync everysec</strong>：每秒fsync一次，足够快（和使用RDB持久化差不多），并且在故障时只会丢失1秒钟的数据。</p>
+<p><strong>appendfsync no</strong>：从不fsync，将数据交给操作系统来处理。更快，也更不安全的选择。推荐（并且也是默认）的措施为每秒fsync一次，这种fsync策略可以兼顾速度和安全性。</p>
+<h3 id="AOF重写"><a href="#AOF重写" class="headerlink" title="AOF重写"></a><strong>AOF重写</strong></h3><p>AOF文件里可能有太多没用指令，所以AOF会定期根据<strong>内存的最新数据</strong>生成aof文件如：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs cmd"><span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">6379</span>&gt; incr readcount<br>(integer) <span class="hljs-number">1</span><br><span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">6379</span>&gt; incr readcount<br>(integer) <span class="hljs-number">2</span><br><span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">6379</span>&gt; incr readcount<br>(integer) <span class="hljs-number">3</span><br><span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">6379</span>&gt; incr readcount<br>(integer) <span class="hljs-number">4</span><br><span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">6379</span>&gt; incr readcount<br>(integer) <span class="hljs-number">5</span><br><span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">6379</span>&gt; bgrewriteaof<br><br>//重写后<br><span class="hljs-built_in">SET</span><br>$<span class="hljs-number">9</span><br>readcount<br>$<span class="hljs-number">1</span><br><span class="hljs-number">5</span><br></code></pre></td></tr></table></figure>
+
+<p>如下两个配置可以控制AOF自动重写频率 </p>
+<p><strong>auto-aof-rewrite-min-size 64mb</strong> :aof文件至少要达到64M才会自动重写，文件太小恢复速度本来就很快，重写的意义不大</p>
+<p><strong>auto-aof-rewrite-percentage 100</strong> :aof文件自上一次重写后文件大小增长了100%则再次触发重写</p>
+<p><strong>bgrewriteaof</strong>:手动触发aof重写，AOF重写redis会fork出一个子进程去做，不会对redis正常命令处理有太多影响</p>
+<h2 id="RDB与AOF"><a href="#RDB与AOF" class="headerlink" title="RDB与AOF"></a>RDB与AOF</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>RDB</th>
+<th>AOF</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>启动优先级</td>
+<td>低</td>
+<td>高</td>
+</tr>
+<tr>
+<td>体积</td>
+<td>小</td>
+<td>大</td>
+</tr>
+<tr>
+<td>数据恢复速度</td>
+<td>快</td>
+<td>慢</td>
+</tr>
+<tr>
+<td>数据安全性</td>
+<td>容易丢数据</td>
+<td>根据策略决定，一般数据较新</td>
+</tr>
+</tbody></table>
+<p>redis启动时如果既有rdb文件又有aof文件则优先选择aof文件恢复数据，因为aof一般来说数据更全一点</p>
+<h2 id="Redis-4-0-混合持久化"><a href="#Redis-4-0-混合持久化" class="headerlink" title="Redis 4.0 混合持久化"></a>Redis 4.0 混合持久化</h2><p>重启Redis时，我们很少使用RDB来恢复内存状态，因为会丢失大量数据。我们通常使用AOF日志重放，但是重放AOF日志性能相对RDB来说要慢很多，这样在Redis实例很大的情况下，启动需要花费很长的时间。Redis4.0为了解决这个问题，带来了一个新的持久化选项——混合持久化</p>
+<p>通过如下配置可以开启混合持久化：</p>
+<p><strong># aof-use-rdb-preamble yes</strong> </p>
+<p>​    如果开启了混合持久化，AOF在重写时，不再是单纯将内存数据转换为RESP命令写入AOF文件，而是将重写这一刻之前的内存做RDB快照处理，并且将RDB快照内容和增量的AOF修改内存数据的命令存在一起，都写入新的AOF文件，新的文件一开始不叫appendonly.aof，等到重写完新的AOF文件才会进行改名，原子的覆盖原有的AOF文件，完成新旧两个AOF文件的替换。于是在Redis重启的时候，可以先加载RDB的内容，然后再重放增量AOF日志就可以完全替代之前的AOF全量文件重放，因此重启效率大幅得到提升。</p>
+<p>混合持久化AOF文件结构 ：</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220405212052206.png" alt="image-20220405212052206"></p>
+<h1 id="Redis主从架构"><a href="#Redis主从架构" class="headerlink" title="Redis主从架构"></a>Redis主从架构</h1><img src="/images/分布式-Redis02-持久化和集群/image-20220405215418953.png" alt="image-20220405215418953" style="zoom:50%;">
+
+<h2 id="Redis主从工作原理"><a href="#Redis主从工作原理" class="headerlink" title="Redis主从工作原理"></a>Redis主从工作原理</h2><p>​    如果你为master配置了一个slave，不管这个slave是否是第一次连接上Master，它都会发送一个SYNC命 令(redis2.8版本之前的命令)给master请求复制数据。 </p>
+<p>​    master收到SYNC命令后，会在后台进行数据持久化通过bgsave生成最新的rdb快照文件，持久化期间， master会继续接收客户端的请求，它会把这些可能修改数据集的请求缓存在内存中。当持久化进行完毕以 后，master会把这份rdb文件数据集发送给slave，slave会把接收到的数据进行持久化生成rdb，然后再加 载到内存中。然后，master再将之前缓存在内存中的命令发送给slave。 当master与slave之间的连接由于某些原因而断开时，slave能够自动重连Master，如果master收到了多 个slave并发连接请求，它只会进行一次持久化，而不是一个连接一次，然后再把这一份持久化的数据发送 给多个并发连接的slave。 当master和slave断开重连后，一般都会对整份数据进行复制。但从redis2.8版本开始，master和slave断 开重连后支持部分复制。</p>
+<h3 id="主从复制-全量复制-流程图"><a href="#主从复制-全量复制-流程图" class="headerlink" title="主从复制(全量复制)流程图"></a>主从复制(全量复制)流程图</h3><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220405220449763.png" alt="image-20220405220449763"></p>
+<h3 id="主从复制-部分复制-流程图："><a href="#主从复制-部分复制-流程图：" class="headerlink" title="主从复制(部分复制)流程图："></a>主从复制(部分复制)流程图：</h3><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220405220554914.png" alt="image-20220405220554914"></p>
+<h2 id="主从架构搭建"><a href="#主从架构搭建" class="headerlink" title="主从架构搭建"></a>主从架构搭建</h2><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs cmd">logfile &quot;<span class="hljs-number">6380</span>.log&quot; <br><span class="hljs-built_in">dir</span> /soft/redis‐<span class="hljs-number">5</span>.<span class="hljs-number">0</span>.<span class="hljs-number">3</span>/<span class="hljs-number">6380</span> <br>配置主从复制 <br>replicaof <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span> <span class="hljs-number">6379</span> # 从本机<span class="hljs-number">6379</span>的redis实例复制数据 <br>replica‐read‐only yes <br>启动从节点 <br>redis‐server redis.conf <br>连接从节点 <br>redis‐cli ‐p <span class="hljs-number">6380</span> <br>测试在<span class="hljs-number">6379</span>实例上写数据，<span class="hljs-number">6380</span>实例是否能及时同步新修改数据 <br><br>可以自己再配置一个<span class="hljs-number">6381</span>的从节点<br></code></pre></td></tr></table></figure>
+
+<p>启动6379,6380,6381 3个redis实例，主节点可读可写、从节点只可读</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220407214902817.png" alt="image-20220407214902817"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220407215205669.png" alt="image-20220407215205669"></p>
+<h1 id="Redis哨兵模式"><a href="#Redis哨兵模式" class="headerlink" title="Redis哨兵模式"></a>Redis哨兵模式</h1><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220407223143755.png" alt="image-20220407223143755"></p>
+<p>​    <strong>sentinel哨兵</strong>是特殊的redis服务，不提供读写服务，主要用来监控redis实例节点。 <strong>哨兵架构下client端第一次从哨兵找出redis的主节点，后续就直接访问redis的主节点，不会每次都通过 sentinel代理访问redis的主节点，当redis的主节点发生变化，哨兵会第一时间感知到，并且将新的redis 主节点通知给client端(这里面redis的client端一般都实现了订阅功能，订阅sentinel发布的节点变动消息)</strong></p>
+<h2 id="redis哨兵架构搭建步骤"><a href="#redis哨兵架构搭建步骤" class="headerlink" title="redis哨兵架构搭建步骤"></a>redis哨兵架构搭建步骤</h2><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs cmd"><span class="hljs-number">1</span>、复制一份sentinel.conf文件<br>cp sentinel.conf sentinel‐<span class="hljs-number">26379</span>.conf <br><span class="hljs-number">2</span>、将相关配置修改为如下值：<br>port <span class="hljs-number">26379</span> <br>daemonize yes <br>pidfile &quot;/var/run/redis‐sentinel‐<span class="hljs-number">26379</span>.pid&quot;<br>logfile &quot;/soft/redis-<span class="hljs-number">5</span>.<span class="hljs-number">0</span>.<span class="hljs-number">3</span>/<span class="hljs-number">26379</span>.log&quot; <span class="hljs-number">9</span> <span class="hljs-built_in">dir</span> &quot;/soft/redis-<span class="hljs-number">5</span>.<span class="hljs-number">0</span>.<span class="hljs-number">3</span>/<span class="hljs-number">27369</span>&quot; <br>#sentinel monitor &lt;master‐name&gt; &lt;ip&gt; &lt;redis‐port&gt; &lt;quorum&gt; #quorum是一个数字，指明当有多少个sentinel认为一个master失效时(值一般为：sentinel总数/<span class="hljs-number">2</span> + <span class="hljs-number">1</span>)，master才算真正失效<br>sentinel monitor mymaster <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">0</span>.<span class="hljs-number">60</span> <span class="hljs-number">6379</span> <span class="hljs-number">2</span> <br><span class="hljs-number">3</span>、启动sentinel哨兵实例 <br>src/redis‐sentinel sentinel‐<span class="hljs-number">26379</span>.conf <br><span class="hljs-number">4</span>、查看sentinel的info信息 <br>src/redis‐cli ‐p <span class="hljs-number">26379</span> <span class="hljs-number">19</span> <br><span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">26379</span>&gt;info <br>可以看到Sentinel的info里已经识别出了redis的主从<br><span class="hljs-number">5</span>、可以自己再配置两个sentinel，端口<span class="hljs-number">26380</span>和<span class="hljs-number">26381</span>，注意上述配置文件里的对应数字都要修改<br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220408091050994.png" alt="image-20220408091050994"></p>
+<h3 id="Jedis测试代码"><a href="#Jedis测试代码" class="headerlink" title="Jedis测试代码"></a>Jedis测试代码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">JedisSentinelTest</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        JedisPoolConfig config = <span class="hljs-keyword">new</span> JedisPoolConfig();<br>        config.setMaxTotal(<span class="hljs-number">20</span>);<br>        config.setMaxIdle(<span class="hljs-number">10</span>);<br>        config.setMinIdle(<span class="hljs-number">5</span>);<br>        String masterName = <span class="hljs-string">&quot;mymaster&quot;</span>;<br>        Set&lt;String&gt; sentinels = <span class="hljs-keyword">new</span> HashSet&lt;String&gt;();<br>        sentinels.add(<span class="hljs-keyword">new</span> HostAndPort(<span class="hljs-string">&quot;192.168.136.1&quot;</span>,<span class="hljs-number">26379</span>).toString());<br>        sentinels.add(<span class="hljs-keyword">new</span> HostAndPort(<span class="hljs-string">&quot;192.168.136.1&quot;</span>,<span class="hljs-number">26380</span>).toString());<br>        sentinels.add(<span class="hljs-keyword">new</span> HostAndPort(<span class="hljs-string">&quot;192.168.136.1&quot;</span>,<span class="hljs-number">26381</span>).toString());<br><br>        <span class="hljs-comment">//JedisSentinelPool其实本质跟JedisPool类似，都是与redis主节点建立的连接池</span><br>        <span class="hljs-comment">//JedisSentinelPool并不是说与sentinel建立的连接池，而是通过sentinel发现redis主节点并与其建立连接</span><br><br>        JedisSentinelPool jedisSentinelPool = <span class="hljs-keyword">new</span> JedisSentinelPool(masterName, sentinels, config, <span class="hljs-number">3000</span>, <span class="hljs-keyword">null</span>);<br>        Jedis jedis = <span class="hljs-keyword">null</span>;<br>        <span class="hljs-keyword">try</span>&#123;<br><br>            jedis = jedisSentinelPool.getResource();<br>            System.out.println(jedis.set(<span class="hljs-string">&quot;sentinelKey&quot;</span>, <span class="hljs-string">&quot;sentinelValue&quot;</span>));<br>            System.out.println(jedis.get(<span class="hljs-string">&quot;sentinelKey&quot;</span>));<br>            <span class="hljs-comment">//管道示例</span><br>            <span class="hljs-comment">//管道的命令执行方式：cat redis.txt | redis‐cli ‐h 127.0.0.1 ‐a password ‐ p 6379 ‐‐pipe</span><br>        &#125;<span class="hljs-keyword">catch</span> (Exception e)&#123;<br>            e.printStackTrace();<br>        &#125; <span class="hljs-keyword">finally</span> &#123;<br>            jedis.close();<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="SpringBoot测试代码"><a href="#SpringBoot测试代码" class="headerlink" title="SpringBoot测试代码"></a>SpringBoot测试代码</h3><figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-attr">server:</span><br>  <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span><br><br><span class="hljs-attr">spring:</span><br>  <span class="hljs-attr">redis:</span><br>    <span class="hljs-attr">database:</span> <span class="hljs-number">0</span><br>    <span class="hljs-attr">timeout:</span> <span class="hljs-number">3000</span><br>    <span class="hljs-attr">lettuce:</span><br>      <span class="hljs-attr">pool:</span><br>        <span class="hljs-attr">max-active:</span> <span class="hljs-number">100</span><br>        <span class="hljs-attr">max-idle:</span> <span class="hljs-number">50</span><br>        <span class="hljs-attr">min-idle:</span> <span class="hljs-number">10</span><br>        <span class="hljs-attr">max-wait:</span> <span class="hljs-number">1000</span><br>    <span class="hljs-attr">sentinel:</span><br>      <span class="hljs-attr">master:</span> <span class="hljs-string">mymaster</span><br>      <span class="hljs-attr">nodes:</span> <span class="hljs-number">192.168</span><span class="hljs-number">.136</span><span class="hljs-number">.1</span><span class="hljs-string">:26379,192.168.136.1:26380,192.168.136.1:26381</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Controller</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestController</span> </span>&#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> Logger logger = LoggerFactory.getLogger(TestController.class);<br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> StringRedisTemplate redisTemplate;<br><br>    <span class="hljs-meta">@GetMapping(&quot;/testSentinel&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testSentinel</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> InterruptedException </span>&#123;<br>        <span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>;<br>        <span class="hljs-keyword">while</span>(<span class="hljs-keyword">true</span>)&#123;<br>            redisTemplate.opsForValue().set(<span class="hljs-string">&quot;testSentinel&quot;</span>+i,<span class="hljs-string">&quot;testSentinel&quot;</span>+i);<br>            i++;<br>            Thread.sleep(<span class="hljs-number">1000</span>);<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="Redis集群模式"><a href="#Redis集群模式" class="headerlink" title="Redis集群模式"></a>Redis集群模式</h1><h2 id="Redis集群方案比较"><a href="#Redis集群方案比较" class="headerlink" title="Redis集群方案比较"></a>Redis集群方案比较</h2><h3 id="哨兵模式"><a href="#哨兵模式" class="headerlink" title="哨兵模式"></a>哨兵模式</h3><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220410125124943.png" alt="image-20220410125124943"></p>
+<p>在redis3.0以前的版本要实现集群一般是借助哨兵sentinel工具来监控master节点的状态，如果master节点异常，则会做主从切换，将某一台slave作为master，哨兵的<strong>配置略微复杂</strong>，并且<strong>性能和高可用性等各方面表现一般</strong>，特别是在主从切换的瞬间存在<strong>访问瞬断</strong>的情况，而且哨兵模式只有一个主节点对外提供服务，没法支持很高的并发，且单个主节点内存也不宜设置得过大，否则会导致<strong>持久化文件过大</strong>，影响数据恢复或主从同步的效率</p>
+<p><strong>缺点：</strong></p>
+<p>1、主从切换存在访问瞬断</p>
+<p>2、单一主节点提供服务，并发量不高，内存存在限制<br>    （一般而言一台Redis 内存不超过4G(内存过大会导致持久化文件过大)，最大连接数不超过10W）</p>
+<p>3、配置略微复杂</p>
+<p><strong>优点：</strong></p>
+<p>1、主节点故障时支持主从切换</p>
+<h3 id="高可用的集群模式"><a href="#高可用的集群模式" class="headerlink" title="高可用的集群模式"></a>高可用的集群模式</h3><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220410125706773.png" alt="image-20220410125706773"></p>
+<p>redis集群是一个<strong>由多个主从节点群组成的分布式服务器群</strong>，它具有<strong>复制</strong>、<strong>高可用</strong>和<strong>分片</strong>特性。Redis集群不需要sentinel哨兵也能完成节点移除和故障转移的功能。需要将每个节点设置成集群模式，这种集群模式没有中心节点，可<strong>水平扩展</strong>，据官方文档称可以线性扩展到上万个节点(<strong>官方推荐不超过1000个节点</strong>)。redis集群的性能和高可用性均优于之前版本的哨兵模式，且集群配置非常简单 </p>
+<p><strong>优点：</strong></p>
+<p>1、配置简单</p>
+<p>2、访问瞬断影响范围小（某个主节点A挂了，A节点切换主从时只会暂时影响路由到该节点的请求，其他请求正常）</p>
+<p>3、集群提供服务：高吞吐，支持水平拓展</p>
+<h2 id="Redis高可用集群搭建"><a href="#Redis高可用集群搭建" class="headerlink" title="Redis高可用集群搭建"></a>Redis高可用集群搭建</h2><p>redis集群需要至少三个master节点，我们这里搭建三个master节点，并且给每个master再搭建一个slave节点，总共6个redis节点，这里用三台机器部署6个redis实例，每台机器一主一从，搭建集群的步骤如下：</p>
+<p>配置第一台</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><code class="hljs cmd">进入/soft/redis-<span class="hljs-number">5</span>.<span class="hljs-number">0</span>.<span class="hljs-number">3</span><br>第一步：在第一台机器的/usr/local下创建文件夹redis-cluster，然后在其下面分别创建<span class="hljs-number">2</span>个文件夾如下<br>（<span class="hljs-number">1</span>）<span class="hljs-built_in">mkdir</span> <span class="hljs-number">8001</span> <span class="hljs-number">8004</span><br><br>第二步：把之前的redis-<span class="hljs-number">7369</span>.conf复制为redis-cluster-<span class="hljs-number">8001</span>.conf，修改如下内容：<br>（<span class="hljs-number">1</span>）daemonize yes<br>（<span class="hljs-number">2</span>）port <span class="hljs-number">8001</span>（分别对每个机器的端口号进行设置）<br>（<span class="hljs-number">3</span>）pidfile /soft/redis-<span class="hljs-number">5</span>.<span class="hljs-number">0</span>.<span class="hljs-number">3</span>/redis_8001.pid  # 把pid进程号写入pidfile配置的文件<br>（<span class="hljs-number">4</span>）<span class="hljs-built_in">dir</span> /soft/redis-<span class="hljs-number">5</span>.<span class="hljs-number">0</span>.<span class="hljs-number">3</span>/<span class="hljs-number">8001</span>/（指定数据文件存放位置，必须要指定不同的目录位置，不然会丢失数据）<br>（<span class="hljs-number">5</span>）cluster-enabled yes（启动集群模式）<br>（<span class="hljs-number">6</span>）cluster-config-file nodes-<span class="hljs-number">8001</span>.conf（集群节点信息文件，这里<span class="hljs-number">800</span>x最好和port对应上）<br>（<span class="hljs-number">7</span>）cluster-node-timeout <span class="hljs-number">10000</span><br> (<span class="hljs-number">8</span>)# bind <span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>（bind绑定的是自己机器网卡的ip，如果有多块网卡可以配多个ip，代表允许客户端通过机器的哪些网卡ip去访问，内网一般可以不配置bind，注释掉即可）<br> (<span class="hljs-number">9</span>)protected-<span class="hljs-built_in">mode</span>  no   （关闭保护模式）<br> (<span class="hljs-number">10</span>)appendonly yes<br>如果要设置密码需要增加如下配置：<br> (<span class="hljs-number">11</span>)requirepass <span class="hljs-number">12345</span>     (设置redis访问密码)<br> (<span class="hljs-number">12</span>)masterauth <span class="hljs-number">12345</span>      (设置集群节点间访问密码，跟上面一致)<br><br>第三步：把修改后的配置文件，<span class="hljs-built_in">copy</span>到<span class="hljs-number">8004</span>，修改第<span class="hljs-number">2</span>、<span class="hljs-number">3</span>、<span class="hljs-number">4</span>、<span class="hljs-number">6</span>项里的端口号，可以用批量替换：<br>:%s/源字符串/目的字符串/g <br><br>第四步：另外两台机器也需要做上面几步操作，第二台机器用<span class="hljs-number">8002</span>和<span class="hljs-number">8005</span>，第三台机器用<span class="hljs-number">8003</span>和<span class="hljs-number">8006</span><br><br>第五步：分别启动<span class="hljs-number">6</span>个redis实例，然后检查是否启动成功<br>（<span class="hljs-number">1</span>）redis-server /usr/local/redis-cluster/<span class="hljs-number">800</span>*/redis.conf<br>（<span class="hljs-number">2</span>）ps -ef | grep redis 查看是否启动成功<br>    <br>第六步：用redis-cli创建整个redis集群(redis5以前的版本集群是依靠ruby脚本redis-trib.rb实现)<br># 下面命令里的<span class="hljs-number">1</span>代表为每个创建的主服务器节点创建一个从服务器节点<br># 执行这条命令需要确认三台机器之间的redis实例要能相互访问，可以先简单把所有机器防火墙关掉，如果不关闭防火墙则需要打开redis服务端口和集群节点gossip通信端口<span class="hljs-number">16379</span>(默认是在redis端口号上加<span class="hljs-number">1</span>W)<br># 关闭防火墙<br># systemctl stop firewalld # 临时关闭防火墙<br># systemctl disable firewalld # 禁止开机启动<br># 注意：下面这条创建集群的命令大家不要直接复制，里面的空格编码可能有问题导致创建集群不成功<br>（<span class="hljs-number">1</span>）redis-cli -a <span class="hljs-number">12345</span> --cluster create --cluster-replicas <span class="hljs-number">1</span> <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span>:<span class="hljs-number">8001</span> <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">2</span>:<span class="hljs-number">8002</span> <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">3</span>:<span class="hljs-number">8003</span> <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span>:<span class="hljs-number">8004</span> <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">2</span>:<span class="hljs-number">8005</span> <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">3</span>:<span class="hljs-number">8006</span> <br><br>第七步：验证集群：<br>（<span class="hljs-number">1</span>）连接任意一个客户端即可：./redis-cli -c -h -p (-a访问服务端密码，-c表示集群模式，指定ip地址和端口号）<br>    如：redis-cli -a <span class="hljs-number">12345</span> -c -h <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span> -p <span class="hljs-number">800</span>*<br>（<span class="hljs-number">2</span>）进行验证： cluster info（查看集群信息）、cluster nodes（查看节点列表）<br><span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">8001</span>&gt;cluster info<br><span class="hljs-function">cluster_state:<span class="hljs-title">ok</span></span><br><span class="hljs-function"><span class="hljs-title">cluster_slots_assigned</span>:16384</span><br><span class="hljs-function"><span class="hljs-title">cluster_slots_ok</span>:16384</span><br><span class="hljs-function"><span class="hljs-title">cluster_slots_pfail</span>:0</span><br><span class="hljs-function"><span class="hljs-title">cluster_slots_fail</span>:0</span><br><span class="hljs-function"><span class="hljs-title">cluster_known_nodes</span>:6</span><br><span class="hljs-function"><span class="hljs-title">cluster_size</span>:3</span><br><span class="hljs-function"><span class="hljs-title">cluster_current_epoch</span>:6</span><br><span class="hljs-function"><span class="hljs-title">cluster_my_epoch</span>:1</span><br><span class="hljs-function"><span class="hljs-title">cluster_stats_messages_ping_sent</span>:222</span><br><span class="hljs-function"><span class="hljs-title">cluster_stats_messages_pong_sent</span>:224</span><br><span class="hljs-function"><span class="hljs-title">cluster_stats_messages_sent</span>:446</span><br><span class="hljs-function"><span class="hljs-title">cluster_stats_messages_ping_received</span>:219</span><br><span class="hljs-function"><span class="hljs-title">cluster_stats_messages_pong_received</span>:222</span><br><span class="hljs-function"><span class="hljs-title">cluster_stats_messages_meet_received</span>:5</span><br><span class="hljs-function"><span class="hljs-title">cluster_stats_messages_received</span>:446</span><br><span class="hljs-function"></span><br><span class="hljs-function">127.0.0.1:8001&gt; <span class="hljs-title">cluster</span> <span class="hljs-title">nodes</span></span><br><span class="hljs-function">71<span class="hljs-title">f22e18856c6f6084cf8a21beaf3d0f8fa5c781</span> 192.168.136.3:8006@18006 <span class="hljs-title">slave</span> 687<span class="hljs-title">ccdac68ef3ea3ef2141817ffcdbf8ffc1d62a</span> 0 1649599402000 6 <span class="hljs-title">connected</span></span><br><span class="hljs-function"><span class="hljs-title">db58daf98f0db426e7a079a72ab0fe8fdee36718</span> 192.168.136.2:8005@18005 <span class="hljs-title">slave</span> 09<span class="hljs-title">b4cef366fe5786f8e5a887de316d81a793982a</span> 0 1649599403019 5 <span class="hljs-title">connected</span></span><br><span class="hljs-function">09<span class="hljs-title">b4cef366fe5786f8e5a887de316d81a793982a</span> 192.168.136.1:8001@18001 <span class="hljs-title">myself</span>,<span class="hljs-title">master</span> - 0 1649599401000 1 <span class="hljs-title">connected</span> 0-5460</span><br><span class="hljs-function">687<span class="hljs-title">ccdac68ef3ea3ef2141817ffcdbf8ffc1d62a</span> 192.168.136.2:8002@18002 <span class="hljs-title">master</span> - 0 1649599402000 2 <span class="hljs-title">connected</span> 5461-10922</span><br><span class="hljs-function">24<span class="hljs-title">c1c961d5a9b23b3f7fb670060a41dac253a0f1</span> 192.168.136.1:8004@18004 <span class="hljs-title">slave</span> 7<span class="hljs-title">bea82570c2568a0bfcbe0f91aafa8d908dfb5ce</span> 0 1649599400000 4 <span class="hljs-title">connected</span></span><br><span class="hljs-function">7<span class="hljs-title">bea82570c2568a0bfcbe0f91aafa8d908dfb5ce</span> 192.168.136.3:8003@18003 <span class="hljs-title">master</span> - 0 1649599403000 3 <span class="hljs-title">connected</span> 10923-16383</span><br><span class="hljs-function">（3）进行数据操作验证</span><br><span class="hljs-function">127.0.0.1:8001&gt; <span class="hljs-title">keys</span> * </span><br><span class="hljs-function">(<span class="hljs-title">empty</span> <span class="hljs-title">list</span> <span class="hljs-title">or</span> <span class="hljs-title">set</span>)</span><br><span class="hljs-function">127.0.0.1:8001&gt; <span class="hljs-title">set</span> <span class="hljs-title">key1</span> <span class="hljs-title">value1</span></span><br><span class="hljs-function">-&gt; <span class="hljs-title">Redirected</span> <span class="hljs-title">to</span> <span class="hljs-title">slot</span> [9189] <span class="hljs-title">located</span> <span class="hljs-title">at</span> 192.168.136.2:8002</span><br><span class="hljs-function"><span class="hljs-title">OK</span></span><br><span class="hljs-function">192.168.136.2:8002&gt; <span class="hljs-title">set</span> <span class="hljs-title">key2</span> <span class="hljs-title">value2</span></span><br><span class="hljs-function">-&gt; <span class="hljs-title">Redirected</span> <span class="hljs-title">to</span> <span class="hljs-title">slot</span> [4998] <span class="hljs-title">located</span> <span class="hljs-title">at</span> 192.168.136.1:8001</span><br><span class="hljs-function"><span class="hljs-title">OK</span></span><br><span class="hljs-function">192.168.136.1:8001&gt; <span class="hljs-title">set</span> <span class="hljs-title">key3</span> <span class="hljs-title">value3</span></span><br><span class="hljs-function"><span class="hljs-title">OK</span></span><br><span class="hljs-function">192.168.136.1:8001&gt; <span class="hljs-title">set</span> <span class="hljs-title">key4</span> <span class="hljs-title">value4</span></span><br><span class="hljs-function">-&gt; <span class="hljs-title">Redirected</span> <span class="hljs-title">to</span> <span class="hljs-title">slot</span> [13120] <span class="hljs-title">located</span> <span class="hljs-title">at</span> 192.168.136.3:8003</span><br><span class="hljs-function"><span class="hljs-title">OK</span></span><br><span class="hljs-function">192.168.136.3:8003&gt; </span><br><span class="hljs-function"></span><br><span class="hljs-function">（4）关闭集群则需要逐个进行关闭，使用命令：</span><br><span class="hljs-function"><span class="hljs-title">redis</span>-<span class="hljs-title">cli</span> -<span class="hljs-title">a</span> 12345 -<span class="hljs-title">c</span> -<span class="hljs-title">h</span> 192.168.0.60 -<span class="hljs-title">p</span> 800* <span class="hljs-title">shutdown</span></span><br></code></pre></td></tr></table></figure>
+
+<p><strong>VMWare克隆Centos镜像</strong></p>
+<p>192.168.136.1实例的镜像为192.168.136.2,192.168.136.3</p>
+<p>复制VMware 虚拟机（<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_42339115/article/details/117919290">静态ip配置参考</a>）</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs cmd"># 配置静态ip<br>systemctl stop NetworkManager<br>systemctl disable NetworkManager<br>vim /etc/sysconfig/network-scripts/ifcfg-ens33<br>内容如下 删除UUID这行<br><span class="hljs-built_in">TYPE</span>=&quot;Ethernet&quot;<br>PROXY_METHOD=&quot;none&quot;<br>BROWSER_ONLY=&quot;no&quot;<br>BOOTPROTO=&quot;static&quot;<br>DEFROUTE=&quot;yes&quot;<br>IPV4_FAILURE_FATAL=&quot;no&quot;<br>IPV6INIT=&quot;yes&quot;<br>IPV6_AUTOCONF=&quot;yes&quot;<br>IPV6_DEFROUTE=&quot;yes&quot;<br>IPV6_FAILURE_FATAL=&quot;no&quot;<br>IPV6_ADDR_GEN_MODE=&quot;stable-privacy&quot;<br>NAME=&quot;ens33&quot;<br>#UUID=&quot;f8e1b7b3-<span class="hljs-number">4</span>aaf-<span class="hljs-number">487</span>a-<span class="hljs-number">9</span>c91-a883fe938397&quot;<br>DEVICE=&quot;ens33&quot;<br>ONBOOT=&quot;yes&quot;<br>IPADDR=<span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">2</span><br>NETMASK=<span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">255</span>.<span class="hljs-number">0</span><br>GATEWAY=<span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">2</span><br>DNS1=<span class="hljs-number">114</span>.<span class="hljs-number">114</span>.<span class="hljs-number">114</span>.<span class="hljs-number">114</span><br><br>#重启网卡<br>service network restart<br></code></pre></td></tr></table></figure>
+
+<h2 id="Java操作redis集群"><a href="#Java操作redis集群" class="headerlink" title="Java操作redis集群"></a>Java操作redis集群</h2><h3 id="Jedis"><a href="#Jedis" class="headerlink" title="Jedis"></a>Jedis</h3><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs cmd">public class JedisClusterTest &#123;<br>    public static void main(String[] args) &#123;<br>        JedisPoolConfig config = new JedisPoolConfig();<br>        config.setMaxTotal(<span class="hljs-number">20</span>);<br>        config.setMaxIdle(<span class="hljs-number">10</span>);<br>        config.setMinIdle(<span class="hljs-number">5</span>);<br>        <span class="hljs-built_in">Set</span>&lt;HostAndPort&gt; hostAndPorts = new HashSet&lt;&gt;();<br>        hostAndPorts.add(new HostAndPort(&quot;<span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span>&quot;,<span class="hljs-number">8001</span>));<br>        hostAndPorts.add(new HostAndPort(&quot;<span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span>&quot;,<span class="hljs-number">8004</span>));<br>        hostAndPorts.add(new HostAndPort(&quot;<span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">2</span>&quot;,<span class="hljs-number">8002</span>));<br>        hostAndPorts.add(new HostAndPort(&quot;<span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">2</span>&quot;,<span class="hljs-number">8005</span>));<br>        hostAndPorts.add(new HostAndPort(&quot;<span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">3</span>&quot;,<span class="hljs-number">8003</span>));<br>        hostAndPorts.add(new HostAndPort(&quot;<span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">4</span>&quot;,<span class="hljs-number">8006</span>));<br>        JedisCluster jedisCluster = null;<br>        try &#123;<br>            jedisCluster= new JedisCluster(hostAndPorts,<span class="hljs-number">6000</span>,<span class="hljs-number">5000</span>,<span class="hljs-number">10</span>,&quot;<span class="hljs-number">12345</span>&quot;,config);<br>            jedisCluster.<span class="hljs-built_in">set</span>(&quot;clusterKey&quot;,&quot;clusterValue&quot;);<br>            System.out.println(jedisCluster.get(&quot;clusterKey&quot;));<br>        &#125;catch (Exception e)&#123;<br>            e.printStackTrace();<br>        &#125;finally &#123;<br>            jedisCluster.close();<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="SpringBoot"><a href="#SpringBoot" class="headerlink" title="SpringBoot"></a>SpringBoot</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@GetMapping(&quot;/testCluster&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testCluster</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> InterruptedException </span>&#123;<br>    stringRedisTemplate.opsForValue().set(<span class="hljs-string">&quot;testClusterKey&quot;</span>,<span class="hljs-string">&quot;testClusterValue&quot;</span>);<br>    System.out.println(stringRedisTemplate.opsForValue().get(<span class="hljs-string">&quot;testClusterKey&quot;</span>));<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-attr">server:</span><br>  <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span><br><span class="hljs-attr">spring:</span><br>  <span class="hljs-attr">redis:</span><br>    <span class="hljs-attr">database:</span> <span class="hljs-number">0</span><br>    <span class="hljs-attr">timeout:</span> <span class="hljs-number">3000</span><br>    <span class="hljs-attr">lettuce:</span><br>      <span class="hljs-attr">pool:</span><br>        <span class="hljs-attr">max-active:</span> <span class="hljs-number">100</span><br>        <span class="hljs-attr">max-idle:</span> <span class="hljs-number">50</span><br>        <span class="hljs-attr">min-idle:</span> <span class="hljs-number">10</span><br>        <span class="hljs-attr">max-wait:</span> <span class="hljs-number">1000</span><br>    <span class="hljs-attr">cluster:</span><br>      <span class="hljs-attr">nodes:</span> <span class="hljs-number">192.168</span><span class="hljs-number">.136</span><span class="hljs-number">.1</span><span class="hljs-string">:8001,192.168.136.2:8002,192.168.136.3:8003,192.168.136.1:8004,192.168.136.2:8005,192.168.136.3:8006</span><br>    <span class="hljs-attr">password:</span> <span class="hljs-number">12345</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="Redis集群原理分析"><a href="#Redis集群原理分析" class="headerlink" title="Redis集群原理分析"></a>Redis集群原理分析</h2><p>Redis Cluster 将所有数据划分为 16384 个 slots(槽位)，每个节点负责其中一部分槽位。槽位的信息存储于每个节点中。</p>
+<p>当 Redis Cluster 的客户端来连接集群时，它也会得到一份集群的槽位配置信息并将其缓存在客户端本地。这样当客户端要查找某个 key 时，可以直接定位到目标节点。同时因为槽位的信息可能会存在客户端与服务器不一致的情况，还需要纠正机制来实现槽位信息的校验调整。</p>
+<p><strong>槽位定位算法</strong></p>
+<p>Cluster 默认会对 key 值使用 crc16 算法进行 hash 得到一个整数值，然后用这个整数值对 16384 进行取模来得到具体槽位。</p>
+<p>HASH_SLOT = CRC16(key) mod 16384</p>
+<p><strong>跳转重定位</strong></p>
+<p>当客户端向一个错误的节点发出了指令，该节点会发现指令的 key 所在的槽位并不归自己管理，这时它会向客户端发送一个特殊的跳转指令携带目标操作的节点地址，告诉客户端去连这个节点去获取数据。客户端收到指令后除了跳转到正确的节点上去操作，还会同步更新纠正本地的槽位映射表缓存，后续所有 key 将使用新的槽位映射表。</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cmd"><span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">8001</span>&gt; <span class="hljs-built_in">set</span> key1 value1<br>-&gt; Redirected to slot [<span class="hljs-number">9189</span>] located <span class="hljs-built_in">at</span> <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">2</span>:<span class="hljs-number">8002</span><br>OK<br><span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">2</span>:<span class="hljs-number">8002</span>&gt; <span class="hljs-built_in">set</span> key2 value2<br>-&gt; Redirected to slot [<span class="hljs-number">4998</span>] located <span class="hljs-built_in">at</span> <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span>:<span class="hljs-number">8001</span><br>OK<br></code></pre></td></tr></table></figure>
+
+<h3 id="Redis集群节点间的通信机制"><a href="#Redis集群节点间的通信机制" class="headerlink" title="Redis集群节点间的通信机制"></a>Redis集群节点间的通信机制</h3><p>redis cluster节点间采取gossip协议进行通信 </p>
+<ul>
+<li>维护集群的元数据(集群节点信息，主从角色，节点数量，各节点共享的数据等)有两种方式：集中式和gossip </li>
+</ul>
+<p><strong>集中式：</strong> </p>
+<p>优点在于元数据的更新和读取，时效性非常好，一旦元数据出现变更立即就会更新到集中式的存储中，其他节点读取的时候立即就可以立即感知到；不足在于所有的元数据的更新压力全部集中在一个地方，可能导致元数据的存储压力。 很多中间件都会借助<strong>zookeeper</strong>集中式存储元数据。</p>
+<p><strong>gossip：</strong></p>
+<p>gossip协议包含多种消息，包括ping，pong，meet，fail等等。 </p>
+<p><strong>meet</strong>：某个节点发送meet给新加入的节点，让新节点加入集群中，然后新节点就会开始与其他节点进行通信；</p>
+<p><strong>ping</strong>：每个节点都会频繁给其他节点发送ping，其中包含自己的状态还有自己维护的集群元数据，互相通过ping交换元数据(类似自己感知到的集群节点增加和移除，hash slot信息等)； </p>
+<p><strong>pong</strong>: 对ping和meet消息的返回，包含自己的状态和其他信息，也可以用于信息广播和更新； </p>
+<p><strong>fail</strong>: 某个节点判断另一个节点fail之后，就发送fail给其他节点，通知其他节点，指定的节点宕机了。</p>
+<p>gossip协议的优点在于元数据的更新比较分散，不是集中在一个地方，更新请求会陆陆续续，打到所有节点上去更新，有一定的延时，降低了压力；缺点在于元数据更新有延时可能导致集群的一些操作会有一些滞后。</p>
+<p><strong>gossip通信的10000端口</strong> </p>
+<p>每个节点都有一个专门用于节点间gossip通信的端口，就是自己提供服务的端口号+10000，比如7001，那么用于节点间通信的就是17001端口。 每个节点每隔一段时间都会往另外几个节点发送ping消息，同时其他几点接收到ping消息之后返回pong消息。</p>
+<p><strong>网络抖动</strong></p>
+<p>真实世界的机房网络往往并不是风平浪静的，它们经常会发生各种各样的小问题。比如网络抖动就是非常常见的一种现象，突然之间部分连接变得不可访问，然后很快又恢复正常。</p>
+<p>为解决这种问题，Redis Cluster 提供了一种选项cluster-node-timeout，表示当某个节点持续 timeout 的时间失联时，才可以认定该节点出现故障，需要进行主从切换。如果没有这个选项，网络抖动会导致主从频繁切换 (数据的重新复制)。</p>
+<h3 id="Redis集群选举原理分析"><a href="#Redis集群选举原理分析" class="headerlink" title="Redis集群选举原理分析"></a><strong>Redis集群选举原理分析</strong></h3><p>当slave发现自己的master变为FAIL状态时，便尝试进行Failover，以期成为新的master。由于挂掉的master可能会有多个slave，从而存在多个slave竞争成为master节点的过程， 其过程如下：</p>
+<p>1.slave发现自己的master变为FAIL</p>
+<p>2.将自己记录的集群currentEpoch加1，并广播FAILOVER_AUTH_REQUEST 信息</p>
+<p>3.其他节点收到该信息，只有master响应，判断请求者的合法性，并发送FAILOVER_AUTH_ACK，对每一个epoch只发送一次ack</p>
+<p>4.尝试failover的slave收集master返回的FAILOVER_AUTH_ACK</p>
+<p>5.slave收到超过半数master的ack后变成新Master(这里解释了集群为什么至少需要三个主节点，如果只有两个，当其中一个挂了，只剩一个主节点是不能选举成功的)</p>
+<p>6.slave广播Pong消息通知其他集群节点。</p>
+<p>从节点并不是在主节点一进入 FAIL 状态就马上尝试发起选举，而是有一定延迟，一定的延迟确保我们等待FAIL状态在集群中传播，slave如果立即尝试选举，其它masters或许尚未意识到FAIL状态，可能会拒绝投票</p>
+<p>•<strong>延迟计算公式</strong>：</p>
+<p> DELAY = 500ms + random(0 ~ 500ms) + SLAVE_RANK * 1000ms</p>
+<p>•SLAVE_RANK表示此slave已经从master复制数据的总量的rank。Rank越小代表已复制的数据越新。这种方式下，<strong>持有最新数据的slave将会首先发起选举（理论上）</strong>。</p>
+<p><strong>集群脑裂数据丢失问题</strong></p>
+<p>redis集群没有过半机制会有脑裂问题，网络分区导致脑裂后多个主节点对外提供写服务，一旦网络分区恢复，会将其中一个主节点变为从节点，这时会有大量数据丢失。</p>
+<p>规避方法可以在redis配置里加上参数(这种方法不可能百分百避免数据丢失，参考集群leader选举机制)：</p>
+<p>​                min-replicas-to-write 1 //写数据成功最少同步的slave数量，这个数量可以模仿大于半数机制配置，比如集群总共三个节点可以配置1，加上leader就是2，超过了半数              </p>
+<p><strong>注意</strong>：这个配置在一定程度上会影响集群的可用性，比如slave要是少于1个，这个集群就算leader正常也不能提供服务了，需要具体场景权衡选择。</p>
+<p><strong>集群是否完整才能对外提供服务</strong></p>
+<p>当redis.conf的配置cluster-require-full-coverage为no时，表示当负责一个插槽的主库下线且没有相应的从库进行故障恢复时，集群仍然可用，如果为yes则集群不可用。</p>
+<p><strong>Redis集群为什么至少需要三个master节点，并且推荐节点数为奇数？</strong></p>
+<p>因为新master的选举需要大于半数的集群master节点同意才能选举成功，如果只有两个master节点，当其中一个挂了，是达不到选举新master的条件的。</p>
+<p> 奇数个master节点可以在满足选举该条件的基础上节省一个节点，比如三个master节点和四个master节点的集群相比，大家如果都挂了一个master节点都能选举新master节点，如果都挂了两个master节点都没法选举新master节点了，所以奇数的master节点更多的是==<strong>从节省机器资源角度出发</strong>==说的。</p>
+<p><strong>Redis集群对批量操作命令的支持</strong></p>
+<p>对于类似mset，mget这样的多个key的原生批量操作命令，redis集群只支持所有key落在同一slot的情况，如果有多个key一定要用mset命令在redis集群上操作，则可以在key的前面加上{XX}，这样参数数据分片hash计算的只会是大括号里的值，这样能确保不同的key能落到同一slot里去，示例如下：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmd">mset &#123;user1&#125;:<span class="hljs-number">1</span>:name <span class="hljs-number">12345</span> &#123;user1&#125;:<span class="hljs-number">1</span>:age <span class="hljs-number">18</span><br></code></pre></td></tr></table></figure>
+
+<p>假设name和age计算的hash slot值不一样，但是这条命令在集群下执行，redis只会用大括号里的 user1 做hash slot计算，所以算出来的slot值肯定相同，最后都能落在同一slot。</p>
+<p><strong>哨兵leader选举流程</strong></p>
+<p>当一个master服务器被某sentinel视为下线状态后，该sentinel会与其他sentinel协商选出sentinel的leader进行故障转移工作。每个发现master服务器进入下线的sentinel都可以要求其他sentinel选自己为sentinel的leader，选举是先到先得。同时每个sentinel每次选举都会自增配置纪元(选举周期)，每个纪元中只会选择一个sentinel的leader。如果所有超过一半的sentinel选举某sentinel作为leader。之后该sentinel进行故障转移操作，从存活的slave中选举出新的master，这个选举过程跟集群的master选举很类似。</p>
+<p>哨兵集群只有一个哨兵节点，redis的主从也能正常运行以及选举master，如果master挂了，那唯一的那个哨兵节点就是哨兵leader了，可以正常选举新master。</p>
+<p>不过为了高可用一般都推荐至少部署三个哨兵节点。为什么推荐奇数个哨兵节点原理跟集群奇数个master节点类似。</p>
+<h3 id="Redis集群水平扩展"><a href="#Redis集群水平扩展" class="headerlink" title="Redis集群水平扩展"></a>Redis集群水平扩展</h3><p>Redis3.0以后的版本虽然有了集群功能，提供了比之前版本的哨兵模式更高的性能与可用性，但是集群的水平扩展却比较麻烦，今天就来带大家看看redis高可用集群如何做水平扩展，原始集群(见下图)由6个节点组成，6个节点分布在三台机器上，采用三主三从的模式</p>
+<p>   <img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411085210207.png" alt="image-20220411085210207"></p>
+<p><strong>1、启动集群</strong></p>
+<p># 启动整个集群</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cmd">redis-server redis-cluster-<span class="hljs-number">8001</span>.conf<br>redis-server redis-cluster-<span class="hljs-number">8002</span>.conf<br>redis-server redis-cluster-<span class="hljs-number">8003</span>.conf<br>redis-server redis-cluster-<span class="hljs-number">8004</span>.conf<br>redis-server redis-cluster-<span class="hljs-number">8005</span>.conf<br>redis-server redis-cluster-<span class="hljs-number">8006</span>.conf<br></code></pre></td></tr></table></figure>
+
+
+
+<p># 客户端连接8001端口的redis实例</p>
+<p>redis-cli -a 12345 -c -h 8001域名 -p 8001              </p>
+<p># 查看集群状态</p>
+<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411085223187.png" alt="image-20220411085223187"></p>
+<p> 从上图可以看出，整个集群运行正常，三个master节点和三个slave节点，8001端口的实例节点存储0-5460这些hash槽，8002端口的实例节点存储5461-10922这些hash槽，8003端口的实例节点存储10923-16383这些hash槽，这三个master节点存储的所有hash槽组成redis集群的存储槽位，slave点是每个主节点的备份从节点，不显示存储槽位  </p>
+<p><strong>2、集群操作</strong></p>
+<p>我们在原始集群基础上再增加一主(8007)一从(8008)，增加节点后的集群参见下图，新增节点用虚线框表示</p>
+<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411085245118.png" alt="image-20220411085245118"></p>
+<ul>
+<li><strong>增加redis实例</strong></li>
+</ul>
+<p>在8001机器上创建8007，8008实例，参考上面内容     </p>
+<ul>
+<li> <strong>查看redis集群的命令帮助</strong></li>
+</ul>
+<p>​        cd /usr/local/redis-5.0.3 src/redis-cli –cluster help              </p>
+ <img src="images/分布式-Redis02-持久化和集群/image-20220411085508108.png" alt="image-20220411085508108" style="zoom: 80%;">
+
+<p>1.create：创建一个集群环境host1:port1 … hostN:portN</p>
+<p>2.call：可以执行redis命令</p>
+<p>3.add-node：将一个节点添加到集群里，第一个参数为新节点的ip:port，第二个参数为集群中任意一个已经存在的节点的ip:port </p>
+<p>4.del-node：移除一个节点</p>
+<p>5.reshard：重新分片</p>
+<p>6.check：检查集群状态 </p>
+<ul>
+<li><strong>配置8007为集群主节点</strong></li>
+</ul>
+<p># 使用add-node命令新增一个主节点8007(master)，前面的ip:port为新增节点，后面的ip:port为已知存在节点，看到日志最后有”[OK] New node added correctly”提示代表新节点加入成功</p>
+ <figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmd">redis-cli -a <span class="hljs-number">12345</span> --cluster add-node <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span>:<span class="hljs-number">8007</span> <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span>:<span class="hljs-number">8001</span>              <br></code></pre></td></tr></table></figure>
+
+<p># 查看集群状态</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmd">redis-cli -a <span class="hljs-number">12345</span> -c -h <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span> -p <span class="hljs-number">8001</span> <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span>:<span class="hljs-number">8001</span>&gt; cluster nodes<br></code></pre></td></tr></table></figure>
+
+<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411091336869.png" alt="image-20220411091336869"></p>
+<p>注意：当添加节点成功以后，新增的节点不会有任何数据，因为它还没有分配任何的slot(hash槽)，我们需要为新节点手工分配hash槽</p>
+<p># 使用redis-cli命令为8007分配hash槽，找到集群中的任意一个主节点，对其进行重新分片工作            </p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmd">redis-cli -a zhuge --cluster reshard <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span>:<span class="hljs-number">8001</span> <br></code></pre></td></tr></table></figure>
+
+<p>输出如下：</p>
+<p>… …</p>
+<p>How many slots do you want to move (from 1 to 16384)? <strong>600</strong></p>
+<p>(ps:需要多少个槽移动到新的节点上，自己设置，比如600个hash槽)</p>
+<p>What is the receiving node ID? <strong>2728a594a0498e98e4b83a537e19f9a0a3790f38</strong></p>
+<p>(ps:把这600个hash槽移动到哪个节点上去，需要指定节点id)</p>
+<p>Please enter all the source node IDs.</p>
+<p> Type ‘all’ to use all the nodes as source nodes for the hash slots.</p>
+<p> Type ‘done’ once you entered all the source nodes IDs.</p>
+<p>Source node 1:<strong>all</strong></p>
+<p>(ps:输入all为从所有主节点(8001,8002,8003)中分别抽取相应的槽数指定到新节点中，抽取的总槽数为600个)</p>
+<p> … …</p>
+<p>Do you want to proceed with the proposed reshard plan (yes/no)? <strong>yes</strong></p>
+<p>(ps:输入yes确认开始执行分片任务)</p>
+<p>… …</p>
+<p># 查看下最新的集群状态</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cmd">src/redis-cli -a zhuge -c -h <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span> -p <span class="hljs-number">8001</span> <br><span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span>:<span class="hljs-number">8001</span>&gt; cluster nodes<br></code></pre></td></tr></table></figure>
+
+
+
+<p>如上图所示，现在我们的8007已经有hash槽了，也就是说可以在8007上进行读写数据啦！到此为止我们的8007已经加入到集群中，并且是主节点(Master)</p>
+<ul>
+<li><strong>配置8008为8007的从节点</strong></li>
+</ul>
+<p># 添加从节点8008到集群中去并查看集群状态</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmd">redis-cli -a <span class="hljs-number">12345</span> --cluster add-node <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span>:<span class="hljs-number">8008</span> <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span>:<span class="hljs-number">8001</span>        <br></code></pre></td></tr></table></figure>
+
+<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411092207999.png" alt="image-20220411092207999"></p>
+<p>如图所示，还是一个master节点，没有被分配任何的hash槽。</p>
+<p># 我们需要执行replicate命令来指定当前节点(从节点)的主节点id为哪个,首先需要连接新加的8008节点的客户端，然后使用集群命令进行操作，把当前的8008(slave)节点指定到一个主节点下(这里使用之前创建的8007主节点)</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cmd">src/redis-cli -a zhuge -c -h <span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span> -p <span class="hljs-number">8008</span> <br><span class="hljs-number">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">136</span>.<span class="hljs-number">1</span>:<span class="hljs-number">8008</span>&gt; cluster replicate <span class="hljs-number">2728</span>a594a0498e98e4b83a537e19f9a0a3790f38  #后面这串id为<span class="hljs-number">8007</span>的节点id         <br></code></pre></td></tr></table></figure>
+
+<p># 查看集群状态，8008节点已成功添加为8007节点的从节点</p>
+<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411092342046.png" alt="image-20220411092342046"></p>
+<ul>
+<li> <strong>删除8008从节点</strong></li>
+</ul>
+<p># 用del-node删除从节点8008，指定删除节点ip和端口，以及节点id(红色为8008节点id)</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">redis</span>-cli -a <span class="hljs-number">12345</span> --cluster del-node <span class="hljs-number">192.168.136.1:8008</span> a<span class="hljs-number">1</span>cfe<span class="hljs-number">35722</span>d<span class="hljs-number">151</span>cf<span class="hljs-number">70585</span>cee<span class="hljs-number">21275565393</span>c<span class="hljs-number">0956</span>              <br></code></pre></td></tr></table></figure>
+
+<p># 再次查看集群状态，如下图所示，8008这个slave节点已经移除，并且该节点的redis服务也已被停止</p>
+<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411092451299.png" alt="image-20220411092451299"></p>
+<ul>
+<li><strong>删除8007主节点</strong></li>
+</ul>
+<p>最后，我们尝试删除之前加入的主节点8007，这个步骤相对比较麻烦一些，因为主节点的里面是有分配了hash槽的，所以我们这里必须先把8007里的hash槽放入到其他的可用主节点中去，然后再进行移除节点操作，不然会出现数据丢失问题(目前只能把master的数据迁移到一个节点上，暂时做不了平均分配功能)，执行命令如下：</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/redis-5.0.3/</span>src/redis-cli -a <span class="hljs-number">12345</span> --cluster reshard <span class="hljs-number">192.168</span>.<span class="hljs-number">136.1</span>:<span class="hljs-number">8007</span><br></code></pre></td></tr></table></figure>
+
+<p>输出如下</p>
+<p> … …</p>
+<p>How many slots do you want to move (from 1 to 16384)? <strong>600</strong></p>
+<p>What is the receiving node ID? <strong>dfca1388f124dec92f394a7cc85cf98cfa02f86f</strong></p>
+<p>(ps:这里是需要把数据移动到哪？8001的主节点id)</p>
+<p>Please enter all the source node IDs.</p>
+<p> Type ‘all’ to use all the nodes as source nodes for the hash slots.</p>
+<p> Type ‘done’ once you entered all the source nodes IDs.</p>
+<p>Source node 1:<strong>2728a594a0498e98e4b83a537e19f9a0a3790f38</strong></p>
+<p>(ps:这里是需要数据源，也就是我们的8007节点id)</p>
+<p>Source node 2:done</p>
+<p>(ps:这里直接输入done 开始生成迁移计划)</p>
+<p> … …</p>
+<p>Do you want to proceed with the proposed reshard plan (yes/no)? <strong>Yes</strong></p>
+<p>(ps:这里输入yes开始迁移)</p>
+<p>至此，我们已经成功的把8007主节点的数据迁移到8001上去了，我们可以看一下现在的集群状态如下图，你会发现8007下面已经没有任何hash槽了，证明迁移成功！</p>
+<p>  <img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411092631159.png" alt="image-20220411092631159"></p>
+<p># 最后我们直接使用del-node命令删除8007主节点即可</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">redis</span>-cli -a <span class="hljs-number">12345</span> --cluster del-node <span class="hljs-number">192.168.136.1:8007</span> <span class="hljs-number">2728</span>a<span class="hljs-number">594</span>a<span class="hljs-number">0498</span>e<span class="hljs-number">98</span>e<span class="hljs-number">4</span>b<span class="hljs-number">83</span>a<span class="hljs-number">537</span>e<span class="hljs-number">19</span>f<span class="hljs-number">9</span>a<span class="hljs-number">0</span>a<span class="hljs-number">3790</span>f<span class="hljs-number">38</span>              <br></code></pre></td></tr></table></figure>
+
+<p># 查看集群状态，一切还原为最初始状态啦！大功告成！</p>
+<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Redis02-%E6%8C%81%E4%B9%85%E5%8C%96%E5%92%8C%E9%9B%86%E7%BE%A4/image-20220411092653605.png" alt="image-20220411092653605"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Redis/" rel="tag"># Redis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/03/28/%E5%88%86%E5%B8%83%E5%BC%8F-Redis01-%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/" rel="prev" title="分布式-Redis01-核心数据接口与原理">
+      <i class="fa fa-chevron-left"></i> 分布式-Redis01-核心数据接口与原理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/04/13/%E5%88%86%E5%B8%83%E5%BC%8F-Redis04-%E7%BC%93%E5%AD%98%E8%AE%BE%E8%AE%A1%E4%B8%8E%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" rel="next" title="分布式-Redis04-缓存设计与性能优化">
+      分布式-Redis04-缓存设计与性能优化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis%E6%8C%81%E4%B9%85%E5%8C%96"><span class="nav-number">1.</span> <span class="nav-text">Redis持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#RDB%E5%BF%AB%E7%85%A7%EF%BC%88snapshot%EF%BC%89"><span class="nav-number">1.1.</span> <span class="nav-text">RDB快照（snapshot）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AOF%EF%BC%88append-only-file%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">AOF（append-only file）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF%E9%87%8D%E5%86%99"><span class="nav-number">1.2.1.</span> <span class="nav-text">AOF重写</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RDB%E4%B8%8EAOF"><span class="nav-number">1.3.</span> <span class="nav-text">RDB与AOF</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-4-0-%E6%B7%B7%E5%90%88%E6%8C%81%E4%B9%85%E5%8C%96"><span class="nav-number">1.4.</span> <span class="nav-text">Redis 4.0 混合持久化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis%E4%B8%BB%E4%BB%8E%E6%9E%B6%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">Redis主从架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis%E4%B8%BB%E4%BB%8E%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">2.1.</span> <span class="nav-text">Redis主从工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6-%E5%85%A8%E9%87%8F%E5%A4%8D%E5%88%B6-%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="nav-number">2.1.1.</span> <span class="nav-text">主从复制(全量复制)流程图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6-%E9%83%A8%E5%88%86%E5%A4%8D%E5%88%B6-%E6%B5%81%E7%A8%8B%E5%9B%BE%EF%BC%9A"><span class="nav-number">2.1.2.</span> <span class="nav-text">主从复制(部分复制)流程图：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BB%E4%BB%8E%E6%9E%B6%E6%9E%84%E6%90%AD%E5%BB%BA"><span class="nav-number">2.2.</span> <span class="nav-text">主从架构搭建</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis%E5%93%A8%E5%85%B5%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">Redis哨兵模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#redis%E5%93%A8%E5%85%B5%E6%9E%B6%E6%9E%84%E6%90%AD%E5%BB%BA%E6%AD%A5%E9%AA%A4"><span class="nav-number">3.1.</span> <span class="nav-text">redis哨兵架构搭建步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Jedis%E6%B5%8B%E8%AF%95%E4%BB%A3%E7%A0%81"><span class="nav-number">3.1.1.</span> <span class="nav-text">Jedis测试代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SpringBoot%E6%B5%8B%E8%AF%95%E4%BB%A3%E7%A0%81"><span class="nav-number">3.1.2.</span> <span class="nav-text">SpringBoot测试代码</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis%E9%9B%86%E7%BE%A4%E6%A8%A1%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">Redis集群模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis%E9%9B%86%E7%BE%A4%E6%96%B9%E6%A1%88%E6%AF%94%E8%BE%83"><span class="nav-number">4.1.</span> <span class="nav-text">Redis集群方案比较</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%93%A8%E5%85%B5%E6%A8%A1%E5%BC%8F"><span class="nav-number">4.1.1.</span> <span class="nav-text">哨兵模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AB%98%E5%8F%AF%E7%94%A8%E7%9A%84%E9%9B%86%E7%BE%A4%E6%A8%A1%E5%BC%8F"><span class="nav-number">4.1.2.</span> <span class="nav-text">高可用的集群模式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4%E6%90%AD%E5%BB%BA"><span class="nav-number">4.2.</span> <span class="nav-text">Redis高可用集群搭建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E6%93%8D%E4%BD%9Credis%E9%9B%86%E7%BE%A4"><span class="nav-number">4.3.</span> <span class="nav-text">Java操作redis集群</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Jedis"><span class="nav-number">4.3.1.</span> <span class="nav-text">Jedis</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SpringBoot"><span class="nav-number">4.3.2.</span> <span class="nav-text">SpringBoot</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis%E9%9B%86%E7%BE%A4%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90"><span class="nav-number">4.4.</span> <span class="nav-text">Redis集群原理分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis%E9%9B%86%E7%BE%A4%E8%8A%82%E7%82%B9%E9%97%B4%E7%9A%84%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6"><span class="nav-number">4.4.1.</span> <span class="nav-text">Redis集群节点间的通信机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis%E9%9B%86%E7%BE%A4%E9%80%89%E4%B8%BE%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90"><span class="nav-number">4.4.2.</span> <span class="nav-text">Redis集群选举原理分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis%E9%9B%86%E7%BE%A4%E6%B0%B4%E5%B9%B3%E6%89%A9%E5%B1%95"><span class="nav-number">4.4.3.</span> <span class="nav-text">Redis集群水平扩展</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">71</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

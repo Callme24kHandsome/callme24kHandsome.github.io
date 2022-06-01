@@ -27,12 +27,24 @@
 <meta property="og:site_name" content="24khandsome&#39;s Blog">
 <meta property="og:description" content="JVM调优实战及常量池介绍">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/clipboard.png">
+<meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/image-20220314211343508.png">
+<meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/image-20220314215033980.png">
+<meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/clipboard-1647265871233.png">
+<meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/clipboard-1647265871280.png">
+<meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/clipboard-1647265871577.png">
+<meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/clipboard-1647265871348.png">
+<meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/image-20220314221534785.png">
+<meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/image-20220314221600707.png">
+<meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/image-20220314221951108.png">
+<meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/image-20220315091119340.png">
 <meta property="article:published_time" content="2022-03-13T13:00:00.000Z">
-<meta property="article:modified_time" content="2022-03-13T14:58:55.115Z">
+<meta property="article:modified_time" content="2022-03-15T13:51:08.924Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="性能调优">
 <meta property="article:tag" content="JVM">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/clipboard.png">
 
 <link rel="canonical" href="http://example.com/2022/03/13/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/">
 
@@ -214,10 +226,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-03-13 21:00:00 / 修改时间：22:58:55" itemprop="dateCreated datePublished" datetime="2022-03-13T21:00:00+08:00">2022-03-13</time>
+              <time title="创建时间：2022-03-13 21:00:00" itemprop="dateCreated datePublished" datetime="2022-03-13T21:00:00+08:00">2022-03-13</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-15 21:51:08" itemprop="dateModified" datetime="2022-03-15T21:51:08+08:00">2022-03-15</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -240,7 +258,161 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>性能调优15-JVM调优实战及常量池介绍</p>
+        <h1 id="JVM调优实战及常量池介绍"><a href="#JVM调优实战及常量池介绍" class="headerlink" title="JVM调优实战及常量池介绍"></a>JVM调优实战及常量池介绍</h1><h2 id="GC日志详解"><a href="#GC日志详解" class="headerlink" title="GC日志详解"></a>GC日志详解</h2><p>对于java应用我们可以通过一些配置把程序运行过程中的gc日志全部打印出来，然后分析gc日志得到关键性指标，分析 </p>
+<p>GC原因，调优JVM参数。 </p>
+<p>打印GC日志方法，在JVM参数里增加参数 </p>
+<p>1 ‐XX:+PrintGCDetails ‐XX:+PrintGCTimeStamps ‐XX:+PrintGCDateStamps ‐Xloggc:./gc.log </p>
+<p>Tomcat则直接加在JAVA_OPTS变量里。 </p>
+<h2 id="如何分析GC日志"><a href="#如何分析GC日志" class="headerlink" title="如何分析GC日志"></a>如何分析GC日志</h2><h3 id="普通GC日志（默认Parallel）"><a href="#普通GC日志（默认Parallel）" class="headerlink" title="普通GC日志（默认Parallel）"></a>普通GC日志（默认Parallel）</h3><p>下图中是截取的JVM刚启动的一部分GC日志 </p>
+<p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/clipboard.png" alt="img"></p>
+<p>我们可以看到图中第一行红框，是项目的配置参数。这里不仅配置了打印GC日志，还有相关的VM内存参数。 </p>
+<p>第二行红框中的是在这个GC时间点发生GC之后相关GC情况。 </p>
+<p>1、对于2.909：  这是从jvm启动开始计算到这次GC经过的时间，前面还有具体的发生时间日期。 </p>
+<p>2、Full GC(Metadata GC Threshold)指这是一次full gc，括号里是gc的原因， PSYoungGen是年轻代的GC，ParOldGen是老年代的GC，Metaspace是元空间的GC</p>
+<p>3、 6160K-&gt;0K(141824K)，这三个数字分别对应GC之前占用年轻代的大小，GC之后年轻代占用，以及整个年轻代的大小。 </p>
+<p>4、112K-&gt;6056K(95744K)，这三个数字分别对应GC之前占用老年代的大小，GC之后老年代占用，以及整个老年代的大小。 </p>
+<p>5、6272K-&gt;6056K(237568K)，这三个数字分别对应GC之前占用堆内存的大小，GC之后堆内存占用，以及整个堆内存的大小。 </p>
+<p>6、20516K-&gt;20516K(1069056K)，这三个数字分别对应GC之前占用元空间内存的大小，GC之后元空间内存占用，以及整个元空间内存的大小。 </p>
+<p>7、0.0209707是该时间点GC总耗费时间。 </p>
+<p>从日志可以发现几次fullgc都是由于元空间不够导致的，所以我们可以将元空间调大点</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">java -jar -Xloggc:./gc-adjust-%t.log -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M -XX:+PrintGCDetails -XX:+PrintGCDateStamps  <br>-XX:+PrintGCTimeStamps -XX:+PrintGCCause  -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M <br>microservice-eureka-server.jar<br></code></pre></td></tr></table></figure>
+
+<p>​    调整完我们再看下gc日志发现已经没有因为元空间不够导致的fullgc了</p>
+<p>​    对于CMS和G1收集器的日志会有一点不一样，也可以试着打印下对应的gc日志分析下，可以发现gc日志里面的gc步骤跟我们之前讲过的步骤是类似的</p>
+<h3 id="CMS-GC日志"><a href="#CMS-GC日志" class="headerlink" title="CMS-GC日志"></a>CMS-GC日志</h3><p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/image-20220314211343508.png" alt="image-20220314211343508"></p>
+<h3 id="G1-GC日志"><a href="#G1-GC日志" class="headerlink" title="G1-GC日志"></a>G1-GC日志</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * -Xloggc:d:/gc-g1-%t.log -Xms10M -Xmx10M -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M</span><br><span class="hljs-comment"> * -XX:+PrintGCDetails -XX:+PrintGCDateStamps  -XX:+PrintGCTimeStamps -XX:+PrintGCCause  </span><br><span class="hljs-comment"> * -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M </span><br><span class="hljs-comment"> * -XX:+UseG1GC -XX:MaxGCPauseMillis=2</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HeapTest</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> InterruptedException </span>&#123;<br>        ArrayList&lt;SoftReference&lt;<span class="hljs-keyword">byte</span>[]&gt;&gt; heapTests = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();<br><br>        <span class="hljs-keyword">while</span> (<span class="hljs-keyword">true</span>) &#123;<br>            HeapTest heapTest = <span class="hljs-keyword">new</span> HeapTest();<br>            heapTest.func();<br>            Thread.sleep(<span class="hljs-number">10</span>);<br>            heapTests.add(<span class="hljs-keyword">new</span> SoftReference&lt;&gt;(heapTest.funcA()));<br>        &#125;<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">func</span><span class="hljs-params">()</span></span>&#123;<br>        <span class="hljs-keyword">byte</span>[] a = <span class="hljs-keyword">new</span> <span class="hljs-keyword">byte</span>[<span class="hljs-number">1024</span> * <span class="hljs-number">100</span>];  <span class="hljs-comment">//100KB</span><br>    &#125;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">byte</span>[] funcA()&#123;<br>        <span class="hljs-keyword">byte</span>[] a = <span class="hljs-keyword">new</span> <span class="hljs-keyword">byte</span>[<span class="hljs-number">1024</span> * <span class="hljs-number">100</span>];  <span class="hljs-comment">//100KB</span><br>        <span class="hljs-keyword">return</span> a;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>日志太长就不放了</p>
+<p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/image-20220314215033980.png" alt="image-20220314215033980"></p>
+<p>上面的这些参数，能够帮我们查看分析GC的垃圾收集情况。但是如果GC日志很多很多，成千上万行。就算你一目十行，看完了，脑子也是一片空白。所以我们可以借助一些功能来帮助我们分析，这里推荐一个gceasy(<a target="_blank" rel="noopener" href="https://gceasy.io/">https://gceasy.io</a>)，可以上传gc文件，然后他会利用可视化的界面来展现GC情况。具体下图所示 </p>
+<p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/clipboard-1647265871233.png" alt="clipboard-1647265871233"></p>
+<p>上图我们可以看到年轻代，老年代，以及永久代的内存分配，和最大使用情况。 </p>
+<p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/clipboard-1647265871280.png" alt="0"></p>
+<p>​    上图我们可以看到堆内存在GC之前和之后的变化，以及其他信息。</p>
+<p>这个工具还提供基于机器学习的JVM智能优化建议，当然现在这个功能需要付费<img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/clipboard-1647265871577.png" alt="0"></p>
+<p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/clipboard-1647265871348.png" alt="clipboard-1647265871348"></p>
+<h2 id="JVM参数汇总查看命令"><a href="#JVM参数汇总查看命令" class="headerlink" title="JVM参数汇总查看命令"></a>JVM参数汇总查看命令</h2><p>java -XX:+PrintFlagsInitial 表示打印出所有参数选项的默认值</p>
+<p>java -XX:+PrintFlagsFinal 表示打印出所有参数选项在运行程序时生效的值</p>
+<h2 id="Class常量池与运行时常量池"><a href="#Class常量池与运行时常量池" class="headerlink" title="Class常量池与运行时常量池"></a>Class常量池与运行时常量池</h2><h4 id="Class常量池"><a href="#Class常量池" class="headerlink" title="Class常量池"></a>Class常量池</h4><p>​    Class常量池可以理解为是Class文件中的资源仓库。 Class文件中除了包含类的版本、字段、方法、接口等描述信息外，还有一项信息就是**常量池(constant pool table)<strong>，用于存放编译期生成的各种</strong>字面量(Literal)和符号引用(Symbolic References)**。</p>
+<p>一个class文件的16进制大体结构如下图：</p>
+<p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/image-20220314221534785.png" alt="image-20220314221534785"></p>
+<p>对应的含义如下，细节可以查下oracle官方文档</p>
+<p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/image-20220314221600707.png" alt="image-20220314221600707"></p>
+<p>当然我们一般不会去人工解析这种16进制的字节码文件，我们一般可以通过javap命令生成更可读的JVM字节码指令文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">javap -v Math.class<br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/image-20220314221951108.png" alt="image-20220314221951108"></p>
+<p>常量池中主要存放两大类常量：<strong>字面量和符号引用</strong>。</p>
+<h5 id="字面量"><a href="#字面量" class="headerlink" title="字面量"></a>字面量</h5><p>​    由字母、数字构成的字符串或者数值常量，字面量只可以右值出现，所谓右值是指等号右边的值，如：int a=1 这里的a为左值，1为右值。在这个例子中1就是字面量，如</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">int</span> a = <span class="hljs-number">1</span>;<br><span class="hljs-keyword">int</span> b = <span class="hljs-number">2</span>;<br><span class="hljs-keyword">int</span> c = <span class="hljs-string">&quot;abcdefg&quot;</span>;<br><span class="hljs-keyword">int</span> d = <span class="hljs-string">&quot;abcdefg&quot;</span>;<br></code></pre></td></tr></table></figure>
+
+<h5 id="符号引用"><a href="#符号引用" class="headerlink" title="符号引用"></a>符号引用</h5><p>​    符号应用是编译原理的概念、相对于直接引用而言，主要包含以下3类常量</p>
+<ul>
+<li>类和接口的全限定名</li>
+<li>字段名称和描述符</li>
+<li>方法名和方法描述符</li>
+</ul>
+<p>​    上面的a，b就是字段名称，就是一种符号引用，还有Math类常量池里的 Lcom/tuling/jvm/Math 是类的全限定名，main和compute是方法名称，()是一种UTF8格式的描述符，这些都是符号引用。<br>这些常量池现在是静态信息，只有到运行时被加载到内存后，这些符号才有对应的内存地址信息，这些常量池一旦被装入内存就变成运行时常量池。</p>
+<p>​    符号应用在类加载（把静态变量、静态方法、静态类变为直接引用——静态链接）或者程序运行时（其他情况——动态链接）变为动态引用。所谓引用就是具体符号应用在内存中实际的内存地址或者句柄。<strong>例如，compute()这个符号引用在运行时就会被转变为compute()方法具体代码在内存中的地址，主要通过对象头里的类型指针去转换直接引用。</strong></p>
+<h3 id="字符串常量池（jdk8后字符串常量池只在堆中-运行时常量池在元空间）"><a href="#字符串常量池（jdk8后字符串常量池只在堆中-运行时常量池在元空间）" class="headerlink" title="字符串常量池（jdk8后字符串常量池只在堆中,运行时常量池在元空间）"></a>字符串常量池（jdk8后字符串常量池只在堆中,运行时常量池在元空间）</h3><h4 id="字符串常量池的设计思想"><a href="#字符串常量池的设计思想" class="headerlink" title="字符串常量池的设计思想"></a>字符串常量池的设计思想</h4><ol>
+<li>字符串的分配，和其他的对象分配一样，耗费高昂的时间与空间代价，作为最基础的数据类型，大量频繁的创建字符串，极大程度地影响程序的性能</li>
+<li>JVM为了提高性能和减少内存开销，在实例化字符串常量的时候进行了一些优化</li>
+</ol>
+<ul>
+<li>为字符串开辟一个字符串常量池，类似于缓存区</li>
+<li>创建字符串常量时，首先查询字符串常量池是否存在该字符串</li>
+<li>存在该字符串，返回引用实例，不存在，实例化该字符串并放入池中</li>
+</ul>
+<h4 id="三种字符串操作"><a href="#三种字符串操作" class="headerlink" title="三种字符串操作"></a>三种字符串操作</h4><p>1、直接复制字符串</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">String s = <span class="hljs-string">&quot;zhuge&quot;</span>;  <span class="hljs-comment">// s指向常量池中的引用</span><br></code></pre></td></tr></table></figure>
+
+<p>这种方式创建的字符串对象，只会在常量池中。因为有”zhuge”这个字面量，创建对象s的时候，JVM会先去常量池中通过 equals(key) 方法，判断是否有相同的对象<br>如果有，则直接返回该对象在常量池中的引用；<br>如果没有，则会在常量池中创建一个新对象，再返回引用。</p>
+<p>2、new String()</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">String s1 = <span class="hljs-keyword">new</span> String(<span class="hljs-string">&quot;zhuge&quot;</span>);  <span class="hljs-comment">// s1指向内存中的对象引用</span><br></code></pre></td></tr></table></figure>
+
+<p>这种方式会保证字符串常量池和堆中都有这个对象，没有就创建，最后返回堆内存中的对象引用</p>
+<p>步骤大致如下：</p>
+<p>因为有”zhuge”这个字面量，所以会先检查字符串常量池中是否存在字符串”zhuge”</p>
+<p>不存在，先在字符串常量池里创建一个字符串对象；再去内存中创建一个字符串对象”zhuge”；</p>
+<p>存在的话，就直接去堆内存中创建一个字符串对象”zhuge”；</p>
+<p>最后，将内存中的引用返回。</p>
+<p>3、intern()方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">String s1 = <span class="hljs-keyword">new</span> String(<span class="hljs-string">&quot;zhuge&quot;</span>);   <br>String s2 = s1.intern();<br>System.out.println(s1 == s2);  <span class="hljs-comment">//false</span><br></code></pre></td></tr></table></figure>
+
+<p>通过new操作符创建的字符串对象不指向字符串常量池中的任何对象，但是可以通过使用字符串的intern()方法来指向其 中的某一个。java.lang.String.intern()返回一个常量池里面的字符串，就是一个在字符串常量池中有了一个入口。如果 以前没有在字符串常量池中，那么它就会被添加到里面</p>
+<h4 id="String常量池问题的几个例子"><a href="#String常量池问题的几个例子" class="headerlink" title="String常量池问题的几个例子"></a>String常量池问题的几个例子</h4><p>示例1：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java">String s0=<span class="hljs-string">&quot;zhuge&quot;</span>;<br>String s1=<span class="hljs-string">&quot;zhuge&quot;</span>;<br>String s2=<span class="hljs-string">&quot;zhu&quot;</span> + <span class="hljs-string">&quot;ge&quot;</span>;<br>System.out.println( s0==s1 ); <span class="hljs-comment">//true</span><br>System.out.println( s0==s2 ); <span class="hljs-comment">//true    </span><br></code></pre></td></tr></table></figure>
+
+<p>分析：因为例子中的 s0和s1中的”zhuge”都是字符串常量，它们在编译期就被确定了，所以s0s1为true；而”zhu”和”ge”也都是字符串常量，当一个字 符串由多个字符串常量连接而成时，它自己肯定也是字符串常量，所以s2也同样在编译期就被优化为一个字符串常量”zhuge”，所以s2也是常量池中” zhuge”的一个引用。所以我们得出s0 == s1 == s2；</p>
+<p>示例2：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java">String s0=<span class="hljs-string">&quot;zhuge&quot;</span>;<br>String s1=<span class="hljs-keyword">new</span> String(<span class="hljs-string">&quot;zhuge&quot;</span>);<br>String s2=<span class="hljs-string">&quot;zhu&quot;</span> + <span class="hljs-keyword">new</span> String(<span class="hljs-string">&quot;ge&quot;</span>);<br>System.out.println( s0==s1 );　　<span class="hljs-comment">// false</span><br>System.out.println( s0==s2 )；　 <span class="hljs-comment">// false</span><br>System.out.println( s1==s2 );　　<span class="hljs-comment">// false</span><br></code></pre></td></tr></table></figure>
+
+<p>分析：用new String() 创建的字符串不是常量，不能在编译期就确定，所以new String() 创建的字符串不放入常量池中，它们有自己的地址空间。</p>
+<p>s0还是常量池 中”zhuge”的引用，s1因为无法在编译期确定，所以是运行时创建的新对象”zhuge”的引用，s2因为有后半部分 new String(”ge”)所以也无法在编译期确定，所以也是一个新创建对象”zhuge”的引用;明白了这些也就知道为何得出此结果了。</p>
+<p>示例3：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java">String a = <span class="hljs-string">&quot;a1&quot;</span>;<br> String b = <span class="hljs-string">&quot;a&quot;</span> + <span class="hljs-number">1</span>;<br> System.out.println(a == b); <span class="hljs-comment">// true </span><br> <br> String a = <span class="hljs-string">&quot;atrue&quot;</span>;<br> String b = <span class="hljs-string">&quot;a&quot;</span> + <span class="hljs-string">&quot;true&quot;</span>;<br> System.out.println(a == b); <span class="hljs-comment">// true </span><br> <br> String a = <span class="hljs-string">&quot;a3.4&quot;</span>;<br> String b = <span class="hljs-string">&quot;a&quot;</span> + <span class="hljs-number">3.4</span>;<br> System.out.println(a == b); <span class="hljs-comment">// true</span><br></code></pre></td></tr></table></figure>
+
+<p>分析：JVM对于字符串常量的”+”号连接，将在程序编译期，JVM就将常量字符串的”+”连接优化为连接后的值，拿”a” + 1来说，经编译器优化后在class中就已经是a1。在编译期其字符串常量的值就确定下来，故上面程序最终的结果都为true。</p>
+<p>示例4：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java">String a = <span class="hljs-string">&quot;ab&quot;</span>;<br>String bb = <span class="hljs-string">&quot;b&quot;</span>;<br>String b = <span class="hljs-string">&quot;a&quot;</span> + bb;<br>System.out.println(a == b); <span class="hljs-comment">// false  </span><br></code></pre></td></tr></table></figure>
+
+<p>分析：JVM对于字符串引用，由于在字符串的”+”连接中，有字符串引用存在，而引用的值在程序编译期是无法确定的，即”a” + bb无法被编译器优化，只有在程序运行期来动态分配并将连接后的新地址赋给b。所以上面程序的结果也就为false。</p>
+<p>示例5：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java">String a = <span class="hljs-string">&quot;ab&quot;</span>;<br>String bb = <span class="hljs-string">&quot;b&quot;</span>;<br>String b = <span class="hljs-string">&quot;a&quot;</span> + bb;<br><br>System.out.println(a == b); <span class="hljs-comment">// false</span><br></code></pre></td></tr></table></figure>
+
+<p>分析：和示例4中唯一不同的是bb字符串加了final修饰，对于final修饰的变量，它在编译时被解析为常量值的一个本地拷贝存储到自己的常量池中或嵌入到它的字节码流中。所以此时的”a” + bb和”a” + “b”效果是一样的。故上面程序的结果为true。</p>
+<p>示例6：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java">String a = <span class="hljs-string">&quot;ab&quot;</span>;<br><span class="hljs-keyword">final</span> String bb = getBB();<br>String b = <span class="hljs-string">&quot;a&quot;</span> + bb;<br>System.out.println(a == b); <span class="hljs-comment">// false</span><br><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> String <span class="hljs-title">getBB</span><span class="hljs-params">()</span> </span><br><span class="hljs-function"></span>&#123;  <br>    <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;b&quot;</span>;  <br> &#125;<br></code></pre></td></tr></table></figure>
+
+<p>分析：JVM对于字符串引用bb，它的值在编译期无法确定，只有在程序运行期调用方法后，将方法的返回值和”a”来动态连接并分配地址为b，故上面 程序的结果为false。</p>
+<p><strong>关于String是不可变的</strong></p>
+<p>通过上面例子可以得出得知</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java">String  s  =  <span class="hljs-string">&quot;a&quot;</span> + <span class="hljs-string">&quot;b&quot;</span> + <span class="hljs-string">&quot;c&quot;</span>;  <span class="hljs-comment">//就等价于String s = &quot;abc&quot;;</span><br>String  a  =  <span class="hljs-string">&quot;a&quot;</span>;<br>String  b  =  <span class="hljs-string">&quot;b&quot;</span>;<br>String  c  =  <span class="hljs-string">&quot;c&quot;</span>;<br>String  s1  =   a  +  b  +  c;<br></code></pre></td></tr></table></figure>
+
+<p>s1 这个就不一样了，可以通过观察其<strong>JVM指令码</strong>发现s1的”+”操作会变成如下操作：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">StringBuilder temp = <span class="hljs-keyword">new</span> StringBuilder();<br>temp.append(a).append(b).append(c);<br>String s = temp.toString();<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java">String str1 = <span class="hljs-string">&quot;abc&quot;</span>; <br>String str2 = <span class="hljs-string">&quot;abc&quot;</span>; <br>String str3 = <span class="hljs-string">&quot;abc&quot;</span>; <br>String str4 = <span class="hljs-keyword">new</span> String(<span class="hljs-string">&quot;abc&quot;</span>);<br>String str5 = <span class="hljs-keyword">new</span> String(<span class="hljs-string">&quot;abc&quot;</span>);<br>String str5 = <span class="hljs-keyword">new</span> String(<span class="hljs-string">&quot;abc&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+
+
+<p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/image-20220315091119340.png" alt="image-20220315091119340"></p>
+<p><strong>面试题：String str4 = new String(“abc”) 创建多少个对象？</strong> </p>
+<ol>
+<li>在常量池中查找是否有“abc”对象 </li>
+</ol>
+<p>有则返回对应的引用实例 </p>
+<p>没有则在常量池中创建对应的实例对象 </p>
+<ol start="2">
+<li><p>在堆中 new 一个 String(“abc”) 对象</p>
+<p>3.将对象地址赋值给str4，创建一个引用 </p>
+</li>
+</ol>
+<p>所以，常量池中没有“abc”字面量则创建两个对象，否则创建一个对象，以及创建一个引用 </p>
+<p>根据字面量，往往会提出这样的变式题： </p>
+<p><strong>String str1 = new String(“A”+”B”) ; 会创建多少个对象?</strong></p>
+<p><strong>String str2 = new String(“ABC”) + “ABC” ; 会创建多少个对象?</strong> </p>
+<p><strong>str1：</strong> </p>
+<p>字符串常量池：”A”,”B”,”AB” : 3个 </p>
+<p>堆：new String(“AB”) ：1个 </p>
+<p>引用： str1 ：1个 </p>
+<p>总共 ： 5个 </p>
+<p><strong>str2 ：</strong> </p>
+<p>字符串常量池：”ABC” : 1个 </p>
+<p>堆：new String(“ABC”) ：1个 </p>
+<p>引用： str2 ：1个 </p>
+<p>总共 ： 3个 </p>
+<h3 id="八种基本类型的包装类和对象池"><a href="#八种基本类型的包装类和对象池" class="headerlink" title="八种基本类型的包装类和对象池"></a>八种基本类型的包装类和对象池</h3><p>java中基本类型的包装类的大部分都实现了常量池技术(严格来说应该叫<strong>对象池，</strong>在堆上)，这些类是Byte,Short,Integer,Long,Character,Boolean,另外两种浮点数类型的包装类则没有实现。另外Byte,Short,Integer,Long,Character这5种整型的包装类也只是在对应值小于等于127时才可使用对象池，也即对象不负责创建和管理大于127的这些类的对象。因为一般这种比较小的数用到的概率相对较大。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Test</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        <span class="hljs-comment">//5种整形的包装类Byte,Short,Integer,Long,Character的对象，</span><br>        <span class="hljs-comment">//在值小于127时可以使用对象池</span><br>        Integer i1 = <span class="hljs-number">127</span>;  <span class="hljs-comment">//这种调用底层实际是执行的Integer.valueOf(127)，里面用到了IntegerCache对象池</span><br>        Integer i2 = <span class="hljs-number">127</span>;<br>        System.out.println(i1 == i2);<span class="hljs-comment">//输出true</span><br><br>        <span class="hljs-comment">//值大于127时，不会从对象池中取对象</span><br>        Integer i3 = <span class="hljs-number">128</span>;<br>        Integer i4 = <span class="hljs-number">128</span>;<br>        System.out.println(i3 == i4);<span class="hljs-comment">//输出false</span><br><br>        <span class="hljs-comment">//用new关键词新生成对象不会使用对象池</span><br>        Integer i5 = <span class="hljs-keyword">new</span> Integer(<span class="hljs-number">127</span>);<br>        Integer i6 = <span class="hljs-keyword">new</span> Integer(<span class="hljs-number">127</span>);<br>        System.out.println(i5 == i6);<span class="hljs-comment">//输出false</span><br><br>        <span class="hljs-comment">//Boolean类也实现了对象池技术</span><br>        Boolean bool1 = <span class="hljs-keyword">true</span>;<br>        Boolean bool2 = <span class="hljs-keyword">true</span>;<br>        System.out.println(bool1 == bool2);<span class="hljs-comment">//输出true</span><br><br>        <span class="hljs-comment">//浮点类型的包装类没有实现对象池技术</span><br>        Double d1 = <span class="hljs-number">1.0</span>;<br>        Double d2 = <span class="hljs-number">1.0</span>;<br>        System.out.println(d1 == d2);<span class="hljs-comment">//输出false</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="安全点与安全区域"><a href="#安全点与安全区域" class="headerlink" title="安全点与安全区域"></a>安全点与安全区域</h2><p>​    安全点就是指代码中一些特定的位置,当线程运行到这些位置时它的状态是确定的,这样JVM就可以安全的进行一些操作,比 如GC等，所以GC不是想什么时候做就立即触发的，是需要等待所有线程运行到安全点后才能触发。 这些特定的安全点位置主要有以下几种: </p>
+<ol>
+<li>方法返回之前 </li>
+<li>调用某个方法之后</li>
+<li> 抛出异常的位置 </li>
+<li>循环的末尾 </li>
+</ol>
+<p>安全区域又是什么？ Safe Point 是对正在执行的线程设定的。 如果一个线程处于 Sleep 或中断状态，它就不能响应 JVM 的中断请求，再运行到 Safe Point 上。 因此 JVM 引入了 Safe Region。 <strong>Safe Region 是指在一段代码片段中，引用关系不会发生变化</strong>。在这个区域内的任意地方开始 GC 都是安全的。 线程在进入 Safe Region 的时候先标记自己已进入了 Safe Region，等到被唤醒时准备离开 Safe Region 时，先检查能 否离开，如果 GC 完成了，那么线程可以离开，否则它必须等待直到收到安全离开的信号为止。</p>
 
     </div>
 
@@ -263,7 +435,10 @@
     <a href="/2022/03/12/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9814-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E4%BB%8B%E7%BB%8D/" rel="prev" title="性能调优14-JVM调优工具介绍">
       <i class="fa fa-chevron-left"></i> 性能调优14-JVM调优工具介绍
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2022/03/28/%E5%88%86%E5%B8%83%E5%BC%8F-Redis01-%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8E%9F%E7%90%86/" rel="next" title="分布式-Redis01-核心数据接口与原理">
+      分布式-Redis01-核心数据接口与原理 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -322,6 +497,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">JVM调优实战及常量池介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#GC%E6%97%A5%E5%BF%97%E8%AF%A6%E8%A7%A3"><span class="nav-number">1.1.</span> <span class="nav-text">GC日志详解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%88%86%E6%9E%90GC%E6%97%A5%E5%BF%97"><span class="nav-number">1.2.</span> <span class="nav-text">如何分析GC日志</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%99%AE%E9%80%9AGC%E6%97%A5%E5%BF%97%EF%BC%88%E9%BB%98%E8%AE%A4Parallel%EF%BC%89"><span class="nav-number">1.2.1.</span> <span class="nav-text">普通GC日志（默认Parallel）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CMS-GC%E6%97%A5%E5%BF%97"><span class="nav-number">1.2.2.</span> <span class="nav-text">CMS-GC日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#G1-GC%E6%97%A5%E5%BF%97"><span class="nav-number">1.2.3.</span> <span class="nav-text">G1-GC日志</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM%E5%8F%82%E6%95%B0%E6%B1%87%E6%80%BB%E6%9F%A5%E7%9C%8B%E5%91%BD%E4%BB%A4"><span class="nav-number">1.3.</span> <span class="nav-text">JVM参数汇总查看命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Class%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6%E5%B8%B8%E9%87%8F%E6%B1%A0"><span class="nav-number">1.4.</span> <span class="nav-text">Class常量池与运行时常量池</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Class%E5%B8%B8%E9%87%8F%E6%B1%A0"><span class="nav-number">1.4.0.1.</span> <span class="nav-text">Class常量池</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AD%97%E9%9D%A2%E9%87%8F"><span class="nav-number">1.4.0.1.1.</span> <span class="nav-text">字面量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AC%A6%E5%8F%B7%E5%BC%95%E7%94%A8"><span class="nav-number">1.4.0.1.2.</span> <span class="nav-text">符号引用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%B8%B8%E9%87%8F%E6%B1%A0%EF%BC%88jdk8%E5%90%8E%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%B8%B8%E9%87%8F%E6%B1%A0%E5%8F%AA%E5%9C%A8%E5%A0%86%E4%B8%AD-%E8%BF%90%E8%A1%8C%E6%97%B6%E5%B8%B8%E9%87%8F%E6%B1%A0%E5%9C%A8%E5%85%83%E7%A9%BA%E9%97%B4%EF%BC%89"><span class="nav-number">1.4.1.</span> <span class="nav-text">字符串常量池（jdk8后字符串常量池只在堆中,运行时常量池在元空间）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%B8%B8%E9%87%8F%E6%B1%A0%E7%9A%84%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3"><span class="nav-number">1.4.1.1.</span> <span class="nav-text">字符串常量池的设计思想</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E7%A7%8D%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%93%8D%E4%BD%9C"><span class="nav-number">1.4.1.2.</span> <span class="nav-text">三种字符串操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#String%E5%B8%B8%E9%87%8F%E6%B1%A0%E9%97%AE%E9%A2%98%E7%9A%84%E5%87%A0%E4%B8%AA%E4%BE%8B%E5%AD%90"><span class="nav-number">1.4.1.3.</span> <span class="nav-text">String常量池问题的几个例子</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%AB%E7%A7%8D%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%8C%85%E8%A3%85%E7%B1%BB%E5%92%8C%E5%AF%B9%E8%B1%A1%E6%B1%A0"><span class="nav-number">1.4.2.</span> <span class="nav-text">八种基本类型的包装类和对象池</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E7%82%B9%E4%B8%8E%E5%AE%89%E5%85%A8%E5%8C%BA%E5%9F%9F"><span class="nav-number">1.5.</span> <span class="nav-text">安全点与安全区域</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -337,20 +513,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-count">71</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-count">23</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">60</span>
+        <span class="site-state-item-count">63</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

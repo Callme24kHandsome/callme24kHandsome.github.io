@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="zookeeper01-简介与客户端使用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式-zookeeper01-简介与客户端使用">
+<meta property="og:url" content="http://example.com/2022/04/23/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="zookeeper01-简介与客户端使用">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/分布式-zookeeper01-简介与客户端使用/image-20220423165903801.png">
+<meta property="og:image" content="http://example.com/images/分布式-zookeeper01-简介与客户端使用/image-20220423170723134.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/da6794017cb1417684810ce7ccba1f79.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/72444eeb5f0f490a91c8ae93bad2b3e7.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/65be00a325e45c02b57b1dcff86c35db_720w.jpg">
+<meta property="og:image" content="http://example.com/2022/04/23/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/6d37c4f193d373f9476f7ced5bb1906c.png">
+<meta property="og:image" content="http://example.com/2022/04/23/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/b67eee64039a4d258548cafeaeaeb87e.png">
+<meta property="og:image" content="http://example.com/2022/04/23/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/bae63cc5c73841d5a42ed509ca93a613.png">
+<meta property="og:image" content="http://example.com/2022/04/23/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/d307740d854d49919567abd2e7813a2f.png">
+<meta property="article:published_time" content="2022-04-23T13:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-01T00:17:58.219Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="zookeeper">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/分布式-zookeeper01-简介与客户端使用/image-20220423165903801.png">
+
+<link rel="canonical" href="http://example.com/2022/04/23/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>分布式-zookeeper01-简介与客户端使用 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/23/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          分布式-zookeeper01-简介与客户端使用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-04-23 21:00:00" itemprop="dateCreated datePublished" datetime="2022-04-23T21:00:00+08:00">2022-04-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-06-01 08:17:58" itemprop="dateModified" datetime="2022-06-01T08:17:58+08:00">2022-06-01</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/zookeeper/" itemprop="url" rel="index"><span itemprop="name">zookeeper</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">zookeeper01-简介与客户端使用</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、概要、背景及作用"><a href="#一、概要、背景及作用" class="headerlink" title="一、概要、背景及作用"></a>一、概要、背景及作用</h1><h2 id="zookeeper产生背景"><a href="#zookeeper产生背景" class="headerlink" title="zookeeper产生背景"></a>zookeeper产生背景</h2><p>项目从单体到分布式转变之后，将会产生<strong>多个节点之间协同的问题</strong>。如</p>
+<p>1、定时任务由哪个节点来执行</p>
+<p>2、RPC调用时的服务与发现</p>
+<p>3、如何实现分布式锁（保证并发请求的幂等性）</p>
+<p>4、……</p>
+<p>这些问题可以统一归纳为多节点协调问题，如果靠节点自身进行协调这是非常不可靠的，性能上也不可取。必须由一个独立的服务做协调工作，它必须可靠，而且保证性能</p>
+<h2 id="zookeeper概要"><a href="#zookeeper概要" class="headerlink" title="zookeeper概要"></a>zookeeper概要</h2><p>ZooKeeper是在<strong>分布式</strong>应用程序中<strong>提供协调服务</strong>的apache项目。它公开了一组简单的API，分布式应用程序可以基于这些API用于同步，节点状态、配置等信息、服务注册等信息。其由JAVA编写。</p>
+<img src="/images/分布式-zookeeper01-简介与客户端使用/image-20220423165903801.png" alt="image-20220423165903801" style="zoom:67%;">
+
+<h2 id="znode节点"><a href="#znode节点" class="headerlink" title="znode节点"></a>znode节点</h2><p>zookeeper 中数据基本单元叫节点，<strong>节点之下可包含子节点，最后以树级方式程现</strong>。<strong>每个节点拥有唯一的路径path</strong>。客户端基于PATH上传节点数据，zookeeper 收到后会实时通知对该路径进行监听的客户端。</p>
+<img src="/images/分布式-zookeeper01-简介与客户端使用/image-20220423170723134.png" alt="image-20220423170723134" style="zoom: 50%;">
+
+<h2 id="Zookeeper工作机制"><a href="#Zookeeper工作机制" class="headerlink" title="Zookeeper工作机制"></a>Zookeeper工作机制</h2><p>​    Zookeeper从设计模式角度来理解：是一个基于<strong>观察者模式</strong>设计的分布式服务管理框架，它负责存储和管理大家都关心的数据，然后接受观察者(客户端)的注 册，一旦这些数据的状态发生变化，Zookeeper就 将负责通知已经在Zookeeper上注册的那些观察者(客户端)做出相应的反应。</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/da6794017cb1417684810ce7ccba1f79.png" alt="img"></p>
+<h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><p>1）Zookeeper：一个领导者（Leader），多个跟随者（Follower）组成的集群。<br>2）过半机制：集群中只要有<strong>半数以上</strong>节点存活，Zookeeper集群就能正常服务。所 以Zookeeper适合安装<strong>奇数台</strong>服务器<br>3）全局数据一致：每个Server保存一份相同的数据副本，Client无论连接到哪个Server，数据都是一致的。<br>4）更新请求顺序执行，来自同一个Client的更新请求按其发送顺序依次执行。<br>5）数据更新原子性，一次数据更新要么成功，要么失败。<br>6）实时性，在一定时间范围内，Client能读到最新数据.</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/72444eeb5f0f490a91c8ae93bad2b3e7.png" alt="img"></p>
+<h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><p>提供的服务包括：统一命名服务、统一配置管理、统一集群管理、服务器节点动态上下线、软负载均衡等.</p>
+<h3 id="服务发现与注册（在dubbo中使用）"><a href="#服务发现与注册（在dubbo中使用）" class="headerlink" title="服务发现与注册（在dubbo中使用）"></a>服务发现与注册（在dubbo中使用）</h3><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/65be00a325e45c02b57b1dcff86c35db_720w.jpg" alt="img"></p>
+<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/6d37c4f193d373f9476f7ced5bb1906c.png" alt="6d37c4f193d373f9476f7ced5bb1906c.png"></p>
+<h3 id="统一配置管理"><a href="#统一配置管理" class="headerlink" title="统一配置管理"></a>统一配置管理</h3><p>1）分布式环境下，配置文件同步非常常见。<br>（1）一般要求一个集群中，所有节点的配置信息是一致的，比如 Kafka 集群。<br>（2）对配置文件修改后，希望能够快速同步到各个节点上。</p>
+<p>2）配置管理可交由ZooKeeper实现。<br>（1）可将配置信息写入ZooKeeper上的一个Znode<br>（2）各个客户端服务器监听这个Znode。<br>（3）一 旦Znode中的数据被修改，ZooKeeper将通知各个客户端服务器。</p>
+<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/b67eee64039a4d258548cafeaeaeb87e.png" alt="在这里插入图片描述"></p>
+<h3 id="软负载均衡"><a href="#软负载均衡" class="headerlink" title="软负载均衡"></a>软负载均衡</h3><p>在Zookeeper中记录每台服务器的访问数，让访问数最少的服务器去处理最新的客户端请求</p>
+<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/bae63cc5c73841d5a42ed509ca93a613.png" alt="img"></p>
+<h3 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h3><h3 id="多节点系统定时任务"><a href="#多节点系统定时任务" class="headerlink" title="多节点系统定时任务"></a>多节点系统定时任务</h3><h1 id="二、部署与常规配置"><a href="#二、部署与常规配置" class="headerlink" title="二、部署与常规配置"></a>二、部署与常规配置</h1><p>zookeeper 基于JAVA开发，下载后只要有对应JVM环境即可运行。其默认的端口号是2181运行前得保证其不冲突。</p>
+<h2 id="具体部署流程："><a href="#具体部署流程：" class="headerlink" title="具体部署流程："></a>具体部署流程：</h2><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs cmd"><span class="hljs-built_in">cd</span> /soft<br>#下载<br>wget https://mirrors.tuna.tsinghua.edu.cn/apache/zookeeper/current/apache-zookeeper-<span class="hljs-number">3</span>.<span class="hljs-number">5</span>.<span class="hljs-number">5</span>-bin.tar.gz<br>#解压<br>tar -zxvf apache-zookeeper-<span class="hljs-number">3</span>.<span class="hljs-number">5</span>.<span class="hljs-number">5</span>-bin.tar.gz<br>#拷贝默认配置<br><span class="hljs-built_in">cd</span>  &#123;zookeeper_home&#125;/conf <br>cp zoo_sample.cfg zoo.cfg<br>#配置环境变量<br>vim /etc/profile<br>#补充这面这句到<span class="hljs-built_in">PATH</span>=$<span class="hljs-built_in">PATH</span>后面<br>:/soft/apache-zookeeper-<span class="hljs-number">3</span>.<span class="hljs-number">5</span>.<span class="hljs-number">5</span>-bin<br>#立即生效<br>source etc/profile<br>#启动<br>zkServer.sh <span class="hljs-built_in">start</span><br>#连接客户端<br>zkClish.sh <br></code></pre></td></tr></table></figure>
+
+<h2 id="配置文件修改："><a href="#配置文件修改：" class="headerlink" title="配置文件修改："></a>配置文件修改：</h2><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs cmd"># zookeeper时间配置中的基本单位 (毫秒)<br>tickTime=<span class="hljs-number">2000</span><br># 允许follower初始化连接到leader最大时长，它表示tickTime时间倍数 即:initLimit*tickTime<br>initLimit=<span class="hljs-number">10</span><br># 允许follower与leader数据同步最大时长,它表示tickTime时间倍数 <br>syncLimit=<span class="hljs-number">5</span><br>#zookeper 数据存储目录<br>dataDir=/soft/apache-zookeeper-<span class="hljs-number">3</span>.<span class="hljs-number">5</span>.<span class="hljs-number">5</span>-bin/dataDir<br>#对客户端提供的端口号<br>clientPort=<span class="hljs-number">2181</span><br>#单个客户端与zookeeper最大并发连接数<br>maxClientCnxns=<span class="hljs-number">60</span><br># 保存的数据快照数量，之外的将会被清除<br>autopurge.snapRetainCount=<span class="hljs-number">3</span><br>#自动触发清除任务时间间隔，小时为单位。默认为<span class="hljs-number">0</span>，表示不自动清除。<br>autopurge.purgeInterval=<span class="hljs-number">1</span><br>#跳过acl<br>skipACL=yes<br></code></pre></td></tr></table></figure>
+
+<h2 id="客户端命令"><a href="#客户端命令" class="headerlink" title="客户端命令"></a>客户端命令</h2><p><strong>基本命令列表</strong><br> **close **<br> 关闭当前会话<br>**connect host:port **<br>重新连接指定Zookeeper服务<br><strong>create [-s] [-e] [-c] [-t ttl] path [data] [acl]</strong><br>创建节点<br><strong>delete [-v version] path</strong><br>删除节点，(不能存在子节点）<br><strong>deleteall path</strong><br> 删除路径及所有子节点<br><strong>setquota -n|-b val path</strong><br>设置节点限额 -n 子节点数 -b 字节数<br> <strong>listquota path</strong><br>查看节点限额<br><strong>delquota [-n|-b] path</strong><br>删除节点限额<br> <strong>get [-s] [-w] path</strong><br>查看节点数据 -s 包含节点状态 -w 添加监听<br>getAcl [-s] path<br><strong>ls [-s] [-w] [-R] path</strong><br>列出子节点 -s状态 -R 递归查看所有子节点 -w 添加监听<br><strong>printwatches on|off</strong><br>是否打印监听事件<br>**quit **<br>退出客户端<br> **history **<br>查看执行的历史记录<br><strong>redo cmdno</strong><br>重复 执行命令，history 中命令编号确定<br>removewatches path [-c|-d|-a] [-l]<br><strong>删除指定监听</strong><br>set [-s] [-v version] path data<br><strong>设置值</strong><br><strong>setAcl [-s] [-v version] [-R] path acl</strong><br>为节点设置ACL权限<br><strong>stat [-w] path</strong><br>查看节点状态 -w 添加监听<br><strong>sync path</strong><br>强制同步节点<br><strong>node数据的增删改查</strong></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs cmd"># 列出子节点 <br>ls /<br>#创建节点<br>create /luban &quot;luban is good man&quot;<br># 查看节点<br>get /luban<br># 创建子节点 <br>create /luban/sex &quot;man&quot;<br># 删除节点<br>delete /luban/sex<br># 删除所有节点 包括子节点<br>deleteall /luban<br></code></pre></td></tr></table></figure>
+
+<h1 id="三、Zookeeper节点与原生API介绍"><a href="#三、Zookeeper节点与原生API介绍" class="headerlink" title="三、Zookeeper节点与原生API介绍"></a>三、Zookeeper节点与原生API介绍</h1><p>zookeeper 中节点叫znode存储结构上跟文件系统类似，以树级结构进行存储。不同之外在于znode没有目录的概念，不能执行类似cd之类的命令。znode结构包含如下：</p>
+<ul>
+<li><strong>path</strong>:唯一路径 </li>
+<li><strong>childNode</strong>：子节点</li>
+<li><strong>stat</strong>:状态属性</li>
+<li><strong>type</strong>:节点类型</li>
+</ul>
+<h2 id="节点类型"><a href="#节点类型" class="headerlink" title="节点类型"></a>节点类型</h2><table>
+<thead>
+<tr>
+<th align="left">类型</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>PERSISTENT(默认)</strong></td>
+<td align="left">持久节点</td>
+</tr>
+<tr>
+<td align="left">PERSISTENT_SEQUENTIAL</td>
+<td align="left">持久序号节点</td>
+</tr>
+<tr>
+<td align="left">EPHEMERAL</td>
+<td align="left"><strong>临时节点(不可在拥有子节点)</strong>-会话断开后删除</td>
+</tr>
+<tr>
+<td align="left">EPHEMERAL_SEQUENTIAL</td>
+<td align="left">临时序号节点(不可在拥有子节点)</td>
+</tr>
+</tbody></table>
+<ol>
+<li>PERSISTENT（持久节点）</li>
+</ol>
+<p>持久化保存的节点，也是默认创建的</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cmd">#默认创建的就是持久节点<br>create /test<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>PERSISTENT_SEQUENTIAL(持久序号节点)</li>
+</ol>
+<p>创建时zookeeper 会在路径上加上序号作为后缀，。非常适合用于分布式锁、分布式选举等场景。创建时添加 -s 参数即可。</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cmd">#创建序号节点<br>create -s /test<br>#返回创建的实际路径<br>Created /test0000000001<br>create -s /test<br>#返回创建的实际路径<span class="hljs-number">2</span><br>Created /test0000000002<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>EPHEMERAL（临时节点）</li>
+</ol>
+<p>临时节点会在客户端会话断开后自动删除。适用于心跳，服务发现等场景。创建时添加参数-e 即可。</p>
+<figure class="highlight gauss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs gauss"><span class="hljs-meta">#创建临时节点， 断开会话 在连接将会自动删除</span><br><span class="hljs-keyword">create</span> -e /temp<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>EPHEMERAL_SEQUENTIAL（临时序号节点）</li>
+</ol>
+<p>与持久序号节点类似，不同之处在于EPHEMERAL_SEQUENTIAL是临时的会在会话断开后删除。创建时添加 -e -s </p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmd">create -e -s /temp/seq<br></code></pre></td></tr></table></figure>
+
+<h2 id="节点属性"><a href="#节点属性" class="headerlink" title="节点属性"></a>节点属性</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看节点属性</span><br><span class="hljs-built_in">stat</span> /luban<br></code></pre></td></tr></table></figure>
+
+<p>其属性说明如下表：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment">#创建节点的事物ID</span><br><span class="hljs-attribute">cZxid</span> = <span class="hljs-number">0</span>x<span class="hljs-number">385</span><br><span class="hljs-comment">#创建时间</span><br><span class="hljs-attribute">ctime</span> = Tue Sep <span class="hljs-number">24</span> <span class="hljs-number">17</span>:<span class="hljs-number">26</span>:<span class="hljs-number">28</span> CST <span class="hljs-number">2019</span><br><span class="hljs-comment">#修改节点的事物ID</span><br><span class="hljs-attribute">mZxid</span> = <span class="hljs-number">0</span>x<span class="hljs-number">385</span><br><span class="hljs-comment">#最后修改时间</span><br><span class="hljs-attribute">mtime</span> = Tue Sep <span class="hljs-number">24</span> <span class="hljs-number">17</span>:<span class="hljs-number">26</span>:<span class="hljs-number">28</span> CST <span class="hljs-number">2019</span><br><span class="hljs-comment"># 子节点变更的事物ID</span><br><span class="hljs-attribute">pZxid</span> = <span class="hljs-number">0</span>x<span class="hljs-number">385</span><br><span class="hljs-comment">#这表示对此znode的子节点进行的更改次数（不包括子节点）</span><br><span class="hljs-attribute">cversion</span> = <span class="hljs-number">0</span><br><span class="hljs-comment"># 数据版本，变更次数</span><br><span class="hljs-attribute">dataVersion</span> = <span class="hljs-number">0</span><br><span class="hljs-comment">#权限版本，变更次数</span><br><span class="hljs-attribute">aclVersion</span> = <span class="hljs-number">0</span><br><span class="hljs-comment">#临时节点所属会话ID</span><br><span class="hljs-attribute">ephemeralOwner</span> = <span class="hljs-number">0</span>x<span class="hljs-number">0</span><br><span class="hljs-comment">#数据长度</span><br><span class="hljs-attribute">dataLength</span> = <span class="hljs-number">17</span><br><span class="hljs-comment">#子节点数(不包括子子节点)</span><br><span class="hljs-attribute">numChildren</span> = <span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th><strong>cZxid</strong></th>
+<th>创建节点的事物ID</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>mZxid</strong></td>
+<td>最新一次修改节点的事物ID</td>
+</tr>
+<tr>
+<td><strong>pZxid</strong></td>
+<td>子节点变更的事物ID</td>
+</tr>
+<tr>
+<td><strong>cversion</strong></td>
+<td>这表示对此znode的子节点进行的更改次数（不包括子节点）</td>
+</tr>
+<tr>
+<td><strong>dataVersion</strong></td>
+<td>数据版本，变更次数</td>
+</tr>
+<tr>
+<td><strong>aclVersion</strong></td>
+<td>权限版本，变更次数</td>
+</tr>
+</tbody></table>
+<p>ZXID是一个长度64位的数字，其中低32位是按照数字递增，任何数据的变更都会导致,低32位的数字简单加1。高32位是leader周期编号，每当选举出一个新的leader时，新的leader就从本地事物日志中取出ZXID,然后解析出高32位的周期编号，进行加1，再将低32位的全部设置为0。这样就保证了每次新选举的leader后，保证了ZXID的唯一性而且是保证递增的。 </p>
+<h3 id="acl权限设置"><a href="#acl权限设置" class="headerlink" title="acl权限设置"></a>acl权限设置</h3><p>ACL全称为Access Control List（访问控制列表），用于控制资源的访问权限。ZooKeeper使用ACL来控制对其znode的防问。基于scheme: id :permission的方式进行权限控制。scheme表示授权模式、id模式对应值、permission即具体的增删改权限位。</p>
+<p><strong>scheme:认证模型</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">方案</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">world</td>
+<td align="left">开放模式，world表示全世界都可以访问（这是默认设置）</td>
+</tr>
+<tr>
+<td align="left">ip</td>
+<td align="left">ip模式，限定客户端IP防问</td>
+</tr>
+<tr>
+<td align="left">auth</td>
+<td align="left">用户密码认证模式，只有在会话中添加了认证才可以防问</td>
+</tr>
+<tr>
+<td align="left">digest</td>
+<td align="left">与auth类似，区别在于auth用明文密码，而digest 用sha-1+base64加密后的密码。在实际使用中digest 更常见。</td>
+</tr>
+</tbody></table>
+<p><strong>permission权限位</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">权限位</th>
+<th align="left">权限</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">c</td>
+<td align="left">CREATE</td>
+<td align="left">可以创建子节点</td>
+</tr>
+<tr>
+<td align="left">d</td>
+<td align="left">DELETE</td>
+<td align="left">可以删除子节点（仅下一级节点）</td>
+</tr>
+<tr>
+<td align="left">r</td>
+<td align="left">READ</td>
+<td align="left">可以读取节点数据及显示子节点列表</td>
+</tr>
+<tr>
+<td align="left">w</td>
+<td align="left">WRITE</td>
+<td align="left">可以设置节点数据</td>
+</tr>
+<tr>
+<td align="left">a</td>
+<td align="left">ADMIN</td>
+<td align="left">可以设置节点访问控制列表权限</td>
+</tr>
+</tbody></table>
+<p><strong>acl 相关命令：</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">命令</th>
+<th align="left">使用方式</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">getAcl</td>
+<td align="left">getAcl <path></path></td>
+<td align="left">读取ACL权限</td>
+</tr>
+<tr>
+<td align="left">setAcl</td>
+<td align="left">setAcl <path></path> <acl></acl></td>
+<td align="left">设置ACL权限</td>
+</tr>
+<tr>
+<td align="left">addauth</td>
+<td align="left">addauth <scheme> <auth></auth></scheme></td>
+<td align="left">添加认证用户</td>
+</tr>
+</tbody></table>
+<p><strong>world权限****示例</strong><br>语法： setAcl <path></path> world:anyone:&lt;权限位&gt;<br>注：world模式中anyone是唯一的值,表示所有人</p>
+<ol>
+<li>查看默认节点权限：</li>
+</ol>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cmd">#创建一个节点<br>create -e /testAcl<br>#查看节点权限<br>getAcl /testAcl<br>#返回的默认权限表示 ，所有人拥有所有权限。<br>&#x27;world,&#x27;anyone: cdrwa<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>修改默认权限为 读写</li>
+</ol>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs cmd">#设置为rw权限 <br>setAcl /testAcl world:anyone:rw<br># 可以正常读<br>get /testAcl<br># 无法正常创建子节点<br>create -e /testAcl/t &quot;hi&quot;<br># 返回没有权限的异常<br>Authentication is <span class="hljs-keyword">not</span> valid : /testAcl/t<br></code></pre></td></tr></table></figure>
+
+<p><strong>IP权限示例：</strong><br>语法： setAcl <path></path> ip:&lt;ip地址|地址段&gt;:&lt;权限位&gt;</p>
+<p><strong>auth模式示例:</strong><br>语法： </p>
+<ol>
+<li>setAcl <path></path> auth:&lt;用户名&gt;:&lt;密码&gt;:&lt;权限位&gt;</li>
+<li>addauth digest &lt;用户名&gt;:&lt;密码&gt;</li>
+</ol>
+<p><strong>digest 权限示例：</strong><br>语法： </p>
+<ol>
+<li>setAcl <path></path> digest :&lt;用户名&gt;:&lt;密钥&gt;:&lt;权限位&gt;</li>
+<li>addauth digest &lt;用户名&gt;:&lt;密码&gt;</li>
+</ol>
+<p>注1：密钥 通过sha1与base64组合加密码生成，可通过以下命令生成</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmd"><span class="hljs-built_in">echo</span> -n &lt;用户名&gt;:&lt;密码&gt; | openssl dgst -binary -sha1 | openssl base64<br></code></pre></td></tr></table></figure>
+
+<p>注2：为节点设置digest 权限后，访问前必须执行addauth，当前会话才可以防问。</p>
+<ol>
+<li>设置digest 权限</li>
+</ol>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cmd">#先 sha1 加密，然后base64加密<br><span class="hljs-built_in">echo</span> -n luban:<span class="hljs-number">123456</span> | openssl dgst -binary -sha1 | openssl base64<br>#返回密钥<br><span class="hljs-number">2</span>Rz3ZtRZEs5RILjmwuXW/wT13Tk=<br>#设置digest权限<br>setAcl /luban digest:luban:<span class="hljs-number">2</span>Rz3ZtRZEs5RILjmwuXW/wT13Tk=:cdrw<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>查看节点将显示没有权限</li>
+</ol>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs cmd">#查看节点<br>get /luban<br>#显示没有权限访问<br><span class="hljs-function">org.apache.zookeeper.KeeperException$NoAuthException: <span class="hljs-title">KeeperErrorCode</span> = <span class="hljs-title">NoAuth</span> <span class="hljs-title">for</span> /<span class="hljs-title">luban</span></span><br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>给当前会话添加认证后在次查看</li>
+</ol>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cmd">#给当前会话添加权限帐户<br>addauth digest luban:<span class="hljs-number">123456</span><br>#在次查看<br>get /luban<br>#获得返回结果<br>luban is good man<br></code></pre></td></tr></table></figure>
+
+<p>ACL的特殊说明：<br>权限仅对当前节点有效，不会让子节点继承。如限制了IP防问A节点，但不妨碍该IP防问A的子节点 /A/B。</p>
+<h1 id="四、集群部署"><a href="#四、集群部署" class="headerlink" title="四、集群部署"></a>四、集群部署</h1><p>zookeeper集群的目的是为了保证系统的性能承载更多的客户端连接设专门提供的机制。通过集群可以实现以下功能：</p>
+<ul>
+<li>读写分离：提高承载，为更多的客户端提供连接，并保障性能。</li>
+<li>主从自动切换：提高服务容错性，部分节点故障不会影响整个服务集群。</li>
+</ul>
+<p><strong>半数以上运行机制说明：</strong><br>集群至少需要三台服务器，并且强烈建议使用奇数个服务器。因为zookeeper 通过判断大多数节点的存活来判断整个服务是否可用。比如3个节点，挂掉了2个表示整个集群挂掉，而用偶数4个，挂掉了2个也表示其并不是大部分存活，因此也会挂掉。</p>
+<ol>
+<li>集群部署</li>
+</ol>
+<p>配置语法：<br>server.&lt;节点ID&gt;=<ip>:&lt;数据同步端口&gt;:&lt;选举端口&gt;</ip></p>
+<ul>
+<li><strong>节点ID</strong>：服务id手动指定1至125之间的数字，并写到对应服务节点的 {dataDir}/myid 文件中。</li>
+<li><strong>IP地址：</strong>节点的远程IP地址，可以相同。但生产环境就不能这么做了，因为在同一台机器就无法达到容错的目的。所以这种称作为伪集群。</li>
+<li><strong>数据同步端口：</strong>主从同时数据复制端口，（做伪集群时端口号不能重复）。</li>
+<li><strong>选举端口：</strong>主从节点选举端口，（做伪集群时端口号不能重复）。</li>
+</ul>
+<p>配置文件示例：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs cmd">tickTime=<span class="hljs-number">2000</span><br>dataDir=/soft/apache-zookeeper-<span class="hljs-number">3</span>.<span class="hljs-number">5</span>.<span class="hljs-number">5</span>-bin/dataDir/<span class="hljs-number">1</span><br>clientPort=<span class="hljs-number">2181</span><br>initLimit=<span class="hljs-number">5</span><br>syncLimit=<span class="hljs-number">2</span><br>#以下为集群配置，必须配置在所有节点的zoo.cfg文件中<br>server.<span class="hljs-number">1</span>=zoo1:<span class="hljs-number">2888</span>:<span class="hljs-number">3888</span><br>server.<span class="hljs-number">2</span>=zoo2:<span class="hljs-number">2888</span>:<span class="hljs-number">3888</span><br>server.<span class="hljs-number">3</span>=zoo3:<span class="hljs-number">2888</span>:<span class="hljs-number">3888</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="集群配置流程："><a href="#集群配置流程：" class="headerlink" title="集群配置流程："></a>集群配置流程：</h2><p>1、分别创建3个data目录用于存储各节点数据</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs cmd"><span class="hljs-built_in">mkdir</span> data<br><span class="hljs-built_in">mkdir</span> data/<span class="hljs-number">1</span><br><span class="hljs-built_in">mkdir</span> data/<span class="hljs-number">3</span><br><span class="hljs-built_in">mkdir</span> data/<span class="hljs-number">3</span><br></code></pre></td></tr></table></figure>
+
+<p>2、编写myid文件</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cmd"><span class="hljs-built_in">echo</span> <span class="hljs-number">1</span> &gt; data/<span class="hljs-number">1</span>/myid<br><span class="hljs-built_in">echo</span> <span class="hljs-number">3</span> &gt; data/<span class="hljs-number">3</span>/myid<br><span class="hljs-built_in">echo</span> <span class="hljs-number">2</span> &gt; data/<span class="hljs-number">2</span>/myid<br></code></pre></td></tr></table></figure>
+
+<p>3、编写配置文件<br><em>conf/zoo1.cfg</em></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs cmd">tickTime=<span class="hljs-number">2000</span><br>initLimit=<span class="hljs-number">10</span><br>syncLimit=<span class="hljs-number">5</span><br>dataDir=/soft/apache-zookeeper-<span class="hljs-number">3</span>.<span class="hljs-number">5</span>.<span class="hljs-number">5</span>-bin/dataDir/<span class="hljs-number">1</span><br>clientPort=<span class="hljs-number">2181</span><br>#集群配置<br>server.<span class="hljs-number">1</span>=<span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">2887</span>:<span class="hljs-number">3887</span><br>server.<span class="hljs-number">2</span>=<span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">2888</span>:<span class="hljs-number">3888</span><br>server.<span class="hljs-number">3</span>=<span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">2889</span>:<span class="hljs-number">3889</span><br></code></pre></td></tr></table></figure>
+
+<p><em>conf/zoo2.cfg</em></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs cmd">tickTime=<span class="hljs-number">2000</span><br>initLimit=<span class="hljs-number">10</span><br>syncLimit=<span class="hljs-number">5</span><br>dataDir=d/soft/apache-zookeeper-<span class="hljs-number">3</span>.<span class="hljs-number">5</span>.<span class="hljs-number">5</span>-bin/dataDir/<span class="hljs-number">2</span><br>clientPort=<span class="hljs-number">2182</span><br>#集群配置<br>server.<span class="hljs-number">1</span>=<span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">2887</span>:<span class="hljs-number">3887</span><br>server.<span class="hljs-number">2</span>=<span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">2888</span>:<span class="hljs-number">3888</span><br>server.<span class="hljs-number">3</span>=<span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">2889</span>:<span class="hljs-number">3889</span><br></code></pre></td></tr></table></figure>
+
+<p><em>conf/zoo3.cfg</em></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs cmd">tickTime=<span class="hljs-number">2000</span><br>initLimit=<span class="hljs-number">10</span><br>syncLimit=<span class="hljs-number">5</span><br>dataDir=/soft/apache-zookeeper-<span class="hljs-number">3</span>.<span class="hljs-number">5</span>.<span class="hljs-number">5</span>-bin/dataDir/<span class="hljs-number">3</span><br>clientPort=<span class="hljs-number">2183</span><br>#集群配置<br>server.<span class="hljs-number">1</span>=<span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">2887</span>:<span class="hljs-number">3887</span><br>server.<span class="hljs-number">2</span>=<span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">2888</span>:<span class="hljs-number">3888</span><br>server.<span class="hljs-number">3</span>=<span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">2889</span>:<span class="hljs-number">3889</span><br></code></pre></td></tr></table></figure>
+
+<p>4、分别启动</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cmd">./bin/zkServer.sh <span class="hljs-built_in">start</span> conf/zoo1.cfg<br>./bin/zkServer.sh <span class="hljs-built_in">start</span> conf/zoo2.cfg<br>./bin/zkServer.sh <span class="hljs-built_in">start</span> conf/zoo3.cfg<br></code></pre></td></tr></table></figure>
+
+<p>5、分别查看状态</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cmd">./bin/zkServer.sh status conf/zoo1.cfg<br><span class="hljs-function">Mode: <span class="hljs-title">follower</span></span><br><span class="hljs-function">./<span class="hljs-title">bin</span>/<span class="hljs-title">zkServer.sh</span> <span class="hljs-title">status</span> <span class="hljs-title">conf</span>/<span class="hljs-title">zoo2.cfg</span></span><br><span class="hljs-function"><span class="hljs-title">Mode</span>: <span class="hljs-title">leader</span></span><br><span class="hljs-function">./<span class="hljs-title">bin</span>/<span class="hljs-title">zkServer.sh</span> <span class="hljs-title">status</span> <span class="hljs-title">conf</span>/<span class="hljs-title">zoo3.cfg</span></span><br><span class="hljs-function"><span class="hljs-title">Mode</span>: <span class="hljs-title">follower</span></span><br></code></pre></td></tr></table></figure>
+
+<p><strong>检查集群复制情况：</strong><br>1、分别连接指定节点<br>zkCli.sh 后加参数-server 表示连接指定IP与端口。</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cmd">./bin/zkCli.sh -server <span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">2181</span><br>./bin/zkCli.sh -server <span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">2182</span><br>./bin/zkCli.sh -server <span class="hljs-number">127</span>.<span class="hljs-number">0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>:<span class="hljs-number">2183</span><br></code></pre></td></tr></table></figure>
+
+<p>2、任意节点中创建数据，查看其它节点已经同步成功。</p>
+<p>注意： -server参数后同时连接多个服务节点，并用逗号隔开 127.0.0.1:2181,127.0.0.1:2182</p>
+<p><strong>集群角色说明</strong></p>
+<p>zookeeper 集群中总共有三种角色，分别是leader（主节点）follower(子节点) observer（次级子节点）</p>
+<table>
+<thead>
+<tr>
+<th align="left">角色</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>leader</strong></td>
+<td align="left">主节点，又名领导者。用于写入数据，通过选举产生，如果宕机将会选举新的主节点。</td>
+</tr>
+<tr>
+<td align="left"><strong>follower</strong></td>
+<td align="left">子节点，又名追随者。用于实现数据的读取。同时他也是主节点的备选节点，并用拥有投票权。</td>
+</tr>
+<tr>
+<td align="left"><strong>observer</strong></td>
+<td align="left">次级子节点，又名观察者。用于读取数据，与fllower区别在于没有投票权，不能选为主节点。并且在计算集群可用状态时不会将observer计算入内。</td>
+</tr>
+</tbody></table>
+<p><strong>observer配置：</strong><br>只要在集群配置中加上observer后缀即可，示例如下：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">server</span>.<span class="hljs-number">3</span>=<span class="hljs-number">127.0.0.1:2889</span>:<span class="hljs-number">3889</span>:observer<br></code></pre></td></tr></table></figure>
+
+<h3 id="选举机制"><a href="#选举机制" class="headerlink" title="选举机制"></a>选举机制</h3><p>通过 ./bin/zkServer.sh status &lt;zoo配置文件&gt; 命令可以查看到节点状态</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cmd">./bin/zkServer.sh status conf/zoo1.cfg<br><span class="hljs-function">Mode: <span class="hljs-title">follower</span></span><br><span class="hljs-function">./<span class="hljs-title">bin</span>/<span class="hljs-title">zkServer.sh</span> <span class="hljs-title">status</span> <span class="hljs-title">conf</span>/<span class="hljs-title">zoo2.cfg</span></span><br><span class="hljs-function"><span class="hljs-title">Mode</span>: <span class="hljs-title">leader</span></span><br><span class="hljs-function">./<span class="hljs-title">bin</span>/<span class="hljs-title">zkServer.sh</span> <span class="hljs-title">status</span> <span class="hljs-title">conf</span>/<span class="hljs-title">zoo3.cfg</span></span><br><span class="hljs-function"><span class="hljs-title">Mode</span>: <span class="hljs-title">follower</span></span><br></code></pre></td></tr></table></figure>
+
+<p><strong>投票机制说明：</strong></p>
+<ul>
+<li>选举原则：比较每个节点的(zxid,myid),在当选节点的票数&gt;总节点数/2（该原则可以避免zk集群的脑裂问题），<strong>zxid大者当选</strong>，<strong>若zxid相同再比较myid，myid大者当选</strong>；若当前已发生投票节点数未过半，则继续等待投票</li>
+</ul>
+<h5 id="Zookeeper选举机制——启动阶段的leader选举"><a href="#Zookeeper选举机制——启动阶段的leader选举" class="headerlink" title="Zookeeper选举机制——启动阶段的leader选举"></a>Zookeeper选举机制——启动阶段的leader选举</h5><p>zk集群至少要有3个节点，假如有5个节点1、2、3、4、5先后启动，它们启动时的zxid都是一样的(设为0):</p>
+<p>-&gt;节点1进入looking选举状态，给自己投票，发出(0,1)，此时当选节点票数=1&lt;节点总数的一半=2.5，故节点1仍保持looking状态继续等待选举</p>
+<p>-&gt;节点2进入looking选举状态，给自己投票，发出(0,2)，myid为2最大，2当选，但此时当选节点票数=2&lt;节点总数的一半=2.5，故节点2仍保持looking状态继续等待选举</p>
+<p>-&gt;节点3进入looking选举状态，给自己投票，发出(0,3)，myid为3最大，3当选，且此时当选节点票数=3&gt;节点总数的一半=2.5，故节点3当选leader</p>
+<p>-&gt;节点4进入looking选举状态，给自己投票，发出(0,4)，但此时集群leader已选出，所以节点4仍成为follwer</p>
+<p>-&gt;节点5进入looking选举状态，给自己投票，发出(0,5)，但此时集群leader已选出，所以节点5仍成为follwer</p>
+<p>-&gt;选举完成后，leader的状态由looking变为leading，follower的状态由looking变为following</p>
+<p><strong>总的来说，启动阶段的选举当选的必然为位于中间的节点</strong></p>
+<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/d307740d854d49919567abd2e7813a2f.png" alt="image-20220424234345562"></p>
+<h5 id="Zookeeper选举机制——运行阶段的选举"><a href="#Zookeeper选举机制——运行阶段的选举" class="headerlink" title="Zookeeper选举机制——运行阶段的选举"></a>Zookeeper选举机制——运行阶段的选举</h5><p>运行阶段每个节点的zxid都可能不同，但选举原则与启动阶段一样，都是先比较zxid,再比较myid，假如主节点3运行中挂掉了，其他所有从节点全部进入looking状态，节点1、2、4、5的zxid为121、122、124、125，且各从节点都推举自己为下一个leader，节点1发出（121,1），节点2发出（122，2），节点4发出（124，4），由于节点4的zxid比1、2的大，故4当选，且当选节点票数=3&gt;总节点数/2=5/2=2.5,所以4当选新一代leader，节点5发出（125，5），但此时已经选举出leader，所以5成为follwer，最后leader变更状态为leading，follower变更为following</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/zookeeper/" rel="tag"># zookeeper</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/04/13/%E5%88%86%E5%B8%83%E5%BC%8F-Redis03-%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E5%AE%9E%E6%88%98/" rel="prev" title="分布式-Redis03-分布式锁实战">
+      <i class="fa fa-chevron-left"></i> 分布式-Redis03-分布式锁实战
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/04/25/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/" rel="next" title="分布式-zookeeper02-常用应用场景">
+      分布式-zookeeper02-常用应用场景 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%A6%81%E3%80%81%E8%83%8C%E6%99%AF%E5%8F%8A%E4%BD%9C%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">一、概要、背景及作用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#zookeeper%E4%BA%A7%E7%94%9F%E8%83%8C%E6%99%AF"><span class="nav-number">1.1.</span> <span class="nav-text">zookeeper产生背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#zookeeper%E6%A6%82%E8%A6%81"><span class="nav-number">1.2.</span> <span class="nav-text">zookeeper概要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#znode%E8%8A%82%E7%82%B9"><span class="nav-number">1.3.</span> <span class="nav-text">znode节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Zookeeper%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6"><span class="nav-number">1.4.</span> <span class="nav-text">Zookeeper工作机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E7%82%B9"><span class="nav-number">1.5.</span> <span class="nav-text">特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.6.</span> <span class="nav-text">应用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E4%B8%8E%E6%B3%A8%E5%86%8C%EF%BC%88%E5%9C%A8dubbo%E4%B8%AD%E4%BD%BF%E7%94%A8%EF%BC%89"><span class="nav-number">1.6.1.</span> <span class="nav-text">服务发现与注册（在dubbo中使用）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%A1%E7%90%86"><span class="nav-number">1.6.2.</span> <span class="nav-text">统一配置管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1"><span class="nav-number">1.6.3.</span> <span class="nav-text">软负载均衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81"><span class="nav-number">1.6.4.</span> <span class="nav-text">分布式锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E8%8A%82%E7%82%B9%E7%B3%BB%E7%BB%9F%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1"><span class="nav-number">1.6.5.</span> <span class="nav-text">多节点系统定时任务</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E9%83%A8%E7%BD%B2%E4%B8%8E%E5%B8%B8%E8%A7%84%E9%85%8D%E7%BD%AE"><span class="nav-number">2.</span> <span class="nav-text">二、部署与常规配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E9%83%A8%E7%BD%B2%E6%B5%81%E7%A8%8B%EF%BC%9A"><span class="nav-number">2.1.</span> <span class="nav-text">具体部署流程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%BF%AE%E6%94%B9%EF%BC%9A"><span class="nav-number">2.2.</span> <span class="nav-text">配置文件修改：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%91%BD%E4%BB%A4"><span class="nav-number">2.3.</span> <span class="nav-text">客户端命令</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81Zookeeper%E8%8A%82%E7%82%B9%E4%B8%8E%E5%8E%9F%E7%94%9FAPI%E4%BB%8B%E7%BB%8D"><span class="nav-number">3.</span> <span class="nav-text">三、Zookeeper节点与原生API介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8A%82%E7%82%B9%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.1.</span> <span class="nav-text">节点类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8A%82%E7%82%B9%E5%B1%9E%E6%80%A7"><span class="nav-number">3.2.</span> <span class="nav-text">节点属性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#acl%E6%9D%83%E9%99%90%E8%AE%BE%E7%BD%AE"><span class="nav-number">3.2.1.</span> <span class="nav-text">acl权限设置</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2"><span class="nav-number">4.</span> <span class="nav-text">四、集群部署</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E9%85%8D%E7%BD%AE%E6%B5%81%E7%A8%8B%EF%BC%9A"><span class="nav-number">4.1.</span> <span class="nav-text">集群配置流程：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%89%E4%B8%BE%E6%9C%BA%E5%88%B6"><span class="nav-number">4.1.1.</span> <span class="nav-text">选举机制</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Zookeeper%E9%80%89%E4%B8%BE%E6%9C%BA%E5%88%B6%E2%80%94%E2%80%94%E5%90%AF%E5%8A%A8%E9%98%B6%E6%AE%B5%E7%9A%84leader%E9%80%89%E4%B8%BE"><span class="nav-number">4.1.1.0.1.</span> <span class="nav-text">Zookeeper选举机制——启动阶段的leader选举</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Zookeeper%E9%80%89%E4%B8%BE%E6%9C%BA%E5%88%B6%E2%80%94%E2%80%94%E8%BF%90%E8%A1%8C%E9%98%B6%E6%AE%B5%E7%9A%84%E9%80%89%E4%B8%BE"><span class="nav-number">4.1.1.0.2.</span> <span class="nav-text">Zookeeper选举机制——运行阶段的选举</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">71</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

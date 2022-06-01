@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="常用应用场景">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式-zookeeper02-常用应用场景">
+<meta property="og:url" content="http://example.com/2022/04/25/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="常用应用场景">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220426081710019.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220427210231006.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220427211711658.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220427213409554.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220427213417707.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220502223617004.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220428223014338.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220428223333405.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220428224410828.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220428224523002.png">
+<meta property="article:published_time" content="2022-04-25T13:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-01T00:17:43.914Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="zookeeper">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220426081710019.png">
+
+<link rel="canonical" href="http://example.com/2022/04/25/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>分布式-zookeeper02-常用应用场景 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/25/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          分布式-zookeeper02-常用应用场景
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-04-25 21:00:00" itemprop="dateCreated datePublished" datetime="2022-04-25T21:00:00+08:00">2022-04-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-06-01 08:17:43" itemprop="dateModified" datetime="2022-06-01T08:17:43+08:00">2022-06-01</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/zookeeper/" itemprop="url" rel="index"><span itemprop="name">zookeeper</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">常用应用场景</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="zookeeper-应用场景"><a href="#zookeeper-应用场景" class="headerlink" title="zookeeper 应用场景"></a>zookeeper 应用场景</h1><h2 id="一、分布式集群管理"><a href="#一、分布式集群管理" class="headerlink" title="一、分布式集群管理"></a>一、分布式集群管理</h2><ol>
+<li>主动查看线上服务节点</li>
+<li>查看服务节点资源使用情况</li>
+<li>服务离线通知</li>
+<li>服务资源（CPU、内存、硬盘）超出阀值通知</li>
+</ol>
+<p><strong>架构设计：</strong></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220426081710019.png" alt="image-20220426081710019"></p>
+<h3 id="节点结构："><a href="#节点结构：" class="headerlink" title="节点结构："></a>节点结构：</h3><p>server-manager  //根节点</p>
+<p>​    server00000001:<json> //服务节点</json></p>
+<p>​    server00000002:<json> //服务节点</json></p>
+<p>​    server00000003:<json> //服务节点</json></p>
+<h3 id="服务状态信息"><a href="#服务状态信息" class="headerlink" title="服务状态信息:"></a>服务状态信息:</h3><p>a. ip </p>
+<p>b. cpu </p>
+<p>c. memory </p>
+<p>d. disk</p>
+<h3 id="功能实现"><a href="#功能实现" class="headerlink" title="功能实现"></a>功能实现</h3><p>各个服务节点数据生成与上报</p>
+<p>集群管理中心<strong>主动查询</strong>（拉）</p>
+<p>监听<strong>被动通知</strong>节点变化情况，根据规则实时告警等（推）</p>
+<p>关键示例代码： </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Agent</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        Agent.premain(<span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span>);<br>    &#125;<br><br>    <span class="hljs-keyword">private</span> String server = <span class="hljs-string">&quot;192.168.136.1:2181&quot;</span>;<br>    ZkClient zkClient;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> Agent instance;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> String rootPath = <span class="hljs-string">&quot;/server-manger&quot;</span>;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> String servicePath = rootPath + <span class="hljs-string">&quot;/service&quot;</span>;<br>    <span class="hljs-keyword">private</span> String nodePath;<br>    <span class="hljs-keyword">private</span> Thread stateThread;<br>    List&lt;OsBean&gt; list = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">premain</span><span class="hljs-params">(String args, Instrumentation instrumentation)</span> </span>&#123;<br>        instance = <span class="hljs-keyword">new</span> Agent();<br>        <span class="hljs-keyword">if</span> (args != <span class="hljs-keyword">null</span>) &#123;<br>            instance.server = args;<br>        &#125;<br>        instance.init();<br>    &#125;<br><br>    <span class="hljs-comment">// 初始化连接</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">init</span><span class="hljs-params">()</span> </span>&#123;<br>        zkClient = <span class="hljs-keyword">new</span> ZkClient(server);<br>        System.out.println(<span class="hljs-string">&quot;zk连接成功&quot;</span> + server);<br>        buildRoot();<br>        createServerNode();<br>        <span class="hljs-comment">//启动更新线程</span><br>        stateThread = <span class="hljs-keyword">new</span> Thread(() -&gt; &#123;<br>            <span class="hljs-keyword">while</span> (<span class="hljs-keyword">true</span>) &#123;<br>                updateServerNode();<br>                <span class="hljs-keyword">try</span> &#123;<br>                    Thread.sleep(<span class="hljs-number">2000</span>);<br>                &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br>                    e.printStackTrace();<br>                &#125;<br>            &#125;<br>        &#125;, <span class="hljs-string">&quot;zk_stateThread&quot;</span>);<br>        stateThread.setDaemon(<span class="hljs-keyword">true</span>);<br>        stateThread.start();<br>        <span class="hljs-keyword">while</span> (<span class="hljs-keyword">true</span>)&#123;<br><br>        &#125;<br>    &#125;<br><br>    <span class="hljs-comment">// 构建根节点</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">buildRoot</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">if</span> (!zkClient.exists(rootPath)) &#123;<br>            zkClient.createPersistent(rootPath);<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-comment">// 生成服务节点</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">createServerNode</span><span class="hljs-params">()</span> </span>&#123;<br>        nodePath = zkClient.createEphemeralSequential(servicePath, getOsInfo());<br>        System.out.println(<span class="hljs-string">&quot;创建节点:&quot;</span> + nodePath);<br>    &#125;<br><br>    <span class="hljs-comment">// 监听服务节点状态改变</span><br><br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">updateServerNode</span><span class="hljs-params">()</span> </span>&#123;<br>        zkClient.writeData(nodePath, getOsInfo());<br>    &#125;<br><br>    <span class="hljs-comment">// 更新服务节点状态</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getOsInfo</span><span class="hljs-params">()</span> </span>&#123;<br>        OsBean bean = <span class="hljs-keyword">new</span> OsBean();<br><br>        bean.lastUpdateTime = System.currentTimeMillis();<br>        bean.ip = getLocalIp();<br>        bean.cpu = CPUMonitorCalc.getInstance().getProcessCpu();<br>        MemoryUsage memoryUsag = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();<br>        bean.usableMemorySize = memoryUsag.getUsed() / <span class="hljs-number">1024</span> / <span class="hljs-number">1024</span>;<br>        bean.maxMemorySize = memoryUsag.getMax() / <span class="hljs-number">1024</span> / <span class="hljs-number">1024</span>;<br>        <span class="hljs-keyword">return</span> JSON.toJSONString(bean);<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">updateNode</span><span class="hljs-params">(String path, Object data)</span> </span>&#123;<br>        <span class="hljs-keyword">if</span> (zkClient.exists(path)) &#123;<br>            zkClient.writeData(path, data);<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            zkClient.createEphemeral(path, data);<br>        &#125;<br>    &#125;<br><br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> String <span class="hljs-title">getLocalIp</span><span class="hljs-params">()</span> </span>&#123;<br>        InetAddress addr = <span class="hljs-keyword">null</span>;<br>        <span class="hljs-keyword">try</span> &#123;<br>            addr = InetAddress.getLocalHost();<br>        &#125; <span class="hljs-keyword">catch</span> (UnknownHostException e) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RuntimeException(e);<br>        &#125;<br>        <span class="hljs-keyword">return</span> addr.getHostAddress();<br>    &#125;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>效果图：</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220427210231006.png" alt="image-20220427210231006"></p>
+<h2 id="⼆-、分布式注册中⼼-（服务发现与注册）"><a href="#⼆-、分布式注册中⼼-（服务发现与注册）" class="headerlink" title="⼆ 、分布式注册中⼼ （服务发现与注册）"></a>⼆ 、分布式注册中⼼ （服务发现与注册）</h2><p>​    在单体式服务中，通常是由多个客户端去调用一个服务，只要在客户端中配置唯一服务节点地址即可，当升级到分布式后，服务节点变多，像阿里一线大厂服务节点更是上万之多，这么多节点不可能手动配置在客户端，这里就需要一个中间服务，专门用于帮助客户端发现服务节点，即许多技术书籍经常提到的<strong>服务发现</strong>。</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220427211711658.png" alt="image-20220427211711658"></p>
+<p>一个完整的注册中心涵盖以下功能特性：</p>
+<ul>
+<li><strong>服务注册：</strong>提供者上线时将自提供的服务提交给注册中心。</li>
+<li><strong>服务注销：</strong>通知注册心提供者下线。</li>
+<li><strong>服务订阅</strong>：动态实时接收服务变更消息。</li>
+<li><strong>可靠</strong>：注册服务本身是集群的，数据冗余存储。避免单点故障，及数据丢失。</li>
+<li><strong>容错</strong>：当服务提供者出现宕机，断电等极情况时，注册中心能够动态感知并通知客户端服务提供者的状态。</li>
+</ul>
+<h3 id="Dubbo-对zookeeper的使用"><a href="#Dubbo-对zookeeper的使用" class="headerlink" title="Dubbo 对zookeeper的使用"></a>Dubbo 对zookeeper的使用</h3><p>阿里著名的开源项目Dubbo 是一个基于JAVA的RCP框架，其中必不可少的注册中心可基于多种第三方组件实现，但其官方推荐的还是Zookeeper做为注册中心服务。</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220427213409554.png" alt="image-20220427213409554"></p>
+<p>​                <img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220427213417707.png" alt="image-20220427213417707">    </p>
+<p><strong>节点说明：</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left"><strong>类别</strong></th>
+<th align="left"><strong>属性</strong></th>
+<th align="left"><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>Root</strong></td>
+<td align="left">持久节点</td>
+<td align="left">根节点名称，默认是 “dubbo”</td>
+</tr>
+<tr>
+<td align="left"><strong>Service</strong></td>
+<td align="left">持久节点</td>
+<td align="left">服务名称，完整的服务类名</td>
+</tr>
+<tr>
+<td align="left"><strong>type</strong></td>
+<td align="left">持久节点</td>
+<td align="left">可选值：providers(提供者)、consumers（消费者）、configurators(动态配置)、routers</td>
+</tr>
+<tr>
+<td align="left"><strong>URL</strong></td>
+<td align="left">临时节点</td>
+<td align="left">url名称 包含服务提供者的 IP 端口 及配置等信息。</td>
+</tr>
+</tbody></table>
+<p><strong>流程说明</strong></p>
+<ol>
+<li>服务提供者启动时: 向 /dubbo/com.foo.BarService/providers 目录下写入自己的 URL 地址</li>
+<li>服务消费者启动时: 订阅 /dubbo/com.foo.BarService/providers 目录下的提供者 URL 地址。并向 /dubbo/com.foo.BarService/consumers 目录下写入自己的 URL 地址</li>
+<li>监控中心启动时: 订阅 /dubbo/com.foo.BarService 目录下的所有提供者和消费者 URL 地址。</li>
+</ol>
+<h3 id="与其他服务发现与注册的区别"><a href="#与其他服务发现与注册的区别" class="headerlink" title="与其他服务发现与注册的区别"></a>与其他服务发现与注册的区别</h3><p><a target="_blank" rel="noopener" href="https://glory.blog.csdn.net/article/details/100023415?spm=1001.2101.3001.6650.1&amp;utm_medium=distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~default-1.pc_relevant_default&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~default-1.pc_relevant_default&amp;utm_relevant_index=2">参考</a></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220502223617004.png" alt="image-20220502223617004"></p>
+<h2 id="三、分布式JOB"><a href="#三、分布式JOB" class="headerlink" title="三、分布式JOB"></a>三、分布式JOB</h2><ol>
+<li>多个服务节点只允许其中一个主节点运行JOB任务。</li>
+<li>当主节点挂掉后能自动切换主节点，继续执行JOB任务。</li>
+</ol>
+<p><strong>node结构：</strong></p>
+<ol>
+<li>server-master</li>
+<li>server0001:master</li>
+<li>server0002:slave</li>
+<li>server000n:slave</li>
+</ol>
+<p><strong>选举流程：</strong><br>服务启动：</p>
+<ol>
+<li>在server-master下创建server子节点，值为slave</li>
+<li>server-master 下所有子节点</li>
+<li>判断是否存在master 节点</li>
+<li>如果没有设置自己为master节点</li>
+</ol>
+<p>子节点删除事件触发：</p>
+<ol>
+<li>获取所有server-master 下所有子节点</li>
+<li>判断是否存在master 节点</li>
+<li>如果没有设置最小值序号为master 节点</li>
+</ol>
+<h2 id="四、分布式锁"><a href="#四、分布式锁" class="headerlink" title="四、分布式锁"></a>四、分布式锁</h2><h3 id="锁的的基本概念："><a href="#锁的的基本概念：" class="headerlink" title="锁的的基本概念："></a><strong>锁的的基本概念：</strong></h3><p>开发中锁的概念并不陌生，通过锁可以实现在多个线程或多个进程间在争抢资源时，能够合理的分配置资源的所有权。在单体应用中我们可以通过 synchronized 或ReentrantLock 来实现锁。但在分布式系统中，仅仅是加synchronized 是不够的，需要借助第三组件来实现。比如一些简单的做法是使用 关系型数据行级锁来实现不同进程之间的互斥，但大型分布式系统的性能瓶颈往往集中在数据库操作上。为了提高性能得采用如Redis、Zookeeper之内的组件实现分布式锁。</p>
+<p><strong>共享锁：</strong>也称作只读锁，当一方获得共享锁之后，其它方也可以获得共享锁。但其只允许读取。在共享锁全部释放之前，其它方不能获得写锁。<br><strong>排它锁：</strong>也称作读写锁，获得排它锁后，可以进行数据的读写。在其释放之前，其它方不能获得任何锁。</p>
+<h3 id="锁的获取："><a href="#锁的获取：" class="headerlink" title="锁的获取："></a>锁的获取：</h3><p>某银行帐户，可以同时进行帐户信息的读取，但读取其间不能修改帐户数据。其帐户ID为:888</p>
+<h4 id="获得读锁流程："><a href="#获得读锁流程：" class="headerlink" title="获得读锁流程："></a>获得读锁流程：</h4><p>1、基于资源ID创建临时序号读锁节点 /lock/888.R0000000002 Read </p>
+<p>2、获取 /lock 下所有⼦节点，判断其最⼩的节点是否为读锁，如果是则获锁成功 </p>
+<p>3、最⼩节点不是读锁，则阻塞等待。添加lock/ ⼦节点变更监听。 </p>
+<p>4、当节点变更监听触发，执⾏第2步 </p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220428223014338.png" alt="image-20220428223014338"></p>
+<p><strong>数据结构：</strong></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220428223333405.png" alt="image-20220428223333405"></p>
+<h4 id="获得写锁流程："><a href="#获得写锁流程：" class="headerlink" title="获得写锁流程："></a>获得写锁流程：</h4><p>1、基于资源ID创建临时序号写锁节点  /lock/888.R0000000002 Write<br>2、获取 /lock 下所有子节点，判断其最小的节点是否为自己，如果是则获锁成功<br>3、最小节点不是自己，则阻塞等待。添加lock/ 子节点变更监听。<br>4、当节点变更监听触发，执行第2步</p>
+<h4 id="释放锁："><a href="#释放锁：" class="headerlink" title="释放锁："></a>释放锁：</h4><p>读取完毕后，⼿动删除临时节点，如果获锁期间宕机，则会在会话失效后⾃动删除。</p>
+<h4 id="关于羊群效应："><a href="#关于羊群效应：" class="headerlink" title="关于羊群效应："></a>关于羊群效应：</h4><p>​    在等待锁获得期间，所有等待节点都在监听 Lock节点，一但lock 节点变更所有等待节点都会被触发，然后在同时反查Lock 子节点。如果等待对例过大会使用Zookeeper承受非常大的流量压力。</p>
+<p>​    为了改善这种情况，可以采用监听链表的方式，每个等待对列只监听前一个节点（如果本身是读锁，则监听自己之前的最近的一个读锁），如果前一个节点释放锁的时候，才会被触发通知。这样就形成了一个监听链表。</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220428224410828.png" alt="image-20220428224410828"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper02-%E5%B8%B8%E7%94%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/image-20220428224523002.png" alt="image-20220428224523002"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ZookeeperLock</span> </span>&#123;<br>    <span class="hljs-keyword">private</span> String server = <span class="hljs-string">&quot;192.168.0.149:2181&quot;</span>;<br>    <span class="hljs-keyword">private</span> ZkClient zkClient;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> String rootPath = <span class="hljs-string">&quot;/tuling-lock&quot;</span>;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ZookeeperLock</span><span class="hljs-params">()</span> </span>&#123;<br>        zkClient = <span class="hljs-keyword">new</span> ZkClient(server, <span class="hljs-number">5000</span>, <span class="hljs-number">20000</span>);<br>        buildRoot();<br>    &#125;<br><br>    <span class="hljs-comment">// 构建根节点</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">buildRoot</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">if</span> (!zkClient.exists(rootPath)) &#123;<br>            zkClient.createPersistent(rootPath);<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Lock <span class="hljs-title">lock</span><span class="hljs-params">(String lockId, <span class="hljs-keyword">long</span> timeout)</span> </span>&#123;<br>        Lock lockNode = createLockNode(lockId);<br>        lockNode = tryActiveLock(lockNode);<span class="hljs-comment">// 尝试激活锁</span><br>        <span class="hljs-keyword">if</span> (!lockNode.isActive()) &#123;<br>            <span class="hljs-keyword">try</span> &#123;<br>                <span class="hljs-keyword">synchronized</span> (lockNode) &#123;<br>                    lockNode.wait(timeout);<br>                &#125;<br>            &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br>                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RuntimeException(e);<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">if</span> (!lockNode.isActive()) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RuntimeException(<span class="hljs-string">&quot; lock  timeout&quot;</span>);<br>        &#125;<br>        <span class="hljs-keyword">return</span> lockNode;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">unlock</span><span class="hljs-params">(Lock lock)</span> </span>&#123;<br>        <span class="hljs-keyword">if</span> (lock.isActive()) &#123;<br>            zkClient.delete(lock.getPath());<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-comment">// 尝试激活锁</span><br>    <span class="hljs-function"><span class="hljs-keyword">private</span> Lock <span class="hljs-title">tryActiveLock</span><span class="hljs-params">(Lock lockNode)</span> </span>&#123;<br>        <span class="hljs-comment">// 判断当前是否为最小节点</span><br>        List&lt;String&gt; list = zkClient.getChildren(rootPath)<br>                .stream()<br>                .sorted()<br>                .map(p -&gt; rootPath + <span class="hljs-string">&quot;/&quot;</span> + p)<br>                .collect(Collectors.toList());<br>        String firstNodePath = list.get(<span class="hljs-number">0</span>);<br>        <span class="hljs-keyword">if</span> (firstNodePath.equals(lockNode.getPath())) &#123;<br>            lockNode.setActive(<span class="hljs-keyword">true</span>);<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            String upNodePath = list.get(list.indexOf(lockNode.getPath()) - <span class="hljs-number">1</span>);<br>            zkClient.subscribeDataChanges(upNodePath, <span class="hljs-keyword">new</span> IZkDataListener() &#123;<br>                <span class="hljs-meta">@Override</span><br>                <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handleDataChange</span><span class="hljs-params">(String dataPath, Object data)</span> <span class="hljs-keyword">throws</span> Exception </span>&#123;<br><br>                &#125;<br><br>                <span class="hljs-meta">@Override</span><br>                <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handleDataDeleted</span><span class="hljs-params">(String dataPath)</span> <span class="hljs-keyword">throws</span> Exception </span>&#123;<br>                    <span class="hljs-comment">// 事件处理 与心跳 在同一个线程，如果Debug时占用太多时间，将导致本节点被删除，从而影响锁逻辑。</span><br>                    System.out.println(<span class="hljs-string">&quot;节点删除:&quot;</span> + dataPath);<br>                     Lock lock = tryActiveLock(lockNode);<br>                    <span class="hljs-keyword">synchronized</span> (lockNode) &#123;<br>                        <span class="hljs-keyword">if</span> (lock.isActive()) &#123;<br>                            lockNode.notify();<br>                        &#125;<br>                    &#125;<br>                    zkClient.unsubscribeDataChanges(upNodePath, <span class="hljs-keyword">this</span>);<br>                &#125;<br>            &#125;);<br>        &#125;<br>        <span class="hljs-keyword">return</span> lockNode;<br>    &#125;<br><br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Lock <span class="hljs-title">createLockNode</span><span class="hljs-params">(String lockId)</span> </span>&#123;<br>        String nodePath = zkClient.createEphemeralSequential(rootPath + <span class="hljs-string">&quot;/&quot;</span> + lockId, <span class="hljs-string">&quot;lock&quot;</span>);<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Lock(lockId, nodePath);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Lock</span> </span>&#123;<br><br>    <span class="hljs-keyword">private</span> String lockId;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Lock</span><span class="hljs-params">(String lockId, String path)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.lockId = lockId;<br>        <span class="hljs-keyword">this</span>.path = path;<br>    &#125;<br><br>    <span class="hljs-keyword">private</span> String path;<br>    <span class="hljs-keyword">private</span> Boolean isActive;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getPath</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> path;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setPath</span><span class="hljs-params">(String path)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.path = path;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Boolean <span class="hljs-title">isActive</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> isActive;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setActive</span><span class="hljs-params">(Boolean active)</span> </span>&#123;<br>        isActive = active;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Boolean <span class="hljs-title">getActive</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> isActive;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="ZK分布式锁的成熟框架curator"><a href="#ZK分布式锁的成熟框架curator" class="headerlink" title="ZK分布式锁的成熟框架curator"></a>ZK分布式锁的成熟框架curator</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs POM">&lt;dependency&gt;<br>    &lt;groupId&gt;org.apache.curator&lt;&#x2F;groupId&gt;<br>    &lt;artifactId&gt;curator-framework&lt;&#x2F;artifactId&gt;<br>    &lt;version&gt;4.3.0&lt;&#x2F;version&gt;<br>&lt;&#x2F;dependency&gt;<br>&lt;dependency&gt;<br>    &lt;groupId&gt;org.apache.curator&lt;&#x2F;groupId&gt;<br>    &lt;artifactId&gt;curator-recipes&lt;&#x2F;artifactId&gt;<br>    &lt;version&gt;4.3.0&lt;&#x2F;version&gt;<br>&lt;&#x2F;dependency&gt;<br>&lt;dependency&gt;<br>    &lt;groupId&gt;org.apache.curator&lt;&#x2F;groupId&gt;<br>    &lt;artifactId&gt;curator-client&lt;&#x2F;artifactId&gt;<br>    &lt;version&gt;4.3.0&lt;&#x2F;version&gt;<br>&lt;&#x2F;dependency&gt;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 使用curator实现分布式锁</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CuratorLock</span> </span>&#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> i;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setI</span><span class="hljs-params">(<span class="hljs-keyword">int</span> i)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.i = i;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">getI</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> i;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> Exception </span>&#123;<br>        CuratorLock curatorLock = <span class="hljs-keyword">new</span> CuratorLock();<br>        CuratorFramework client = CuratorFrameworkFactory.builder()<br>                .connectString(<span class="hljs-string">&quot;zookeeper01.com:2181&quot;</span>)<br>                .connectionTimeoutMs(<span class="hljs-number">10000</span>)<br>                .sessionTimeoutMs(<span class="hljs-number">10000</span>)<br>                .retryPolicy(<span class="hljs-keyword">new</span> ExponentialBackoffRetry(<span class="hljs-number">3000</span>, <span class="hljs-number">4</span>)).build();<br>        client.start();<br>        InterProcessMutex lock = <span class="hljs-keyword">new</span> InterProcessMutex(client, <span class="hljs-string">&quot;/distributedLock&quot;</span>);<br>        ExecutorService pool = Executors.newCachedThreadPool();<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">100</span>; i++) &#123;<br>            pool.submit(() -&gt; &#123;<br>                <span class="hljs-keyword">try</span> &#123;<br>                    lock.acquire();<br>                    curatorLock.setI(curatorLock.getI() + <span class="hljs-number">1</span>);<br>                    lock.release();<br>                &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;<br>                    e.printStackTrace();<br>                &#125;<br>            &#125;);<br>        &#125;<br>        Thread.sleep(<span class="hljs-number">10000</span>);<br>        System.out.println(curatorLock.getI());<br>     &#125;<br> &#125;<br></code></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/zookeeper/" rel="tag"># zookeeper</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/04/23/%E5%88%86%E5%B8%83%E5%BC%8F-zookeeper01-%E7%AE%80%E4%BB%8B%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8/" rel="prev" title="分布式-zookeeper01-简介与客户端使用">
+      <i class="fa fa-chevron-left"></i> 分布式-zookeeper01-简介与客户端使用
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/05/11/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-01RabbitMQ%E5%AE%89%E8%A3%85%E4%BB%A5%E5%8F%8A%E5%85%A5%E9%97%A8/" rel="next" title="分布式-MQ-01RabbitMQ安装以及入门">
+      分布式-MQ-01RabbitMQ安装以及入门 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#zookeeper-%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">zookeeper 应用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%88%86%E5%B8%83%E5%BC%8F%E9%9B%86%E7%BE%A4%E7%AE%A1%E7%90%86"><span class="nav-number">1.1.</span> <span class="nav-text">一、分布式集群管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8A%82%E7%82%B9%E7%BB%93%E6%9E%84%EF%BC%9A"><span class="nav-number">1.1.1.</span> <span class="nav-text">节点结构：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%8A%B6%E6%80%81%E4%BF%A1%E6%81%AF"><span class="nav-number">1.1.2.</span> <span class="nav-text">服务状态信息:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.1.3.</span> <span class="nav-text">功能实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%BC%86-%E3%80%81%E5%88%86%E5%B8%83%E5%BC%8F%E6%B3%A8%E5%86%8C%E4%B8%AD%E2%BC%BC-%EF%BC%88%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E4%B8%8E%E6%B3%A8%E5%86%8C%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">⼆ 、分布式注册中⼼ （服务发现与注册）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Dubbo-%E5%AF%B9zookeeper%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">1.2.1.</span> <span class="nav-text">Dubbo 对zookeeper的使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8E%E5%85%B6%E4%BB%96%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0%E4%B8%8E%E6%B3%A8%E5%86%8C%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.2.2.</span> <span class="nav-text">与其他服务发现与注册的区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%88%86%E5%B8%83%E5%BC%8FJOB"><span class="nav-number">1.3.</span> <span class="nav-text">三、分布式JOB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81"><span class="nav-number">1.4.</span> <span class="nav-text">四、分布式锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%81%E7%9A%84%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%EF%BC%9A"><span class="nav-number">1.4.1.</span> <span class="nav-text">锁的的基本概念：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%81%E7%9A%84%E8%8E%B7%E5%8F%96%EF%BC%9A"><span class="nav-number">1.4.2.</span> <span class="nav-text">锁的获取：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8E%B7%E5%BE%97%E8%AF%BB%E9%94%81%E6%B5%81%E7%A8%8B%EF%BC%9A"><span class="nav-number">1.4.2.1.</span> <span class="nav-text">获得读锁流程：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8E%B7%E5%BE%97%E5%86%99%E9%94%81%E6%B5%81%E7%A8%8B%EF%BC%9A"><span class="nav-number">1.4.2.2.</span> <span class="nav-text">获得写锁流程：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8A%E6%94%BE%E9%94%81%EF%BC%9A"><span class="nav-number">1.4.2.3.</span> <span class="nav-text">释放锁：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E7%BE%8A%E7%BE%A4%E6%95%88%E5%BA%94%EF%BC%9A"><span class="nav-number">1.4.2.4.</span> <span class="nav-text">关于羊群效应：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ZK%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E6%88%90%E7%86%9F%E6%A1%86%E6%9E%B6curator"><span class="nav-number">1.4.2.5.</span> <span class="nav-text">ZK分布式锁的成熟框架curator</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">71</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>
