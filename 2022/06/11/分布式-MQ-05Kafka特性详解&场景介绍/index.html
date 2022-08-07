@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Kafka特性详解&amp;场景介绍">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式-MQ-05Kafka特性详解&amp;场景介绍">
+<meta property="og:url" content="http://example.com/2022/06/11/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="Kafka特性详解&amp;场景介绍">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220611121058072.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220611140717313.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220611142326746.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220611135409534.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/18924448-e7c7d275694f8292.webp">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220611134540976.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220612164527184.png">
+<meta property="article:published_time" content="2022-06-11T13:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-16T13:55:12.401Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="MQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220611121058072.png">
+
+<link rel="canonical" href="http://example.com/2022/06/11/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>分布式-MQ-05Kafka特性详解&场景介绍 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/11/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          分布式-MQ-05Kafka特性详解&场景介绍
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-06-11 21:00:00" itemprop="dateCreated datePublished" datetime="2022-06-11T21:00:00+08:00">2022-06-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-06-16 21:55:12" itemprop="dateModified" datetime="2022-06-16T21:55:12+08:00">2022-06-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Kafka/" itemprop="url" rel="index"><span itemprop="name">Kafka</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">Kafka特性详解&场景介绍</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Kafka特性详解-amp-场景介绍"><a href="#Kafka特性详解-amp-场景介绍" class="headerlink" title="Kafka特性详解&amp;场景介绍"></a>Kafka特性详解&amp;场景介绍</h1><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220611121058072.png" alt="image-20220611121058072"></p>
+<h2 id="概念介绍"><a href="#概念介绍" class="headerlink" title="概念介绍"></a>概念介绍</h2><p>Kafka是最初由Linkedin公司开发，是一个<strong>分布式</strong>、<strong>支持分区</strong>的（partition）、<strong>多副本</strong>的（replica），==基于zookeeper==协调的分布式消息系统（官方称之为commit log）；它的最大的特性就是可以<strong>实时的处理大量数据</strong>以满足各种需求场景：比如基于hadoop的批处理系 统、低延迟的实时系统、Storm/Spark流式处理引擎，<strong>web/nginx日志、访问日志</strong>，消息服务等等，用scala语言编写， Linkedin于2010年贡献给了Apache基金会并成为顶级开源 项目。</p>
+<h3 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h3><table>
+<thead>
+<tr>
+<th><strong>名称</strong></th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Broker</td>
+<td>消息中间件处理节点，一个Kafka节点就是 一个broker，一个或者多个Broker可以组 成一个Kafka集群</td>
+</tr>
+<tr>
+<td>Topic</td>
+<td>Kafka根据topic对消息进行归类，发布到 Kafka集群的每条消息都需要指定一个topic</td>
+</tr>
+<tr>
+<td>Producer</td>
+<td>消息生产者，向Broker发送消息的客户端</td>
+</tr>
+<tr>
+<td>Consumer</td>
+<td>消息消费者，从Broker读取消息的客户端</td>
+</tr>
+<tr>
+<td>ConsumerGroup</td>
+<td>每个Consumer属于一个特定的Consumer Group，一条消息可以被多个不同的 Consumer Group消费，但是一个 Consumer Group中只能有一个Consumer 能够消费该消息</td>
+</tr>
+<tr>
+<td>Partition</td>
+<td>物理上的概念，一个topic可以分为多个</td>
+</tr>
+</tbody></table>
+<h3 id="主题Topic和消息日志Log"><a href="#主题Topic和消息日志Log" class="headerlink" title="主题Topic和消息日志Log"></a>主题Topic和消息日志Log</h3><p>让我们首先深入理解Kafka提出一个高层次的抽象概念-Topic。 可以理解Topic是一个类别的名称，同类消息发送到同一个Topic下面。对于每一个Topic，下面可以有多个分区</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220611140717313.png" alt="image-20220611140717313"></p>
+<p>Partition是一个<strong>有序的message序列</strong>，这些message按顺序添加到一个叫做<strong>commit log的文件</strong>中。每partition中的 消息都有一个唯一的编号，称之为offset，用来唯一标示某个分区中的message；每个partition，都对应一个commit log文件。一个partition中的message的offset都是唯一的，但是不同的 partition中的message的offset可能是相同的。</p>
+<p>kafka集群，在配置的时间范围内，维护所有的由producer生成的消息，而不管这些消息有没有被消费。<strong>例如</strong>日志保留( log retention )时间被设置为2天。kafka会维护最近2天生产的所有消息，而2天前的消息会被丢弃。kafka的性能与保留的数据量的大小没有关系，因此保存大量的数据(日志信息)不会有什么影响。 </p>
+<p><strong>每个consumer是基于自己在commit log中的消费进度(offset)来进行工作的</strong>。在kafka中，<strong>消费offset由consumer自己来维护</strong>；一般情况下我们按照顺序逐条消费commit log中的消息，当然我可以通过指定offset来重复消费某些消息或者跳过某些消息。 这意味kafka中的consumer对集群的影响是非常小的，添加一个或者减少一个consumer，对于集群或者其他consumer来说，都是没有影响的，因为每个consumer维护各自的offset。<strong>所以说kafka集群是无状态的，性能不会因为consumer数量受太多影响。kafka还将很多关键信息记录在zookeeper里，保证自己的无状态，从而在水平扩容时非常方便。</strong></p>
+<p><strong>为什么要对Topic下数据进行分区存储？</strong> </p>
+<p>1、commit log文件会受到所在机器的文件系统大小的限制，分区之后，理论上一个topic可以处理任意数量的数据。 </p>
+<p>2、为了<strong>提高并行度</strong>。</p>
+<h3 id="分布式Distribution"><a href="#分布式Distribution" class="headerlink" title="分布式Distribution"></a>分布式Distribution</h3><p>log的partitions分布在kafka集群中不同的broker上，每个broker可以请求备份其他broker上partition上的数据。kafka 集群支持配置一个partition备份的数量。 针对每个partition，都有一个broker起到“leader”的作用，0个或多个其他的broker作为“follwers”的作用。 </p>
+<p><strong>leader处理所有的针对这个partition的读写请求，而followers被动复制leader的结果</strong>。如果这个leader失效了，其中 的一个follower将会自动的变成新的leader</p>
+<h3 id="Producers"><a href="#Producers" class="headerlink" title="Producers"></a>Producers</h3><p>生产者将消息发送到topic中去，同时负责选择将message发送到topic的哪一个partition中。通过round­robin做简单的 负载均衡。也可以根据消息中的某一个关键字来进行区分。通常第二种方式使用的更多</p>
+<p>Consumers 传统的消息传递模式有2种：( queue) 和（publish-subscribe） </p>
+<p><strong>queue模式</strong>：多个consumer从服务器中读取数据，消息只会到达一个consumer。 </p>
+<p><strong>publish-subscribe模式</strong>：消息会被广播给所有的consumer。</p>
+<p>Kafka基于这2种模式提供了一种consumer的抽象概念：consumer group。 </p>
+<p>​    queue模式：所有的consumer都位于同一个consumer group 下。 </p>
+<p>​    publish-subscribe模式：所有的consumer都有着自己唯一的consumer group。</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220611142326746.png" alt="image-20220611142326746"></p>
+<p>上图说明：由2个broker组成的kafka集群，总共有4个partition(P0-P3)。这个集群由2个Consumer Group， A有2个 consumer instances ，B有四个。 通常一个topic会有几个consumer group，每个consumer group都是一个逻辑上的订阅者（ logical subscriber ）。每个consumer group由多个consumer instance组成，从而达到可扩展和容灾的功能。</p>
+<h3 id="消费顺序"><a href="#消费顺序" class="headerlink" title="消费顺序"></a>消费顺序</h3><p><strong>Kafka比传统的消息系统有着更强的顺序保证。 ==一个partition同一个时刻在一个consumer group中只有一个consumer instance在消费，从而保证顺序==。 consumer group中的consumer instance的数量不能比一个Topic中的partition的数量多，否则，多出来的 consumer消费不到消息</strong></p>
+<p><strong>严格有序</strong></p>
+<p>Kafka只在partition的范围内保证消息消费的局部顺序性，不能在同一个topic中的多个partition中保证总的消费顺序性。如果有在总体上保证消费顺序的需求，那么我们可以通过将topic的partition数量设置为1，将consumer group中的consumer instance数量也设置为1。</p>
+<p>Spring Boot整合Kafka</p>
+<h2 id="Spring-Boot整合Kafka"><a href="#Spring-Boot整合Kafka" class="headerlink" title="Spring Boot整合Kafka"></a><strong>Spring Boot整合Kafka</strong></h2><p><strong>引入spring boot kafka依赖，详见项目实例：spring-boot-kafka</strong></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">project</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">modelVersion</span>&gt;</span>4.0.0<span class="hljs-tag">&lt;/<span class="hljs-name">modelVersion</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.example<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>kafka-study<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>1.0-SNAPSHOT<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">parent</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-parent<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2.1.3.RELEASE<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">relativePath</span>/&gt;</span> <span class="hljs-comment">&lt;!-- lookup parent from repository --&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">parent</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">properties</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">maven.compiler.source</span>&gt;</span>8<span class="hljs-tag">&lt;/<span class="hljs-name">maven.compiler.source</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">maven.compiler.target</span>&gt;</span>8<span class="hljs-tag">&lt;/<span class="hljs-name">maven.compiler.target</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">properties</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.apache.kafka<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>kafka-clients<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.kafka<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-kafka<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">project</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>application.yml</strong>配置如下：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-attr">server:</span><br>  <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span><br><br><span class="hljs-attr">spring:</span><br>  <span class="hljs-attr">kafka:</span><br>    <span class="hljs-string">bootstrap‐servers:</span> <span class="hljs-string">localhost:9092,localhost:9093</span><br>    <span class="hljs-attr">producer:</span> <span class="hljs-comment"># 生产者</span><br>      <span class="hljs-attr">retries:</span> <span class="hljs-number">3</span> <span class="hljs-comment"># 设置大于0的值，则客户端会将发送失败的记录重新发送</span><br>      <span class="hljs-string">batch‐size:</span> <span class="hljs-number">16384</span><br>      <span class="hljs-string">buffer‐memory:</span> <span class="hljs-number">33554432</span><br>      <span class="hljs-comment"># 指定消息key和消息体的编解码方式</span><br>      <span class="hljs-string">key‐serializer:</span> <span class="hljs-string">org.apache.kafka.common.serialization.StringSerializer</span><br>      <span class="hljs-string">value‐serializer:</span> <span class="hljs-string">org.apache.kafka.common.serialization.StringSerializer</span><br>    <span class="hljs-attr">consumer:</span><br>      <span class="hljs-string">group‐id:</span> <span class="hljs-string">mygroup</span><br>      <span class="hljs-string">enable‐auto‐commit:</span> <span class="hljs-literal">true</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>发送者代码：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">KafkaController</span> </span>&#123;<br>    <span class="hljs-meta">@Resource</span><br>    <span class="hljs-keyword">private</span> KafkaTemplate&lt;String,String&gt; kafkaTemplate;<br><br>    <span class="hljs-meta">@RequestMapping(&quot;/send&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">send</span><span class="hljs-params">()</span> </span>&#123;<br>        kafkaTemplate.send(<span class="hljs-string">&quot;mytopic&quot;</span>, <span class="hljs-number">0</span>, <span class="hljs-string">&quot;key&quot;</span>, <span class="hljs-string">&quot;this is a msg&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>消费者代码：</strong> </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyConsumer</span> </span>&#123;<br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@KafkaListener</span>(groupId = &quot;testGroup&quot;, topicPartitions = &#123;</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@TopicPartition</span>(topic = &quot;topic1&quot;, partitions = &#123;&quot;0&quot;, &quot;1&quot;&#125;),</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@TopicPartition</span>(topic = &quot;topic2&quot;, partitions = &quot;0&quot;,</span><br><span class="hljs-comment">     * partitionOffsets = <span class="hljs-doctag">@PartitionOffset</span>(partition = &quot;1&quot;, initialOffset = &quot;100&quot;))</span><br><span class="hljs-comment">     * &#125;,concurrency = &quot;6&quot;)</span><br><span class="hljs-comment">     * //concurrency就是同组下的消费者个数，就是并发消费数，必须小于等于分区总数</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> record</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-meta">@KafkaListener(topics = &quot;mytopic&quot;,groupId = &quot;testGroup&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">listen</span><span class="hljs-params">(ConsumerRecord&lt;String, String&gt; record)</span> </span>&#123;<br>        String value = record.value();<br>        System.out.println(value);<br>        System.out.println(record);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="Kafka的使用场景"><a href="#Kafka的使用场景" class="headerlink" title="Kafka的使用场景"></a>Kafka的使用场景</h2><p>1、日志收集：一个公司可以用Kafka收集各种服务的log，通过kafka以统一接口服务的方式开放给各种 consumer，例如hadoop、Hbase、Solr等。</p>
+<p>2、消息系统：解耦和生产者和消费者、缓存消息等。</p>
+<p>3、用户活动跟踪：Kafka经常被用来记录web用户或者app用户的各种活动，如浏览网页、搜索、点击等活动，这 些活动信息被各个服务器发布到kafka的topic中，然后订阅者通过订阅这些topic来做实时的监控分析，或者装载到 hadoop、数据仓库中做离线分析和挖掘。 </p>
+<p>4、运营指标：Kafka也经常用来记录运营监控数据。包括收集各种分布式应用的数据，生产各种操作的集中反 馈，比如报警和报告</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220611135409534.png" alt="image-20220611135409534"></p>
+<p>普通ELK架构</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/18924448-e7c7d275694f8292.webp" alt="img"></p>
+<p>flume替代logstash（Java等语言应用支持直接异步发送消息到kafka）</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220611134540976.png" alt="image-20220611134540976"></p>
+<h2 id="Kafka最佳实践"><a href="#Kafka最佳实践" class="headerlink" title="Kafka最佳实践"></a>Kafka最佳实践</h2><p><strong>Kafka可视化管理工具kafka-manager</strong> </p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220612164527184.png" alt="image-20220612164527184"></p>
+<p>安装及基本使用可参考：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/dadonggg/p/8205302.html">https://www.cnblogs.com/dadonggg/p/8205302.html</a> </p>
+<h3 id="线上broker机器配置规划"><a href="#线上broker机器配置规划" class="headerlink" title="线上broker机器配置规划"></a>线上broker机器配置规划</h3><p>1、假设某电商公司的日志平台日均10亿条。</p>
+<p>2、按照二八原则，80%的流量产生在20%时间内，所以8亿数据分布在4.8个小时里,假设4小时,QPS=6w</p>
+<p>3、一般需要在QPS均值上放大5-10倍对应瞬间的流量高峰，也就是 6 * 5 = 30w/s的数据流量</p>
+<p>4、topic一般设置副本数=2，也就是10 * 2 = 20亿数据，假设数据默认保留7天，则需要最大容量 20 * 7 =140亿数据</p>
+<p>5、假设一条数据平均1kb的大小，140亿 * 1kb = 14T</p>
+<p>6、根据第3、5点，规划5-6台物理机部署kafka比较稳妥，每台机器承载几万的QPS,且每台<strong>物理机</strong>分配3-4个T的<strong>机械硬盘（无需SSD，因为Kafka是顺序读写，不需要像Mysql那样随机读写）</strong></p>
+<p>7、高峰每秒6w数据/s = 每秒传输60M数据，峰值300M，综合成本考虑用千兆<strong>网卡</strong></p>
+<p>8、因为Kafka消息处理时用到的大部分是年轻代，且启动后处理线程较多，应该分配16核，考虑到峰值时1分钟产生18G，可以采用32G内存，老年代空间分配少些。</p>
+<p>9、最终采用 6台 16核32G内存的物理机，每台机器配有3T机械硬盘、千兆网卡</p>
+<h3 id="JVM参数设置"><a href="#JVM参数设置" class="headerlink" title="JVM参数设置"></a><strong>JVM参数设置</strong></h3><p>kafka是scala语言开发，运行在JVM上，需要对JVM参数合理设置，参看JVM调优专题 修改bin/kafka-start-server.sh中的jvm设置</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-built_in">export</span> KAFKA_HEAP_OPTS=<span class="hljs-string">&quot;‐Xmx16G ‐Xms16G ‐Xmn12G ‐XX:MetaspaceSize=256M ‐XX:+UseG1GC ‐XX:MaxGCPauseMillis=50&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p>使用G1垃圾收集器的原因：</p>
+<p>1、这种大内存的情况一般都要用G1垃圾收集器，因为年轻代内存比较大，用G1可以设置GC最大停顿时间，不至于一次minor gc就花费太长 时间</p>
+<h3 id="线上问题及优化"><a href="#线上问题及优化" class="headerlink" title="线上问题及优化"></a>线上问题及优化</h3><h4 id="消息丢失情况"><a href="#消息丢失情况" class="headerlink" title="消息丢失情况"></a>消息丢失情况</h4><p><strong>消息发送端：</strong> </p>
+<p>（1）acks=0： 表示producer不需要等待任何broker确认收到消息的回复，就可以继续发送下一条消息。性能最高，但是最容易丢消 息。大数据统计报表场景，对性能要求很高，对数据丢失不敏感的情况可以用这种。 </p>
+<p>（2）acks=1： 至少要等待leader已经成功将数据写入本地log，但是不需要等待所有follower是否成功写入。就可以继续发送下一条消 息。这种情况下，如果follower没有成功备份数据，而此时leader又挂掉，则消息会丢失。 （3）acks=-1或all： 这意味着leader需要等待所有备份(min.insync.replicas配置的备份个数)都成功写入日志，这种策略会保证只要有一 个备份存活就不会丢失数据。这是最强的数据保证。一般除非是金融级别，或跟钱打交道的场景才会使用这种配置。当然如果 min.insync.replicas配置的是1则也可能丢消息，跟acks=1情况类似。 </p>
+<p><strong>消息消费端</strong>：<br>如果消费这边配置的是自动提交，万一消费到数据还没处理完，就自动提交offset了，但是此时你consumer直接宕机了，未处理完的数据 丢失了，下次也消费不到了。</p>
+<p><strong>消息重复消费：</strong></p>
+<p>如果发送端配置了重试机制，kafka不会等之前那条消息完全发送成功才去发送下一条消息，这样可能会出现，发送了1，2，3条消息，第 一条超时了，后面两条发送成功，再重试发送第1条消息，这时消息在broker端的顺序就是2，3，1了 所以，是否一定要配置重试要根据业务情况而定。也可以用同步发送的模式去发消息，当然acks不能设置为0，这样也能保证消息从发送 端到消费端全链路有序。</p>
+<p><strong>消息积压</strong></p>
+<p>1）线上有时因为发送方发送消息速度过快，或者消费方处理消息过慢，可能会导致broker积压大量未消费消息。 此种情况如果积压了上百万未消费消息需要紧急处理，可以修改消费端程序，让其将收到的消息快速转发到其他topic(可以设置很多分 区)，然后再启动多个消费者同时消费新主题的不同分区。</p>
+<p>2）由于消息数据格式变动或消费者程序有bug，导致消费者一直消费不成功，也可能导致broker积压大量未消费消息。 此种情况可以将这些消费不成功的消息转发到其它队列里去(类似死信队列)，后面再慢慢分析死信队列里的消息处理问题。</p>
+<p><strong>消息回溯</strong> </p>
+<p>如果某段时间对已消费消息计算的结果觉得有问题，可能是由于程序bug导致的计算错误，当程序bug修复后，这时可能需要对之前已消 费的消息重新消费，可以指定从多久之前的消息回溯消费，这种可以用consumer的offsetsForTimes、seek等方法指定从某个offset偏移 的消息开始消费，参见上节课的内容。</p>
+<p><strong>分区数越多吞吐量越高吗</strong></p>
+<p>网络上很多资料都说分区数越多吞吐量越高 ， 但从压测结果来看，分区数到达某个值吞吐量反而开始下降，实际上很多事情都会有一个 临界值，当超过 这个临界值之后，很多原本符合既定逻辑的走向又会变得不同。<strong>一般情况分区数跟集群机器数量相当就差不多了</strong>。 当然吞吐量的数值和走势还会和磁盘、文件系统、 I/O调度策略等因素相关。 注意：如果分区数设置过大，比如设置10000，可能会设置不成功，后台会报错”java.io.IOException : Too many open files”。 异常中最关键的信息是“ Too many open flies”，这是一种常见的 Linux 系统错误，通常意味着文件描述符不足，它一般发生在创建线 程、创建 Socket、打开文件这些场景下 。 在 Linux系统的默认设置下，这个文件描述符的个数不是很多 ，通过 ulimit -n 命令可以查 看：一般默认是1024，可以将该值增大，比如：ulimit -n 65535</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MQ/" rel="tag"># MQ</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/06/08/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-04RocketMQ%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/" rel="prev" title="分布式-MQ-04RocketMQ特性详解&场景介绍">
+      <i class="fa fa-chevron-left"></i> 分布式-MQ-04RocketMQ特性详解&场景介绍
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/06/18/%E5%88%86%E5%B8%83%E5%BC%8F-Mysql%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB%E5%8F%8A%E9%AB%98%E5%8F%AF%E7%94%A8%E6%96%B9%E6%A1%88/" rel="next" title="分布式-Mysql读写分离及高可用方案">
+      分布式-Mysql读写分离及高可用方案 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3-amp-%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">Kafka特性详解&amp;场景介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.1.</span> <span class="nav-text">概念介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A"><span class="nav-number">1.1.1.</span> <span class="nav-text">名词解释</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E9%A2%98Topic%E5%92%8C%E6%B6%88%E6%81%AF%E6%97%A5%E5%BF%97Log"><span class="nav-number">1.1.2.</span> <span class="nav-text">主题Topic和消息日志Log</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8FDistribution"><span class="nav-number">1.1.3.</span> <span class="nav-text">分布式Distribution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Producers"><span class="nav-number">1.1.4.</span> <span class="nav-text">Producers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E9%A1%BA%E5%BA%8F"><span class="nav-number">1.1.5.</span> <span class="nav-text">消费顺序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Boot%E6%95%B4%E5%90%88Kafka"><span class="nav-number">1.2.</span> <span class="nav-text">Spring Boot整合Kafka</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka%E7%9A%84%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.3.</span> <span class="nav-text">Kafka的使用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">1.4.</span> <span class="nav-text">Kafka最佳实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E4%B8%8Abroker%E6%9C%BA%E5%99%A8%E9%85%8D%E7%BD%AE%E8%A7%84%E5%88%92"><span class="nav-number">1.4.1.</span> <span class="nav-text">线上broker机器配置规划</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE"><span class="nav-number">1.4.2.</span> <span class="nav-text">JVM参数设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E4%B8%8A%E9%97%AE%E9%A2%98%E5%8F%8A%E4%BC%98%E5%8C%96"><span class="nav-number">1.4.3.</span> <span class="nav-text">线上问题及优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E4%B8%A2%E5%A4%B1%E6%83%85%E5%86%B5"><span class="nav-number">1.4.3.1.</span> <span class="nav-text">消息丢失情况</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">79</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">65</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

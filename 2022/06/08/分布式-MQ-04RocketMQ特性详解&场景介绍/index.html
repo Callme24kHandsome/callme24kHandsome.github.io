@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="RocketMQ特性详解&amp;场景介绍">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式-MQ-04RocketMQ特性详解&amp;场景介绍">
+<meta property="og:url" content="http://example.com/2022/06/08/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-04RocketMQ%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="RocketMQ特性详解&amp;场景介绍">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-04RocketMQ%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220608221627118.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-04RocketMQ%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220608224559503.png">
+<meta property="article:published_time" content="2022-06-08T13:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-12T10:38:48.691Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="MQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-04RocketMQ%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220608221627118.png">
+
+<link rel="canonical" href="http://example.com/2022/06/08/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-04RocketMQ%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>分布式-MQ-04RocketMQ特性详解&场景介绍 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/08/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-04RocketMQ%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          分布式-MQ-04RocketMQ特性详解&场景介绍
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-06-08 21:00:00" itemprop="dateCreated datePublished" datetime="2022-06-08T21:00:00+08:00">2022-06-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-06-12 18:38:48" itemprop="dateModified" datetime="2022-06-12T18:38:48+08:00">2022-06-12</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/RocketMQ/" itemprop="url" rel="index"><span itemprop="name">RocketMQ</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">RocketMQ特性详解&场景介绍</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="RocketMQ特性详解-amp-场景介绍"><a href="#RocketMQ特性详解-amp-场景介绍" class="headerlink" title="RocketMQ特性详解&amp;场景介绍"></a>RocketMQ特性详解&amp;场景介绍</h1><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="消息模型"><a href="#消息模型" class="headerlink" title="消息模型"></a>消息模型</h3><p>RocketMQ主要由 Producer、Broker、Consumer 三部分组成，其中Producer 负责 生产消息，Consumer 负责消费消息，Broker 负责存储消息。 </p>
+<h3 id="消息生产者-producer"><a href="#消息生产者-producer" class="headerlink" title="消息生产者(producer)"></a>消息生产者(producer)</h3><p>负责生产消息，一般由业务系统负责生产消息。一个消息生产者会把业务应用系统里产 生的消息发送到broker服务器。RocketMQ提供多种发送方式，同步发送、异步发送、顺序发送、单向发送。同步和异步方式均需要Broker返回确认信息，单向发送不需要。</p>
+<h3 id="消息消费者（Consumer）"><a href="#消息消费者（Consumer）" class="headerlink" title="消息消费者（Consumer）"></a>消息消费者（Consumer）</h3><p>负责消费消息，一般是后台系统负责异步消费。一个消息消费者会从Broker服务器拉 取消息、并将其提供给应用程序。从用户应用的角度而言提供了两种消费形式：<strong>拉取式消费</strong> (pull consumer)、<strong>推动式消费</strong>(push consumer)。</p>
+<h3 id="主题（Topic）"><a href="#主题（Topic）" class="headerlink" title="主题（Topic）"></a>主题（Topic）</h3><p>表示一类消息的集合，每个主题包含若干条消息，每条消息只能属于一个主题，是 RocketMQ进行消息订阅的基本单位。</p>
+<h3 id="代理服务器（Broker-Server）"><a href="#代理服务器（Broker-Server）" class="headerlink" title="代理服务器（Broker Server）"></a>代理服务器（Broker Server）</h3><p>消息中转角色，负责存储消息、转发消息。代理服务器在RocketMQ系统中负责接收从生产者发送来的消息并存储、同时为消费者的拉取请求作准备。代理服务器也存储消息相关的元数据，包括消费者组、消费进度偏移和主题和队列消息等。</p>
+<h3 id="名字服务（Name-Server）"><a href="#名字服务（Name-Server）" class="headerlink" title="名字服务（Name Server）"></a>名字服务（Name Server）</h3><p>名称服务充当路由消息的提供者。生产者或消费者能够通过名字服务查找各主题相应的 Broker IP列表。多个Namesrv实例组成集群，但相互独立，没有信息交换。</p>
+<p>NameServer是一个非常简单的Topic路由注册中心，其角色类似Dubbo中的 zookeeper，支持Broker的动态注册与发现。主要包括两个功能：</p>
+<p>​     <strong>Broker管理</strong>，NameServer接受Broker集群的注册信息并且保存下来作为路由信息的基本数据。然后提供心跳检测机制，检查Broker是否还存活； </p>
+<p>​    <strong>路由信息管理</strong>，每个NameServer将保存关于Broker集群的整个路由信息和用于客户端 查询的队列信息。然后Producer和Conumser通过NameServer就可以知道整个Broker集群的路由信息，从而进行消息的投递和消费。NameServer通常也是集群的方式部署，各实例间相互不进行信息通讯。Broker是向每一台NameServer注册自己的路由信息，所以每一 个NameServer实例上面都保存一份完整的路由信息。当某个NameServer因某种原因下线 了，Broker仍然可以向其它NameServer同步其路由信息，Producer,Consumer仍然可以 动态感知Broker的路由的信息。</p>
+<h3 id="拉取式消费（Pull-Consumer）"><a href="#拉取式消费（Pull-Consumer）" class="headerlink" title="拉取式消费（Pull Consumer）"></a>拉取式消费（Pull Consumer）</h3><p>Consumer消费的一种类型，应用通常主动调用Consumer的拉消息方法从Broker服务 器拉消息、主动权由应用控制。一旦获取了批量消息，应用就会启动消费过程。 </p>
+<h3 id="推动式消费（Push-Consumer）"><a href="#推动式消费（Push-Consumer）" class="headerlink" title="推动式消费（Push Consumer）"></a>推动式消费（Push Consumer）</h3><p> Consumer消费的一种类型，该模式下Broker收到数据后会主动推送给消费端，**==该消费模式一般实时性较高==**</p>
+<h3 id="生产者组（Producer-Group）"><a href="#生产者组（Producer-Group）" class="headerlink" title="生产者组（Producer Group）"></a>生产者组（Producer Group）</h3><p>同一类Producer的集合，这类Producer发送同一类消息且发送逻辑一致。如果发送的是事物消息且原始生产者在发送之后崩溃，则Broker服务器会联系同一生产者组的其他生 产者实例以提交或回溯消费</p>
+<h3 id="消费者组（Consumer-Group）"><a href="#消费者组（Consumer-Group）" class="headerlink" title="消费者组（Consumer Group）"></a>消费者组（Consumer Group）</h3><p>同一类Consumer的集合，这类Consumer通常消费同一类消息且消费逻辑一致。消费者组使得在消息消费方面，实现负载均衡和容错的目标变得非常容易。要注意的是，消费者组的消费者实例必须订阅完全相同的Topic。<strong>RocketMQ 支持两种消息模式：集群消费 （Clustering）和广播消费（Broadcasting）。</strong></p>
+<h3 id="集群消费（Clustering）"><a href="#集群消费（Clustering）" class="headerlink" title="集群消费（Clustering）"></a>集群消费（Clustering）</h3><p>集群消费模式下,相同Consumer Group的每个Consumer实例平均分摊消息。</p>
+<h3 id="广播消费（Broadcasting）"><a href="#广播消费（Broadcasting）" class="headerlink" title="广播消费（Broadcasting）"></a>广播消费（Broadcasting）</h3><p>广播消费模式下，相同Consumer Group的每个Consumer实例都接收全量的消息。</p>
+<h3 id="普通顺序消息（Normal-Ordered-Message）"><a href="#普通顺序消息（Normal-Ordered-Message）" class="headerlink" title="普通顺序消息（Normal Ordered Message）"></a>普通顺序消息（Normal Ordered Message）</h3><p>普通顺序消费模式下，消费者通过同一个消费队列收到的消息是有顺序的，不同消息队 列收到的消息则可能是无顺序的。 </p>
+<h3 id="严格顺序消息（Strictly-Ordered-Message）"><a href="#严格顺序消息（Strictly-Ordered-Message）" class="headerlink" title="严格顺序消息（Strictly Ordered Message）"></a>严格顺序消息（Strictly Ordered Message）</h3><p>严格顺序消息模式下，消费者收到的所有消息均是有顺序的。</p>
+<h3 id="消息（Message）"><a href="#消息（Message）" class="headerlink" title="消息（Message）"></a>消息（Message）</h3><p>消息系统所传输信息的物理载体，生产和消费数据的最小单位，每条消息必须属于一个 主题。RocketMQ中每个消息拥有唯一的Message ID，且可以携带具有业务标识的Key。 ==<strong>系统提供了通过Message ID和Key查询消息的功能。</strong>==</p>
+<h3 id="标签（Tag）"><a href="#标签（Tag）" class="headerlink" title="标签（Tag）"></a>标签（Tag）</h3><p><strong>为消息设置的标志，用于同一主题下区分不同类型的消息</strong>。来自同一业务单元的消息， 可以根据不同业务目的在同一主题下设置不同标签。标签能够有效地保持代码的清晰度和连 贯性，并优化RocketMQ提供的查询系统。消费者可以根据Tag实现对不同子主题的不同消 费逻辑，实现更好的扩展性</p>
+<h2 id="RabbitMQ整体架构"><a href="#RabbitMQ整体架构" class="headerlink" title="RabbitMQ整体架构"></a>RabbitMQ整体架构</h2><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-04RocketMQ%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220608221627118.png" alt="image-20220608221627118"></p>
+<h2 id="Rocketmq特性"><a href="#Rocketmq特性" class="headerlink" title="Rocketmq特性"></a>Rocketmq特性</h2><h3 id="Producer端"><a href="#Producer端" class="headerlink" title="Producer端"></a>Producer端</h3><h4 id="发送方式"><a href="#发送方式" class="headerlink" title="发送方式"></a>发送方式</h4><p><strong>Sync</strong>：同步的发送方式，会等待发送结果后才返回 </p>
+<p><strong>Async</strong>：异步的发送方式，发送完后，立刻返回。Client 在拿到 Broker 的响应结果后，会 回调指定的 callback. 这个 API 也可以指定 Timeout，不指定也是默认的 3000ms. </p>
+<p><strong>Oneway</strong>：单向发送，比较简单，发出去后，什么都不管直接返回。</p>
+<h4 id="发送结果"><a href="#发送结果" class="headerlink" title="发送结果"></a>发送结果</h4><p>class：org.apache.rocketmq.client.producer.SendStatus </p>
+<p><strong>SEND_OK</strong> 消息发送成功。要注意的是消息发送成功也不意味着它是可靠的。要确保不会丢失任何 消息，还应启用同步Master服务器或同步刷盘，即SYNC_MASTER或SYNC_FLUSH。、</p>
+<p><strong>FLUSH_DISK_TIMEOUT</strong> 消息发送成功但是服务器刷盘超时。此时消息已经进入服务器队列（内存），只有服务 器宕机，消息才会丢失。消息存储配置参数中可以设置刷盘方式和同步刷盘时间长度，如果 Broker服务器设置了刷盘方式为同步刷盘，即FlushDiskType=SYNC_FLUSH（默认为异步<br>刷盘方式），当Broker服务器未在同步刷盘时间内（默认为5s）完成刷盘，则将返回该状 态——刷盘超时。 </p>
+<p><strong>FLUSH_SLAVE_TIMEOUT</strong> 消息发送成功，但是服务器同步到Slave时超时。此时消息已经进入服务器队列，只有 服务器宕机，消息才会丢失。如果Broker服务器的角色是同步Master，即 SYNC_MASTER（默认是异步Master即ASYNC_MASTER），并且从Broker服务器未在同 步刷盘时间（默认为5秒）内完成与主服务器的同步，则将返回该状态——数据同步到 Slave服务器超时。 </p>
+<p><strong>SLAVE_NOT_AVAILABLE</strong> 消息发送成功，但是此时Slave不可用。如果Broker服务器的角色是同步Master，即 SYNC_MASTER（默认是异步Master服务器即ASYNC_MASTER），但没有配置slave Broker服务器，则将返回该状态——无Slave服务器可用。</p>
+<h4 id="顺序消息"><a href="#顺序消息" class="headerlink" title="顺序消息"></a>顺序消息</h4><p>​    消息有序指的是可以按照消息的发送顺序来消费(FIFO)。RocketMQ可以严格的保证消 息有序，<strong>可以分为==分区有序或者全局有序==。</strong></p>
+<p>​    顺序消费的原理解析，在默认的情况下消息发送会采取Round Robin轮询方式把消息发送到不同的queue(分区队列)；而消费消息的时候从多个queue上拉取消息，这种情况发送和消费是不能保证顺序。<strong>但是如果控制发送的顺序消息只依次发送到同一个queue中，消费的时候只从这个queue上依次拉取，则就保证了顺序。当发送和消费参与的queue只有一 个，则是全局有序；如果多个queue参与，则为分区有序，即相对每个queue，消息都是有序的。</strong>下面用订单进行分区有序的示例。一个订单的顺序流程是：创建、付款、推送、完成。 订单号相同的消息会被先后发送到同一个队列中，消费时，同一个OrderId获取到的肯定是 同一个队列。</p>
+<h4 id="消息状态"><a href="#消息状态" class="headerlink" title="消息状态"></a>消息状态</h4><p>org.apache.rocketmq.client.consumer.listener.ConsumeOrderlyStatus </p>
+<p>消费成功 SUCCESS </p>
+<p>不能跳过消息，等待一下 SUSPEND_CURRENT_QUEUE_A_MOMENT </p>
+<h4 id="延时消息"><a href="#延时消息" class="headerlink" title="延时消息"></a>延时消息</h4><p>定时消息是指消息发到 Broker 后，不能立刻被 Consumer 消费，要到特定的时间点 或者等待特定的时间后才能被消费。 使用场景：如电商里，提交了一个订单就可以发送一个延时消息，1h后去检查这个订单的 状态，如果还是未付款就取消订单释放库存。</p>
+<p>延迟级别 </p>
+<p>当前支持的延迟时间 </p>
+<p>1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h </p>
+<p>现在RocketMq并不支持任意时间的延时，需要设置几个固定的延时等级，从1s到2h 分别对应着等级1到18 消息消费失败会进入延时消息队列，消息发送时间与设置的延时等级和重试次数有关。</p>
+<h4 id="批量消息"><a href="#批量消息" class="headerlink" title="批量消息"></a>批量消息</h4><p>批量发送消息能显著提高传递小消息的性能。限制是这些批量消息应该有相同的 topic，相同的waitStoreMsgOK，而且不能是延时消息。此外，这一批消息的总大小不应 超过4MB。rocketmq建议每次批量消息大小大概在1MB。 当消息大小超过4MB时，需要将消息进行分割</p>
+<h4 id="过滤消息"><a href="#过滤消息" class="headerlink" title="过滤消息"></a>过滤消息</h4><p>大多数情况下，可以通过TAG来选择您想要的消息</p>
+<h4 id="事务消息"><a href="#事务消息" class="headerlink" title="事务消息"></a>事务消息</h4><p>​    <strong>事务消息</strong>：消息队列 MQ 提供类似XA的<strong>分布式事务功能</strong>，通过消息队列 MQ 事务消息能达到分布式事务的最终一致。 </p>
+<p>​    <strong>半事务消息</strong>：暂不能投递的消息，发送方已经成功地将消息发送到了消息队列 MQ 服务端，但是服务端未收到生产者对该消息的二次确认，此时该消息被标记 成“暂不能投递”状态，处于该种状态下的消息即半事务消息。 </p>
+<p>​    <strong>消息回查</strong>：由于网络闪断、生产者应用重启等原因，导致某条事务消息的二次确 认丢失，消息队列 MQ 服务端通过扫描发现某条消息长期处于“半事务消息”时，需要主动向消息生产者询问该消息的最终状态（Commit 或是 Rollback），该询问过程即消息回查。 场景通过购物车进行下单的流程中，用户入口在购物车系统，交易下单入口在交易系统，两 个系统之间的数据需要保持最终一致，这时可以通过事务消息进行处理。交易系统下单之 后，发送一条交易下单的消息到消息队列 MQ，购物车系统订阅消息队列 MQ 的交易下单消 息，做相应的业务处理，更新购物车数据。 消息状态</p>
+<p><strong>场景：</strong>通过购物车进行下单的流程中，用户入口在购物车系统，交易下单入口在交易系统，两 个系统之间的数据需要保持最终一致，这时可以通过事务消息进行处理。交易系统下单之 后，发送一条交易下单的消息到消息队列 MQ，购物车系统订阅消息队列 MQ 的交易下单消 息，做相应的业务处理，更新购物车数据。</p>
+<p><strong>交互流程</strong></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-04RocketMQ%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220608224559503.png" alt="image-20220608224559503"></p>
+<p><strong>事务消息的限制：</strong></p>
+<p>1、事务消息不支持延时消息和批量消息。 </p>
+<p>2、为了避免单个消息被检查太多次而导致半队列消息累积，我们默认将单个消息的检查次 数限制为 15 次，但是用户可以通过 Broker 配置文件的 transactionCheckMax参数来修改此限制。如果已经检查某条消息超过 N 次的话（ N = transactionCheckMax ） 则 Broker将丢弃此消息，并在默认情况下同时打印错误日志。用户可以通过重写 AbstractTransactio nCheckListener 类来修改这个行为。 </p>
+<p>3、事务消息将在 Broker 配置文件中的参数 transactionMsgTimeout 这样的特定时间长度之后被检查。当发送事务消息时，用户还可以通过设置用户属性 CHECK_IMMUNITY_TIME_I N_SECONDS 来改变这个限制，该参数优先于 transactionMsgTimeout 参数。</p>
+<p>4、事务性消息可能不止一次被检查或消费。 </p>
+<p>5、提交给用户的目标主题消息可能会失败，目前这依日志的记录而定。它的高可用性通过RocketMQ 本身的高可用性机制来保证，如果希望确保事务消息不丢失、并且事务完整性得到保证，建议使用同步的双重写入机制。 </p>
+<p>6、事务消息的3生产者 ID 不能与其他类型消息的生产者 ID 共享。与其他类型的消息不 15 同，事务消息允许反向查询、MQ服务器能通过它们的生产者 ID 查询到消费者。</p>
+<h3 id="Consumer端"><a href="#Consumer端" class="headerlink" title="Consumer端"></a>Consumer端</h3><h4 id="消费模型"><a href="#消费模型" class="headerlink" title="消费模型"></a>消费模型</h4><p> consumer有两种消费模型： </p>
+<p> 1、广播消费，相同Consumer Group的每个Consumer实例都接收全量的消息 </p>
+<p> org.apache.rocketmq.common.protocol.heartbeat.MessageModel#BROADCASTING </p>
+<p> 2、集群消费,相同Consumer Group的每个Consumer实例平均分摊消息 </p>
+<p> org.apache.rocketmq.common.protocol.heartbeat.MessageModel#CLUSTERING</p>
+<h4 id="消费点位"><a href="#消费点位" class="headerlink" title="消费点位"></a>消费点位</h4><p> 当建立一个新的消费者组时，需要决定是否需要消费已经存在于 Broker 中的历史消息 </p>
+<p> org.apache.rocketmq.common.consumer.ConsumeFromWhere </p>
+<p> CONSUME_FROM_LAST_OFFSET 将会忽略历史消息，并消费之后生成的任何消息。 </p>
+<p> CONSUME_FROM_FIRST_OFFSET 将会消费每个存在于 Broker 中的信息。你也可以使用 </p>
+<p> CONSUME_FROM_TIMESTAMP 来消费在指定时间戳后产生的消息。 </p>
+<h4 id="消息重复幂等"><a href="#消息重复幂等" class="headerlink" title="消息重复幂等"></a>消息重复幂等</h4><p>RocketMQ无法避免消息重复，所以如果业务对消费重复非常敏感，务必要在业务层 面去重 </p>
+<p>幂等令牌是生产者和消费者两者中的既定协议，在业务中通常是具备唯一业务标识的字符 串，如：订单号、流水号等。且一般由生产者端生成并传递给消费者端。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MQ/" rel="tag"># MQ</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/06/01/images/Mybati%E6%89%A7%E8%A1%8C%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E8%BF%87%E7%A8%8B%E4%B8%8E%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90(1)/oops/" rel="prev" title="">
+      <i class="fa fa-chevron-left"></i> 
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/06/11/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/" rel="next" title="分布式-MQ-05Kafka特性详解&场景介绍">
+      分布式-MQ-05Kafka特性详解&场景介绍 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#RocketMQ%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3-amp-%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">RocketMQ特性详解&amp;场景介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.1.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.1.1.</span> <span class="nav-text">消息模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E7%94%9F%E4%BA%A7%E8%80%85-producer"><span class="nav-number">1.1.2.</span> <span class="nav-text">消息生产者(producer)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E6%B6%88%E8%B4%B9%E8%80%85%EF%BC%88Consumer%EF%BC%89"><span class="nav-number">1.1.3.</span> <span class="nav-text">消息消费者（Consumer）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E9%A2%98%EF%BC%88Topic%EF%BC%89"><span class="nav-number">1.1.4.</span> <span class="nav-text">主题（Topic）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8%EF%BC%88Broker-Server%EF%BC%89"><span class="nav-number">1.1.5.</span> <span class="nav-text">代理服务器（Broker Server）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8D%E5%AD%97%E6%9C%8D%E5%8A%A1%EF%BC%88Name-Server%EF%BC%89"><span class="nav-number">1.1.6.</span> <span class="nav-text">名字服务（Name Server）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%89%E5%8F%96%E5%BC%8F%E6%B6%88%E8%B4%B9%EF%BC%88Pull-Consumer%EF%BC%89"><span class="nav-number">1.1.7.</span> <span class="nav-text">拉取式消费（Pull Consumer）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E5%8A%A8%E5%BC%8F%E6%B6%88%E8%B4%B9%EF%BC%88Push-Consumer%EF%BC%89"><span class="nav-number">1.1.8.</span> <span class="nav-text">推动式消费（Push Consumer）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85%E7%BB%84%EF%BC%88Producer-Group%EF%BC%89"><span class="nav-number">1.1.9.</span> <span class="nav-text">生产者组（Producer Group）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%EF%BC%88Consumer-Group%EF%BC%89"><span class="nav-number">1.1.10.</span> <span class="nav-text">消费者组（Consumer Group）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E6%B6%88%E8%B4%B9%EF%BC%88Clustering%EF%BC%89"><span class="nav-number">1.1.11.</span> <span class="nav-text">集群消费（Clustering）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%BF%E6%92%AD%E6%B6%88%E8%B4%B9%EF%BC%88Broadcasting%EF%BC%89"><span class="nav-number">1.1.12.</span> <span class="nav-text">广播消费（Broadcasting）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%99%AE%E9%80%9A%E9%A1%BA%E5%BA%8F%E6%B6%88%E6%81%AF%EF%BC%88Normal-Ordered-Message%EF%BC%89"><span class="nav-number">1.1.13.</span> <span class="nav-text">普通顺序消息（Normal Ordered Message）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A5%E6%A0%BC%E9%A1%BA%E5%BA%8F%E6%B6%88%E6%81%AF%EF%BC%88Strictly-Ordered-Message%EF%BC%89"><span class="nav-number">1.1.14.</span> <span class="nav-text">严格顺序消息（Strictly Ordered Message）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%EF%BC%88Message%EF%BC%89"><span class="nav-number">1.1.15.</span> <span class="nav-text">消息（Message）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%87%E7%AD%BE%EF%BC%88Tag%EF%BC%89"><span class="nav-number">1.1.16.</span> <span class="nav-text">标签（Tag）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RabbitMQ%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">RabbitMQ整体架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Rocketmq%E7%89%B9%E6%80%A7"><span class="nav-number">1.3.</span> <span class="nav-text">Rocketmq特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Producer%E7%AB%AF"><span class="nav-number">1.3.1.</span> <span class="nav-text">Producer端</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%91%E9%80%81%E6%96%B9%E5%BC%8F"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">发送方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%91%E9%80%81%E7%BB%93%E6%9E%9C"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">发送结果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%BA%E5%BA%8F%E6%B6%88%E6%81%AF"><span class="nav-number">1.3.1.3.</span> <span class="nav-text">顺序消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E7%8A%B6%E6%80%81"><span class="nav-number">1.3.1.4.</span> <span class="nav-text">消息状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BB%B6%E6%97%B6%E6%B6%88%E6%81%AF"><span class="nav-number">1.3.1.5.</span> <span class="nav-text">延时消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%B9%E9%87%8F%E6%B6%88%E6%81%AF"><span class="nav-number">1.3.1.6.</span> <span class="nav-text">批量消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%87%E6%BB%A4%E6%B6%88%E6%81%AF"><span class="nav-number">1.3.1.7.</span> <span class="nav-text">过滤消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF"><span class="nav-number">1.3.1.8.</span> <span class="nav-text">事务消息</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Consumer%E7%AB%AF"><span class="nav-number">1.3.2.</span> <span class="nav-text">Consumer端</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">消费模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E7%82%B9%E4%BD%8D"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">消费点位</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E9%87%8D%E5%A4%8D%E5%B9%82%E7%AD%89"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">消息重复幂等</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">79</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">65</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>
