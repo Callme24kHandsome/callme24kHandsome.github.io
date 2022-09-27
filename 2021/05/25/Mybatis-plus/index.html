@@ -30,7 +30,7 @@
 <meta property="og:image" content="http://example.com/images/Mybatis-plus/image-20210529174638703.png">
 <meta property="og:image" content="http://example.com/images/Mybatis-plus/image-20210531170508023.png">
 <meta property="article:published_time" content="2021-05-25T13:00:00.000Z">
-<meta property="article:modified_time" content="2021-05-31T09:10:02.642Z">
+<meta property="article:modified_time" content="2022-08-28T13:20:31.300Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="Mybatis">
 <meta property="article:tag" content="Mybatis-plus">
@@ -225,7 +225,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-05-31 17:10:02" itemprop="dateModified" datetime="2021-05-31T17:10:02+08:00">2021-05-31</time>
+                <time title="修改时间：2022-08-28 21:20:31" itemprop="dateModified" datetime="2022-08-28T21:20:31+08:00">2022-08-28</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -289,6 +289,8 @@
 <h2 id="多租户（约等于数据隔离、也可作为权限过滤）"><a href="#多租户（约等于数据隔离、也可作为权限过滤）" class="headerlink" title="多租户（约等于数据隔离、也可作为权限过滤）"></a>多租户（约等于数据隔离、也可作为权限过滤）</h2><blockquote>
 <p>多租户 != 权限过滤,不要乱用,租户之间是完全隔离的!!!<br>启用多租户后所有执行的method的sql都会进行处理.<br>自写的sql请按规范书写(sql涉及到多个表的每个表都要给别名,特别是 inner join 的要写标准的 inner join)</p>
 </blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 租户处理器（ TenantId 行级 ）</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@author</span> hubin</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@since</span> 2017-08-31</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">TenantHandler</span> </span>&#123;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 获取租户 ID 值表达式，支持多个 ID 条件查询</span><br><span class="hljs-comment">     * &lt;p&gt;</span><br><span class="hljs-comment">     * 支持自定义表达式，比如：tenant_id in (1,2) <span class="hljs-doctag">@since</span> 2019-8-2</span><br><span class="hljs-comment">     * 多参请使用 &#123;<span class="hljs-doctag">@link</span> ValueListExpression&#125;</span><br><span class="hljs-comment">     *</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> select 参数 true 表示为 select 下的 where 条件,false 表示 insert/update/delete 下的条件</span><br><span class="hljs-comment">     *               只有 select 下才允许多参,否则只支持单参</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@return</span> 租户 ID 值表达式</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function">Expression <span class="hljs-title">getTenantId</span><span class="hljs-params">(<span class="hljs-keyword">boolean</span> select)</span></span>;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 获取租户字段名</span><br><span class="hljs-comment">     *</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@return</span> 租户字段名</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function">String <span class="hljs-title">getTenantIdColumn</span><span class="hljs-params">()</span></span>;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 根据表名判断是否进行过滤</span><br><span class="hljs-comment">     *</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> tableName 表名</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@return</span> 是否进行过滤, true:表示忽略，false:需要解析多租户字段</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">boolean</span> <span class="hljs-title">doTableFilter</span><span class="hljs-params">(String tableName)</span></span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
 <p>假设有如下场景：</p>
 <p>查询某些表的数据需要根据这些表的某个字段进行数据隔离</p>
 <p>于是</p>
@@ -403,7 +405,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">79</span>
+          <span class="site-state-item-count">75</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

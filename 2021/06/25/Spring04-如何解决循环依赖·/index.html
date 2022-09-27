@@ -29,7 +29,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/images/Spring04-%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%C2%B7/spring%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E6%95%B0%E6%8D%AE%E6%B5%81%E7%A8%8B%E5%9B%BE.svg">
 <meta property="article:published_time" content="2021-06-25T13:00:00.000Z">
-<meta property="article:modified_time" content="2021-11-14T13:25:44.622Z">
+<meta property="article:modified_time" content="2022-09-08T01:18:44.350Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="源码">
 <meta property="article:tag" content="Spring">
@@ -225,7 +225,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-11-14 21:25:44" itemprop="dateModified" datetime="2021-11-14T21:25:44+08:00">2021-11-14</time>
+                <time title="修改时间：2022-09-08 09:18:44" itemprop="dateModified" datetime="2022-09-08T09:18:44+08:00">2022-09-08</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -292,8 +292,9 @@
 <ul>
 <li>1.从容器中获取serviceA</li>
 <li>2.容器尝试从单例缓存中找serviceA，找不到</li>
-<li>3.准备创建serviceA<br>4.调用serviceA的构造器创建serviceA，得到serviceA实例，此时serviceA还未填充属性，未进行其他任何初始化的操作</li>
-<li>5**.将早期的serviceA暴露出去：即将其丢到第3级缓存==singletonFactories==中**</li>
+<li>3.准备创建serviceA</li>
+<li>4.调用serviceA的构造器创建serviceA，得到serviceA实例，此时serviceA还未填充属性，未进行其他任何初始化的操作</li>
+<li>5**.将早期的serviceA暴露出去：即将其丢到第3级缓存<span style="background:yellow">singletonFactories</span>中**</li>
 <li>6.serviceA准备填充属性，发现需要注入serviceB，然后向容器获取serviceB</li>
 <li>7.容器尝试从单例缓存中找serviceB，找不到</li>
 <li>8.准备创建serviceB</li>
@@ -375,6 +376,11 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java">你好,service1<br>Service1 m1<br>Service2 m1<br>你好,service1<br>Service1 m1<br><span class="hljs-keyword">true</span><br></code></pre></td></tr></table></figure>
 
 <p>这样就解决问题了。</p>
+<h1 id="猜想-1"><a href="#猜想-1" class="headerlink" title="猜想"></a>猜想</h1><p>1、@Async循环依赖如何解决？<br>2、SpringAOP、事务是否会导致早期暴露bean不一致？<br>3、开放性问题：为什么@EnableAsync不像AOP和事务一样实现AbstractAdvisorAutoProxyCreator（实现了SmartInstantiationAwareBeanPostProcessor）这个接口呢？异步事务按照AOP那样生效是不是就可以避免循环依赖呢？</p>
+<p>1、标注了@Async注解方法的类A，在注入其他组件时B，@lazy，懒加载该类A，因此创建B时不会实时创建A，避免破坏早期bean，避免循环依赖</p>
+<p>2、@EnableAspectJAutoProxy<br>-&gt; AspectJAutoProxyRegistrar<br>-&gt;AnnotationAwareAspectJAutoProxyCreator<br>-&gt;AbstractAutoProxyCreator(实现了SmartInstantiationAwareBeanPostProcessor)(可在获取早期对象时就生成代理对象)</p>
+<p>@EnableAsyncProxyAsyncConfiguration<br>-&gt;AsyncAnnotationBeanPostProcessor(没有实现SmartInstantiationAwareBeanPostProcessor)<br>(在postProcessAfterInitialization这个阶段才能触发生成代理对象)</p>
+<p>3、不可估量</p>
 
     </div>
 
@@ -460,7 +466,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFSpring%E7%9A%84%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96"><span class="nav-number">1.</span> <span class="nav-text">什么是Spring的循环依赖</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%A3%80%E6%B5%8B%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96"><span class="nav-number">2.</span> <span class="nav-text">如何检测是否存在循环依赖</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E4%BE%8B%EF%BC%9A"><span class="nav-number">2.1.</span> <span class="nav-text">单例：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E4%BE%8B"><span class="nav-number">2.2.</span> <span class="nav-text">多例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">Spring如何解决循环依赖的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E6%B3%A8%E5%85%A5%E6%96%B9%E5%BC%8F%E5%AF%BC%E8%87%B4%E7%9A%84%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E6%97%A0%E6%B3%95%E8%A7%A3%E5%86%B3"><span class="nav-number">3.1.</span> <span class="nav-text">构造注入方式导致的循环依赖无法解决</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B1%9E%E6%80%A7%E6%B3%A8%E5%85%A5%E6%96%B9%E5%BC%8F%E5%AF%BC%E8%87%B4%E7%9A%84%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E5%8F%AF%E4%BB%A5%E8%A7%A3%E5%86%B3"><span class="nav-number">3.2.</span> <span class="nav-text">属性注入方式导致的循环依赖可以解决</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E8%A7%A3%E5%86%B3%E8%A6%81%E5%93%AA%E4%BA%9B%E6%83%85%E5%86%B5%E4%B8%8B%E6%97%A0%E6%B3%95%E8%A7%A3%E5%86%B3"><span class="nav-number">4.</span> <span class="nav-text">循环依赖解决要哪些情况下无法解决</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%97%A9%E6%9C%9Fbean"><span class="nav-number">5.</span> <span class="nav-text">什么是早期bean</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%87%87%E7%94%A8%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%EF%BC%9F%E5%A6%82%E6%9E%9C%E7%9B%B4%E6%8E%A5%E5%B0%86%E6%97%A9%E6%9C%9Fbean%E4%B8%A2%E5%88%B0%E4%BA%8C%E7%BA%A7%E7%BC%93%E5%AD%98%E5%8F%AF%E4%BB%A5%E4%B9%88%EF%BC%9F"><span class="nav-number">6.</span> <span class="nav-text">为什么采用三级缓存解决循环依赖？如果直接将早期bean丢到二级缓存可以么？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98"><span class="nav-number">6.1.</span> <span class="nav-text">为什么使用三级缓存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8C%9C%E6%83%B3"><span class="nav-number">6.2.</span> <span class="nav-text">猜想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E7%AD%94"><span class="nav-number">6.3.</span> <span class="nav-text">解答</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9C%80%E6%B1%82"><span class="nav-number">6.3.0.1.</span> <span class="nav-text">需求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0"><span class="nav-number">6.3.0.2.</span> <span class="nav-text">实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%EF%BC%9A%E6%8A%A5%E9%94%99%E4%BA%86"><span class="nav-number">6.3.0.3.</span> <span class="nav-text">运行：报错了</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3"><span class="nav-number">6.3.0.4.</span> <span class="nav-text">如何解决</span></a></li></ol></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFSpring%E7%9A%84%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96"><span class="nav-number">1.</span> <span class="nav-text">什么是Spring的循环依赖</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%A3%80%E6%B5%8B%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96"><span class="nav-number">2.</span> <span class="nav-text">如何检测是否存在循环依赖</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E4%BE%8B%EF%BC%9A"><span class="nav-number">2.1.</span> <span class="nav-text">单例：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E4%BE%8B"><span class="nav-number">2.2.</span> <span class="nav-text">多例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">Spring如何解决循环依赖的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E6%B3%A8%E5%85%A5%E6%96%B9%E5%BC%8F%E5%AF%BC%E8%87%B4%E7%9A%84%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E6%97%A0%E6%B3%95%E8%A7%A3%E5%86%B3"><span class="nav-number">3.1.</span> <span class="nav-text">构造注入方式导致的循环依赖无法解决</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B1%9E%E6%80%A7%E6%B3%A8%E5%85%A5%E6%96%B9%E5%BC%8F%E5%AF%BC%E8%87%B4%E7%9A%84%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E5%8F%AF%E4%BB%A5%E8%A7%A3%E5%86%B3"><span class="nav-number">3.2.</span> <span class="nav-text">属性注入方式导致的循环依赖可以解决</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E8%A7%A3%E5%86%B3%E8%A6%81%E5%93%AA%E4%BA%9B%E6%83%85%E5%86%B5%E4%B8%8B%E6%97%A0%E6%B3%95%E8%A7%A3%E5%86%B3"><span class="nav-number">4.</span> <span class="nav-text">循环依赖解决要哪些情况下无法解决</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%97%A9%E6%9C%9Fbean"><span class="nav-number">5.</span> <span class="nav-text">什么是早期bean</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%87%87%E7%94%A8%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%EF%BC%9F%E5%A6%82%E6%9E%9C%E7%9B%B4%E6%8E%A5%E5%B0%86%E6%97%A9%E6%9C%9Fbean%E4%B8%A2%E5%88%B0%E4%BA%8C%E7%BA%A7%E7%BC%93%E5%AD%98%E5%8F%AF%E4%BB%A5%E4%B9%88%EF%BC%9F"><span class="nav-number">6.</span> <span class="nav-text">为什么采用三级缓存解决循环依赖？如果直接将早期bean丢到二级缓存可以么？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98"><span class="nav-number">6.1.</span> <span class="nav-text">为什么使用三级缓存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8C%9C%E6%83%B3"><span class="nav-number">6.2.</span> <span class="nav-text">猜想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E7%AD%94"><span class="nav-number">6.3.</span> <span class="nav-text">解答</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9C%80%E6%B1%82"><span class="nav-number">6.3.0.1.</span> <span class="nav-text">需求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0"><span class="nav-number">6.3.0.2.</span> <span class="nav-text">实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%EF%BC%9A%E6%8A%A5%E9%94%99%E4%BA%86"><span class="nav-number">6.3.0.3.</span> <span class="nav-text">运行：报错了</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3"><span class="nav-number">6.3.0.4.</span> <span class="nav-text">如何解决</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8C%9C%E6%83%B3-1"><span class="nav-number">7.</span> <span class="nav-text">猜想</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -476,7 +482,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">79</span>
+          <span class="site-state-item-count">75</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
