@@ -3123,7 +3123,7 @@
     <title>分布式-Dubbo01-认识分布式</title>
     <url>/2022/06/26/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/</url>
     <content><![CDATA[<h1 id="分布式架构的发展历史与背景"><a href="#分布式架构的发展历史与背景" class="headerlink" title="分布式架构的发展历史与背景"></a>分布式架构的发展历史与背景</h1><h3 id="理解分布式架构"><a href="#理解分布式架构" class="headerlink" title="理解分布式架构"></a>理解分布式架构</h3><h2 id="软件架构的发展历史"><a href="#软件架构的发展历史" class="headerlink" title="软件架构的发展历史"></a>软件架构的发展历史</h2><p>参考：<a href="https://blog.csdn.net/fdxcg_x/article/details/115708922">https://blog.csdn.net/fdxcg_x/article/details/115708922</a></p>
-<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/1320926-20200722145816632-206965628.png" alt="1320926-20200722145816632-206965628"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/1320926-20200722145816632-206965628.png" alt="1320926-20200722145816632-206965628"></p>
 <h3 id="单体架构"><a href="#单体架构" class="headerlink" title="单体架构"></a>单体架构</h3><h4 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h4><ul>
 <li>小项目开发快 成本低</li>
 <li>架构简单</li>
@@ -3135,7 +3135,7 @@
 <li>新增业务困难</li>
 <li>核心业务与边缘业务混合在一块，出现问题互相影响</li>
 </ul>
-<h3 id="垂直架构"><a href="#垂直架构" class="headerlink" title="垂直架构"></a>垂直架构</h3><p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220628082810793.png" alt="image-20220628082810793"></p>
+<h3 id="垂直架构"><a href="#垂直架构" class="headerlink" title="垂直架构"></a>垂直架构</h3><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220628082810793.png" alt="image-20220628082810793"></p>
 <p>​    根据业务把项目垂直切割成多个项目，因此这种架构称之为垂直架构。此时用于加速前端页面开发的**Web框架(MVC)**是关键</p>
 <h4 id="优点-1"><a href="#优点-1" class="headerlink" title="优点"></a>优点</h4><p>1、项目架构简单、前期开发成本低，周期短，适合小型项目</p>
 <p>2、通过垂直拆分，原来的项目不至于无线扩大</p>
@@ -3150,7 +3150,7 @@
 <p>4、搭建集群之后，实现负载均衡比较复杂。比如：内网负载，在迁移得时候会影响调用方的路由，导致线上故障</p>
 <h3 id="分布式架构（SOA（Service-Oriented-Architecture））"><a href="#分布式架构（SOA（Service-Oriented-Architecture））" class="headerlink" title="分布式架构（SOA（Service Oriented Architecture））"></a>分布式架构（SOA（Service Oriented Architecture））</h3><p>​    “面向服务的架构，是一个架构模型或者一种设计方法，而并不是服务解决方案。其中包含多个服务， 服务之间通过相互依赖或者通过通信机制，来完成相互通信的，最终提供一系列的功能。一个服务通常以独立的形式存在与操作系统进程中。各个服务之间通过网络调用 。</p>
 <p>​    跟 SOA 相提并论的还有一个 <strong>ESB</strong>（企业服务总线），简单来说ESB就是一根管道，用来连接各个服务节点。为了集成不同系统，不同协议的服务，ESB 可以简单理解为：它做了消息的转化解释和路由工作，让不同的服务互联互通；</p>
-<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/20210424154249684.png" alt="img"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/20210424154249684.png" alt="img"></p>
 <p><strong>SOA 所解决的核心问题</strong> </p>
 <ol>
 <li>系统集成：<strong>站在系统的角度，解决企业系统间的通信问题，把原先散乱、无规划的系统间的网状结构，梳理成规整、可治理的系统间星形结构</strong>，这一步往往需要引入 一些产品，比如 ESB、以及技术规范、服务管理规范；这一步解决的核心问题是【有序】</li>
@@ -3162,7 +3162,7 @@
 <p>3、服务间统一的通信协议</p>
 <h4 id="缺点-2"><a href="#缺点-2" class="headerlink" title="缺点"></a>缺点</h4><p>1、服务拆分粒度把控复杂，容易造成服务模块边界不清晰</p>
 <p>2、服务接口剧增，调用链路长，容易超时等</p>
-<h3 id="微服务架构"><a href="#微服务架构" class="headerlink" title="微服务架构"></a>微服务架构</h3><p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/2021042415471819.png" alt="img"></p>
+<h3 id="微服务架构"><a href="#微服务架构" class="headerlink" title="微服务架构"></a>微服务架构</h3><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/2021042415471819.png" alt="img"></p>
 <p>SOA架构的一种拓展和变种，强调去中心化、服务拆分粒度更小。</p>
 <h4 id="优点-3"><a href="#优点-3" class="headerlink" title="优点"></a>优点</h4><p>1、能够被一个团队单独进行敏捷开发（开发、测试、部署、运维）实现DevOps开发运维一体化</p>
 <p>2、<strong>各服务功能单一、粒度小</strong></p>
@@ -3225,11 +3225,11 @@
 <p><strong>容错：</strong>如果调用其中一台调用出错了怎么办？</p>
 <h3 id="3种代理架构比较"><a href="#3种代理架构比较" class="headerlink" title="3种代理架构比较"></a>3种代理架构比较</h3><p>参考文档：<a href="https://blog.csdn.net/adparking/article/details/114577835">https://blog.csdn.net/adparking/article/details/114577835</a></p>
 <p>1、基于反向代理的中心化架构（4层代理+7层代理）</p>
-<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220727085907484.png" alt="image-20220727085907484"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220727085907484.png" alt="image-20220727085907484"></p>
 <p>2、嵌入应用内部的去中心化架构（服务发现与注册 consul nacos ribbon）</p>
-<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220727085941776.png" alt="image-20220727085941776"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220727085941776.png" alt="image-20220727085941776"></p>
 <p>3、基于独立代理进程的Service Mesh（服务网格）架构</p>
-<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220727090005751.png" alt="image-20220727090005751"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220727090005751.png" alt="image-20220727090005751"></p>
 <table>
 <thead>
 <tr>
@@ -3263,7 +3263,7 @@
 </tr>
 </tbody></table>
 <h3 id="RMI-远程调用架构"><a href="#RMI-远程调用架构" class="headerlink" title="RMI 远程调用架构"></a>RMI 远程调用架构</h3><p>​     Java RMI，即 远程方法调用(Remote Method Invocation)，一种用于实现远程过程调用(RPC)(Remote procedure call)的Java API， 能直接传输序列化后的Java对象和分布式垃圾收集。它的实现依赖于Java虚拟机(JVM)，因此它仅支持从一个JVM到另一个JVM的调用。</p>
-<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220727084716917.png" alt="image-20220727084716917"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220727084716917.png" alt="image-20220727084716917"></p>
 <p>1、注册中心（可以是服务提供者本身）：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java">LocateRegistry.createRegistry(<span class="hljs-number">8080</span>);<br></code></pre></td></tr></table></figure>
 
@@ -3274,7 +3274,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java">UserService userService = (UserService) Naming.lookup(<span class="hljs-string">&quot;rmi://localhost:8080/UserService&quot;</span>);<br>userService.getName(<span class="hljs-number">11</span>);<br></code></pre></td></tr></table></figure>
 
 <hr>
-<h3 id="Dubbo架构与设计说明"><a href="#Dubbo架构与设计说明" class="headerlink" title="Dubbo架构与设计说明"></a>Dubbo架构与设计说明</h3><h4 id="架构图"><a href="#架构图" class="headerlink" title="架构图"></a>架构图</h4><p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220727085813804.png" alt="image-20220727085813804"></p>
+<h3 id="Dubbo架构与设计说明"><a href="#Dubbo架构与设计说明" class="headerlink" title="Dubbo架构与设计说明"></a>Dubbo架构与设计说明</h3><h4 id="架构图"><a href="#架构图" class="headerlink" title="架构图"></a>架构图</h4><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220727085813804.png" alt="image-20220727085813804"></p>
 <h4 id="流程说明"><a href="#流程说明" class="headerlink" title="流程说明"></a>流程说明</h4><ol>
 <li>Provider(提供者)绑定指定端口并启动服务</li>
 <li>指供者连接注册中心，并发本机IP、端口、应用信息和提供服务信息发送至注册中心存储</li>
@@ -3290,7 +3290,7 @@
 <li>去中心化，双方不直接依懒注册中心，即使注册中心全部宕机短时间内也不会影响服务的调用</li>
 <li>服务提供者无状态，任意一台宕掉后，不影响使用</li>
 </ol>
-<h4 id="Dubbo-整体设计"><a href="#Dubbo-整体设计" class="headerlink" title="Dubbo 整体设计"></a>Dubbo 整体设计</h4><p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220727090423881.png" alt="image-20220727090423881"></p>
+<h4 id="Dubbo-整体设计"><a href="#Dubbo-整体设计" class="headerlink" title="Dubbo 整体设计"></a>Dubbo 整体设计</h4><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220727090423881.png" alt="image-20220727090423881"></p>
 <ul>
 <li>config <strong>配置层</strong>：对外配置接口，以 ServiceConfig, ReferenceConfig 为中心，可以直接初始化配置类，也可以通过 spring 解析配置生成配置类</li>
 <li>proxy <strong>服务代理层</strong>：服务接口透明代理，生成动态代理 扩展接口为 ProxyFactory</li>
@@ -3303,19 +3303,19 @@
 <li>serialize <strong>数据序列化层</strong>：可复用的一些工具，扩展接口为 Serialization, ObjectInput, ObjectOutput, ThreadPool</li>
 </ul>
 <p>协作流程如下：</p>
-<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220727090534527.png" alt="image-20220727090534527"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220727090534527.png" alt="image-20220727090534527"></p>
 <h4 id="Dubbo-中的SPI机制"><a href="#Dubbo-中的SPI机制" class="headerlink" title="Dubbo 中的SPI机制"></a>Dubbo 中的SPI机制</h4><p>java的SPI:具体约定为:当服务的提供者，提供了服务接口的一种实现之后，在jar包的META-INF/services/目录里同时创建一个以服务接口命名的文件。该文件里就是实现该服务接口的具体实现类。而当外部程序装配这个模块的时候，就能通过该jar包META-INF/services/里的配置文件找到具体的实现类名，并装载实例化，完成模块的注入。 基于这样一个约定就能很好的找到服务接口的实现类，而不需要再代码里制定。jdk提供服务实现查找的一个工具类java.util.ServiceLoader</p>
-<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220727091542633.png" alt="image-20220727091542633"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220727091542633.png" alt="image-20220727091542633"></p>
 <figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>    Iterator&lt;UserService&gt; services = ServiceLoader.load(UserService.class).iterator();<br>    UserService service = <span class="hljs-keyword">null</span>;<br>    <span class="hljs-keyword">while</span> (services.hasNext()) &#123;<br>        service = services.next();<br>    &#125;<br>    System.out.println(service.getUser(<span class="hljs-number">111</span>));<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p><strong>Dubbo的SPI机制：</strong></p>
 <p>dubbo spi 目录文件</p>
-<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/wps1.jpg" alt="img"> </p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/wps1.jpg" alt="img"> </p>
 <p>dubbo spi  文件内容：</p>
 <p>luban=tuling.dubbo.server.LubanFilter</p>
 <p>装配自定义Filter</p>
-<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/wps2.jpg" alt="img"></p>
-<h4 id="配置关系图"><a href="#配置关系图" class="headerlink" title="配置关系图"></a>配置关系图</h4><p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220728220127188.png" alt="image-20220728220127188"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/wps2.jpg" alt="img"></p>
+<h4 id="配置关系图"><a href="#配置关系图" class="headerlink" title="配置关系图"></a>配置关系图</h4><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220728220127188.png" alt="image-20220728220127188"></p>
 <h3 id="Dubbo调用模块"><a href="#Dubbo调用模块" class="headerlink" title="Dubbo调用模块"></a>Dubbo调用模块</h3><p>dubbo调用模块核心功能是发起一个远程方法的调用并顺利拿到返回结果，其体系组成如下：</p>
 <p><strong>透明代理：</strong>通过动态代理技术，屏蔽远程调用细节以提高编程友好性。</p>
 <p><strong>负载均衡：</strong>当有多个提供者是，如何选择哪个进行调用的负载算法。</p>
@@ -3333,9 +3333,9 @@
 <li><strong>一致性Hash</strong>(consistenthash ):相同的参数总是发到同一台机器</li>
 </ol>
 <p>为避免热点问题，一致性哈希使用虚拟节点，增大节点数量，根据指定的参数的hash的结果分散在0-2 31-1 之间</p>
-<img src="images/分布式-Dubbo01-认识分布式/image-20220728222535490.png" alt="image-20220728222535490" style="zoom:50%;">
+<img src="/images/分布式-Dubbo01-认识分布式/image-20220728222535490.png" alt="image-20220728222535490" style="zoom:50%;">
 
-<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220728222812973.png" alt="image-20220728222812973"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220728222812973.png" alt="image-20220728222812973"></p>
 <h4 id="容错"><a href="#容错" class="headerlink" title="容错"></a>容错</h4><p>Dubbo 官方目前支持以下容错策略：</p>
 <ol>
 <li><strong>失败自动切换：</strong>调用失败后基于retries=“2” 属性重试其它服务器</li>
@@ -3353,10 +3353,10 @@
 <li>不需要返回结果</li>
 </ol>
 <p>Dubbo 中关于异步等待结果返回的实现流程如下图：</p>
-<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/wps1-1659018752888.jpg" alt="img"> </p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/wps1-1659018752888.jpg" alt="img"> </p>
 <p>消费者订阅原理</p>
-<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220702122859080.png" alt="image-20220702122859080"></p>
-<p><img src="images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220702124112036.png" alt="image-20220702124112036"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220702122859080.png" alt="image-20220702122859080"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220702124112036.png" alt="image-20220702124112036"></p>
 ]]></content>
       <categories>
         <category>Dubbo</category>
