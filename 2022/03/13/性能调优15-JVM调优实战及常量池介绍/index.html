@@ -39,7 +39,7 @@
 <meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/image-20220314221951108.png">
 <meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/image-20220315091119340.png">
 <meta property="article:published_time" content="2022-03-13T13:00:00.000Z">
-<meta property="article:modified_time" content="2022-03-15T13:51:08.924Z">
+<meta property="article:modified_time" content="2023-01-04T14:55:00.214Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="性能调优">
 <meta property="article:tag" content="JVM">
@@ -234,7 +234,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-15 21:51:08" itemprop="dateModified" datetime="2022-03-15T21:51:08+08:00">2022-03-15</time>
+                <time title="修改时间：2023-01-04 22:55:00" itemprop="dateModified" datetime="2023-01-04T22:55:00+08:00">2023-01-04</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -304,7 +304,7 @@
 <p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9815-JVM%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98%E5%8F%8A%E5%B8%B8%E9%87%8F%E6%B1%A0%E4%BB%8B%E7%BB%8D/image-20220314221951108.png" alt="image-20220314221951108"></p>
 <p>常量池中主要存放两大类常量：<strong>字面量和符号引用</strong>。</p>
 <h5 id="字面量"><a href="#字面量" class="headerlink" title="字面量"></a>字面量</h5><p>​    由字母、数字构成的字符串或者数值常量，字面量只可以右值出现，所谓右值是指等号右边的值，如：int a=1 这里的a为左值，1为右值。在这个例子中1就是字面量，如</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">int</span> a = <span class="hljs-number">1</span>;<br><span class="hljs-keyword">int</span> b = <span class="hljs-number">2</span>;<br><span class="hljs-keyword">int</span> c = <span class="hljs-string">&quot;abcdefg&quot;</span>;<br><span class="hljs-keyword">int</span> d = <span class="hljs-string">&quot;abcdefg&quot;</span>;<br></code></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">int</span> a = <span class="hljs-number">1</span>;<br><span class="hljs-keyword">int</span> b = <span class="hljs-number">2</span>;<br>String c = <span class="hljs-string">&quot;abcdefg&quot;</span>;<br>String d = <span class="hljs-string">&quot;abcdefg&quot;</span>;<br></code></pre></td></tr></table></figure>
 
 <h5 id="符号引用"><a href="#符号引用" class="headerlink" title="符号引用"></a>符号引用</h5><p>​    符号应用是编译原理的概念、相对于直接引用而言，主要包含以下3类常量</p>
 <ul>
@@ -358,7 +358,7 @@
 
 <p>分析：JVM对于字符串引用，由于在字符串的”+”连接中，有字符串引用存在，而引用的值在程序编译期是无法确定的，即”a” + bb无法被编译器优化，只有在程序运行期来动态分配并将连接后的新地址赋给b。所以上面程序的结果也就为false。</p>
 <p>示例5：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java">String a = <span class="hljs-string">&quot;ab&quot;</span>;<br>String bb = <span class="hljs-string">&quot;b&quot;</span>;<br>String b = <span class="hljs-string">&quot;a&quot;</span> + bb;<br><br>System.out.println(a == b); <span class="hljs-comment">// false</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java">String a = <span class="hljs-string">&quot;ab&quot;</span>;<br><span class="hljs-keyword">final</span> String bb = <span class="hljs-string">&quot;b&quot;</span>;<br>String b = <span class="hljs-string">&quot;a&quot;</span> + bb;<br><br>System.out.println(a == b); <span class="hljs-comment">// true</span><br></code></pre></td></tr></table></figure>
 
 <p>分析：和示例4中唯一不同的是bb字符串加了final修饰，对于final修饰的变量，它在编译时被解析为常量值的一个本地拷贝存储到自己的常量池中或嵌入到它的字节码流中。所以此时的”a” + bb和”a” + “b”效果是一样的。故上面程序的结果为true。</p>
 <p>示例6：</p>
@@ -402,7 +402,7 @@
 <p>堆：new String(“ABC”) ：1个 </p>
 <p>引用： str2 ：1个 </p>
 <p>总共 ： 3个 </p>
-<h3 id="八种基本类型的包装类和对象池"><a href="#八种基本类型的包装类和对象池" class="headerlink" title="八种基本类型的包装类和对象池"></a>八种基本类型的包装类和对象池</h3><p>java中基本类型的包装类的大部分都实现了常量池技术(严格来说应该叫<strong>对象池，</strong>在堆上)，这些类是Byte,Short,Integer,Long,Character,Boolean,另外两种浮点数类型的包装类则没有实现。另外Byte,Short,Integer,Long,Character这5种整型的包装类也只是在对应值小于等于127时才可使用对象池，也即对象不负责创建和管理大于127的这些类的对象。因为一般这种比较小的数用到的概率相对较大。</p>
+<h3 id="八种基本类型的包装类和对象池"><a href="#八种基本类型的包装类和对象池" class="headerlink" title="八种基本类型的包装类和对象池"></a>八种基本类型的包装类和对象池</h3><p>java中基本类型的包装类的大部分都实现了常量池技术(严格来说应该叫<strong>对象池，</strong>在堆上)，这些类是Byte,Short,Integer,Long,Character,Boolean,另外两种浮点数类型的包装类则没有实现。另外Byte,Short,Integer,Long,Character这5种整型的包装类也只是在对应值-128~127时才可使用对象池，也即对象不负责创建和管理范围外的这些类的对象。因为一般这种比较小的数用到的概率相对较大。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Test</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        <span class="hljs-comment">//5种整形的包装类Byte,Short,Integer,Long,Character的对象，</span><br>        <span class="hljs-comment">//在值小于127时可以使用对象池</span><br>        Integer i1 = <span class="hljs-number">127</span>;  <span class="hljs-comment">//这种调用底层实际是执行的Integer.valueOf(127)，里面用到了IntegerCache对象池</span><br>        Integer i2 = <span class="hljs-number">127</span>;<br>        System.out.println(i1 == i2);<span class="hljs-comment">//输出true</span><br><br>        <span class="hljs-comment">//值大于127时，不会从对象池中取对象</span><br>        Integer i3 = <span class="hljs-number">128</span>;<br>        Integer i4 = <span class="hljs-number">128</span>;<br>        System.out.println(i3 == i4);<span class="hljs-comment">//输出false</span><br><br>        <span class="hljs-comment">//用new关键词新生成对象不会使用对象池</span><br>        Integer i5 = <span class="hljs-keyword">new</span> Integer(<span class="hljs-number">127</span>);<br>        Integer i6 = <span class="hljs-keyword">new</span> Integer(<span class="hljs-number">127</span>);<br>        System.out.println(i5 == i6);<span class="hljs-comment">//输出false</span><br><br>        <span class="hljs-comment">//Boolean类也实现了对象池技术</span><br>        Boolean bool1 = <span class="hljs-keyword">true</span>;<br>        Boolean bool2 = <span class="hljs-keyword">true</span>;<br>        System.out.println(bool1 == bool2);<span class="hljs-comment">//输出true</span><br><br>        <span class="hljs-comment">//浮点类型的包装类没有实现对象池技术</span><br>        Double d1 = <span class="hljs-number">1.0</span>;<br>        Double d2 = <span class="hljs-number">1.0</span>;<br>        System.out.println(d1 == d2);<span class="hljs-comment">//输出false</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <h2 id="安全点与安全区域"><a href="#安全点与安全区域" class="headerlink" title="安全点与安全区域"></a>安全点与安全区域</h2><p>​    安全点就是指代码中一些特定的位置,当线程运行到这些位置时它的状态是确定的,这样JVM就可以安全的进行一些操作,比 如GC等，所以GC不是想什么时候做就立即触发的，是需要等待所有线程运行到安全点后才能触发。 这些特定的安全点位置主要有以下几种: </p>
@@ -561,7 +561,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2022</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="user"></i>
   </span>
