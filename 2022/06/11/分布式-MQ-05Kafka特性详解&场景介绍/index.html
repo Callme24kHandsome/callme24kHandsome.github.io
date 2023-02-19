@@ -35,7 +35,7 @@
 <meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220611134540976.png">
 <meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-05Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/image-20220612164527184.png">
 <meta property="article:published_time" content="2022-06-11T13:00:00.000Z">
-<meta property="article:modified_time" content="2022-06-16T13:55:12.401Z">
+<meta property="article:modified_time" content="2023-02-19T15:09:39.553Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="MQ">
 <meta name="twitter:card" content="summary">
@@ -229,7 +229,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-06-16 21:55:12" itemprop="dateModified" datetime="2022-06-16T21:55:12+08:00">2022-06-16</time>
+                <time title="修改时间：2023-02-19 23:09:39" itemprop="dateModified" datetime="2023-02-19T23:09:39+08:00">2023-02-19</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -298,7 +298,7 @@
 <h3 id="分布式Distribution"><a href="#分布式Distribution" class="headerlink" title="分布式Distribution"></a>分布式Distribution</h3><p>log的partitions分布在kafka集群中不同的broker上，每个broker可以请求备份其他broker上partition上的数据。kafka 集群支持配置一个partition备份的数量。 针对每个partition，都有一个broker起到“leader”的作用，0个或多个其他的broker作为“follwers”的作用。 </p>
 <p><strong>leader处理所有的针对这个partition的读写请求，而followers被动复制leader的结果</strong>。如果这个leader失效了，其中 的一个follower将会自动的变成新的leader</p>
 <h3 id="Producers"><a href="#Producers" class="headerlink" title="Producers"></a>Producers</h3><p>生产者将消息发送到topic中去，同时负责选择将message发送到topic的哪一个partition中。通过round­robin做简单的 负载均衡。也可以根据消息中的某一个关键字来进行区分。通常第二种方式使用的更多</p>
-<p>Consumers 传统的消息传递模式有2种：( queue) 和（publish-subscribe） </p>
+<h3 id="Consumers"><a href="#Consumers" class="headerlink" title="Consumers"></a>Consumers</h3><p>传统的消息传递模式有2种：( queue) 和（publish-subscribe） </p>
 <p><strong>queue模式</strong>：多个consumer从服务器中读取数据，消息只会到达一个consumer。 </p>
 <p><strong>publish-subscribe模式</strong>：消息会被广播给所有的consumer。</p>
 <p>Kafka基于这2种模式提供了一种consumer的抽象概念：consumer group。 </p>
@@ -379,8 +379,8 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2022/05/25/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-03RabbitMQ%E6%95%B4%E5%90%88SpringBoot/" rel="prev" title="分布式-MQ-03RabbitMQ整合SpringBoot&集群搭建">
-      <i class="fa fa-chevron-left"></i> 分布式-MQ-03RabbitMQ整合SpringBoot&集群搭建
+    <a href="/2022/06/08/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-04RocketMQ%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D/" rel="prev" title="分布式-MQ-04RocketMQ特性详解&场景介绍">
+      <i class="fa fa-chevron-left"></i> 分布式-MQ-04RocketMQ特性详解&场景介绍
     </a></div>
       <div class="post-nav-item">
     <a href="/2022/06/18/%E5%88%86%E5%B8%83%E5%BC%8F-Mysql%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB%E5%8F%8A%E9%AB%98%E5%8F%AF%E7%94%A8%E6%96%B9%E6%A1%88/" rel="next" title="分布式-Mysql读写分离及高可用方案">
@@ -444,7 +444,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3-amp-%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">Kafka特性详解&amp;场景介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.1.</span> <span class="nav-text">概念介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A"><span class="nav-number">1.1.1.</span> <span class="nav-text">名词解释</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E9%A2%98Topic%E5%92%8C%E6%B6%88%E6%81%AF%E6%97%A5%E5%BF%97Log"><span class="nav-number">1.1.2.</span> <span class="nav-text">主题Topic和消息日志Log</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8FDistribution"><span class="nav-number">1.1.3.</span> <span class="nav-text">分布式Distribution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Producers"><span class="nav-number">1.1.4.</span> <span class="nav-text">Producers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E9%A1%BA%E5%BA%8F"><span class="nav-number">1.1.5.</span> <span class="nav-text">消费顺序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Boot%E6%95%B4%E5%90%88Kafka"><span class="nav-number">1.2.</span> <span class="nav-text">Spring Boot整合Kafka</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka%E7%9A%84%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.3.</span> <span class="nav-text">Kafka的使用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">1.4.</span> <span class="nav-text">Kafka最佳实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E4%B8%8Abroker%E6%9C%BA%E5%99%A8%E9%85%8D%E7%BD%AE%E8%A7%84%E5%88%92"><span class="nav-number">1.4.1.</span> <span class="nav-text">线上broker机器配置规划</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE"><span class="nav-number">1.4.2.</span> <span class="nav-text">JVM参数设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E4%B8%8A%E9%97%AE%E9%A2%98%E5%8F%8A%E4%BC%98%E5%8C%96"><span class="nav-number">1.4.3.</span> <span class="nav-text">线上问题及优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E4%B8%A2%E5%A4%B1%E6%83%85%E5%86%B5"><span class="nav-number">1.4.3.1.</span> <span class="nav-text">消息丢失情况</span></a></li></ol></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3-amp-%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">Kafka特性详解&amp;场景介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.1.</span> <span class="nav-text">概念介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A"><span class="nav-number">1.1.1.</span> <span class="nav-text">名词解释</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E9%A2%98Topic%E5%92%8C%E6%B6%88%E6%81%AF%E6%97%A5%E5%BF%97Log"><span class="nav-number">1.1.2.</span> <span class="nav-text">主题Topic和消息日志Log</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8FDistribution"><span class="nav-number">1.1.3.</span> <span class="nav-text">分布式Distribution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Producers"><span class="nav-number">1.1.4.</span> <span class="nav-text">Producers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Consumers"><span class="nav-number">1.1.5.</span> <span class="nav-text">Consumers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E9%A1%BA%E5%BA%8F"><span class="nav-number">1.1.6.</span> <span class="nav-text">消费顺序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Boot%E6%95%B4%E5%90%88Kafka"><span class="nav-number">1.2.</span> <span class="nav-text">Spring Boot整合Kafka</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka%E7%9A%84%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.3.</span> <span class="nav-text">Kafka的使用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">1.4.</span> <span class="nav-text">Kafka最佳实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E4%B8%8Abroker%E6%9C%BA%E5%99%A8%E9%85%8D%E7%BD%AE%E8%A7%84%E5%88%92"><span class="nav-number">1.4.1.</span> <span class="nav-text">线上broker机器配置规划</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE"><span class="nav-number">1.4.2.</span> <span class="nav-text">JVM参数设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E4%B8%8A%E9%97%AE%E9%A2%98%E5%8F%8A%E4%BC%98%E5%8C%96"><span class="nav-number">1.4.3.</span> <span class="nav-text">线上问题及优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E4%B8%A2%E5%A4%B1%E6%83%85%E5%86%B5"><span class="nav-number">1.4.3.1.</span> <span class="nav-text">消息丢失情况</span></a></li></ol></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -460,14 +460,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">74</span>
+          <span class="site-state-item-count">75</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-count">27</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
