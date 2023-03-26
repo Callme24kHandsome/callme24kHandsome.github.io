@@ -1888,8 +1888,6 @@
 <p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230326195650362.png" alt="image-20230326195650362"></p>
 <p>交互流程如下：</p>
 <p>1、用户请求充值系统进行充值<br>2、充值系统完成充值将充值结果发给MQ<br>3、账户系统监听MQ，接收充值结果通知，如果接收不到消息，MQ会重复发送通知。接收到充值结果通知账户系<br>统增加充值金额<br>4、账户系统也可以主动查询充值系统的充值结果查询接口，增加金额</p>
-<h2 id="公司方案"><a href="#公司方案" class="headerlink" title="公司方案"></a>公司方案</h2><p>最终一致性方案：<a href="https://wiki.dotfashion.cn/display/PPDD/5.6Mage"><strong>异步组件Mage</strong></a>：使用方本地事务插入消息表 + Eyter平台配置处理逻辑（HTTP/RabbitMQ/Kafka/RestyPass）</p>
-<p>强一致性方案：**<a href="https://wiki.dotfashion.cn/pages/viewpage.action?pageId=429982909">Taurus</a>**：Sage独立中间件模式的实现</p>
 ]]></content>
       <categories>
         <category>分布式事务</category>
