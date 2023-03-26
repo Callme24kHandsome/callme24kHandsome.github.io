@@ -22,7 +22,7 @@
 
   <meta name="description" content="分布式事务01">
 <meta property="og:type" content="article">
-<meta property="og:title" content="分布式-分布式事务01">
+<meta property="og:title" content="分布式-分布式事务基础">
 <meta property="og:url" content="http://example.com/2023/03/15/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/index.html">
 <meta property="og:site_name" content="24khandsome&#39;s Blog">
 <meta property="og:description" content="分布式事务01">
@@ -30,8 +30,21 @@
 <meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230315222605196.png">
 <meta property="og:image" content="http://example.com/images/分布式-分布式事务01/164d6783a9e3f959_tplv-t2oaga2asx-zoom-in-crop-mark_3024_0_0_0.awebp">
 <meta property="og:image" content="http://example.com/images/分布式-分布式事务01/164d67e0c6026ac4_tplv-t2oaga2asx-zoom-in-crop-mark_3024_0_0_0.awebp">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230317090206074.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230319165353627.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230319233044827.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230319233148264.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230319233404655.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/501938d549794ceab7cddeabd04a90af_tplv-k3u1fbpfcp-zoom-in-crop-mark_4536_0_0_0.awebp">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/TB1Y2kuw7T2gK0jSZFkXXcIQFXa-445-444.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230321224855999.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230321234442367.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230322222239901.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230325160143614.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230325161104590.png">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230326195650362.png">
 <meta property="article:published_time" content="2023-03-15T14:00:00.000Z">
-<meta property="article:modified_time" content="2023-03-15T15:09:34.399Z">
+<meta property="article:modified_time" content="2023-03-26T14:18:14.413Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="分布式">
 <meta property="article:tag" content="分布式事务">
@@ -51,7 +64,7 @@
   };
 </script>
 
-  <title>分布式-分布式事务01 | 24khandsome's Blog</title>
+  <title>分布式-分布式事务基础 | 24khandsome's Blog</title>
   
 
 
@@ -209,7 +222,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          分布式-分布式事务01
+          分布式-分布式事务基础
         </h1>
 
         <div class="post-meta">
@@ -218,10 +231,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2023-03-15 22:00:00 / 修改时间：23:09:34" itemprop="dateCreated datePublished" datetime="2023-03-15T22:00:00+08:00">2023-03-15</time>
+              <time title="创建时间：2023-03-15 22:00:00" itemprop="dateCreated datePublished" datetime="2023-03-15T22:00:00+08:00">2023-03-15</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-03-26 22:18:14" itemprop="dateModified" datetime="2023-03-26T22:18:14+08:00">2023-03-26</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -275,7 +294,262 @@
 <p><strong>2、跨数据库实例产生分布式事务</strong></p>
 <img src="/images/分布式-分布式事务01/164d67e0c6026ac4_tplv-t2oaga2asx-zoom-in-crop-mark_3024_0_0_0.awebp" alt="img" style="zoom: 80%;">
 
-<h2 id="分布式事务的基础"><a href="#分布式事务的基础" class="headerlink" title="分布式事务的基础"></a>分布式事务的基础</h2><p>未完待续。。。</p>
+<h2 id="分布式事务的基础"><a href="#分布式事务的基础" class="headerlink" title="分布式事务的基础"></a>分布式事务的基础</h2><p>​    分布式系统之所以叫分布式，是因 为提供服务的各个节点分布在不同机器上，相互之间通过网络交互。不能因为有一点网络问题就导致整个系统无法 提供服务，网络因素成为了分布式事务的考量标准之一。因此，分布式事务需要更进一步的理论支持。</p>
+<h3 id="CAP"><a href="#CAP" class="headerlink" title="CAP"></a>CAP</h3><p>CAP(定理，又被叫作布鲁尔定理。对于设计分布式系统来说(不仅仅是分布式事务)的架构师来说，CAP就是入门理论。</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230317090206074.png" alt="image-20230317090206074"></p>
+<h4 id="C-Consistency-一致性"><a href="#C-Consistency-一致性" class="headerlink" title="C - Consistency-一致性"></a>C - Consistency-一致性</h4><p>​    一致性是指写操作后的读操作可以读取到最新的数据状态，当数据分布在多个节点上，从任意结点读取到的数据都是最新的状态。对于数据分布在不同节点上的数据上来说，如果在某个节点更新了数据，那么在其他节点如果都能读取到这个最新的数据，那么就称为强一致，如果有某个节点没有读取到，那就是分布式不一致。</p>
+<h4 id="A-Availability-可用性"><a href="#A-Availability-可用性" class="headerlink" title="A - Availability-可用性"></a>A - Availability-可用性</h4><p>​    可用性是指任何事务操作都可以得到响应结果，且不会出现响应超时或响应错误。可用性的两个关键一个是合理的时间，一个是合理的响应。合理的时间指的是请求不能无限被阻塞，应该在合理的时间给出返回。合理的响应指的是系统应该明确返回结果并且结果是正确的，这里的正确指的是比如应该返回50，而不是返回40。</p>
+<h4 id="P-Partition-tolerance-分区容错性"><a href="#P-Partition-tolerance-分区容错性" class="headerlink" title="P - Partition tolerance-分区容错性"></a>P - Partition tolerance-分区容错性</h4><p>​    通常分布式系统的各各结点部署在不同的子网，这就是网络分区，不可避免的会出现由于网络问题而导致结点之间通信失败，此时仍可对外提供服务。</p>
+<p>​    <strong>分区容错性是分布式系统具备的基本能力</strong></p>
+<h4 id="CAP三者不可兼得"><a href="#CAP三者不可兼得" class="headerlink" title="CAP三者不可兼得"></a>CAP三者不可兼得</h4><p>​    在分布式系统中，网络无法100%可靠，分区其实是一个必然现象，如果我们选择了CA而放弃了P，那么当发生分区现象时，为了保证一致性，这个时候必须拒绝请求，但是A又不允许，所以分布式系统理论上不可能选择CA架构，只能选择CP或者AP架构。</p>
+<p>​    对于CP来说，放弃可用性，追求一致性和分区容错性，我们的zookeeper其实就是追求的强一致。<br>​    对于AP来说，放弃一致性(这里说的一致性是强一致性)，追求分区容错性和可用性，这是很多分布式系统设计时的选择，后面的BASE也是根据AP来扩展。<br>​    顺便一提，CAP理论中是忽略网络延迟，也就是当事务提交时，从节点A复制到节点B，但是在现实中这个是明显不可能的，所以总会有一定的时间是不一致。同时CAP中选择两个，比如你选择了CP，并不是叫你放弃A。因为P出现的概率实在是太小了，大部分的时间你仍然需要保证CA。就算分区出现了你也要为后来的A做准备，比如通过一些日志的手段，是其他机器回复至可用。</p>
+<h3 id="BASE"><a href="#BASE" class="headerlink" title="BASE"></a>BASE</h3><h4 id="强一致性与最终一致性"><a href="#强一致性与最终一致性" class="headerlink" title="强一致性与最终一致性"></a>强一致性与最终一致性</h4><p>​    CAP理论告诉我们一个分布式系统最多只能同时满足一致性（Consistency）、可用性（Availability）和分区容忍性（Partition tolerance）这三项中的两项，其中AP在实际应用中较多，AP即舍弃一致性，保证可用性和分区容忍性，但是在实际生产中很多场景都要实现一致性，比如前边我们举的例子主数据库向从数据库同步数据，即使不要一致性，但是最终也要将数据同步成功来保证数据一致，这种一致性和CAP中的一致性不同，CAP中的一致性要求在任何时间查询每个结点数据都必须一致，它强调的是<strong>强一致性</strong>，但是最终一致性是允许可以在一段时间内每个结点的数据不一致，但是经过一段时间每个结点的数据必须一致，它强调的是<strong>最终数据的一致性</strong>。</p>
+<h4 id="Base理论"><a href="#Base理论" class="headerlink" title="Base理论"></a>Base理论</h4><p>​    BASE 是 **Basically Available(基本可用)<strong>、</strong>Soft state(软状态)**和 <strong>Eventually consistent (最终一致性)<strong>三个短语的缩写。BASE理论是对CAP中AP的一个扩展，通过牺牲强一致性来获得可用性，当出现故障允许部分不可用但要保证核心功能可用，允许数据在一段时间内是不一致的，但最终达到一致状态。满足BASE理论的事务，我们称之为“</strong>柔性事务</strong>”</p>
+<p><strong>基本可用</strong>:</p>
+<p>​    分布式系统在出现故障时，允许损失部分可用功能，保证核心功能可用。如，电商网站交易付款出现问题了，商品依然可以正常浏览。</p>
+<p><strong>软状态</strong>:</p>
+<p>​    由于不要求强一致性，所以BASE允许系统中存在中间状态（也叫软状态），这个状态不影响系统可用性，如订单的”支付中”、“数据同步中”等状态，待数据最终一致后状态改为“成功”状态。</p>
+<p><strong>最终一致</strong>:</p>
+<p>​    最终一致是指经过一段时间后，所有节点数据都将会达到一致。如订单的”支付中”状态，最终会变为“支付成功”或者”支付失败”，使订单状态与实际交易结果达成一致，但需要一定时间的延迟、等待。</p>
+<h2 id="2PC协议及其解决方案"><a href="#2PC协议及其解决方案" class="headerlink" title="2PC协议及其解决方案"></a>2PC协议及其解决方案</h2><h3 id="什么是2PC"><a href="#什么是2PC" class="headerlink" title="什么是2PC"></a>什么是2PC</h3><p>​    2PC即两阶段提交协议，是将整个事务流程分为两个阶段，<strong>准备阶段</strong>（Prepare phase）、<strong>提交阶段</strong>（commitphase），2是指两个阶段，P是指准备阶段，C是指提交阶段。</p>
+<p><strong>1. 准备阶段（Prepare phase）：</strong>事务管理器给每个参与者发送Prepare消息，每个数据库参与者在本地执行事务，并写本地的Undo/Redo日志，此时事务没有提交。（Undo日志是记录修改前的数据，用于数据库回滚，Redo日志是记录修改后的数据，用于提交事务后写入数据文件）</p>
+<p><strong>2. 提交阶段（commit phase）：</strong>如果事务管理器收到了参与者的执行失败或者超时消息时，直接给每个参与者发送回滚(Rollback)消息；否则，发送提交(Commit)消息；参与者根据事务管理器的指令执行提交或者回滚操作，并释放事务处理过程中使用的锁资源。注意:必须在最后阶段释放锁资源。</p>
+<h3 id="XA方案"><a href="#XA方案" class="headerlink" title="XA方案"></a>XA方案</h3><p><strong>DTP</strong>：国际开放标准组织Open Group定义了分布式事务处理模型DTP（Distributed Transaction Processing Reference Model），这模型规范了分布式事务的模型设计。</p>
+<p><strong>DTP模型定义如下角色：</strong></p>
+<ul>
+<li>**AP(**Application Program)：即应用程序，可以理解为使用DTP分布式事务的程序。</li>
+<li><strong>RM</strong>(Resource Manager)：即资源管理器，可以理解为事务的参与者，一般情况下是指一个数据库实例，通过资源管理器对该数据库进行控制，资源管理器控制着分支事务。</li>
+<li><strong>TM</strong>(Transaction Manager)：事务管理器，负责协调和管理事务，事务管理器控制着全局事务，管理事务生命周期，并协调各个RM。全局事务是指分布式事务处理环境中，需要操作多个数据库共同完成一个工作，这个工作即是一个全局事务。</li>
+</ul>
+<p>下面新用户注册送积分为例来说明：</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230319165353627.png" alt="image-20230319165353627"></p>
+<p><strong>以上三个角色之间的交互方式如下：</strong></p>
+<ol>
+<li>TM向AP提供 应用程序编程接口，AP通过TM提交及回滚事务。</li>
+<li>TM交易中间件通过XA接口来通知RM数据库事务的开始、结束以及提交、回滚等。</li>
+</ol>
+<p><strong>执行流程如下：</strong></p>
+<p>1、应用程序（AP）持有用户库和积分库两个数据源。<br>2、应用程序（AP）通过TM通知用户库RM新增用户，同时通知积分库RM为该用户新增积分，RM此时并未提交事<br>务，此时用户和积分资源锁定。<br>3、TM收到执行回复，只要有一方失败则分别向其他RM发起回滚事务，回滚完毕，资源锁释放。<br>4、TM收到执行回复，全部成功，此时向所有RM发起提交事务，提交完毕，资源锁释放</p>
+<p><strong>DTP模型定义TM和RM之间通讯的接口规范叫XA，简单理解为数据库提供的2PC接口协议，基于数据库的XA协议来实现2PC又称为XA方案</strong>。</p>
+<h3 id="XA方案的问题"><a href="#XA方案的问题" class="headerlink" title="XA方案的问题"></a>XA方案的问题</h3><p><strong>单点问题</strong></p>
+<p>​    事务管理器在整个流程中扮演的角色很关键，如果其宕机，比如在第一阶段已经完成，在第二阶段正准备提交的时候事务管理器宕机，资源管理器就会一直阻塞，导致数据库无法使用。</p>
+<p><strong>同步阻塞</strong></p>
+<p>​    在准备就绪之后，资源管理器中的资源一直处于阻塞，直到提交完成，释放资源。</p>
+<p><strong>数据不一致</strong></p>
+<p>​    两阶段提交协议虽然为分布式数据强一致性所设计，但仍然存在数据不一致性的可能，比如在第二阶段中，假设协调者发出了事务commit的通知，但是因为网络问题该通知仅被一部分参与者所收到并执行了commit操作，其余的参与者则因为没有收到通知一直处于阻塞状态，这时候就产生了数据的不一致性。</p>
+<p>​    总的来说，XA协议比较简单，成本较低，但是其单点问题，以及不能支持高并发(由于同步阻塞)依然是其最大的弱点。</p>
+<h3 id="Seata-AT-方案"><a href="#Seata-AT-方案" class="headerlink" title="Seata (AT)方案"></a>Seata (AT)方案</h3><h4 id="是什么"><a href="#是什么" class="headerlink" title="是什么"></a>是什么</h4><p>​    Seata 是一款开源的分布式事务解决方案，致力于提供高性能和简单易用的分布式事务服务。Seata 将为用户提供了 AT、TCC、SAGA 和 XA 事务模式，为用户打造一站式的分布式解决方案。</p>
+<p>​    传统2PC的问题在Seata中得到了解决，它通过对本地关系数据库的分支事务的协调来驱动完成全局事务，是<strong>工作在应用层</strong>的中间件。主要优点是性能较好，且不长时间占用连接资源，它以高效并且<strong>对业务0侵入</strong>的方式解决微服务场景下面临的分布式事务问题，它目前主要提供<strong>AT模式</strong>(即2PC)及TCC模式的分布式事务解决方案。</p>
+<p>​    Seata把一个分布式事务理解成一个包含了若干分支事务的全局事务。全局事务的职责是协调其下管辖的分支事务达成一致，要么一起成功提交，要么一起失败回滚。此外，通常分支事务本身就是一个关系数据库的本地事务，下图是全局事务与分支事务的关系图：</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230319233044827.png" alt="image-20230319233044827"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230319233148264.png" alt="image-20230319233148264"></p>
+<p>Seata定义了3个组件来协议分布式事务的处理过程：</p>
+<p>Transaction Coordinator (<strong>TC</strong>)： 事务协调器，它是独立的中间件，需要独立部署运行，它维护全局事务的运<br>行状态，接收TM指令发起全局事务的提交与回滚，负责与RM通信协调各各分支事务的提交或回滚。</p>
+<p>Transaction Manager (<strong>TM</strong>)： 事务管理器，TM需要嵌入应用程序中工作，它负责开启一个全局事务，并最终<br>向TC发起全局提交或全局回滚的指令。</p>
+<p>Resource Manager (<strong>RM</strong>)： 控制分支事务，负责分支注册、状态汇报，并接收事务协调器TC的指令，驱动分<br>支（本地）事务的提交和回滚。</p>
+<p>拿新用户注册送积分举例Seata的分布式事务过程：</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230319233404655.png" alt="image-20230319233404655"></p>
+<p>具体的执行流程如下：</p>
+<ol>
+<li>用户服务的 TM 向 TC 申请开启一个全局事务，全局事务创建成功并生成一个全局唯一的XID。</li>
+<li>用户服务的 RM 向 TC 注册 分支事务，该分支事务在用户服务执行新增用户逻辑，并将其纳入 XID 对应全局<br>事务的管辖。</li>
+<li>用户服务执行分支事务，向用户表插入一条记录。</li>
+<li>逻辑执行到远程调用积分服务时(XID 在微服务调用链路的上下文中传播)。积分服务的RM 向 TC 注册分支事<br>务，该分支事务执行增加积分的逻辑，并将其纳入 XID 对应全局事务的管辖。</li>
+<li>积分服务执行分支事务，向积分记录表插入一条记录，执行完毕后，返回用户服务。</li>
+<li>用户服务分支事务执行完毕。</li>
+<li>TM 向 TC 发起针对 XID 的全局提交或回滚决议。</li>
+<li>TC 调度 XID 下管辖的全部分支事务完成提交或回滚请求。</li>
+</ol>
+<h4 id="Seata实现2PC（AT模式）与传统2PC（XA模式）的差别"><a href="#Seata实现2PC（AT模式）与传统2PC（XA模式）的差别" class="headerlink" title="Seata实现2PC（AT模式）与传统2PC（XA模式）的差别"></a>Seata实现2PC（AT模式）与传统2PC（XA模式）的差别</h4><table>
+<thead>
+<tr>
+<th></th>
+<th>XA</th>
+<th>Seata AT</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>架构层次</td>
+<td>RM是数据库本身</td>
+<td>RM是以jar包形式作为中间件部署在应用程序这一侧</td>
+</tr>
+<tr>
+<td>资源锁定</td>
+<td>事务性资源锁定到第二阶段完成</td>
+<td>第一阶段就提交完成后释放，整体效率较高</td>
+</tr>
+</tbody></table>
+<h2 id="3PC协议"><a href="#3PC协议" class="headerlink" title="3PC协议"></a>3PC协议</h2><h3 id="是什么-1"><a href="#是什么-1" class="headerlink" title="是什么"></a>是什么</h3><p>​    1、在2阶段提交协议的基础上、<br>​    2、三阶段提交协议在协调者和参与者中都引入超时机制，<br>​    3、并且把两阶段提交协议的第一个阶段拆分成了两步：询问，然后再锁资源，最后真正提交</p>
+<p>1、can commit<br>    预执行一次、不占用资源<br>2、pre commit<br>    预执行一次，记录undo/redo日志，占用资源<br>3、do commit<br>    事务提交阶段</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/501938d549794ceab7cddeabd04a90af_tplv-k3u1fbpfcp-zoom-in-crop-mark_4536_0_0_0.awebp" alt="img"></p>
+<p>​    3PC 多了一个阶段其实就是在执行事务之前来确认参与者是否正常，防止个别参与者不正常的情况下，其他参与者都执行了事务，锁定资源。<br>​    出发点是好的，但是绝大部分情况下肯定是正常的，所以每次都<strong>多了一个交互阶段就很不划算</strong>。<br>​    3PC 在参与者处也引入了超时机制，这样在协调者挂了的情况下，如果已经到了提交阶段了，参与者等半天没收到协调者的情况的话就会自动提交事务。不过万一协调者发的是回滚命令呢？这就数据不一致了。</p>
+<h3 id="2PC与3PC"><a href="#2PC与3PC" class="headerlink" title="2PC与3PC"></a>2PC与3PC</h3><p>​    2PC 是一个强一致性的同步阻塞协议，性能已经是比较差的了，</p>
+<p>​    3PC 主要是为了解决两阶段提交协议的阻塞问题，从原来的两个阶段扩展为三个阶段，增加了超时机制。但是多了一个阶段就多了一次通讯的开销，而且是绝大部分情况下无用的通讯。</p>
+<p>​    2PC 还是 3PC 都是协议，可以认为是一种指导思想，和真正的落地还是有差别的。</p>
+<h2 id="TCC事务及其解决方案"><a href="#TCC事务及其解决方案" class="headerlink" title="TCC事务及其解决方案"></a>TCC事务及其解决方案</h2><h3 id="是什么-2"><a href="#是什么-2" class="headerlink" title="是什么"></a>是什么</h3><p>​    <strong>TCC是Try、Confifirm、Cancel三个词语的缩写</strong>，TCC要求每个分支事务实现三个操作：预处理Try、确认Confifirm、撤销Cancel。Try操作做业务检查及资源预留，Confifirm做业务确认操作，Cancel实现一个与Try相反的操作即回滚操作。TM首先发起所有的分支事务的try操作，任何一个分支事务的try操作执行失败，TM将会发起所有分支事务的Cancel操作，若try操作全部成功，TM将会发起所有分支事务的Confifirm操作，其中Confifirm/Cancel操作若执行失败，TM会进行重试。 </p>
+<p><strong>TCC分为三个阶段：</strong></p>
+<p>1、Try 阶段是做业务检查(一致性)及资源预留(隔离)，此阶段仅是一个初步操作，它和后续的Confifirm 一起才能真正构成一个完整的业务逻辑。</p>
+<p>2、Confifirm 阶段是做确认提交，Try阶段所有分支事务执行成功后开始执行 Confifirm。通常情况下，采用TCC则认为 Confifirm阶段是不会出错的。即：只要Try成功，Confifirm一定成功。若Confifirm阶段真的出错了，需引入重试机制或人工处理。</p>
+<p>3、Cancel 阶段是在业务执行错误需要回滚的状态下执行分支事务的业务取消，预留资源释放。通常情况下，采用TCC则认为Cancel阶段也是一定成功的。若Cancel阶段真的出错了，需引入重试机制或人工处理。</p>
+<p>TM事务管理器，TM事务管理器可以实现为独立的服务，也可以让全局事务发起方充当TM的角色，TM独立出来是为了成为公用组件，是为了考虑系统结构和软件复用。</p>
+<p>TM在发起全局事务时生成<strong>全局事务记录</strong>，全局事务ID贯穿整个分布式事务调用链条，用来记录事务上下文，追踪和记录状态，由于Confifirm 和cancel失败需进行重试，因此需要实现为幂等，幂等性是指同一个操作无论请求多少次，其结果都相同。 与之相对的，每个分支注册的事务称为<strong>分支事务记录</strong></p>
+<h3 id="为什么"><a href="#为什么" class="headerlink" title="为什么"></a>为什么</h3><p>TCC事务机制相比于上面介绍的XA，解决了其几个缺点:<br>1.单点问题：由主业务方发起并完成这个业务活动。业务活动管理器也变成多点，引入集群。<br>2.同步阻塞：引入超时，超时后进行补偿，并且不会锁定整个资源，<strong>将资源转换为业务逻辑形式，粒度变小</strong>。<br>3.数据不一致：有了补偿机制之后，由业务活动管理器控制一致性</p>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>强隔离性，严格一致性要求的活动业务（能够控制粒度）。</li>
+<li>执行时间较短的业务</li>
+</ul>
+<p>缺点:</p>
+<p>​    1、代码入侵业务</p>
+<p>​    2、实现较复杂</p>
+<h3 id="TCC需要注意三种异常处理"><a href="#TCC需要注意三种异常处理" class="headerlink" title="TCC需要注意三种异常处理"></a>TCC需要注意三种异常处理</h3><p><strong>空回滚：</strong></p>
+<p>​    未Try就Cancel，直接返回成功</p>
+<p><strong>幂等：</strong></p>
+<p>​    Try、Confirm、Cancel需要保证幂等，可重复执行以支持TCC的提交重试机制</p>
+<p><strong>悬挂：</strong></p>
+<p>​    Cancel后再Try，会造成资源被“占用“，要求二阶段即Cancel执行后，不允许执行一阶段即Try</p>
+<p><strong>经典案例</strong>：<strong>A 转账 30 元给 B，A和B账户在不同的服务</strong></p>
+<p><strong>方案一</strong>：</p>
+<p>账户A:</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">try</span>：<br><span class="hljs-attribute">1</span>、检查余额是否够<span class="hljs-number">30</span>元<br><span class="hljs-attribute">2</span>、扣减<span class="hljs-number">30</span>元<br><span class="hljs-attribute">confirm</span>：空<br><span class="hljs-attribute">cancel</span>：增加<span class="hljs-number">30</span>元<br></code></pre></td></tr></table></figure>
+
+<p>账户B:</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">try</span>：增加<span class="hljs-number">30</span>元 <br><span class="hljs-attribute">confirm</span>：空 <br><span class="hljs-attribute">cancel</span>：减少<span class="hljs-number">30</span>元 <br></code></pre></td></tr></table></figure>
+
+<p>存在的问题：1、无幂等、空回滚、悬挂校验 2、B在try时新增30可能会被别的线程消费</p>
+<p><strong>优化方案</strong>：</p>
+<p>账户A:</p>
+<figure class="highlight md"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs md">try：<br>1、try幂等校验<br>2、try悬挂校验<br>3、减少30元<br>confirm：空<br>cancel：<br>1、cancel幂等校验<br>2、cancel空回滚校验<br>3、增加30元<br></code></pre></td></tr></table></figure>
+
+<p>账户B:</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs vim"><span class="hljs-keyword">try</span>： 空<br><span class="hljs-keyword">confirm</span>： <br><span class="hljs-number">1</span>、<span class="hljs-keyword">confirm</span>幂等校验    <br><span class="hljs-number">2</span>、正式增加<span class="hljs-number">30</span>元 <br>cancel：空<br></code></pre></td></tr></table></figure>
+
+<h3 id="TCC-解决方案"><a href="#TCC-解决方案" class="headerlink" title="TCC 解决方案"></a>TCC 解决方案</h3><p><strong>目前市面上的TCC框架众多比如下面这几种：</strong></p>
+<table>
+<thead>
+<tr>
+<th>框架名称</th>
+<th>Gitbub地址</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>tcc-transaction</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/changmingxie/tcc-transaction">https://github.com/changmingxie/tcc-transaction</a></td>
+</tr>
+<tr>
+<td>Hmily</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/dromara/hmily">https://github.com/dromara/hmily</a></td>
+</tr>
+<tr>
+<td>ByteTCC</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/liuyangming/ByteTCC">https://github.com/liuyangming/ByteTCC</a></td>
+</tr>
+<tr>
+<td>EasyTransaction</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/QNJR-GROUP/EasyTransaction">https://github.com/QNJR-GROUP/EasyTransaction</a></td>
+</tr>
+<tr>
+<td>Seata TCC模式</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/seata/seata">https://github.com/seata/seata</a></td>
+</tr>
+</tbody></table>
+<h2 id="Saga事务及其解决方案"><a href="#Saga事务及其解决方案" class="headerlink" title="Saga事务及其解决方案"></a>Saga事务及其解决方案</h2><h3 id="是什么-3"><a href="#是什么-3" class="headerlink" title="是什么"></a>是什么</h3><p>​    Saga是30年前一篇数据库伦理提到的一个概念（理论基础：Hector &amp; Kenneth 发表论⽂ Sagas （1987））。其核心思想是将长事务拆分为多个本地短事务，由Saga事务协调器协调，如果正常结束那就正常完成，如果某个步骤失败，则补偿前面已经成功的操作。</p>
+<p>​    Saga的组成：每个Saga由一系列sub-transaction Ti 组成 每个Ti 都有对应的补偿动作Ci，补偿动作用于撤销Ti造成的结果,这里的每个T，都是一个本地事务。 可以看到，和TCC相比，Saga没有“预留 try”动作，它的Ti就是直接提交到库。</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/TB1Y2kuw7T2gK0jSZFkXXcIQFXa-445-444.png" alt="Saga模式示意图"></p>
+<p>Saga的执行顺序有两种：</p>
+<p>1、T1, T2, T3, …, Tn</p>
+<p>2、T1, T2, …, Tj, Cj,…, C2, C1，其中0 &lt; j &lt; n<br>Saga定义了两种恢复策略：</p>
+<p>1、向后恢复：即上面提到的第二种执行顺序，其中j是发生错误的sub-transaction，这种做法的效果是撤销掉之前所有成功的sub-transation，使得整个Saga的执行结果撤销。</p>
+<p>2、向前恢复，适用于必须要成功的场景，执行顺序是类似于这样的：T1, T2, …, Tj(失败), Tj(重试),…, Tn，其中j是发生错误的sub-transaction。该情况下不需要Ci</p>
+<h3 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h3><ul>
+<li>业务流程长、业务流程多</li>
+<li>参与者包含其它公司或遗留系统服务，无法提供 TCC 模式要求的三个接口</li>
+</ul>
+<h3 id="优势"><a href="#优势" class="headerlink" title="优势"></a>优势</h3><ul>
+<li>一阶段提交本地事务，无锁，高性能</li>
+<li>事件驱动架构，参与者可异步执行，高吞吐</li>
+<li>补偿服务易于实现</li>
+</ul>
+<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><ul>
+<li>不保证隔离性</li>
+</ul>
+<p>拿100元买一瓶水的例子来说，这里定义：</p>
+<p>​    T1=扣100元 T2=给用户加一瓶水 T3=减库存一瓶水<br>​    C1=加100元 C2=给用户减一瓶水 C3=给库存加一瓶水<br>我们一次进行T1,T2，T3如果发生问题，就执行发生问题的C操作的反向。上面说到的隔离性的问题会出现在，如果执行到T3这个时候需要执行回滚，但是这个用户已经把水喝了(另外一个事务)，回滚的时候就会发现，无法给用户减一瓶水了。这就是事务之间没有隔离性的问题。</p>
+<p><strong>隔离性问题如何解决</strong></p>
+<p>1、参照华为的解决方案(Servicecomb):从业务层面入手加入一 Session 以及锁的机制来保证能够串行化操作资源；</p>
+<p>2、在业务层面通过预先冻结资金的方式隔离这部分资源， 最后在业务操作的过程中可以通过及时读取当前状态的方式获取到最新的更新。</p>
+<p>3、不回滚，提供“向前”恢复上下文继续执行的能力, 让业务最终执行成功, 达到最终一致性的目的。</p>
+<h3 id="Seata-Saga模式"><a href="#Seata-Saga模式" class="headerlink" title="Seata(Saga模式)"></a><a target="_blank" rel="noopener" href="https://seata.io/zh-cn/docs/user/saga.html">Seata(Saga模式)</a></h3><h2 id="最终一致性之可靠消息方案"><a href="#最终一致性之可靠消息方案" class="headerlink" title="最终一致性之可靠消息方案"></a>最终一致性之可靠消息方案</h2><h3 id="是什么-4"><a href="#是什么-4" class="headerlink" title="是什么"></a>是什么</h3><p>​    可靠消息最终一致性方案是指当<strong>事务发起方执行完成本地事务后并发出一条消息</strong>，<strong>事务参与方(消息消费者)一定能够接收消息并处理事务成功</strong>，此方案强调的是只要消息发给事务参与方最终事务要达到一致。</p>
+<p>​    比如利用消息中间件来完成可靠消息，如下图</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230321224855999.png" alt="image-20230321224855999"></p>
+<p>​    事务发起方（消息生产方）将消息发给消息中间件，事务参与方从消息中间件接收消息，事务发起方和消息中间件之间，事务参与方（消息消费方）和消息中间件之间都是通过网络通信，由于网络通信的不确定性会导致分布式事务问题。因此可靠消息最终一致性方案要解决以下几个问题：</p>
+<p>1、<strong>本地事务与消息发送的原子性问题</strong></p>
+<p>​    事务发起方在本地事务执行成功后消息必须发出去，否则就丢弃消息。即实现本地事务和消息发送的原子性，要么都成功，要么都失败。本地事务与消息发送的原子性问题是实现可靠消息最终一致性方案的<strong>关键问题</strong></p>
+<p>先发送消息，再操作数据库：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">begin</span> transaction；<br><span class="hljs-operator">/</span><span class="hljs-operator">/</span><span class="hljs-number">1.</span>发送MQ<br><span class="hljs-operator">/</span><span class="hljs-operator">/</span><span class="hljs-number">2.</span>数据库操作<br><span class="hljs-keyword">commit</span> transation;<br>这种情况下无法保证数据库操作与发送消息的一致性，因为可能发送消息成功，数据库操作失败。<br></code></pre></td></tr></table></figure>
+
+<p>先进行数据库操作，再发送消息：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">begin</span> transaction；<br><span class="hljs-operator">/</span><span class="hljs-operator">/</span><span class="hljs-number">1.</span>数据库操作<br><span class="hljs-operator">/</span><span class="hljs-operator">/</span><span class="hljs-number">2.</span>发送MQ<br><span class="hljs-keyword">commit</span> transation;<br></code></pre></td></tr></table></figure>
+
+<p>​    这种情况下貌似没有问题，如果发送MQ消息失败，就会抛出异常，导致数据库事务回滚。但如果是超时异常，数据库回滚，但MQ其实已经正常发送了，同样会导致不一致。</p>
+<p>2、<strong>事务参与方接受消息的可靠性</strong></p>
+<p>​    事务参与方必须能够从消息队列接收到消息，如果接收消息失败可以重复接收消息。</p>
+<p>3、<strong>消息重复消费的问题</strong></p>
+<p>​    由于网络2的存在，若某一个消费节点超时但是消费成功，此时消息中间件会重复投递此消息，就导致了消息的重复消费。要解决消息重复消费的问题就要实现事务参与方的方法<strong>幂等</strong>性</p>
+<h3 id="本地消息表方案"><a href="#本地消息表方案" class="headerlink" title="本地消息表方案"></a>本地消息表方案</h3><p>​    本地消息表这个方案最初是eBay提出的，此方案的核心是<strong>通过本地事务保证数据业务操作和消息的一致性</strong>，然后通过定时任务将消息发送至消息中间件，待确认消息发送给消费方成功再将消息删除或者修改状态。</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230321234442367.png" alt="image-20230321234442367"></p>
+<p>1、在同一事务插入消息表使原子性问题得到解决</p>
+<p>2、定时任务轮询消息表保证了消息一定能到达事务参与方</p>
+<p>3、通过MQ消费的ACK机制确保消费者消费了消息，消费者需要自身实现幂等</p>
+<h3 id="RocketMQ事务消息方案"><a href="#RocketMQ事务消息方案" class="headerlink" title="RocketMQ事务消息方案"></a>RocketMQ事务消息方案</h3><p>​    RocketMQ 事务消息设计则主要是为了解决 Producer 端的消息发送与本地事务执行的原子性问题，RocketMQ 的设计中 broker 与 producer 端的<strong>双向通信</strong>能力，使得 broker 天生可以作为一个事务协调者存在；而RocketMQ本身提供的存储机制为事务消息提供了持久化能力；</p>
+<p>​    RocketMQ 的高可用机制以及可靠消息设计则为事务消息在系统发生异常时依然能够保证达成事务的最终一致性。</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230322222239901.png" alt="image-20230322222239901"></p>
+<p>以注册送积分的例子来描述，Producer 即MQ发送方，本例中是用户服务，负责新增用户。MQ订阅方即消息消费方，本例中是积分服务，负责新增积分。执行流程如下：</p>
+<p><strong>1、Producer 发送事务消息</strong><br>    Producer （MQ发送方）发送事务消息至MQ Server，MQ Server将消息状态标记为Prepared（预备状态），注<br>意此时这条消息消费者（MQ订阅方）是无法消费到的。本例中，Producer 发送 ”增加积分消息“ 到MQ Server。</p>
+<p><strong>2、MQ Server回应消息发送成功</strong></p>
+<p>​    MQ Server接收到Producer 发送给的消息则回应发送成功表示MQ已接收到消息</p>
+<p><strong>3、Producer 执行本地事务</strong></p>
+<p>​    Producer 端执行业务代码逻辑，通过本地数据库事务控制。本例中，Producer 执行添加用户操作</p>
+<p><strong>4、消息投递</strong></p>
+<p>​    若Producer 本地事务执行成功则自动向MQServer发送commit消息，MQ Server接收到commit消息后将”增加积分消息“ 状态标记为可消费，此时MQ订阅方（积分服务）即正常消费消息；若Producer 本地事务执行失败则自动向MQServer发送rollback消息，MQ Server接收到rollback消息后 将删除”增加积分消息“ 。</p>
+<p>​    MQ订阅方（积分服务）消费消息，消费成功则向MQ回应ack，否则将重复接收消息。这里ack默认自动回应，即程序执行正常则自动回应ack。</p>
+<p><strong>5、事务回查</strong></p>
+<p>​    如果执行Producer端本地事务过程中，执行端挂掉，或者超时，MQ Server将会不停的询问同组的其他 Producer来获取事务执行状态，这个过程叫事务回查。MQ Server会根据事务回查结果来决定是否投递消息。<br>​    以上主干流程已由RocketMQ实现，对用户侧来说，<strong>用户需要分别实现本地事务执行以及本地事务回查方法，因此只需关注本地事务的执行状态即可。</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//1、RoacketMQ提供RocketMQLocalTransactionListener接口：</span><br><span class="hljs-comment">//消息发送成功回调此方法，此方法执行本地事务</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">RocketMQLocalTransactionListener</span> </span>&#123;<br><span class="hljs-comment">/**</span><br><span class="hljs-comment">‐ 发送prepare消息成功此方法被回调，该方法用于执行本地事务</span><br><span class="hljs-comment">‐ <span class="hljs-doctag">@param</span> msg 回传的消息，利用transactionId即可获取到该消息的唯一Id</span><br><span class="hljs-comment">‐ <span class="hljs-doctag">@param</span> arg 调用send方法时传递的参数，当send时候若有额外的参数可以传递到send方法中，这里能获取到</span><br><span class="hljs-comment">‐ <span class="hljs-doctag">@return</span> 返回事务状态，COMMIT：提交 ROLLBACK：回滚 UNKNOW：回调</span><br><span class="hljs-comment">*/</span><br><span class="hljs-function">RocketMQLocalTransactionState <span class="hljs-title">executeLocalTransaction</span><span class="hljs-params">(Message msg, Object arg)</span></span>;<br><span class="hljs-comment">/**</span><br><span class="hljs-comment">‐ <span class="hljs-doctag">@param</span> msg 通过获取transactionId来判断这条消息的本地事务执行状态</span><br><span class="hljs-comment">‐ <span class="hljs-doctag">@return</span> 返回事务状态，COMMIT：提交 ROLLBACK：回滚 UNKNOW：回调</span><br><span class="hljs-comment">*/</span><br><span class="hljs-function">RocketMQLocalTransactionState <span class="hljs-title">checkLocalTransaction</span><span class="hljs-params">(Message msg)</span></span>;<br>&#125;<br><br><span class="hljs-comment">//2、RocketMQ提供用于发送事务消息的API：</span><br><span class="hljs-comment">//此方法检查事务执行状态</span><br>TransactionMQProducer producer = <span class="hljs-keyword">new</span> TransactionMQProducer(<span class="hljs-string">&quot;ProducerGroup&quot;</span>);<br>producer.setNamesrvAddr(<span class="hljs-string">&quot;127.0.0.1:9876&quot;</span>);<br>producer.start();<br><span class="hljs-comment">//设置TransactionListener实现</span><br>producer.setTransactionListener(transactionListener）；<br><span class="hljs-comment">//发送事务消息</span><br>SendResult sendResult = producer.sendMessageInTransaction(msg, <span class="hljs-keyword">null</span>);<br></code></pre></td></tr></table></figure>
+
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>​    可靠消息最终一致性事务适合执行周期长且实时性要求不高的场景。引入消息机制后，同步的事务操作变为基于消息执行的异步操作, 避免了分布式事务中的同步阻塞操作的影响，并实现了两个服务的解耦。</p>
+<h2 id="最终一致性之最大努力通知"><a href="#最终一致性之最大努力通知" class="headerlink" title="最终一致性之最大努力通知"></a>最终一致性之最大努力通知</h2><h3 id="是什么-5"><a href="#是什么-5" class="headerlink" title="是什么"></a>是什么</h3><p>目标：<strong>发起通知方通过一定的机制最大努力将业务处理结果通知到接收方</strong>，具体包括：</p>
+<p><strong>1、有一定的消息重复通知机制。</strong></p>
+<p>​    因为接收通知方可能没有接收到通知，此时要有一定的机制对消息重复通知。</p>
+<p><strong>2、消息校对机制。</strong></p>
+<p>​    如果尽最大努力也没有通知到接收方，或者接收方消费消息后要再次消费，此时可由接收方主动向通知方查询消息信息来满足需求。</p>
+<p><strong>最大努力通知与可靠消息一致性有什么不同</strong></p>
+<p><strong>1、解决方案思想不同</strong></p>
+<p>​    可靠消息一致性，发起通知方需要保证将消息发出去，并且将消息发到接收通知方，<strong>消息的可靠性关键由发起通知方来保证</strong>。</p>
+<p>​    最大努力通知，发起通知方尽最大的努力将业务处理结果通知为接收通知方，但是可能消息接收不到，此时需要接收通知方主动调用发起通知方的接口查询业务处理结果，<strong>通知的可靠性关键在接收通知方</strong>。</p>
+<p><strong>2、两者的业务应用场景不同</strong></p>
+<p>​    可靠消息一致性关注的是交易过程的事务一致，以异步的方式完成交易。</p>
+<p>​    最大努力通知关注的是交易后的<strong>通知事务</strong>，即将交易结果可靠的通知出去。</p>
+<p><strong>3、技术解决方向不同</strong></p>
+<p>​    可靠消息一致性要解决消息从发出到接收的一致性，即消息发出并且被接收到。</p>
+<p>​    最大努力通知无法保证消息从发出到接收的一致性，只提供消息接收的可靠性机制。可靠机制：最大努力的将消息通知给接收方，当消息无法被接收方接收时，由接收方主动查询消息（业务处理结果）。</p>
+<h3 id="技术方案"><a href="#技术方案" class="headerlink" title="技术方案"></a>技术方案</h3><h4 id="消息通知方-MQ-ack机制-接受通知方"><a href="#消息通知方-MQ-ack机制-接受通知方" class="headerlink" title="消息通知方 + MQ(ack机制) + 接受通知方"></a>消息通知方 + MQ(ack机制) + 接受通知方</h4><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230325160143614.png" alt="image-20230325160143614"></p>
+<p>1、消息通知方发送通知MQ（普通消息）</p>
+<p>2、接受通知方监听MQ</p>
+<p>3、接收通知方接受消息成功，业务处理完成后回应ack，若无回应，则MQ会重复通知</p>
+<p>4、接收通知方可以通过消息校对接口（通知方提供）来校对消息的一致性</p>
+<h4 id="消息通知方-MQ-ack机制-通知程序-接受通知方"><a href="#消息通知方-MQ-ack机制-通知程序-接受通知方" class="headerlink" title="消息通知方 + MQ(ack机制) + 通知程序+接受通知方"></a>消息通知方 + MQ(ack机制) + 通知程序+接受通知方</h4><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230325161104590.png" alt="image-20230325161104590"></p>
+<p>1、消息通知方发送通知MQ（普通消息）</p>
+<p>2、通知程序监听 MQ监听MQ</p>
+<p>3、通知程序通过互联网接口协议（如http、webservice）调用接收通知方案接口，完成通知。<br>通知程序调用接收通知方接口成功就表示通知成功，即消费MQ消息成功，MQ将不再向通知程序投递通知消<br>息。</p>
+<p>4、接收通知方可以通过消息校对接口（通知方提供）来校对消息的一致性</p>
+<h4 id="举例：充值结果通知"><a href="#举例：充值结果通知" class="headerlink" title="举例：充值结果通知"></a>举例：充值结果通知</h4><p>充值系统：通知方</p>
+<p>账户系统：被通知方</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230326195650362.png" alt="image-20230326195650362"></p>
+<p>交互流程如下：</p>
+<p>1、用户请求充值系统进行充值<br>2、充值系统完成充值将充值结果发给MQ<br>3、账户系统监听MQ，接收充值结果通知，如果接收不到消息，MQ会重复发送通知。接收到充值结果通知账户系<br>统增加充值金额<br>4、账户系统也可以主动查询充值系统的充值结果查询接口，增加金额</p>
+<h2 id="公司方案"><a href="#公司方案" class="headerlink" title="公司方案"></a>公司方案</h2><p>最终一致性方案：<a target="_blank" rel="noopener" href="https://wiki.dotfashion.cn/display/PPDD/5.6Mage"><strong>异步组件Mage</strong></a>：使用方本地事务插入消息表 + Eyter平台配置处理逻辑（HTTP/RabbitMQ/Kafka/RestyPass）</p>
+<p>强一致性方案：**<a target="_blank" rel="noopener" href="https://wiki.dotfashion.cn/pages/viewpage.action?pageId=429982909">Taurus</a>**：Sage独立中间件模式的实现</p>
 
     </div>
 
@@ -357,7 +631,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%8B%E5%8A%A1"><span class="nav-number">1.1.</span> <span class="nav-text">什么是事务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E6%9C%AC%E5%9C%B0%E4%BA%8B%E5%8A%A1"><span class="nav-number">1.2.</span> <span class="nav-text">数据库本地事务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1"><span class="nav-number">1.3.</span> <span class="nav-text">分布式事务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E7%89%A9%E7%9A%84%E5%9C%B0%E4%BA%A7%E7%94%9F%E5%9C%BA%E6%99%AF"><span class="nav-number">1.4.</span> <span class="nav-text">分布式事物的地产生场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E7%9A%84%E5%9F%BA%E7%A1%80"><span class="nav-number">2.</span> <span class="nav-text">分布式事务的基础</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%8B%E5%8A%A1"><span class="nav-number">1.1.</span> <span class="nav-text">什么是事务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E6%9C%AC%E5%9C%B0%E4%BA%8B%E5%8A%A1"><span class="nav-number">1.2.</span> <span class="nav-text">数据库本地事务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1"><span class="nav-number">1.3.</span> <span class="nav-text">分布式事务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E7%89%A9%E7%9A%84%E5%9C%B0%E4%BA%A7%E7%94%9F%E5%9C%BA%E6%99%AF"><span class="nav-number">1.4.</span> <span class="nav-text">分布式事物的地产生场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E7%9A%84%E5%9F%BA%E7%A1%80"><span class="nav-number">2.</span> <span class="nav-text">分布式事务的基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CAP"><span class="nav-number">2.1.</span> <span class="nav-text">CAP</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#C-Consistency-%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">2.1.1.</span> <span class="nav-text">C - Consistency-一致性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#A-Availability-%E5%8F%AF%E7%94%A8%E6%80%A7"><span class="nav-number">2.1.2.</span> <span class="nav-text">A - Availability-可用性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#P-Partition-tolerance-%E5%88%86%E5%8C%BA%E5%AE%B9%E9%94%99%E6%80%A7"><span class="nav-number">2.1.3.</span> <span class="nav-text">P - Partition tolerance-分区容错性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CAP%E4%B8%89%E8%80%85%E4%B8%8D%E5%8F%AF%E5%85%BC%E5%BE%97"><span class="nav-number">2.1.4.</span> <span class="nav-text">CAP三者不可兼得</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BASE"><span class="nav-number">2.2.</span> <span class="nav-text">BASE</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%BA%E4%B8%80%E8%87%B4%E6%80%A7%E4%B8%8E%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">2.2.1.</span> <span class="nav-text">强一致性与最终一致性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Base%E7%90%86%E8%AE%BA"><span class="nav-number">2.2.2.</span> <span class="nav-text">Base理论</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2PC%E5%8D%8F%E8%AE%AE%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">3.</span> <span class="nav-text">2PC协议及其解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF2PC"><span class="nav-number">3.1.</span> <span class="nav-text">什么是2PC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#XA%E6%96%B9%E6%A1%88"><span class="nav-number">3.2.</span> <span class="nav-text">XA方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#XA%E6%96%B9%E6%A1%88%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">3.3.</span> <span class="nav-text">XA方案的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Seata-AT-%E6%96%B9%E6%A1%88"><span class="nav-number">3.4.</span> <span class="nav-text">Seata (AT)方案</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">3.4.1.</span> <span class="nav-text">是什么</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Seata%E5%AE%9E%E7%8E%B02PC%EF%BC%88AT%E6%A8%A1%E5%BC%8F%EF%BC%89%E4%B8%8E%E4%BC%A0%E7%BB%9F2PC%EF%BC%88XA%E6%A8%A1%E5%BC%8F%EF%BC%89%E7%9A%84%E5%B7%AE%E5%88%AB"><span class="nav-number">3.4.2.</span> <span class="nav-text">Seata实现2PC（AT模式）与传统2PC（XA模式）的差别</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3PC%E5%8D%8F%E8%AE%AE"><span class="nav-number">4.</span> <span class="nav-text">3PC协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88-1"><span class="nav-number">4.1.</span> <span class="nav-text">是什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2PC%E4%B8%8E3PC"><span class="nav-number">4.2.</span> <span class="nav-text">2PC与3PC</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCC%E4%BA%8B%E5%8A%A1%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">5.</span> <span class="nav-text">TCC事务及其解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88-2"><span class="nav-number">5.1.</span> <span class="nav-text">是什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88"><span class="nav-number">5.2.</span> <span class="nav-text">为什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCC%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E4%B8%89%E7%A7%8D%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="nav-number">5.3.</span> <span class="nav-text">TCC需要注意三种异常处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCC-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">5.4.</span> <span class="nav-text">TCC 解决方案</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Saga%E4%BA%8B%E5%8A%A1%E5%8F%8A%E5%85%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">6.</span> <span class="nav-text">Saga事务及其解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88-3"><span class="nav-number">6.1.</span> <span class="nav-text">是什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">6.2.</span> <span class="nav-text">适用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8A%BF"><span class="nav-number">6.3.</span> <span class="nav-text">优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9"><span class="nav-number">6.4.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Seata-Saga%E6%A8%A1%E5%BC%8F"><span class="nav-number">6.5.</span> <span class="nav-text">Seata(Saga模式)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E4%B9%8B%E5%8F%AF%E9%9D%A0%E6%B6%88%E6%81%AF%E6%96%B9%E6%A1%88"><span class="nav-number">7.</span> <span class="nav-text">最终一致性之可靠消息方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88-4"><span class="nav-number">7.1.</span> <span class="nav-text">是什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E6%B6%88%E6%81%AF%E8%A1%A8%E6%96%B9%E6%A1%88"><span class="nav-number">7.2.</span> <span class="nav-text">本地消息表方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RocketMQ%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF%E6%96%B9%E6%A1%88"><span class="nav-number">7.3.</span> <span class="nav-text">RocketMQ事务消息方案</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">7.3.1.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E4%B9%8B%E6%9C%80%E5%A4%A7%E5%8A%AA%E5%8A%9B%E9%80%9A%E7%9F%A5"><span class="nav-number">8.</span> <span class="nav-text">最终一致性之最大努力通知</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88-5"><span class="nav-number">8.1.</span> <span class="nav-text">是什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E6%96%B9%E6%A1%88"><span class="nav-number">8.2.</span> <span class="nav-text">技术方案</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E9%80%9A%E7%9F%A5%E6%96%B9-MQ-ack%E6%9C%BA%E5%88%B6-%E6%8E%A5%E5%8F%97%E9%80%9A%E7%9F%A5%E6%96%B9"><span class="nav-number">8.2.1.</span> <span class="nav-text">消息通知方 + MQ(ack机制) + 接受通知方</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E9%80%9A%E7%9F%A5%E6%96%B9-MQ-ack%E6%9C%BA%E5%88%B6-%E9%80%9A%E7%9F%A5%E7%A8%8B%E5%BA%8F-%E6%8E%A5%E5%8F%97%E9%80%9A%E7%9F%A5%E6%96%B9"><span class="nav-number">8.2.2.</span> <span class="nav-text">消息通知方 + MQ(ack机制) + 通知程序+接受通知方</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BE%E4%BE%8B%EF%BC%9A%E5%85%85%E5%80%BC%E7%BB%93%E6%9E%9C%E9%80%9A%E7%9F%A5"><span class="nav-number">8.2.3.</span> <span class="nav-text">举例：充值结果通知</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AC%E5%8F%B8%E6%96%B9%E6%A1%88"><span class="nav-number">9.</span> <span class="nav-text">公司方案</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
