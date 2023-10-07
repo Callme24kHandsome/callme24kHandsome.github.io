@@ -188,6 +188,235 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/14/junit5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/03/14/junit5/" class="post-title-link" itemprop="url">单元测试-junit5</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-03-14 16:38:02" itemprop="dateCreated datePublished" datetime="2021-03-14T16:38:02+08:00">2021-03-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-09-30 09:08:14" itemprop="dateModified" datetime="2022-09-30T09:08:14+08:00">2022-09-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">单元测试</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="07、单元测试"><a href="#07、单元测试" class="headerlink" title="07、单元测试"></a>07、单元测试</h1><h1 id="1、JUnit5-的变化"><a href="#1、JUnit5-的变化" class="headerlink" title="1、JUnit5 的变化"></a>1、JUnit5 的变化</h1><p><strong>Spring Boot 2.2.0 版本开始引入 JUnit 5 作为单元测试默认库</strong></p>
+<p>作为最新版本的JUnit框架，JUnit5与之前版本的Junit框架有很大的不同。由三个不同子项目的几个不同模块组成。</p>
+<blockquote>
+<p><strong>JUnit 5 = JUnit Platform + JUnit Jupiter + JUnit Vintage</strong></p>
+</blockquote>
+<p><strong>JUnit Platform</strong>: Junit Platform是在JVM上启动测试框架的基础，不仅支持Junit自制的测试引擎，其他测试引擎也都可以接入。</p>
+<p><strong>JUnit Jupiter</strong>: JUnit Jupiter提供了JUnit5的新的编程模型，是JUnit5新特性的核心。内部 包含了一个<strong>测试引擎</strong>，用于在Junit Platform上运行。</p>
+<p><strong>JUnit Vintage</strong>: 由于JUint已经发展多年，为了照顾老的项目，JUnit Vintage提供了兼容JUnit4.x,Junit3.x的测试引擎。</p>
+<p><img src="/images/junit5/afeae670-6be9-11e9-8b0d-d3a853e66b8e-1617453264093" alt="img"></p>
+<p>注意：</p>
+<p><strong>SpringBoot 2.4 以上版本移除了默认对 Vintage 的依赖。如果需要兼容junit4需要自行引入（不能使用junit4的功能 @Test）</strong></p>
+<p><strong>JUnit 5’s Vintage Engine Removed from</strong> <strong><code>spring-boot-starter-test,如果需要继续兼容junit4需要自行引入vintage</code></strong></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.junit.vintage<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>junit-vintage-engine<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">scope</span>&gt;</span>test<span class="hljs-tag">&lt;/<span class="hljs-name">scope</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">exclusions</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">exclusion</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.hamcrest<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>hamcrest-core<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">exclusion</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">exclusions</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p><img src="/images/junit5/image-1617453444332.png" alt="img"></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-test<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">scope</span>&gt;</span>test<span class="hljs-tag">&lt;/<span class="hljs-name">scope</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>现在版本：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@SpringBootTest</span><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Boot05WebAdminApplicationTests</span> </span>&#123;<br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">contextLoads</span><span class="hljs-params">()</span> </span>&#123;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>以前：</p>
+<p><strong>@SpringBootTest + @RunWith(SpringTest.class)</strong></p>
+<p>SpringBoot整合Junit以后。</p>
+<ul>
+<li>编写测试方法：@Test标注（注意需要使用junit5版本的注解）</li>
+<li>Junit类具有Spring的功能，@Autowired、比如 @Transactional 标注测试方法，测试完成后自动回滚</li>
+</ul>
+<h1 id="2、JUnit5常用注解"><a href="#2、JUnit5常用注解" class="headerlink" title="2、JUnit5常用注解"></a>2、JUnit5常用注解</h1><p>JUnit5的注解与JUnit4的注解有所变化</p>
+<p><a target="_blank" rel="noopener" href="https://junit.org/junit5/docs/current/user-guide/#writing-tests-annotations">https://junit.org/junit5/docs/current/user-guide/#writing-tests-annotations</a></p>
+<ul>
+<li>**@Test **:表示方法是测试方法。但是与JUnit4的@Test不同，他的职责非常单一不能声明任何属性，拓展的测试将会由Jupiter提供额外测试</li>
+<li>**@ParameterizedTest **:表示方法是参数化测试，下方会有详细介绍</li>
+<li>**@RepeatedTest **:表示方法可重复执行，下方会有详细介绍</li>
+<li>**@DisplayName **:为测试类或者测试方法设置展示名称</li>
+<li><strong>@BeforeEach</strong> :表示在每个单元测试之前执行</li>
+<li>**@AfterEach **:表示在每个单元测试之后执行</li>
+<li>**@BeforeAll :**表示在所有单元测试之前执行</li>
+<li>**@AfterAll :**表示在所有单元测试之后执行</li>
+<li>**@Tag :**表示单元测试类别，类似于JUnit4中的@Categories</li>
+<li>**@Disabled :**表示测试类或测试方法不执行，类似于JUnit4中的@Ignore</li>
+<li>**@Timeout :**表示测试方法运行如果超过了指定时间将会返回错误</li>
+<li>**@ExtendWith :**为测试类或测试方法提供扩展类引用</li>
+</ul>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs less"><span class="hljs-selector-tag">import</span> <span class="hljs-selector-tag">org</span><span class="hljs-selector-class">.junit</span><span class="hljs-selector-class">.jupiter</span><span class="hljs-selector-class">.api</span><span class="hljs-selector-class">.Test</span>; <span class="hljs-comment">//注意这里使用的是jupiter的Test注解！！</span><br><br><br><span class="hljs-selector-tag">public</span> <span class="hljs-selector-tag">class</span> <span class="hljs-selector-tag">TestDemo</span> &#123;<br><br>  <span class="hljs-variable">@Test</span><br>  <span class="hljs-variable">@DisplayName</span>(<span class="hljs-string">&quot;第一次测试&quot;</span>)<br>  public void firstTest() &#123;<br>      <span class="hljs-selector-tag">System</span><span class="hljs-selector-class">.out</span><span class="hljs-selector-class">.println</span>(<span class="hljs-string">&quot;hello world&quot;</span>);<br>  &#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h1 id="3、断言（assertions）"><a href="#3、断言（assertions）" class="headerlink" title="3、断言（assertions）"></a>3、断言（assertions）</h1><p>断言（assertions）是测试方法中的核心部分，用来对测试需要满足的条件进行验证。<strong>这些断言方法都是 org.junit.jupiter.api.Assertions 的静态方法</strong>。JUnit 5 内置的断言可以分成如下几个类别：</p>
+<p><strong>检查业务逻辑返回的数据是否合理。</strong></p>
+<p><strong>所有的测试运行结束以后，会有一个详细的测试报告；</strong></p>
+<h2 id="1、简单断言"><a href="#1、简单断言" class="headerlink" title="1、简单断言"></a>1、简单断言</h2><p>用来对单个值进行简单的验证。如：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>assertEquals</td>
+<td>判断两个对象或两个原始类型是否相等</td>
+</tr>
+<tr>
+<td>assertNotEquals</td>
+<td>判断两个对象或两个原始类型是否不相等</td>
+</tr>
+<tr>
+<td>assertSame</td>
+<td>判断两个对象引用是否指向同一个对象</td>
+</tr>
+<tr>
+<td>assertNotSame</td>
+<td>判断两个对象引用是否指向不同的对象</td>
+</tr>
+<tr>
+<td>assertTrue</td>
+<td>判断给定的布尔值是否为 true</td>
+</tr>
+<tr>
+<td>assertFalse</td>
+<td>判断给定的布尔值是否为 false</td>
+</tr>
+<tr>
+<td>assertNull</td>
+<td>判断给定的对象引用是否为 null</td>
+</tr>
+<tr>
+<td>assertNotNull</td>
+<td>判断给定的对象引用是否不为 null</td>
+</tr>
+</tbody></table>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-meta">@DisplayName(&quot;simple assertion&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">simple</span><span class="hljs-params">()</span> </span>&#123;<br>     assertEquals(<span class="hljs-number">3</span>, <span class="hljs-number">1</span> + <span class="hljs-number">2</span>, <span class="hljs-string">&quot;simple math&quot;</span>);<br>     assertNotEquals(<span class="hljs-number">3</span>, <span class="hljs-number">1</span> + <span class="hljs-number">1</span>);<br><br>     assertNotSame(<span class="hljs-keyword">new</span> Object(), <span class="hljs-keyword">new</span> Object());<br>     Object obj = <span class="hljs-keyword">new</span> Object();<br>     assertSame(obj, obj);<br><br>     assertFalse(<span class="hljs-number">1</span> &gt; <span class="hljs-number">2</span>);<br>     assertTrue(<span class="hljs-number">1</span> &lt; <span class="hljs-number">2</span>);<br><br>     assertNull(<span class="hljs-keyword">null</span>);<br>     assertNotNull(<span class="hljs-keyword">new</span> Object());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="2、数组断言"><a href="#2、数组断言" class="headerlink" title="2、数组断言"></a>2、数组断言</h2><p>通过 assertArrayEquals 方法来判断两个对象或原始类型的数组是否相等</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs Java"><span class="hljs-meta">@Test</span><br><span class="hljs-meta">@DisplayName(&quot;array assertion&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">array</span><span class="hljs-params">()</span> </span>&#123;<br> assertArrayEquals(<span class="hljs-keyword">new</span> <span class="hljs-keyword">int</span>[]&#123;<span class="hljs-number">1</span>, <span class="hljs-number">2</span>&#125;, <span class="hljs-keyword">new</span> <span class="hljs-keyword">int</span>[] &#123;<span class="hljs-number">1</span>, <span class="hljs-number">2</span>&#125;);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="3、组合断言"><a href="#3、组合断言" class="headerlink" title="3、组合断言"></a>3、组合断言</h2><p>assertAll 方法接受多个 org.junit.jupiter.api.Executable 函数式接口的实例作为要验证的断言，可以通过 lambda 表达式很容易的提供这些断言</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs Java"><span class="hljs-meta">@Test</span><br><span class="hljs-meta">@DisplayName(&quot;assert all&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">all</span><span class="hljs-params">()</span> </span>&#123;<br> assertAll(<span class="hljs-string">&quot;Math&quot;</span>,<br>    () -&gt; assertEquals(<span class="hljs-number">2</span>, <span class="hljs-number">1</span> + <span class="hljs-number">1</span>),<br>    () -&gt; assertTrue(<span class="hljs-number">1</span> &gt; <span class="hljs-number">0</span>)<br> );<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="4、异常断言"><a href="#4、异常断言" class="headerlink" title="4、异常断言"></a>4、异常断言</h2><p>在JUnit4时期，想要测试方法的异常情况时，需要用**@Rule<strong>注解的ExpectedException变量还是比较麻烦的。而JUnit5提供了一种新的断言方式</strong>Assertions.assertThrows()** ,配合函数式编程就可以进行使用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-meta">@DisplayName(&quot;异常测试&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">exceptionTest</span><span class="hljs-params">()</span> </span>&#123;<br>    ArithmeticException exception = Assertions.assertThrows(<br>           <span class="hljs-comment">//扔出断言异常</span><br>            ArithmeticException.class, () -&gt; System.out.println(<span class="hljs-number">1</span> % <span class="hljs-number">0</span>));<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="5、超时断言"><a href="#5、超时断言" class="headerlink" title="5、超时断言"></a>5、超时断言</h2><p>Junit5还提供了<strong>Assertions.assertTimeout()</strong> 为测试方法设置了超时时间</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-meta">@DisplayName(&quot;超时测试&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">timeoutTest</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-comment">//如果测试方法时间超过1s将会异常</span><br>    Assertions.assertTimeout(Duration.ofMillis(<span class="hljs-number">1000</span>), () -&gt; Thread.sleep(<span class="hljs-number">500</span>));<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="6、快速失败"><a href="#6、快速失败" class="headerlink" title="6、快速失败"></a>6、快速失败</h2><p>通过 fail 方法直接使得测试失败</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-meta">@DisplayName(&quot;fail&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">shouldFail</span><span class="hljs-params">()</span> </span>&#123;<br> fail(<span class="hljs-string">&quot;This should fail&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h1 id="4、前置条件（assumptions）"><a href="#4、前置条件（assumptions）" class="headerlink" title="4、前置条件（assumptions）"></a>4、前置条件（assumptions）</h1><p>JUnit 5 中的前置条件（<strong>assumptions【假设】</strong>）类似于断言，不同之处在于<strong>不满足的断言会使得测试方法失败</strong>，而不满足的<strong>前置条件只会使得测试方法的执行终止</strong>。前置条件可以看成是测试方法执行的前提，当该前提不满足时，就没有继续执行的必要。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@DisplayName(&quot;前置条件&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AssumptionsTest</span> </span>&#123;<br> <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String environment = <span class="hljs-string">&quot;DEV&quot;</span>;<br> <br> <span class="hljs-meta">@Test</span><br> <span class="hljs-meta">@DisplayName(&quot;simple&quot;)</span><br> <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">simpleAssume</span><span class="hljs-params">()</span> </span>&#123;<br>    assumeTrue(Objects.equals(<span class="hljs-keyword">this</span>.environment, <span class="hljs-string">&quot;DEV&quot;</span>));<br>    assumeFalse(() -&gt; Objects.equals(<span class="hljs-keyword">this</span>.environment, <span class="hljs-string">&quot;PROD&quot;</span>));<br> &#125;<br> <br> <span class="hljs-meta">@Test</span><br> <span class="hljs-meta">@DisplayName(&quot;assume then do&quot;)</span><br> <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">assumeThenDo</span><span class="hljs-params">()</span> </span>&#123;<br>    assumingThat(<br>       Objects.equals(<span class="hljs-keyword">this</span>.environment, <span class="hljs-string">&quot;DEV&quot;</span>),<br>       () -&gt; System.out.println(<span class="hljs-string">&quot;In DEV&quot;</span>)<br>    );<br> &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>assumeTrue 和 assumFalse 确保给定的条件为 true 或 false，不满足条件会使得测试执行终止。assumingThat 的参数是表示条件的布尔值和对应的 Executable 接口的实现对象。只有条件满足时，Executable 对象才会被执行；当条件不满足时，测试执行并不会终止。</p>
+<h1 id="5、嵌套测试"><a href="#5、嵌套测试" class="headerlink" title="5、嵌套测试"></a>5、嵌套测试</h1><p>JUnit 5 可以通过 Java 中的内部类和@Nested 注解实现嵌套测试，从而可以更好的把相关的测试方法组织在一起。在内部类中可以使用@BeforeEach 和@AfterEach 注解，而且嵌套的层次没有限制。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@DisplayName(&quot;A stack&quot;)</span><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestingAStackDemo</span> </span>&#123;<br><br>    Stack&lt;Object&gt; stack;<br><br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-meta">@DisplayName(&quot;is instantiated with new Stack()&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">isInstantiatedWithNew</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">new</span> Stack&lt;&gt;();<br>    &#125;<br><br>    <span class="hljs-meta">@Nested</span><br>    <span class="hljs-meta">@DisplayName(&quot;when new&quot;)</span><br>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">WhenNew</span> </span>&#123;<br><br>        <span class="hljs-meta">@BeforeEach</span><br>        <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">createNewStack</span><span class="hljs-params">()</span> </span>&#123;<br>            stack = <span class="hljs-keyword">new</span> Stack&lt;&gt;();<br>        &#125;<br><br>        <span class="hljs-meta">@Test</span><br>        <span class="hljs-meta">@DisplayName(&quot;is empty&quot;)</span><br>        <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">isEmpty</span><span class="hljs-params">()</span> </span>&#123;<br>            assertTrue(stack.isEmpty());<br>        &#125;<br><br>        <span class="hljs-meta">@Test</span><br>        <span class="hljs-meta">@DisplayName(&quot;throws EmptyStackException when popped&quot;)</span><br>        <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">throwsExceptionWhenPopped</span><span class="hljs-params">()</span> </span>&#123;<br>            assertThrows(EmptyStackException.class, stack::pop);<br>        &#125;<br><br>        <span class="hljs-meta">@Test</span><br>        <span class="hljs-meta">@DisplayName(&quot;throws EmptyStackException when peeked&quot;)</span><br>        <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">throwsExceptionWhenPeeked</span><span class="hljs-params">()</span> </span>&#123;<br>            assertThrows(EmptyStackException.class, stack::peek);<br>        &#125;<br><br>        <span class="hljs-meta">@Nested</span><br>        <span class="hljs-meta">@DisplayName(&quot;after pushing an element&quot;)</span><br>        <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AfterPushing</span> </span>&#123;<br><br>            String anElement = <span class="hljs-string">&quot;an element&quot;</span>;<br><br>            <span class="hljs-meta">@BeforeEach</span><br>            <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">pushAnElement</span><span class="hljs-params">()</span> </span>&#123;<br>                stack.push(anElement);<br>            &#125;<br><br>            <span class="hljs-meta">@Test</span><br>            <span class="hljs-meta">@DisplayName(&quot;it is no longer empty&quot;)</span><br>            <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">isNotEmpty</span><span class="hljs-params">()</span> </span>&#123;<br>                assertFalse(stack.isEmpty());<br>            &#125;<br><br>            <span class="hljs-meta">@Test</span><br>            <span class="hljs-meta">@DisplayName(&quot;returns the element when popped and is empty&quot;)</span><br>            <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">returnElementWhenPopped</span><span class="hljs-params">()</span> </span>&#123;<br>                assertEquals(anElement, stack.pop());<br>                assertTrue(stack.isEmpty());<br>            &#125;<br><br>            <span class="hljs-meta">@Test</span><br>            <span class="hljs-meta">@DisplayName(&quot;returns the element when peeked but remains not empty&quot;)</span><br>            <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">returnElementWhenPeeked</span><span class="hljs-params">()</span> </span>&#123;<br>                assertEquals(anElement, stack.peek());<br>                assertFalse(stack.isEmpty());<br>            &#125;<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h1 id="6、参数化测试"><a href="#6、参数化测试" class="headerlink" title="6、参数化测试"></a>6、参数化测试</h1><p>参数化测试是JUnit5很重要的一个新特性，它使得用不同的参数多次运行测试成为了可能，也为我们的单元测试带来许多便利。</p>
+<p>利用**@ValueSource**等注解，指定入参，我们将可以使用不同的参数进行多次单元测试，而不需要每新增一个参数就新增一个单元测试，省去了很多冗余代码。</p>
+<p>**<br>**</p>
+<p><strong>@ValueSource</strong>: 为参数化测试指定入参来源，支持八大基础类以及String类型,Class类型</p>
+<p><strong>@NullSource</strong>: 表示为参数化测试提供一个null的入参</p>
+<p><strong>@EnumSource</strong>: 表示为参数化测试提供一个枚举入参</p>
+<p><strong>@CsvFileSource</strong>：表示读取指定CSV文件内容作为参数化测试入参</p>
+<p><strong>@MethodSource</strong>：表示读取指定方法的返回值作为参数化测试入参(注意方法返回需要是一个流)</p>
+<blockquote>
+<p>当然如果参数化测试仅仅只能做到指定普通的入参还达不到让我觉得惊艳的地步。让我真正感到他的强大之处的地方在于他可以支持外部的各类入参。如:CSV,YML,JSON 文件甚至方法的返回值也可以作为入参。只需要去实现<strong>ArgumentsProvider</strong>接口，任何外部文件都可以作为它的入参。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@ParameterizedTest</span><br><span class="hljs-meta">@ValueSource(strings = &#123;&quot;one&quot;, &quot;two&quot;, &quot;three&quot;&#125;)</span><br><span class="hljs-meta">@DisplayName(&quot;参数化测试1&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">parameterizedTest1</span><span class="hljs-params">(String string)</span> </span>&#123;<br>    System.out.println(string);<br>    Assertions.assertTrue(StringUtils.isNotBlank(string));<br>&#125;<br><br><br><span class="hljs-meta">@ParameterizedTest</span><br><span class="hljs-meta">@MethodSource(&quot;method&quot;)</span>    <span class="hljs-comment">//指定方法名</span><br><span class="hljs-meta">@DisplayName(&quot;方法来源参数&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testWithExplicitLocalMethodSource</span><span class="hljs-params">(String name)</span> </span>&#123;<br>    System.out.println(name);<br>    Assertions.assertNotNull(name);<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">static</span> Stream&lt;String&gt; <span class="hljs-title">method</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">return</span> Stream.of(<span class="hljs-string">&quot;apple&quot;</span>, <span class="hljs-string">&quot;banana&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h1 id="7、迁移指南"><a href="#7、迁移指南" class="headerlink" title="7、迁移指南"></a>7、迁移指南</h1><p>在进行迁移的时候需要注意如下的变化：</p>
+<ul>
+<li>注解在 org.junit.jupiter.api 包中，断言在 org.junit.jupiter.api.Assertions 类中，前置条件在 org.junit.jupiter.api.Assumptions 类中。</li>
+<li>把@Before 和@After 替换成@BeforeEach 和@AfterEach。</li>
+<li>把@BeforeClass 和@AfterClass 替换成@BeforeAll 和@AfterAll。</li>
+<li>把@Ignore 替换成@Disabled。</li>
+<li>把@Category 替换成@Tag。</li>
+<li>把@RunWith、@Rule 和@ClassRule 替换成@ExtendWith。</li>
+</ul>
+<h1 id="8、参考来源："><a href="#8、参考来源：" class="headerlink" title="8、参考来源："></a>8、参考来源：</h1><p><a target="_blank" rel="noopener" href="https://www.yuque.com/atguigu/springboot/ksndgx">https://www.yuque.com/atguigu/springboot/ksndgx</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/14/MyArticle/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2771,20 +3000,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-count">79</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-count">29</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">68</span>
+        <span class="site-state-item-count">70</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
