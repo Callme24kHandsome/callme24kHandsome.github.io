@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="leetcode热题100">
+<meta property="og:type" content="article">
+<meta property="og:title" content="leetcode100-2">
+<meta property="og:url" content="http://example.com/2024/02/02/leetcode100-2/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="leetcode热题100">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/leetcode100-2/image-20240202092200947.png">
+<meta property="og:image" content="http://example.com/images/leetcode100-2/image-20240202093311492.png">
+<meta property="og:image" content="http://example.com/images/leetcode100-2/image-20240203133932264.png">
+<meta property="og:image" content="http://example.com/images/leetcode100-2/image-20240203133917768.png">
+<meta property="og:image" content="http://example.com/images/leetcode100-2/image-20240203163828876.png">
+<meta property="article:published_time" content="2024-02-02T14:00:00.000Z">
+<meta property="article:modified_time" content="2024-02-03T08:45:31.779Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="leetcode">
+<meta property="article:tag" content="热题100">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/leetcode100-2/image-20240202092200947.png">
+
+<link rel="canonical" href="http://example.com/2024/02/02/leetcode100-2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>leetcode100-2 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/02/02/leetcode100-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          leetcode100-2
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-02-02 22:00:00" itemprop="dateCreated datePublished" datetime="2024-02-02T22:00:00+08:00">2024-02-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-02-03 16:45:31" itemprop="dateModified" datetime="2024-02-03T16:45:31+08:00">2024-02-03</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/leetcode/" itemprop="url" rel="index"><span itemprop="name">leetcode</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">leetcode热题100</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="图论"><a href="#图论" class="headerlink" title="图论"></a>图论</h1><h2 id="200-岛屿数量"><a href="#200-岛屿数量" class="headerlink" title="200. 岛屿数量"></a><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/number-of-islands/">200. 岛屿数量</a></h2><p><img src="/images/leetcode100-2/image-20240202092200947.png" alt="image-20240202092200947"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">numIslands1</span><span class="hljs-params">(<span class="hljs-keyword">char</span>[][] grid)</span> </span>&#123;<br>    <span class="hljs-keyword">int</span> result = <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">int</span> r = grid.length;<br>    <span class="hljs-keyword">int</span> c = grid[<span class="hljs-number">0</span>].length;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; r; i++) &#123;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> j = <span class="hljs-number">0</span>; j &lt; c; j++) &#123;<br>            <span class="hljs-keyword">if</span>(grid[i][j] == <span class="hljs-string">&#x27;1&#x27;</span>)&#123;<br>                ++ result;<br>                dfs(grid,i,j);<br>            &#125;<br><br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> result;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">dfs</span><span class="hljs-params">(<span class="hljs-keyword">char</span>[][] grid,<span class="hljs-keyword">int</span> r,<span class="hljs-keyword">int</span> c)</span></span>&#123;<br>    <span class="hljs-keyword">if</span>(r &gt;= grid.length || c &gt;= grid[<span class="hljs-number">0</span>].length || r &lt; <span class="hljs-number">0</span> || c &lt; <span class="hljs-number">0</span>)&#123;<br>        <span class="hljs-keyword">return</span>;<br>    &#125;<br>    <span class="hljs-keyword">if</span>(grid[r][c] != <span class="hljs-string">&#x27;1&#x27;</span>)&#123;<br>        <span class="hljs-comment">//海洋或者已标记</span><br>        <span class="hljs-keyword">return</span>;<br>    &#125;<br>    <span class="hljs-comment">//标记已访问</span><br>    grid[r][c] = <span class="hljs-string">&#x27;2&#x27;</span>;<br>    dfs(grid,r+<span class="hljs-number">1</span>,c);<br>    dfs(grid,r-<span class="hljs-number">1</span>,c);<br>    dfs(grid,r,c+<span class="hljs-number">1</span>);<br>    dfs(grid,r,c-<span class="hljs-number">1</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="994-腐烂的橘子"><a href="#994-腐烂的橘子" class="headerlink" title="994. 腐烂的橘子"></a><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/rotting-oranges/">994. 腐烂的橘子</a></h2><p><img src="/images/leetcode100-2/image-20240202093311492.png" alt="image-20240202093311492"></p>
+<p>利用队列+宽度遍历</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">orangesRotting</span><span class="hljs-params">(<span class="hljs-keyword">int</span>[][] grid)</span> </span>&#123;<br>    <span class="hljs-keyword">int</span> r = grid.length;<br>    <span class="hljs-keyword">int</span> c = grid[<span class="hljs-number">0</span>].length;<br>    <span class="hljs-keyword">int</span> count = <span class="hljs-number">0</span>; <span class="hljs-comment">// count 表示新鲜橘子的数量</span><br>    <span class="hljs-keyword">int</span> round = <span class="hljs-number">0</span>; <span class="hljs-comment">// round 表示腐烂的轮数，或者分钟数</span><br>    Queue&lt;<span class="hljs-keyword">int</span>[]&gt; queue = <span class="hljs-keyword">new</span> ArrayDeque&lt;&gt;();<br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; r; i++) &#123;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> j = <span class="hljs-number">0</span>; j &lt; c; j++) &#123;<br>            <span class="hljs-keyword">if</span>(grid[i][j] == <span class="hljs-number">2</span>)&#123;<br>                queue.add(<span class="hljs-keyword">new</span> <span class="hljs-keyword">int</span>[]&#123;i,j&#125;);<br>            &#125;<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(grid[i][j] == <span class="hljs-number">1</span>)&#123;<br>                count++;<br>            &#125;<br><br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">while</span>(!queue.isEmpty() &amp;&amp; count &gt; <span class="hljs-number">0</span>)&#123;<br>        round++;<br>        <span class="hljs-keyword">int</span> n = queue.size();<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; n; i++) &#123;<br>            <span class="hljs-keyword">int</span>[] orange = queue.poll();<br>            <span class="hljs-keyword">int</span> row = orange[<span class="hljs-number">0</span>];<br>            <span class="hljs-keyword">int</span> col = orange[<span class="hljs-number">1</span>];<br><br>            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> k = <span class="hljs-number">0</span>; k &lt; <span class="hljs-number">4</span>; k++) &#123;<br>                <span class="hljs-keyword">int</span> x = row + dx[k];<br>                <span class="hljs-keyword">int</span> y = col + dy[k];<br>                <span class="hljs-keyword">if</span>(x &gt;= <span class="hljs-number">0</span> &amp;&amp; x &lt; r &amp;&amp; y &gt;= <span class="hljs-number">0</span> &amp;&amp; y &lt; c &amp;&amp; grid[x][y] == <span class="hljs-number">1</span>)&#123;<br>                    grid[x][y] = <span class="hljs-number">2</span>;<br>                    count--;<br>                    queue.add(<span class="hljs-keyword">new</span> <span class="hljs-keyword">int</span>[]&#123;x,y&#125;);<br>                &#125;<br>            &#125;<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">if</span> (count &gt; <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-keyword">return</span> round;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="207-课程表"><a href="#207-课程表" class="headerlink" title="207. 课程表"></a><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/course-schedule/">207. 课程表</a></h2><p><img src="/images/leetcode100-2/image-20240203133932264.png" alt="image-20240203133932264"></p>
+<p><img src="/images/leetcode100-2/image-20240203133917768.png" alt="image-20240203133917768"></p>
+<h3 id="解法：有向图-入度-队列-宽度优先遍历"><a href="#解法：有向图-入度-队列-宽度优先遍历" class="headerlink" title="解法：有向图 +入度+队列+ 宽度优先遍历"></a>解法：有向图 +入度+队列+ 宽度优先遍历</h3><p>思路：先学没有前置课程的课程，维护所有课程的入度（前置课程数），学完对应课程C1后，维护其他以C1为前置课程的课程的入度-1，利用队列存储入度为0的课程，循环迭代，直到队列为空。如果课程学习完毕，则完成，否则说明存在有向环，存在死循环</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">canFinish</span><span class="hljs-params">(<span class="hljs-keyword">int</span> numCourses, <span class="hljs-keyword">int</span>[][] prerequisites)</span> </span>&#123;<br>    <span class="hljs-comment">//维护每个节点的入度，下标表示第index课程</span><br>    <span class="hljs-keyword">int</span>[] indegrees = <span class="hljs-keyword">new</span> <span class="hljs-keyword">int</span>[numCourses];<br>    <span class="hljs-comment">//维护每个课程的后置课程</span><br>    List&lt;List&lt;Integer&gt;&gt; outSides = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();<br>    Queue&lt;Integer&gt; queue = <span class="hljs-keyword">new</span> ArrayDeque&lt;&gt;();<br>    <span class="hljs-keyword">int</span> visitCount = <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; numCourses; i++) &#123;<br>        outSides.add(<span class="hljs-keyword">new</span> ArrayList&lt;&gt;());<br>    &#125;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span>[] prerequisite : prerequisites) &#123;<br>        indegrees[prerequisite[<span class="hljs-number">0</span>]]++;<br>        outSides.get(prerequisite[<span class="hljs-number">1</span>]).add(prerequisite[<span class="hljs-number">0</span>]);<br>    &#125;<br><br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; indegrees.length; i++) &#123;<br>        <span class="hljs-keyword">if</span>(indegrees[i] == <span class="hljs-number">0</span>)&#123;<br>            queue.offer(i);<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">while</span> (!queue.isEmpty())&#123;<br>        Integer pre = queue.poll();<br>        visitCount ++;<br>        <span class="hljs-keyword">for</span> (Integer node : outSides.get(pre)) &#123;<br>            indegrees[node]--;<br>            <span class="hljs-keyword">if</span>(indegrees[node] == <span class="hljs-number">0</span>)&#123;<br>                queue.offer(node);<br>            &#125;<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> visitCount == numCourses;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="208-实现-Trie-前缀树"><a href="#208-实现-Trie-前缀树" class="headerlink" title="208. 实现 Trie (前缀树)"></a><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/implement-trie-prefix-tree/">208. 实现 Trie (前缀树)</a></h2><p><img src="/images/leetcode100-2/image-20240203163828876.png" alt="image-20240203163828876"></p>
+<p>解题思路：实现一种数据结构，能够像树形结构那样层层向下检索字符串的每个字符，且字符都是小写，告诉了我们下一个字母只有26种可能，且需要支持search功能，说明得直到是否包含某个字符串。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Trie</span> </span>&#123;<br>    <span class="hljs-keyword">private</span> Trie[] children;<br>    <span class="hljs-comment">//当前单词是否为某个字符串的结束符</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">boolean</span> isEnd;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Trie</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.isEnd = <span class="hljs-keyword">false</span>;<br>        <span class="hljs-comment">//实际不存储char，Trie的下标来标识</span><br>        children = <span class="hljs-keyword">new</span> Trie[<span class="hljs-number">26</span>];<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">insert</span><span class="hljs-params">(String word)</span> </span>&#123;<br>        Trie node = <span class="hljs-keyword">this</span>;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; word.length(); i++) &#123;<br>            <span class="hljs-keyword">char</span> c = word.charAt(i);<br>            <span class="hljs-keyword">int</span> index = c - <span class="hljs-string">&#x27;a&#x27;</span>;<br>            <span class="hljs-keyword">if</span>(Objects.isNull(node.children[index]))&#123;<br>                node.children[index] = <span class="hljs-keyword">new</span> Trie();<br>            &#125;<br>            node = node.children[index];<br>        &#125;<br>        node.isEnd = <span class="hljs-keyword">true</span>;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">search</span><span class="hljs-params">(String word)</span> </span>&#123;<br>        Trie trie = prefixWith(word);<br>        <span class="hljs-keyword">if</span>(trie != <span class="hljs-keyword">null</span> &amp;&amp; trie.isEnd)&#123;<br>            <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">startsWith</span><span class="hljs-params">(String prefix)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> prefixWith(prefix) != <span class="hljs-keyword">null</span>;<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Trie <span class="hljs-title">prefixWith</span><span class="hljs-params">(String prefix)</span> </span>&#123;<br>        Trie node = <span class="hljs-keyword">this</span>;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; prefix.length(); i++) &#123;<br>            <span class="hljs-keyword">int</span> index = prefix.charAt(i) - <span class="hljs-string">&#x27;a&#x27;</span>;<br>            <span class="hljs-keyword">if</span>(node.children[index]!=<span class="hljs-keyword">null</span>)&#123;<br>                node = node.children[index];<br>            &#125;<span class="hljs-keyword">else</span>&#123;<br>                <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">return</span> node;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/leetcode/" rel="tag"># leetcode</a>
+              <a href="/tags/%E7%83%AD%E9%A2%98100/" rel="tag"># 热题100</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/01/21/leetcode100-%E6%A0%91/" rel="prev" title="leetcode100-树">
+      <i class="fa fa-chevron-left"></i> leetcode100-树
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%BE%E8%AE%BA"><span class="nav-number">1.</span> <span class="nav-text">图论</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#200-%E5%B2%9B%E5%B1%BF%E6%95%B0%E9%87%8F"><span class="nav-number">1.1.</span> <span class="nav-text">200. 岛屿数量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#994-%E8%85%90%E7%83%82%E7%9A%84%E6%A9%98%E5%AD%90"><span class="nav-number">1.2.</span> <span class="nav-text">994. 腐烂的橘子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#207-%E8%AF%BE%E7%A8%8B%E8%A1%A8"><span class="nav-number">1.3.</span> <span class="nav-text">207. 课程表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E6%B3%95%EF%BC%9A%E6%9C%89%E5%90%91%E5%9B%BE-%E5%85%A5%E5%BA%A6-%E9%98%9F%E5%88%97-%E5%AE%BD%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86"><span class="nav-number">1.3.1.</span> <span class="nav-text">解法：有向图 +入度+队列+ 宽度优先遍历</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#208-%E5%AE%9E%E7%8E%B0-Trie-%E5%89%8D%E7%BC%80%E6%A0%91"><span class="nav-number">1.4.</span> <span class="nav-text">208. 实现 Trie (前缀树)</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">81</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">70</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>
