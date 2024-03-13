@@ -30,7 +30,7 @@
 <meta property="og:image" content="http://example.com/images/Spring-01-工厂类与常用注解/image-20210614232348569.png">
 <meta property="og:image" content="http://example.com/images/Spring-01-%E5%B7%A5%E5%8E%82%E7%B1%BB%E4%B8%8E%E5%B8%B8%E7%94%A8%E6%B3%A8%E8%A7%A3/BeanFactory.png">
 <meta property="article:published_time" content="2021-06-14T13:00:00.000Z">
-<meta property="article:modified_time" content="2022-08-28T15:33:19.870Z">
+<meta property="article:modified_time" content="2024-03-05T11:44:50.324Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="源码">
 <meta property="article:tag" content="Spring">
@@ -225,7 +225,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-08-28 23:33:19" itemprop="dateModified" datetime="2022-08-28T23:33:19+08:00">2022-08-28</time>
+                <time title="修改时间：2024-03-05 19:44:50" itemprop="dateModified" datetime="2024-03-05T19:44:50+08:00">2024-03-05</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -251,19 +251,19 @@
       
         <h1 id="Spring框架功能整体介绍"><a href="#Spring框架功能整体介绍" class="headerlink" title="Spring框架功能整体介绍"></a>Spring框架功能整体介绍</h1><img src="/images/Spring-01-工厂类与常用注解/image-20210614232348569.png" alt="image-20210614232348569" style="zoom: 67%;">
 
-<h2 id="Spring-Core-Container"><a href="#Spring-Core-Container" class="headerlink" title="Spring Core Container"></a>Spring Core Container</h2><p>​    Core 和 Beans 模块是框架的基础部分，提供 IoC （转控制）和依赖注入特性。 这里的基础 概念是 BeanFactory，它提供对 Factory 模式的经典实 现来消除对程序’性单例模式的需要，并真 正地允许你从程序逻辑中分离出依赖关系和配置</p>
+<h2 id="Spring-Core-Container"><a href="#Spring-Core-Container" class="headerlink" title="Spring Core Container"></a>Spring Core Container</h2><p>​    Core 和 Beans 模块是框架的基础部分，提供 IoC （转控制）和依赖注入特性。 这里的基础概念是 BeanFactory，它提供对 Factory 模式的经典实现来消除对程序对单例模式的需要，并真正地允许你从程序逻辑中分离出依赖关系和配置</p>
 <p>​    <strong>Core</strong>：主要包含 Spring 框架基本的核心工具类， Spring 的其他组件都要用到这个包 里的类， Core模块是其他组件的基 本核心。</p>
 <p>​    <strong>Beans</strong> (BeanFacotry)：它包含访问配直文件、创建和管理 bean 以及进行 Inversion of Control I Dependency Injection ( IoC/DI ）操作相关的所有类</p>
-<p>​    <strong>Context</strong>(处理BeanFactory，一般还是ApplicationContext起作用)：构建于 Core 和 Beans 模块基础之上，提供了一种类似JNDI 注册器的框 架式的对象访问方法。 Context 模块继承了 Beans 的特性，为 Spring 核 心提供了大量 扩展，添加了对国际化（例如资源绑定）、事件传播、资源加载和对 Context 的透明创 建的支持。 Context 模块同时也支持 J2EE 的一些特 性， ApplicationContext 接口是 Context 模块的关键</p>
-<p>​    Expression Language：模块提供了强大的表达式语言，用于在运行时查询和操纵对象。 它是 JSP 2.1 规范中定义的 unifed expression language 的扩展。 该语言支持设直／获取属 性的值，属性的分配，方法的调用，访问数组上下文（ accessiong the context of arrays ）、 容器和索引器、逻辑和算术运算符、命名变量以及从Spring的 IoC 容器中根据名称检 索对象。 它也支持 list 投影、选择和一般的 list 聚合</p>
-<h2 id="Spring-Data-Access-Integration"><a href="#Spring-Data-Access-Integration" class="headerlink" title="Spring Data Access/Integration"></a>Spring Data Access/Integration</h2><p>​    <strong>JDBC：</strong>模块提供了一个 JDBC 抽象层，它可以消除冗长的 JDBC 编码和解析数据库厂 商特有的错误代码。这个模块包含了 Spring 对 JDBC 数据访问进行封装的所有类</p>
-<p>​    <strong>ORM：</strong>模块为流行的对象－关系映射API，如 JPA、 JDO、 Hibernate、 iBatis 等，提供了 一个交互层。 利用 ORM 封装包，可以混合使用所有 Spring 提供的特性进行 O/R 映射， 如前边提到的简单声 明性事务管理。</p>
-<p>​    <strong>OXM：</strong> <strong>模块提供了一个对</strong> ObjecνXML <strong>映射实现的抽象层，</strong></p>
-<p>​    <strong>JMS ( Java Messaging Service )：</strong>模块主要包含了 一些制造和消 费消息的特性。</p>
-<p>​    <strong>Transaction：</strong>支持编程和声明性的事务管理，这些事务类必须实现特定的接口，并 且对所有的 POJO 都适用</p>
-<h2 id="Spring-Web"><a href="#Spring-Web" class="headerlink" title="Spring Web"></a>Spring Web</h2><p>​    Web 模块：提供了基础的面向 Web 的集成特性c.例如，多文件上传、使用 servlet listeners 初始化IoC 容器以及一个面向 Web 的应用上下文。 它还包含 Spring 远程支持中 Web 的相关部分。</p>
+<p>​    <strong>Context</strong>(处理BeanFactory，一般还是ApplicationContext起作用)：构建于 Core 和 Beans 模块基础之上，提供了一种类似JNDI注册器的框架式的对象访问方法。Context模块继承了Beans的特性，为Spring核心提供了大量扩展，添加了对国际化（例如资源绑定）、事件传播、资源加载和对Context的透明创建的支持。Context模块同时也支持J2EE的一些特性，ApplicationContext接口是Context模块的关键</p>
+<p>​    Expression Language：模块提供了强大的表达式语言，用于在运行时查询和操纵对象。它是JSP2.1规范中定义的unifed expression language 的扩展。该语言支持设直／获取属性的值，属性的分配，方法的调用，访问数组上下文（accessiong the context of arrays）、容器和索引器、逻辑和算术运算符、命名变量以及从Spring的IoC容器中根据名称检索对象。它也支持list投影、选择和一般的list聚合</p>
+<h2 id="Spring-Data-Access-Integration"><a href="#Spring-Data-Access-Integration" class="headerlink" title="Spring Data Access/Integration"></a>Spring Data Access/Integration</h2><p>​    <strong>JDBC：</strong>模块提供了一个JDBC抽象层，它可以消除冗长的JDBC编码和解析数据库厂商特有的错误代码。这个模块包含了Spring对JDBC数据访问进行封装的所有类</p>
+<p>​    <strong>ORM：</strong>模块为流行的对象－关系映射API，如JPA、JDO、Hibernate、iBatis等，提供了一个交互层。利用ORM封装包，可以混合使用所有Spring提供的特性进行O/R映射，如前边提到的简单声明性事务管理。</p>
+<p>​    <strong>OXM：</strong>模块提供了一个对<strong>Object 与 XML</strong>映射实现的抽象层</p>
+<p>​    <strong>JMS(Java Messaging Service )：</strong>模块主要包含了 一些制造和消 费消息的特性。</p>
+<p>​    <strong>Transaction：</strong>支持编程和声明性的事务管理，这些事务类必须实现特定的接口，并且对所有的 POJO 都适用</p>
+<h2 id="Spring-Web"><a href="#Spring-Web" class="headerlink" title="Spring Web"></a>Spring Web</h2><p>​    Web模块：提供了基础的面向Web的集成特性，例如，多文件上传、使用servlet listeners 初始化IoC 容器以及一个面向 Web 的应用上下文。 它还包含 Spring 远程支持中 Web 的相关部分。</p>
 <h2 id="Spring-Aop"><a href="#Spring-Aop" class="headerlink" title="Spring Aop"></a>Spring Aop</h2><p>​    <strong>Aspects</strong> 模块提供了对 AspectJ 的集成支持。</p>
-<p>​    <strong>Instrumentation</strong> 模块提供了 class instrumentation 支持和     classloader 实现，使得可以在特定的应用服务器上使用</p>
+<p>​    <strong>Instrumentation</strong> 模块提供了 class instrumentation 支持和classloader 实现，使得可以在特定的应用服务器上使用</p>
 <h2 id="Test"><a href="#Test" class="headerlink" title="Test"></a>Test</h2><p>Test 模块支持使用 JUnit 和 TestNG 对 Spring 组件进行测试</p>
 <h2 id="Spring容器继承图"><a href="#Spring容器继承图" class="headerlink" title="Spring容器继承图"></a>Spring容器继承图</h2><p><img src="/images/Spring-01-%E5%B7%A5%E5%8E%82%E7%B1%BB%E4%B8%8E%E5%B8%B8%E7%94%A8%E6%B3%A8%E8%A7%A3/BeanFactory.png"></p>
 <h2 id="IOC和DI-控制反转和依赖注入"><a href="#IOC和DI-控制反转和依赖注入" class="headerlink" title="IOC和DI(控制反转和依赖注入)"></a>IOC和DI(控制反转和依赖注入)</h2><p>​        <strong>DI：</strong>软件设计的一个重要思想：依赖倒置原则（Dependency Inversion Principle ）</p>
@@ -303,8 +303,9 @@
 <p>​    <strong>针对多实例bean的话,容器启动的时候，bean是不会被创建的而是在获取bean的时候被创建，而且bean的销毁不受IOC容器的管理.</strong></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Configuration</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MainConfig</span> </span>&#123;<br><span class="hljs-comment">//指定了bean的生命周期的初始化方法和销毁方法.</span><br>	<span class="hljs-meta">@Bean(initMethod = &quot;init&quot;,destroyMethod = &quot;destroy&quot;)</span> <span class="hljs-function"><span class="hljs-keyword">public</span> Car <span class="hljs-title">car</span><span class="hljs-params">()</span> </span>&#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Car();<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
-<p><strong>通过 InitializingBean和DisposableBean 的二个接口实现bean的初始化以及销毁方法</strong></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span> <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Book</span> </span>&#123;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Book</span><span class="hljs-params">()</span> </span>&#123;<br>    	System.out.println(<span class="hljs-string">&quot;book 的构造方法&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-meta">@PostConstruct</span> <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">init</span><span class="hljs-params">()</span> </span>&#123;<br>    	System.out.println(<span class="hljs-string">&quot;book 的PostConstruct标志的方法&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-meta">@PreDestroy</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">destory</span><span class="hljs-params">()</span> </span>&#123;<br>    	System.out.println(<span class="hljs-string">&quot;book 的PreDestory标注的方法&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><strong>通过 InitializingBean和DisposableBean接口</strong></p>
+<p><strong>通过 @PostConstruct和@PreDestroy注解</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span> <br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Book</span> </span>&#123;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Book</span><span class="hljs-params">()</span> </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;book 的构造方法&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-meta">@PostConstruct</span> <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">init</span><span class="hljs-params">()</span> </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;book 的PostConstruct标志的方法&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-meta">@PreDestroy</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">destory</span><span class="hljs-params">()</span> </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;book 的PreDestory标注的方法&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p><strong>通过Spring的BeanPostProcessor的 bean的后置处理器会拦截所有bean初始化过程</strong></p>
 <p>​    postProcessBeforeInitialization 在init方法之前调用</p>
@@ -313,9 +314,9 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Person</span> </span>&#123;<br><br>    <span class="hljs-comment">//通过普通的方式@Value(&quot;司马&quot;)</span><br>    <span class="hljs-keyword">private</span> String firstName;<br><br>    <span class="hljs-comment">//spel方式来赋值@Value(&quot;#&#123;28-8&#125;&quot;)</span><br>    <span class="hljs-keyword">private</span> Integer age;<br>    通过读取外部配置文件的值<br>    <span class="hljs-meta">@Value(&quot;$&#123;person.lastName&#125;&quot;)</span> <br>    <span class="hljs-keyword">private</span> String lastName;<br><br>    &#125;<br><br><span class="hljs-meta">@Configuration</span><br><span class="hljs-meta">@PropertySource(value = &#123;&quot;classpath:person.properties&quot;&#125;)</span> <span class="hljs-comment">//指定外部文件的位置public class MainConfig &#123;</span><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Person <span class="hljs-title">person</span><span class="hljs-params">()</span> </span>&#123; <br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Person();           <br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <h2 id="自动装配"><a href="#自动装配" class="headerlink" title="自动装配"></a><strong>自动装配</strong></h2><h3 id="AutoWired的使用"><a href="#AutoWired的使用" class="headerlink" title="@AutoWired的使用"></a>@AutoWired的使用</h3><ul>
-<li><p>自动装配首先时按照类型进行装配，若在IOC容器中发现了多个相同类型的组件，那么就按照 属性名称来进行装配</p>
+<li><p>自动装配首先时按照类型进行装配，若在IOC容器中发现了多个相同类型的组件，那么就按照<strong>属性名称</strong>来进行装配</p>
 <ul>
-<li><p>比如，我容器中有二个TulingDao类型的组件 一个叫tulingDao 一个叫tulingDao2</p>
+<li><p>比如，我容器中有2个TulingDao类型的组件 一个叫tulingDao 一个叫tulingDao2</p>
 <p>那么我们通过@AutoWired 来修饰的属性名称时tulingDao，那么拿就加载容器的tulingDao组件，若属性名称为<br>tulignDao2 那么他就加载的时tulingDao2组件</p>
 </li>
 </ul>
@@ -324,10 +325,11 @@
 </li>
 <li><p>假设我们容器中即没有tulingDao 和tulingDao2,那么在装配的时候就会抛出异常No qualifying bean of type ‘com.tuling.testautowired.TulingDao’ available 若我们想不抛异常 ，我们需要指定 required为false的时候可以了</p>
 </li>
-<li><p>使用autowired 、</p>
+<li><p>使用autowired </p>
 <ul>
 <li>可以标注在方法上标注在set方法上</li>
 <li>标注在构造方法上</li>
+<li>成员属性上</li>
 <li>标注在配置类上的入参中（可以不写）</li>
 </ul>
 </li>
@@ -337,6 +339,11 @@
 
 
 <h3 id="Resource-JSR250规范"><a href="#Resource-JSR250规范" class="headerlink" title="@Resource(JSR250规范)"></a>@Resource(JSR250规范)</h3><p>功能和@AutoWired的功能差不多一样，但是不支持@Primary 和@Qualifier</p>
+<p>来源：@Autowired来源Spring，@Resource来源JavaEE</p>
+<p>必要性：@Resource注入的属性必须存在，否则抛错</p>
+<p>顺序：</p>
+<p>@Resource默认按注解属性名注入，熟悉名为空时，默认按标注的字段名或者方法名找bean，最后再根据类型匹配</p>
+<p>@Autowired默认先按类型，存在多个时才根据@Qualifier或者@Primary，然后才根据名称</p>
 <h3 id="InJect（JSR330规范）"><a href="#InJect（JSR330规范）" class="headerlink" title="@InJect（JSR330规范）"></a>@InJect（JSR330规范）</h3><p>需要导入jar包依赖<br>功能和支持@Primary功能 ,但是没有Require=false的功能</p>
 <p>使用autowired 可以标注在方法上标注在set方法上</p>
 <p>标注在构造方法上</p>

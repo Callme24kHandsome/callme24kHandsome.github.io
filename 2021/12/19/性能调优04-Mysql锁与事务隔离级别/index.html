@@ -32,7 +32,7 @@
 <meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9804-Mysql%E9%94%81%E4%B8%8E%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/image-20211222230309957.png">
 <meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9804-Mysql%E9%94%81%E4%B8%8E%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/image-20211222230650385.png">
 <meta property="article:published_time" content="2021-12-19T13:00:00.000Z">
-<meta property="article:modified_time" content="2022-10-12T13:47:46.773Z">
+<meta property="article:modified_time" content="2024-03-04T12:39:02.166Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="Mysql">
 <meta property="article:tag" content="性能调优">
@@ -229,7 +229,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-10-12 21:47:46" itemprop="dateModified" datetime="2022-10-12T21:47:46+08:00">2022-10-12</time>
+                <time title="修改时间：2024-03-04 20:39:02" itemprop="dateModified" datetime="2024-03-04T20:39:02+08:00">2024-03-04</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -258,7 +258,7 @@
 <p>2、从对数据库操作的类型分，分为<strong>读锁</strong>和<strong>写锁</strong>(<font style="background:yellow;font-weight:bold">都属于悲观锁</font>) </p>
 <p>​        1、读锁（共享锁）：针对同一份数据，<strong>多个读操作可以同时进行而不会互相影响</strong> </p>
 <p>​        2、写锁（排它锁）：当前写操作没有完成前，它<strong>会阻断其他写锁和读锁</strong> </p>
-<p>​                1、从对数据操作的粒度分，分为表锁和行锁</p>
+<p>3、从对数据操作的粒度分，分为表锁和行锁</p>
 <h3 id="2-1-表锁"><a href="#2-1-表锁" class="headerlink" title="2.1 表锁"></a>2.1 表锁</h3><p>​        每次操作锁住整张表。</p>
 <p>​        开销小，加锁快；不会出现死锁；</p>
 <p>​        锁定粒度大，发生锁冲突的概率最高，并发度最低</p>
@@ -279,8 +279,7 @@
 <h4 id="2-2-1行锁支持事务"><a href="#2-2-1行锁支持事务" class="headerlink" title="2.2.1行锁支持事务"></a>2.2.1行锁支持事务</h4><h5 id="事务（Transaction）及其ACID属性"><a href="#事务（Transaction）及其ACID属性" class="headerlink" title="事务（Transaction）及其ACID属性"></a>事务（Transaction）及其ACID属性</h5><p>​        1、<strong>原子性(Atomicity)</strong> ：事务是一个原子操作单元,其对数据的修改,要么全都执 行,要么全都不执行。</p>
 <p>​        2、<strong>一致性(Consistent)</strong> ：在事务开始和完成时,数据都必须保持一致状态。这意 味着所有相关的数据规则都必须应用于事务的修改,以保持数据的完整性;事务结束 时,所有的内部数据结构(如B树索引或双向链表)也都必须是正确的。 </p>
 <p>​        3、<strong>隔离性(Isolation)</strong> ：数据库系统提供一定的隔离机制,保证事务在不受外部并 发操作影响的“独立”环境执行。这意味着事务处理过程中的中间状态对外部是 不可见的,反之亦然。</p>
-<pre><code>     4、**持久性(Durable)** ：事务完成之后,它对于数据的修改是永久性的,即使出现系 统故障也能够保持
-</code></pre>
+<p>​        4、<strong>持久性(Durable)</strong> ：事务完成之后,它对于数据的修改是永久性的,即使出现系 统故障也能够保持</p>
 <h5 id="并发事务处理带来的问题"><a href="#并发事务处理带来的问题" class="headerlink" title="并发事务处理带来的问题"></a>并发事务处理带来的问题</h5><p>​        1、**更新丢失（Lost Update）(脏写)**当两个或多个事务选择同一行，然后基于最初选定的值更新该行时，由于每 个事务都不知道其他事务的存在，就会发生丢失更新问题–最后的更新覆盖了由其他事务所做的更新。</p>
 <p>​        就是两个事务都更新一个数据，结果有一个人回滚了把另外一个人更新的数据也回滚没了        </p>
 <p>​        解决办法：乐观锁加版本号或者悲观锁加行锁</p>
@@ -355,7 +354,7 @@
 <p>针对这些问题,<strong>才有了 RU（读未提交）、RC（读已提交）、RR（可重复读） 和串行四个隔离级别</strong></p>
 <p>​    <strong>RU 隔离级别，就是可以读到别人还没提交的事务修改过的数据；</strong><br>​    <strong>RC 隔离级别，可以读到人家提交的事务修改过的数据，可以避免脏读问题；</strong><br>​    <strong>RR 是不会读到别的事务已经提交事务修改的数据，可以避免脏读和不可重复读的问题；</strong><br>​    <strong>串行是让事务都串行执行，可以避免所有问题，包括脏读、不可重复读、幻读</strong></p>
 <p>MySQL 实现 MVCC 机制的时候，是基于 <strong>undo log 多版本链条</strong> + <strong>ReadView</strong> 机制来做的，默认的 RR 隔离级别，就是基于这套机制实现了 RR 级别，除了避免脏写、脏读、不可重复读，还能避免幻读问题。因此我们一般来说我们都用默认的 RR 隔离级别就可以了</p>
-<h2 id="undo-log版本链"><a href="#undo-log版本链" class="headerlink" title="undo log版本链"></a>undo log版本链</h2><p>​    总起起来，就是多个事务串行执行的时候，每个人修改了一行数据，都会更新隐藏<br>字段 trx_id 和 roll_pointer，同时之前多个数据快照对应的 undo log，会通过roll_pointer 指针串联起来，形成一个重要的版本链</p>
+<h2 id="undo-log版本链"><a href="#undo-log版本链" class="headerlink" title="undo log版本链"></a>undo log版本链</h2><p>​    总起起来，就是多个事务串行执行的时候，每个人修改了一行数据，都会更新隐藏字段 trx_id 和 roll_pointer，同时之前多个数据快照对应的 undo log，会通过roll_pointer 指针串联起来，形成一个重要的版本链</p>
 <p>我们每条数据其实都有两个子段，一个是 trx_id，一个是 roll_pointer。</p>
 <p>trx_id 就是最近一次更新这条数据的事务id</p>
 <p>roll_pointer 就是指向你更新这个事务之前生成的 undo log</p>
