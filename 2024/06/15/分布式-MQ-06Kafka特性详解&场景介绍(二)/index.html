@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Kafka特性详解&amp;场景介绍">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式-MQ-06Kafka特性详解&amp;场景介绍(二)">
+<meta property="og:url" content="http://example.com/2024/06/15/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-06Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D(%E4%BA%8C)/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="Kafka特性详解&amp;场景介绍">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-06Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D(%E4%BA%8C)/image-20240615230628783.png">
+<meta property="article:published_time" content="2024-06-15T13:00:00.000Z">
+<meta property="article:modified_time" content="2024-06-15T15:09:02.092Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="MQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-06Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D(%E4%BA%8C)/image-20240615230628783.png">
+
+<link rel="canonical" href="http://example.com/2024/06/15/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-06Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D(%E4%BA%8C)/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>分布式-MQ-06Kafka特性详解&场景介绍(二) | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/06/15/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-06Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D(%E4%BA%8C)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          分布式-MQ-06Kafka特性详解&场景介绍(二)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-06-15 21:00:00 / 修改时间：23:09:02" itemprop="dateCreated datePublished" datetime="2024-06-15T21:00:00+08:00">2024-06-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Kafka/" itemprop="url" rel="index"><span itemprop="name">Kafka</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">Kafka特性详解&场景介绍</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Kafka特性详解Q-amp-A"><a href="#Kafka特性详解Q-amp-A" class="headerlink" title="Kafka特性详解Q&amp;A"></a>Kafka特性详解Q&amp;A</h1><h2 id="1、HW、LW、LEO、ISR的含义和关系"><a href="#1、HW、LW、LEO、ISR的含义和关系" class="headerlink" title="1、HW、LW、LEO、ISR的含义和关系"></a>1、HW、LW、LEO、ISR的含义和关系</h2><p>LEO： Log end offset，Kafka 分区消息的终点，消息终止偏移，下一条消息的插入位置</p>
+<p>HW：High water mark 高水位 用于控制消息可见性，HW <strong>以下</strong>的消息对外可见，HW 的位置可能对应一条消息，但是对外不可见不可以消费，HW 的最大值是 LEO，<strong>分区 HW 就是 leader 副本的 HW 值</strong>=整个ISR分区所有副本的的LEO</p>
+<p>LW：Low water mark，用于控制消息可见性，LW <strong>及以上</strong>的消息对外可见</p>
+<p>ISR：In sync replica 指满足副本同步要求的副本集合，包括领导者副本</p>
+<h2 id="2、kafka的rebalance机制-是什么？"><a href="#2、kafka的rebalance机制-是什么？" class="headerlink" title="2、kafka的rebalance机制 是什么？"></a>2、kafka的rebalance机制 是什么？</h2><p>Kafka的rebalance（重新平衡）指的是Kafka消费者组内部的一种协议和过程，用于<strong>在消费者组成员发生变化或者分区发生变化时重新分配分区所有权</strong>。<strong>这个过程确保了每个分区都由消费者组中的一个成员来消费，并且当消费者加入或离开消费者组时，或者主题的分区数发生变化时，分区的分配关系能够自动调整</strong></p>
+<h2 id="3、rebalance的触发条件"><a href="#3、rebalance的触发条件" class="headerlink" title="3、rebalance的触发条件"></a>3、rebalance的触发条件</h2><p>1、分区数发生变化（分区只能增不能减）<br>2、消费者加入或者离开<br>3、消费者失效：如果一个消费者由于网络原因、故障或其他原因失去联系，则该消费者拥有的分区将被重新分配给其他消费者。（session 超时和 pull超时）</p>
+<h2 id="4、rebalance的过程"><a href="#4、rebalance的过程" class="headerlink" title="4、rebalance的过程"></a>4、rebalance的过程</h2><p>1、消费成员向coordinator发送请求加入cosummer group<br>2、coordinator选择一个consumer担任leader角色<br>3、leader分配消费方案，上报给coordinator<br>4、coordinator收到后同步方案给其他consumer</p>
+<h2 id="5、rebalance的影响"><a href="#5、rebalance的影响" class="headerlink" title="5、rebalance的影响"></a>5、rebalance的影响</h2><p>1、重复消费，原consumer踢出前还没提交offset，rebalance后部分会重新消费，可以通过幂等解决<br>2、临时停顿，集群不稳定<br>3、频繁的rebalance影响整体的消费速度</p>
+<h2 id="6、如何避免rebalance发生，减少rebalance的影响"><a href="#6、如何避免rebalance发生，减少rebalance的影响" class="headerlink" title="6、如何避免rebalance发生，减少rebalance的影响"></a>6、如何避免rebalance发生，减少rebalance的影响</h2><p>1、优雅退出close消费者<br>2、及时提交偏移量，每一条提交一次<br>3、避免消费者心跳和session超时或者消费拉取超时被踢出消费者组，从而rebalance</p>
+<h2 id="7、比较常见的引起消费组成员的加入或离开导致rebanlance的原因"><a href="#7、比较常见的引起消费组成员的加入或离开导致rebanlance的原因" class="headerlink" title="7、比较常见的引起消费组成员的加入或离开导致rebanlance的原因"></a>7、比较常见的引起消费组成员的加入或离开导致rebanlance的原因</h2><p>（1）未能及时发送心跳而Rebalance<br>    session.timeout.ms 一次session的连接超时时间，heartbeat.interval.ms 心跳时间，一般为超时时间的1/3，Consumer在被判定为死亡之前，能够发送至少 3 轮的心跳请求。heartbeat.interval.ms 默认值 3000，也就是每3s发送一次心跳包。</p>
+<p>（2）Consumer消费超时而Rebalance<br>     每隔多长时间去拉取消息。合理设置预期值，尽量但间隔时间消费者处理完业务逻辑，否则就会被coordinator判定为死亡，踢出Consumer Group，进行Rebalance。<br>    max.poll.records 一次从拉取出来的数据条数。根据消费业务处理耗费时长合理设置，如果max.poll.interval.ms 设置的时间较短，可以max.poll.records设置小点儿，少拉取些，这样不会超时。<br>    <strong>总之，尽可能在max.poll.interval.ms时间间隔内处理完max.poll.records条消息，让Coordinator认为消费Consumer还活着</strong></p>
+<h2 id="8、几个时间配置的定义和影响"><a href="#8、几个时间配置的定义和影响" class="headerlink" title="8、几个时间配置的定义和影响"></a>8、几个时间配置的定义和影响</h2><ol>
+<li>request.timeout.ms<br>定义：这个配置参数指定了客户端等待Kafka服务端响应的最长时间。如果请求在这个时间内没有收到响应，客户端会重试发送请求（根据重试策略）。<br>影响：设置太短可能导致在正常的负载和轻微网络延迟情况下出现不必要的重试。设置太长，可能在服务端处理出现问题时，导致客户端长时间等待响应，影响客户端处理效率。</li>
+<li>session.timeout.ms<br>定义：这个配置参数用于控制消费者被认为是存活的最小时间间隔。如果在这个时间间隔内，消费者没有向Kafka集群发送心跳，则认为该消费者已经死亡，会从它所在的消费者组中移除。<br>影响：设置太短可能导致在正常的网络波动或者处理较大消息时，消费者被误认为已经死亡。设置太长，当消费者真的失败时，Kafka集群需要更长的时间来检测到这一点，并进行重新平衡，影响消息的及时消费。</li>
+<li>heartbeat.interval.ms<br>定义：这个配置参数指定了消费者发送心跳给Kafka协调者的频率。心跳是用来表明消费者存活的状态、加入和退出消费者组的机制。<br>影响：设置太短会导致消费者发送过多的心跳，增加Kafka集群的负载。设置太长，可能会导致Kafka协调者在session.timeout.ms时间内检测不到消费者的存活状态，导致消费者被误判为已经死亡。</li>
+<li>max.poll.interval.ms<br>定义：这个配置参数指定了消费者在两次调用poll()方法之间的最大时间间隔。如果超过这个时间没有调用poll()，Kafka会认为消费者已经死亡，将其从消费者组中移除，并触发重新平衡。<br>影响：设置太短可能会导致在处理大批量消息、网络延迟或系统负载高的情况下，无法在时间间隔内完成poll()调用。设置太长，就像session.timeout.ms一样，影响故障检测和重新平衡的响应速度。</li>
+</ol>
+<p><strong>结论</strong></p>
+<p>​    这些配置参数之间的关系非常密切，需要根据实际使用场景和Kafka集群的性能来合理设置。session.timeout.ms、heartbeat.interval.ms和max.poll.interval.ms特别关系到消费者的健康检测和消费者组的稳定性。request.timeout.ms更多的影响到客户端与服务端之间通信的效率和稳定性。合理配置这些参数可帮助保证Kafka消费者服务的高可用性和消息的及时处理。</p>
+<h2 id="9、kafka生产者发送消息的同步机制"><a href="#9、kafka生产者发送消息的同步机制" class="headerlink" title="9、kafka生产者发送消息的同步机制"></a>9、kafka生产者发送消息的同步机制</h2><p>（1）acks=0： 表示producer不需要等待任何broker确认收到消息的回复，就可以继续发送下一条消息。性能最高，但是最容易丢消 息。大数据统计报表场景，对性能要求很高，对数据丢失不敏感的情况可以用这种。</p>
+<p>（2）acks=1： 至少要等待leader已经成功将数据写入本地log，但是不需要等待所有follower是否成功写入。就可以继续发送下一条消 息。这种情况下，如果follower没有成功备份数据，而此时leader又挂掉，则消息会丢失。 </p>
+<p>（3）acks=-1或all： 这意味着leader需要等待所有备份(min.insync.replicas配置的备份个数)都成功写入日志，这种策略会保证只要有一 个备份存活就不会丢失数据。这是最强的数据保证。一般除非是金融级别，或跟钱打交道的场景才会使用这种配置。当然如果 min.insync.replicas配置的是1则也可能丢消息，跟acks=1情况类似。</p>
+<p>在分区存在副本的情况下，使用leader-follower，leader负责读写请求，follower从分区leader那复制数据</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs txt">（1）、在分区存在副本的情况下，使用leader-follower，leader负责读写请求，follower从分区leader那复制数据<br>（2）、复制数据时：leader接收到写请求，写入到本地日志，紧接着folloer从leader获取数据并将其写入到自己的日志。<br>（3）、一旦超过Kafka Broker端的配置min.insync.replicas数量的ISR副本都成功复制了数据，leader则认为数据已被成功复制。<br>（4）、Kafka设计了复制延迟的容忍机制，如果Follower与Leader之间的复制延迟超过配置的阈值，则Follower会被认为是落后的，并可能从ISR列表中移除。<br></code></pre></td></tr></table></figure>
+
+<h2 id="10、什么是ISR（In-Sync-Replicas）"><a href="#10、什么是ISR（In-Sync-Replicas）" class="headerlink" title="10、什么是ISR（In-Sync Replicas）"></a>10、什么是ISR（In-Sync Replicas）</h2><p>1、ISR是一组保持与Leader同步的副本列表<br>2、如果Follower太久没有从Leader复制数据，或者跟不上Leader的数据同步速度，它会从ISR中移除。<br>3、ISR确保只有那些与Leader保持同步的副本才能被选举为Leader，从而确保数据不会丢失</p>
+<p>​    replica.lag.time.max.ms：决定了一个副本被认为是落后（并可能从ISR中移除）的最大时间。如果副本在该时间内未同步数据，它会被认为是落后的。<br>​    min.insync.replicas：这是针对每个主题可以设置的参数，指定了一个生产者在考虑写入请求成功之前，必须有多少ISR副本确认接收到数据。</p>
+<p>结论：kafka通过分区来提升并发度，利用分区副本和leader-follower+ISR来保障高可用性和一致性。</p>
+<h2 id="11、Kafka消费发布流程"><a href="#11、Kafka消费发布流程" class="headerlink" title="11、Kafka消费发布流程"></a>11、Kafka消费发布流程</h2><p>1、producer先根据路由规则，把消息发送到指定partition的leader<br>2、leader将消息写入本地log<br>3、folloer从leader pull消息，写入本地log后leader发送ack<br>4、leader接受到一定数量的ISR中的分区副本的ack后，增加HW（hight watermark，最后后一条commit的offset ），并向producer发送ack</p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-06Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D(%E4%BA%8C)/image-20240615230628783.png" alt="image-20240615230628783"></p>
+<h2 id="12、消息丢失"><a href="#12、消息丢失" class="headerlink" title="12、消息丢失"></a>12、消息丢失</h2><p>1、生产者-&gt;server：设置重试，重试间隔，设置ack=alls(实际采用ISR机制)，如果额外设置min.insync.replicas，则要求ISR中至少多少个副本成功写入<br>2、消费者：手动提交+消费完再提交</p>
+<h2 id="13、消息重复消费"><a href="#13、消息重复消费" class="headerlink" title="13、消息重复消费"></a>13、消息重复消费</h2><p>1、生产者重复投递-消费者支持幂等<br>2、消费超时等失败场景导致重复投递：加快单条消费速度+适当调整max.poll.interval.ms和调小max.poll.records，避免消费太多无法及时poll从而触发rebalance。一般而言max.poll.interval.ms &gt; session.timeout.ms</p>
+<h2 id="14、消息积压"><a href="#14、消息积压" class="headerlink" title="14、消息积压"></a>14、消息积压</h2><p>1、增加分区，增加消费者数量<br>2、分析堆积原因，通过设置消费偏移量解决<br>3、kafka不适合长任务，避免引起重平衡，长耗时任务丢给异步任务处理<br>4、1个分区时，临时调整，根据需要开多个消费组处理特定逻辑<br>5、临时增加消息保留时间<br>6、评估多个分区，局部有序的方案</p>
+<h2 id="15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量"><a href="#15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量" class="headerlink" title="15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量"></a>15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量</h2>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MQ/" rel="tag"># MQ</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/04/02/Java%E9%9B%86%E5%90%88%E7%9B%B8%E5%85%B3/" rel="prev" title="Java集合">
+      <i class="fa fa-chevron-left"></i> Java集合
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3Q-amp-A"><span class="nav-number">1.</span> <span class="nav-text">Kafka特性详解Q&amp;A</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81HW%E3%80%81LW%E3%80%81LEO%E3%80%81ISR%E7%9A%84%E5%90%AB%E4%B9%89%E5%92%8C%E5%85%B3%E7%B3%BB"><span class="nav-number">1.1.</span> <span class="nav-text">1、HW、LW、LEO、ISR的含义和关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81kafka%E7%9A%84rebalance%E6%9C%BA%E5%88%B6-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">1.2.</span> <span class="nav-text">2、kafka的rebalance机制 是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%E3%80%81rebalance%E7%9A%84%E8%A7%A6%E5%8F%91%E6%9D%A1%E4%BB%B6"><span class="nav-number">1.3.</span> <span class="nav-text">3、rebalance的触发条件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4%E3%80%81rebalance%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="nav-number">1.4.</span> <span class="nav-text">4、rebalance的过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5%E3%80%81rebalance%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="nav-number">1.5.</span> <span class="nav-text">5、rebalance的影响</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6%E3%80%81%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8Drebalance%E5%8F%91%E7%94%9F%EF%BC%8C%E5%87%8F%E5%B0%91rebalance%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="nav-number">1.6.</span> <span class="nav-text">6、如何避免rebalance发生，减少rebalance的影响</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7%E3%80%81%E6%AF%94%E8%BE%83%E5%B8%B8%E8%A7%81%E7%9A%84%E5%BC%95%E8%B5%B7%E6%B6%88%E8%B4%B9%E7%BB%84%E6%88%90%E5%91%98%E7%9A%84%E5%8A%A0%E5%85%A5%E6%88%96%E7%A6%BB%E5%BC%80%E5%AF%BC%E8%87%B4rebanlance%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">1.7.</span> <span class="nav-text">7、比较常见的引起消费组成员的加入或离开导致rebanlance的原因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8%E3%80%81%E5%87%A0%E4%B8%AA%E6%97%B6%E9%97%B4%E9%85%8D%E7%BD%AE%E7%9A%84%E5%AE%9A%E4%B9%89%E5%92%8C%E5%BD%B1%E5%93%8D"><span class="nav-number">1.8.</span> <span class="nav-text">8、几个时间配置的定义和影响</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9%E3%80%81kafka%E7%94%9F%E4%BA%A7%E8%80%85%E5%8F%91%E9%80%81%E6%B6%88%E6%81%AF%E7%9A%84%E5%90%8C%E6%AD%A5%E6%9C%BA%E5%88%B6"><span class="nav-number">1.9.</span> <span class="nav-text">9、kafka生产者发送消息的同步机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AFISR%EF%BC%88In-Sync-Replicas%EF%BC%89"><span class="nav-number">1.10.</span> <span class="nav-text">10、什么是ISR（In-Sync Replicas）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11%E3%80%81Kafka%E6%B6%88%E8%B4%B9%E5%8F%91%E5%B8%83%E6%B5%81%E7%A8%8B"><span class="nav-number">1.11.</span> <span class="nav-text">11、Kafka消费发布流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12%E3%80%81%E6%B6%88%E6%81%AF%E4%B8%A2%E5%A4%B1"><span class="nav-number">1.12.</span> <span class="nav-text">12、消息丢失</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#13%E3%80%81%E6%B6%88%E6%81%AF%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9"><span class="nav-number">1.13.</span> <span class="nav-text">13、消息重复消费</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#14%E3%80%81%E6%B6%88%E6%81%AF%E7%A7%AF%E5%8E%8B"><span class="nav-number">1.14.</span> <span class="nav-text">14、消息积压</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#15%E3%80%81Kafka%E7%9B%B8%E8%BE%83%E4%BA%8E%E5%85%B6%E4%BB%96%E5%B9%B3%E5%8F%B0%E6%AF%94%E5%A6%82RabbitMQ%E7%9A%84%E4%BC%98%E5%8A%BF%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E6%94%AF%E6%8C%81%E5%A4%A7%E6%95%B0%E6%8D%AE%E9%87%8F"><span class="nav-number">1.15.</span> <span class="nav-text">15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">83</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>
