@@ -36,7 +36,7 @@
 <meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9811-JVM%E5%8F%8AJVM%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/%E4%BA%BF%E7%BA%A7%E6%B5%81%E9%87%8F%E7%94%B5%E5%95%86%E7%B3%BB%E7%BB%9FJVM%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE%E4%BC%98%E5%8C%96.png">
 <meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9811-JVM%E5%8F%8AJVM%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/image-20240325210337112.png">
 <meta property="article:published_time" content="2022-03-05T13:00:00.000Z">
-<meta property="article:modified_time" content="2024-03-25T13:12:40.028Z">
+<meta property="article:modified_time" content="2024-07-08T02:23:39.629Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="性能调优">
 <meta property="article:tag" content="JVM">
@@ -231,7 +231,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-03-25 21:12:40" itemprop="dateModified" datetime="2024-03-25T21:12:40+08:00">2024-03-25</time>
+                <time title="修改时间：2024-07-08 10:23:39" itemprop="dateModified" datetime="2024-07-08T10:23:39+08:00">2024-07-08</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -302,13 +302,72 @@
 <p>​    <strong>对象逃逸分析</strong>：就是分析对象动态作用域，当一个对象在方法中被定义后，它可能被外部方法所引用，例如作为调用参数传递到其他地方中。</p>
 <p>  很显然test1方法中的user对象被返回了，这个对象的作用域范围不确定，test2方法中的user对象我们可以确定当方法结束这个对象就可以认为是无效对象了.</p>
 <p>​    对于这样的对象我们其实可以将其分配在栈内存里，让其在方法结束时跟随栈内存一起被回收掉,如果这时候栈内存不足，则再分配到堆上。</p>
+<p>​    此外，线程逃逸分析通常是在 JVM 的编译阶段进行的。在编译阶段，JVM 会对代码进行分析和优化，包括对象的分配和内存管理</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 栈上分配，标量替换</span><br><span class="hljs-comment"> * 代码调用了1亿次alloc()，如果是分配到堆上，大概需要1GB以上堆空间，如果堆空间小于该值，必然会触发GC。</span><br><span class="hljs-comment"> * </span><br><span class="hljs-comment"> * 使用如下参数不会发生GC</span><br><span class="hljs-comment"> * -Xmx15m -Xms15m -XX:+DoEscapeAnalysis -XX:+PrintGC -XX:+EliminateAllocations</span><br><span class="hljs-comment"> * 使用如下参数都会发生大量GC</span><br><span class="hljs-comment"> * -Xmx15m -Xms15m -XX:-DoEscapeAnalysis -XX:+PrintGC -XX:+EliminateAllocations</span><br><span class="hljs-comment"> * -Xmx15m -Xms15m -XX:+DoEscapeAnalysis -XX:+PrintGC -XX:-EliminateAllocations</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AllotOnStack</span> </span>&#123;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        <span class="hljs-keyword">long</span> start = System.currentTimeMillis();<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">100000000</span>; i++) &#123;<br>            alloc();<br>        &#125;<br>        <span class="hljs-keyword">long</span> end = System.currentTimeMillis();<br>        System.out.println(end - start);<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">alloc</span><span class="hljs-params">()</span> </span>&#123;<br>        User user = <span class="hljs-keyword">new</span> User();<br>        user.setId(<span class="hljs-number">1</span>);<br>        user.setName(<span class="hljs-string">&quot;zhuge&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>结论：<strong>栈上分配依赖于<font color="red">逃逸分析</font>和<font color="red">标量替换</font></strong>,逃逸分析和标量替换在JDK8默认开启</p>
+<h2 id="Server模式和Client模式"><a href="#Server模式和Client模式" class="headerlink" title="Server模式和Client模式"></a>Server模式和Client模式</h2><p>JVM 有两种运行模式：Client 模式和 Server 模式。</p>
+<ul>
+<li><strong>Client 模式</strong>：<ul>
+<li>特点：启动速度较快，占用内存较少，适用于桌面应用程序等对启动时间要求较高的场景。</li>
+<li>编译器：使用 C1 编译器，进行简单和快速的优化。</li>
+<li>应用场景：通常用于普通的桌面应用，如小型的 Java 应用程序。</li>
+</ul>
+</li>
+<li><strong>Server 模式</strong>：<ul>
+<li>特点：启动速度较慢，但运行时性能更好，适用于长时间运行的服务器端应用。</li>
+<li>编译器：采用更复杂和强大的 C2 编译器，进行更深入和耗时的优化。</li>
+<li>应用场景：常用于服务器端应用，如 Web 服务器、应用服务器等，能够处理高并发和大量的数据处理任务。</li>
+</ul>
+</li>
+</ul>
+<p><strong>C1 和 C2 编译器</strong></p>
+<ul>
+<li><strong>C1 编译器</strong>：也称为客户端编译器（Client Compiler）。它的优化策略相对简单和快速，主要关注代码的快速生成和较短的编译时间。适用于对启动速度要求较高的场景。<ul>
+<li>例子：对于一些简单的循环和方法调用，C1 编译器可能会进行基本的常量折叠、消除一些冗余的计算等简单优化。</li>
+</ul>
+</li>
+<li><strong>C2 编译器</strong>：也称为服务器端编译器（Server Compiler）。它执行更深入和耗时的优化，以生成更高效的机器码。<ul>
+<li>例子：C2 编译器可能会进行更复杂的循环优化、内联函数、更精细的寄存器分配等，以提高代码的长期运行性能。</li>
+</ul>
+</li>
+</ul>
+<p><strong>服务端 JVM 通常采用 Server 模式启动，主要有以下好处：</strong></p>
+<ol>
+<li>更优的性能优化：Server 模式下的 JVM 采用了更复杂和强大的优化策略，能够生成更高效的机器码，从而提高程序的长期运行性能。</li>
+<li>更好的内存管理：有助于更有效地管理大量的内存，处理高并发和大规模的数据处理任务。</li>
+<li>高级的垃圾回收算法：例如更适合服务器端应用的垃圾回收算法，减少垃圾回收带来的暂停时间，提高系统的整体响应性。</li>
+</ol>
+<p>​    <strong>在 Server 模式启动后，同一段代码第一次运行时通常是解释执行，而不是立即编译成机器码。JVM 会通过热点探测来确定哪些代码是频繁执行的热点代码。只有被判定为热点的代码，才会在后续被编译成机器码。这样可以避免过早地对不常执行的代码进行编译，节省编译时间和资源。</strong></p>
+<p>​    例如，一个复杂的计算函数在服务端应用中被频繁调用，经过一定次数的执行后，JVM 会将其识别为热点代码并编译成机器码，从而在后续的调用中直接执行机器码，提高执行效率。但如果是一个很少被调用的辅助函数，可能始终都是解释执行。</p>
 <h2 id="内存泄漏"><a href="#内存泄漏" class="headerlink" title="内存泄漏"></a>内存泄漏</h2><h3 id="1、什么是内存泄露"><a href="#1、什么是内存泄露" class="headerlink" title="1、什么是内存泄露"></a>1、什么是内存泄露</h3><p>​    <strong>存在一些对象他们是可到达的GC无法回收，但是程序之后又不会用到这些对象，对于存在这种占用内存却不会被使用的现象就叫内存泄漏</strong></p>
 <h3 id="2、内存泄露的场景"><a href="#2、内存泄露的场景" class="headerlink" title="2、内存泄露的场景"></a>2、内存泄露的场景</h3><p>1、静态集合类：如HashMap、LinkedList等静态容器，通常做缓存用，生命周期与程序一致，如果没有及时按策略清除容器中引用的对象，则会导致容器越积越大，白白占用大量内存空间（使用redis，ehcache等带LRU策略的缓存框架）</p>
 <p>2、各种连接如数据库连接、网络连接、IO连接等等使用结束后没有及时关闭，导致连接对象无法回收</p>
 <p>3、TreadLocal、内部类实例被引用导致外部类实例无法释放等等</p>
+<p>4、定义太多无效类、枚举、静态常量、变量等，导致元空间占用。</p>
+<h2 id="OOM的原因"><a href="#OOM的原因" class="headerlink" title="OOM的原因"></a>OOM的原因</h2><ol>
+<li><strong>堆内存溢出（Heap Space OOM）</strong>：<ul>
+<li>大量对象创建且未被及时回收：例如在程序中创建了大量的对象，尤其是大对象，而垃圾回收机制未能及时清理这些不再使用的对象，导致堆内存被耗尽。</li>
+<li>内存泄漏：某些对象一直被引用，无法被垃圾回收，导致内存逐渐被占用完。</li>
+<li>不合理的缓存：比如创建了一个过大的缓存，且缓存中的元素没有有效的过期策略。</li>
+</ul>
+</li>
+<li><strong>线程栈溢出（StackOverflowError）</strong>：<ul>
+<li>线程数量过多：创建了过多的线程（存咋死循环或者递归没有出口），每个线程都需要分配一定的栈空间。</li>
+<li>单个线程栈空间过大：通过<code>-Xss</code>参数设置的线程栈大小过大，导致可用的线程栈数量减少。</li>
+</ul>
+</li>
+<li>元空间（方法区）溢出<strong>（Metaspace OOM）</strong>：加大元空间<ul>
+<li>加载了过多的类：在动态加载类的应用中，可能会加载大量的类，导致方法区空间不足（过多无效类，枚举）。</li>
+<li>常量池过大：字符串常量过多或者其他常量占用了大量空间。</li>
+</ul>
+</li>
+<li>直接内存溢出<strong>（Direct Buffer Memory OOM）</strong>：<ul>
+<li>直接使用<code>ByteBuffer</code>分配了过大的本地内存，且没有合理的释放。</li>
+<li>可以通过 <code>-XX:MaxDirectMemorySize</code> 来指定最大的直接内存大小。当直接内存的使用达到了阈值的时候，JVM 会尝试调用 <code>System.gc()</code> 来触发一次 FULL GC，从而完成可控的堆外内存回收</li>
+</ul>
+</li>
+</ol>
 
     </div>
 
@@ -393,7 +452,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">JVM内存模型介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">JDK体系结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JDK"><span class="nav-number">1.1.1.</span> <span class="nav-text">JDK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JRE"><span class="nav-number">1.1.2.</span> <span class="nav-text">JRE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM"><span class="nav-number">1.1.3.</span> <span class="nav-text">JVM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%BA%E5%88%AB%E4%B8%8E%E8%81%94%E7%B3%BB"><span class="nav-number">1.1.4.</span> <span class="nav-text">区别与联系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E8%AF%AD%E8%A8%80%E7%9A%84%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%89%B9%E6%80%A7"><span class="nav-number">1.2.</span> <span class="nav-text">Java语言的跨平台特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%EF%BC%88%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">JVM内存模型（运行时数据区）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84"><span class="nav-number">1.3.1.</span> <span class="nav-text">内存模型结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE"><span class="nav-number">1.3.2.</span> <span class="nav-text">JVM内存参数设置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E5%8F%82%E6%95%B0%E5%A4%A7%E5%B0%8F%E8%AE%BE%E7%BD%AE%E4%B8%BE%E4%BE%8B"><span class="nav-number">1.4.</span> <span class="nav-text">JVM内存参数大小设置举例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90"><span class="nav-number">1.5.</span> <span class="nav-text">逃逸分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F"><span class="nav-number">1.6.</span> <span class="nav-text">内存泄漏</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AF%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2"><span class="nav-number">1.6.1.</span> <span class="nav-text">1、什么是内存泄露</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E7%9A%84%E5%9C%BA%E6%99%AF"><span class="nav-number">1.6.2.</span> <span class="nav-text">2、内存泄露的场景</span></a></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">JVM内存模型介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">JDK体系结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JDK"><span class="nav-number">1.1.1.</span> <span class="nav-text">JDK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JRE"><span class="nav-number">1.1.2.</span> <span class="nav-text">JRE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM"><span class="nav-number">1.1.3.</span> <span class="nav-text">JVM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%BA%E5%88%AB%E4%B8%8E%E8%81%94%E7%B3%BB"><span class="nav-number">1.1.4.</span> <span class="nav-text">区别与联系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E8%AF%AD%E8%A8%80%E7%9A%84%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%89%B9%E6%80%A7"><span class="nav-number">1.2.</span> <span class="nav-text">Java语言的跨平台特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%EF%BC%88%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">JVM内存模型（运行时数据区）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84"><span class="nav-number">1.3.1.</span> <span class="nav-text">内存模型结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE"><span class="nav-number">1.3.2.</span> <span class="nav-text">JVM内存参数设置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E5%8F%82%E6%95%B0%E5%A4%A7%E5%B0%8F%E8%AE%BE%E7%BD%AE%E4%B8%BE%E4%BE%8B"><span class="nav-number">1.4.</span> <span class="nav-text">JVM内存参数大小设置举例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90"><span class="nav-number">1.5.</span> <span class="nav-text">逃逸分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Server%E6%A8%A1%E5%BC%8F%E5%92%8CClient%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.6.</span> <span class="nav-text">Server模式和Client模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F"><span class="nav-number">1.7.</span> <span class="nav-text">内存泄漏</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AF%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2"><span class="nav-number">1.7.1.</span> <span class="nav-text">1、什么是内存泄露</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E7%9A%84%E5%9C%BA%E6%99%AF"><span class="nav-number">1.7.2.</span> <span class="nav-text">2、内存泄露的场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OOM%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">1.8.</span> <span class="nav-text">OOM的原因</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

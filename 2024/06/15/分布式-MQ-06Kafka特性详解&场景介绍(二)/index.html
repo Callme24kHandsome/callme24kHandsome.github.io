@@ -29,7 +29,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-06Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D(%E4%BA%8C)/image-20240615230628783.png">
 <meta property="article:published_time" content="2024-06-15T13:00:00.000Z">
-<meta property="article:modified_time" content="2024-06-15T15:09:02.092Z">
+<meta property="article:modified_time" content="2024-06-16T04:41:35.562Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="MQ">
 <meta name="twitter:card" content="summary">
@@ -215,10 +215,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2024-06-15 21:00:00 / 修改时间：23:09:02" itemprop="dateCreated datePublished" datetime="2024-06-15T21:00:00+08:00">2024-06-15</time>
+              <time title="创建时间：2024-06-15 21:00:00" itemprop="dateCreated datePublished" datetime="2024-06-15T21:00:00+08:00">2024-06-15</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-06-16 12:41:35" itemprop="dateModified" datetime="2024-06-16T12:41:35+08:00">2024-06-16</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -274,7 +280,16 @@
 <h2 id="12、消息丢失"><a href="#12、消息丢失" class="headerlink" title="12、消息丢失"></a>12、消息丢失</h2><p>1、生产者-&gt;server：设置重试，重试间隔，设置ack=alls(实际采用ISR机制)，如果额外设置min.insync.replicas，则要求ISR中至少多少个副本成功写入<br>2、消费者：手动提交+消费完再提交</p>
 <h2 id="13、消息重复消费"><a href="#13、消息重复消费" class="headerlink" title="13、消息重复消费"></a>13、消息重复消费</h2><p>1、生产者重复投递-消费者支持幂等<br>2、消费超时等失败场景导致重复投递：加快单条消费速度+适当调整max.poll.interval.ms和调小max.poll.records，避免消费太多无法及时poll从而触发rebalance。一般而言max.poll.interval.ms &gt; session.timeout.ms</p>
 <h2 id="14、消息积压"><a href="#14、消息积压" class="headerlink" title="14、消息积压"></a>14、消息积压</h2><p>1、增加分区，增加消费者数量<br>2、分析堆积原因，通过设置消费偏移量解决<br>3、kafka不适合长任务，避免引起重平衡，长耗时任务丢给异步任务处理<br>4、1个分区时，临时调整，根据需要开多个消费组处理特定逻辑<br>5、临时增加消息保留时间<br>6、评估多个分区，局部有序的方案</p>
-<h2 id="15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量"><a href="#15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量" class="headerlink" title="15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量"></a>15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量</h2>
+<h2 id="15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量"><a href="#15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量" class="headerlink" title="15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量"></a>15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量</h2><p><strong>优点：</strong></p>
+<p>A、分布式架构：扩展性和可靠性</p>
+<p>B、持久化存储：持久化在磁盘上保存一段时间，单个broker支持TB级别数据</p>
+<p>C、高性能高吞吐：采用磁盘顺序写，比随机写效率高、支持批量发消息和消费消息、partition机制：topic分为多个分区，挺高并行度也提高吞吐量</p>
+<p>D、leader-follow + ISR机制，保障快速写入和数据不丢失</p>
+<p><strong>缺点：</strong></p>
+<p>1、消费者数量受到分区数限制</p>
+<p>2、不支持事务</p>
+<p>3、运维成本高</p>
+
     </div>
 
     
