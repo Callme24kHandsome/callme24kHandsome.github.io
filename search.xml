@@ -7897,11 +7897,11 @@
 <h3 id="2、找出占用cpu最高的栈信息"><a href="#2、找出占用cpu最高的栈信息" class="headerlink" title="2、找出占用cpu最高的栈信息"></a>2、找出占用cpu最高的栈信息</h3><p>1，使用命令top -p <pid> ，显示你的java进程的内存情况，pid是你的java进程号，比如4977 </pid></p>
 <p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9814-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E4%BB%8B%E7%BB%8D/clipboard.png"></p>
 <p>2，按H，获取每个线程的内存情况 </p>
-<p>![](/images/性能调优14-JVM调优工具介绍/clipboard (1).png)</p>
+<p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9814-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E4%BB%8B%E7%BB%8D/clipboard-1.png"></p>
 <p>3，找到内存和cpu占用最高的线程tid，比如19664</p>
 <p>4，转为十六进制得到 0x4cd0，此为线程id的十六进制表示</p>
 <p>5，执行 jstack 19663|grep -A 10 4cd0，得到线程堆栈信息中 4cd0 这个线程所在行的后面10行，从堆栈中可以发现导致cpu飙高的调用方法</p>
-<p>![clipboard (2)](/images/性能调优14-JVM调优工具介绍/clipboard (2).png)</p>
+<p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9814-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E4%BB%8B%E7%BB%8D/clipboard-2.png" alt="clipboard (2)"></p>
 <p>6，查看对应的堆栈信息找出可能存在问题的代码</p>
 <h2 id="jvisualvm-远程连接（少用）"><a href="#jvisualvm-远程连接（少用）" class="headerlink" title="jvisualvm(远程连接（少用）)"></a>jvisualvm(远程连接（少用）)</h2><p><strong>启动普通的jar程序JMX端口配置：</strong> </p>
 <p>java -Dcom.sun.management.jmxremote.port=8899 -Dcom.sun.management.jmxremote.ssl=false - </p>
@@ -7948,11 +7948,11 @@
 
 <figure class="highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">jstat -gc 13456 2000 10000<br></code></pre></td></tr></table></figure>
 
-<p>![](/images/性能调优14-JVM调优工具介绍/clipboard (3).png)</p>
+<p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9814-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E4%BB%8B%E7%BB%8D/clipboard-3.png"></p>
 <p>对于对象动态年龄判断机制导致的full gc较为频繁可以先试着优化下JVM参数，把年轻代适当调大点：</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">-Xms1536M -Xmx1536M -Xmn1024M -Xss256K -XX:SurvivorRatio=6  -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M <br>-XX:+UseParNewGC  -XX:+UseConcMarkSweepGC  -XX:CMSInitiatingOccupancyFraction=92 -XX:+UseCMSInitiatingOccupancyOnly <br></code></pre></td></tr></table></figure>
 
-<p>![](/images/性能调优14-JVM调优工具介绍/clipboard (4).png)</p>
+<p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9814-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E4%BB%8B%E7%BB%8D/clipboard-4.png"></p>
 <p>优化完发现没什么变化，<strong>full gc的次数比minor gc的次数还多了</strong></p>
 <p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9814-JVM%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%E4%BB%8B%E7%BB%8D/clipboard-1647159739850.png"></p>
 <p><strong>我们可以推测下full gc比minor gc还多的原因有哪些？</strong></p>
