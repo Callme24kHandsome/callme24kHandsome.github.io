@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="java爬虫webmagic的介绍和使用，webmagic— + selenium 无头浏览器驱动模式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java爬虫02-webmagic">
+<meta property="og:url" content="http://example.com/2024/09/11/Java%E7%88%AC%E8%99%AB02-webmagic/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="java爬虫webmagic的介绍和使用，webmagic— + selenium 无头浏览器驱动模式">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2024/09/11/Java%E7%88%AC%E8%99%AB02-webmagic/images/Java%E7%88%AC%E8%99%AB02-webmagic/webmagic.png">
+<meta property="og:image" content="http://example.com/images/Java%E7%88%AC%E8%99%AB02-webmagic/image-20240928221420318.png">
+<meta property="article:published_time" content="2024-09-11T14:00:00.000Z">
+<meta property="article:modified_time" content="2024-10-06T05:15:25.706Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="爬虫">
+<meta property="article:tag" content="webmagic">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/09/11/Java%E7%88%AC%E8%99%AB02-webmagic/images/Java%E7%88%AC%E8%99%AB02-webmagic/webmagic.png">
+
+<link rel="canonical" href="http://example.com/2024/09/11/Java%E7%88%AC%E8%99%AB02-webmagic/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java爬虫02-webmagic | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/09/11/Java%E7%88%AC%E8%99%AB02-webmagic/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java爬虫02-webmagic
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-09-11 22:00:00" itemprop="dateCreated datePublished" datetime="2024-09-11T22:00:00+08:00">2024-09-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-10-06 13:15:25" itemprop="dateModified" datetime="2024-10-06T13:15:25+08:00">2024-10-06</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">爬虫</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">java爬虫webmagic的介绍和使用，webmagic— + selenium 无头浏览器驱动模式</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Webmagic"><a href="#Webmagic" class="headerlink" title="Webmagic"></a>Webmagic</h1><h2 id="是什么"><a href="#是什么" class="headerlink" title="是什么"></a>是什么</h2><p>​    WebMagic是一款简单灵活的爬虫框架，它的的架构设计参照了Scrapy，目标是尽量的模块化，并体现爬虫的功能特点。</p>
+<h2 id="架构设计"><a href="#架构设计" class="headerlink" title="架构设计"></a>架构设计</h2><h3 id="WebMagic的四个组件"><a href="#WebMagic的四个组件" class="headerlink" title="WebMagic的四个组件"></a>WebMagic的四个组件</h3><p><img src="images/Java%E7%88%AC%E8%99%AB02-webmagic/webmagic.png" alt="image"></p>
+<h4 id="1-Downloader"><a href="#1-Downloader" class="headerlink" title="1.Downloader"></a>1.Downloader</h4><p>​    Downloader负责从互联网上下载页面，以便后续处理。WebMagic默认使用了<a target="_blank" rel="noopener" href="http://hc.apache.org/index.html">Apache HttpClient</a>作为下载工具。</p>
+<h4 id="2-PageProcessor"><a href="#2-PageProcessor" class="headerlink" title="2.PageProcessor"></a>2.PageProcessor</h4><p>​    PageProcessor负责解析页面，抽取有用信息，以及发现新的链接。WebMagic使用<a target="_blank" rel="noopener" href="http://jsoup.org/">Jsoup</a>作为HTML解析工具，并基于其开发了解析XPath的工具<a target="_blank" rel="noopener" href="https://github.com/code4craft/xsoup">Xsoup</a>。</p>
+<p>在这四个组件中，<code>PageProcessor</code>对于每个站点每个页面都不一样，是需要使用者定制的部分。</p>
+<h4 id="3-Scheduler"><a href="#3-Scheduler" class="headerlink" title="3.Scheduler"></a>3.Scheduler</h4><p>​    Scheduler负责管理待抓取的URL，以及一些去重的工作。WebMagic默认提供了JDK的内存队列来管理URL，并用集合来进行去重。也支持使用Redis进行分布式管理。</p>
+<p>除非项目有一些特殊的分布式需求，否则无需自己定制Scheduler。</p>
+<h4 id="4-Pipeline"><a href="#4-Pipeline" class="headerlink" title="4.Pipeline"></a>4.Pipeline</h4><p>​    Pipeline负责抽取结果的处理，包括计算、持久化到文件、数据库等。WebMagic默认提供了“输出到控制台”和“保存到文件”两种结果处理方案。</p>
+<p><code>Pipeline</code>定义了结果保存的方式，如果你要保存到指定数据库，则需要编写对应的Pipeline。对于一类需求一般只需编写一个<code>Pipeline</code>。</p>
+<h3 id="用于数据流转的对象"><a href="#用于数据流转的对象" class="headerlink" title="用于数据流转的对象"></a>用于数据流转的对象</h3><h4 id="1-Request"><a href="#1-Request" class="headerlink" title="1. Request"></a>1. Request</h4><p>​    <code>Request</code>是对URL地址的一层封装，一个Request对应一个URL地址。</p>
+<p>它是PageProcessor与Downloader交互的载体，也是PageProcessor控制Downloader唯一方式。</p>
+<p>除了URL本身外，它还包含一个Key-Value结构的字段<code>extra</code>。你可以在extra中保存一些特殊的属性，然后在其他地方读取，以完成不同的功能。例如附加上一个页面的一些信息等。</p>
+<h4 id="2-Page"><a href="#2-Page" class="headerlink" title="2. Page"></a>2. Page</h4><p>​    <code>Page</code>代表了从Downloader下载到的一个页面——可能是HTML，也可能是JSON或者其他文本格式的内容。</p>
+<p>Page是WebMagic抽取过程的核心对象，它提供一些方法可供抽取、结果保存等。在第四章的例子中，我们会详细介绍它的使用。</p>
+<h4 id="3-ResultItems"><a href="#3-ResultItems" class="headerlink" title="3. ResultItems"></a>3. ResultItems</h4><p><code>ResultItems</code>相当于一个Map，它保存PageProcessor处理的结果，供Pipeline使用。它的API与Map很类似，值得注意的是它有一个字段<code>skip</code>，若设置为true，则不应被Pipeline处理</p>
+<h3 id="控制爬虫运转的引擎–Spider"><a href="#控制爬虫运转的引擎–Spider" class="headerlink" title="控制爬虫运转的引擎–Spider"></a>控制爬虫运转的引擎–Spider</h3><p>​    Spider是WebMagic内部流程的核心。Downloader、PageProcessor、Scheduler、Pipeline都是Spider的一个属性，这些属性是可以自由设置的，通过设置这个属性可以实现不同的功能。Spider也是WebMagic操作的入口，它封装了爬虫的创建、启动、停止、多线程等功能</p>
+<h2 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h2><p>​    不适合爬取动态或者动态加载页面，而现如今大部门大厂网站都做了动态渲染或者反扒。如果需要爬取，可以结合selenium +浏览器驱动访问页面。</p>
+<h1 id="Selenium"><a href="#Selenium" class="headerlink" title="Selenium"></a>Selenium</h1><h2 id="是什么-1"><a href="#是什么-1" class="headerlink" title="是什么"></a>是什么</h2><p>​    Selenium 通过使用 <em>WebDriver</em> 支持市场上所有主流浏览器的自动化。 WebDriver 是一个 API 和协议，它定义了一个语言中立的接口，用于控制 web 浏览器的行为。 每个浏览器都有一个特定的 WebDriver 实现，称为驱动程序。 驱动程序是负责委派给浏览器的组件，并处理与 Selenium 和浏览器之间的通信。总的来说，selenium是一种浏览器控制框架。</p>
+<h2 id="怎么用"><a href="#怎么用" class="headerlink" title="怎么用"></a>怎么用</h2><h5 id="Webmagic-Selenium-Chormedriver"><a href="#Webmagic-Selenium-Chormedriver" class="headerlink" title="Webmagic+Selenium+Chormedriver"></a>Webmagic+Selenium+Chormedriver</h5><h2 id="Boss直聘网爬取"><a href="#Boss直聘网爬取" class="headerlink" title="Boss直聘网爬取"></a>Boss直聘网爬取</h2><h4 id="DDL"><a href="#DDL" class="headerlink" title="DDL"></a>DDL</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> `job_info`<br>(<br>    `id`                 <span class="hljs-type">bigint</span>(<span class="hljs-number">20</span>)    <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> auto_increment comment <span class="hljs-string">&#x27;主键id&#x27;</span>,<br>    job_id               <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">100</span>)  <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-string">&#x27;&#x27;</span> COMMENT <span class="hljs-string">&#x27;jobid&#x27;</span>,<br>    work_location        <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">50</span>)   <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-string">&#x27;&#x27;</span> COMMENT <span class="hljs-string">&#x27;workLocation&#x27;</span>,<br>    job_benifit          <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">200</span>)  <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-string">&#x27;&#x27;</span> COMMENT <span class="hljs-string">&#x27;jobBenifit&#x27;</span>,<br>    work_experience      <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">200</span>)  <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-string">&#x27;&#x27;</span> COMMENT <span class="hljs-string">&#x27;workExperience&#x27;</span>,<br>    degree_experience    <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">200</span>)  <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-string">&#x27;&#x27;</span> COMMENT <span class="hljs-string">&#x27;degreeExperience&#x27;</span>,<br>    job_desc             <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">2000</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-string">&#x27;&#x27;</span> COMMENT <span class="hljs-string">&#x27;jobDesc&#x27;</span>,<br>    `company_name`       <span class="hljs-type">varchar</span>(<span class="hljs-number">100</span>)           <span class="hljs-keyword">default</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;公司名称&#x27;</span>,<br>    `company_addr`       <span class="hljs-type">varchar</span>(<span class="hljs-number">200</span>)           <span class="hljs-keyword">default</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;公司联系方式&#x27;</span>,<br>    `company_info`       text comment <span class="hljs-string">&#x27;公司信息&#x27;</span>,<br>    `job_name`           <span class="hljs-type">varchar</span>(<span class="hljs-number">100</span>)           <span class="hljs-keyword">default</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;职位名称&#x27;</span>,<br>    `job_addr`           <span class="hljs-type">varchar</span>(<span class="hljs-number">200</span>)            <span class="hljs-keyword">default</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;工作地点&#x27;</span>,<br>    `job_info`           text comment <span class="hljs-string">&#x27;职位信息&#x27;</span>,<br>    `salary_min`         <span class="hljs-type">float</span>(<span class="hljs-number">10</span>, <span class="hljs-number">2</span>)           <span class="hljs-keyword">default</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;薪资范围，最小&#x27;</span>,<br>    `salary_max`         <span class="hljs-type">float</span>(<span class="hljs-number">10</span>, <span class="hljs-number">2</span>)           <span class="hljs-keyword">default</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;薪资范围，最大&#x27;</span>,<br>     salary_month        <span class="hljs-type">int</span>                    <span class="hljs-keyword">default</span> <span class="hljs-number">12</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;薪资月数&#x27;</span>,<br>    `url`                <span class="hljs-type">varchar</span>(<span class="hljs-number">1500</span>)          <span class="hljs-keyword">default</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;招聘信息详情页&#x27;</span>,<br>    `<span class="hljs-type">time</span>`               <span class="hljs-type">varchar</span>(<span class="hljs-number">10</span>)            <span class="hljs-keyword">default</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;职位最近发布时间&#x27;</span>,<br>    `company_creat_time` <span class="hljs-type">varchar</span>(<span class="hljs-number">50</span>)            <span class="hljs-keyword">default</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;公司成立时间&#x27;</span>,<br>    `company_fund`       <span class="hljs-type">varchar</span>(<span class="hljs-number">50</span>)            <span class="hljs-keyword">default</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;公司注册资本&#x27;</span>,<br>    `boss_active_time`   <span class="hljs-type">varchar</span>(<span class="hljs-number">50</span>)            <span class="hljs-keyword">default</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;职位最近发布时间&#x27;</span>,<br>    <span class="hljs-keyword">primary</span> key (`id`)<br>) engine <span class="hljs-operator">=</span> InnoDB comment <span class="hljs-operator">=</span><span class="hljs-string">&#x27;招聘信息&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<h4 id="application-properties"><a href="#application-properties" class="headerlink" title="application.properties"></a>application.properties</h4><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-meta">spring.datasource.driver-class-name</span>=<span class="hljs-string">com.mysql.jdbc.Driver</span><br><span class="hljs-meta">spring.datasource.url</span>=<span class="hljs-string">jdbc:mysql://localhost:3306/selenium?characterEncoding=UTF-8&amp;useUnicode=true&amp;useSSL=false&amp;tinyInt1isBit=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=Asia/Shanghai</span><br><span class="hljs-meta">spring.datasource.username</span>=<span class="hljs-string">root</span><br><span class="hljs-meta">spring.datasource.password</span>=<span class="hljs-string">123456</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="pom-xml"><a href="#pom-xml" class="headerlink" title="pom.xml"></a>pom.xml</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">parent</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-parent<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2.6.6<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">relativePath</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">parent</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">properties</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">maven.compiler.source</span>&gt;</span>8<span class="hljs-tag">&lt;/<span class="hljs-name">maven.compiler.source</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">maven.compiler.target</span>&gt;</span>8<span class="hljs-tag">&lt;/<span class="hljs-name">maven.compiler.target</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">project.build.sourceEncoding</span>&gt;</span>UTF-8<span class="hljs-tag">&lt;/<span class="hljs-name">project.build.sourceEncoding</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">properties</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>cn.hutool<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>hutool-all<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>5.8.27<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>us.codecraft<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>webmagic-core<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>0.8.0<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">exclusions</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">exclusion</span>&gt;</span><br>                    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.slf4j<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>                    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>slf4j-log4j12<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>                <span class="hljs-tag">&lt;/<span class="hljs-name">exclusion</span>&gt;</span><br>            <span class="hljs-tag">&lt;/<span class="hljs-name">exclusions</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>us.codecraft<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>webmagic-extension<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>0.8.0<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">exclusions</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">exclusion</span>&gt;</span><br>                    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.slf4j<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>                    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>slf4j-log4j12<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>                <span class="hljs-tag">&lt;/<span class="hljs-name">exclusion</span>&gt;</span><br>            <span class="hljs-tag">&lt;/<span class="hljs-name">exclusions</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.apache.commons<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>commons-lang3<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.baomidou<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>mybatis-plus-boot-starter<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>3.1.1<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>mysql<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>mysql-connector-java<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>5.1.47<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.seleniumhq.selenium<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>selenium-java<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>4.22.0<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.projectlombok<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>lombok<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>1.18.22<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.seleniumhq.selenium<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>selenium-java<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>3.13.0<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span><span class="hljs-comment">&lt;!--selenium--&gt;</span><br><br></code></pre></td></tr></table></figure>
+
+<h3 id="webmagic3件套"><a href="#webmagic3件套" class="headerlink" title="webmagic3件套"></a>webmagic3件套</h3><h4 id="MyBossDownloader-注入谷歌浏览器驱动"><a href="#MyBossDownloader-注入谷歌浏览器驱动" class="headerlink" title="MyBossDownloader:注入谷歌浏览器驱动"></a><strong>MyBossDownloader</strong>:注入谷歌浏览器驱动</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyBossDownloader</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Downloader</span> </span>&#123;<br><br>    <span class="hljs-keyword">private</span> RemoteWebDriver driver;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">MyBossDownloader</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-comment">// 创建chorme的配置信息</span><br>        System.setProperty(<span class="hljs-string">&quot;webdriver.chrome.driver&quot;</span>,<span class="hljs-string">&quot;C:\\Users\\81566\\Downloads\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe&quot;</span>);<br>        <span class="hljs-comment">// 创建chorme对象</span><br>        ChromeOptions chromeOptions = <span class="hljs-keyword">new</span> ChromeOptions();<br>        <span class="hljs-comment">//关闭谷歌驱动上的 Chrome 正在受软件测试控制的 提示</span><br>        chromeOptions.setExperimentalOption(<span class="hljs-string">&quot;excludeSwitches&quot;</span>, Arrays.asList(<span class="hljs-string">&quot;enable-automation&quot;</span>));<br>        <span class="hljs-comment">// 设置为无头模式</span><br>        <span class="hljs-comment">//chromeOptions.addArguments(&quot;--headless&quot;);</span><br>        <span class="hljs-comment">// 设置浏览器打开窗口大小</span><br>        <span class="hljs-comment">//chromeOptions.addArguments(&quot;--window-size=100,100&quot;);</span><br>        <span class="hljs-comment">// 1. 基于配置信息，创建RemoteWebDriver对象</span><br>        driver = <span class="hljs-keyword">new</span> ChromeDriver(chromeOptions);<br>    &#125;<br>    <span class="hljs-meta">@SneakyThrows</span><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Page <span class="hljs-title">download</span><span class="hljs-params">(Request request, Task task)</span> </span>&#123;<br>        String url = request.getUrl();<br>        System.out.println(<span class="hljs-string">&quot;url:&quot;</span>+url);<br>        <span class="hljs-keyword">if</span>(!url.contains(<span class="hljs-string">&quot;detail&quot;</span>))&#123;<br>            <span class="hljs-comment">//下一页</span><br>            <span class="hljs-keyword">if</span>(StrUtil.isNotBlank(request.getExtra(<span class="hljs-string">&quot;url&quot;</span>)))&#123;<br>                url = request.getExtra(<span class="hljs-string">&quot;url&quot;</span>);<br>                <span class="hljs-keyword">if</span>(!url.equals(driver.getCurrentUrl()))&#123;<br>                    driver.get(url);<br>                    Thread.sleep( RandomUtil.randomInt(<span class="hljs-number">8000</span>,<span class="hljs-number">12000</span>));<br>                    doScrollToEnd();<br>                    Thread.sleep(<span class="hljs-number">2000</span>);<br>                &#125;<br><br>                List&lt;WebElement&gt; nextPages = driver.findElementsByCssSelector(<span class="hljs-string">&quot;#wrap &gt; div.page-job-wrapper &gt; div.page-job-inner &gt; div &gt; div.job-list-wrapper &gt; div.search-job-result &gt; div &gt; div &gt; div &gt; a&quot;</span>);<br>                WebElement nextPage = nextPages.get(nextPages.size() - <span class="hljs-number">1</span>);<br>                <span class="hljs-keyword">if</span>(!<span class="hljs-string">&quot;disabled&quot;</span>.equals(nextPage.getAttribute(<span class="hljs-string">&quot;class&quot;</span>)))&#123;<br>                    <span class="hljs-comment">//等待元素可点击</span><br>                    ((JavascriptExecutor) driver).executeScript(<span class="hljs-string">&quot;arguments[0].click();&quot;</span>, nextPage);<br>                    Thread.sleep( RandomUtil.randomInt(<span class="hljs-number">8000</span>,<span class="hljs-number">12000</span>));<br><br>                    doScrollToEnd();<br>                    <span class="hljs-keyword">return</span> createPage(driver.getCurrentUrl(), driver.getPageSource(), <span class="hljs-string">&quot;page&quot;</span>);<br>                &#125;<br>                System.out.println(<span class="hljs-string">&quot;翻页失败&quot;</span>);<br>            &#125;<span class="hljs-keyword">else</span>&#123;<br>                <span class="hljs-comment">//分页 https://www.zhipin.com/web/geek/job?query=Java&amp;city=101280100&amp;page=1</span><br>                driver.get(url);<br>                Thread.sleep( RandomUtil.randomInt(<span class="hljs-number">8000</span>,<span class="hljs-number">12000</span>));<br>                doScrollToEnd();<br>                <span class="hljs-keyword">return</span> createPage(driver.getCurrentUrl(), driver.getPageSource(), <span class="hljs-string">&quot;page&quot;</span>);<br>            &#125;<br>        &#125;<span class="hljs-keyword">else</span> &#123;<br>            driver.get(url);<br>            Thread.sleep(RandomUtil.randomInt(<span class="hljs-number">2000</span>,<span class="hljs-number">5000</span>));<br>            Page page = createPage(driver.getCurrentUrl(), driver.getPageSource(), <span class="hljs-string">&quot;pageDetail&quot;</span>);<br>            String jobId = request.getExtra(<span class="hljs-string">&quot;jobId&quot;</span>);<br>            page.putField(<span class="hljs-string">&quot;jobId&quot;</span>, jobId);<br>            <span class="hljs-keyword">return</span> page;<br>        &#125;<br><br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">doScrollToEnd</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> InterruptedException </span>&#123;<br>        <span class="hljs-keyword">long</span> height = (<span class="hljs-keyword">long</span>) driver.executeScript(<span class="hljs-string">&quot;return document.body.scrollHeight&quot;</span>);<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; height - <span class="hljs-number">1000</span>; i = i + RandomUtil.randomInt(<span class="hljs-number">200</span>,<span class="hljs-number">500</span>)) &#123;<br>            driver.executeScript(StrUtil.format(<span class="hljs-string">&quot;window.scrollTo(0,&#123;&#125;)&quot;</span>,i));<br>            Thread.sleep(RandomUtil.randomInt(<span class="hljs-number">200</span>,<span class="hljs-number">1000</span>));<br>        &#125;<br><br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">private</span> Page <span class="hljs-title">createPage</span><span class="hljs-params">(String url, String html, String pageName)</span> <span class="hljs-keyword">throws</span> InterruptedException </span>&#123;<br>        Page page = <span class="hljs-keyword">new</span> Page();<br>        PlainText plainText = <span class="hljs-keyword">new</span> PlainText(url);<br>        page.setUrl(plainText);<br>        page.setRawText(html);<br><br>        <span class="hljs-keyword">int</span> retry  = <span class="hljs-number">0</span>;<br>        <span class="hljs-keyword">while</span> (html.contains(<span class="hljs-string">&quot;请稍候&quot;</span>) &amp;&amp; url.contains(<span class="hljs-string">&quot;detail&quot;</span>) &amp;&amp; retry &lt; <span class="hljs-number">1</span>)&#123;<br>            System.out.println(<span class="hljs-string">&quot;加载无效,重新加载&quot;</span>);<br>            driver.get(url);<br>            Thread.sleep(<span class="hljs-number">5000</span>);<br>            html = driver.getPageSource();<br>            page.setRawText(html);<br>            retry++;<br>        &#125;<br><br>        Request req = <span class="hljs-keyword">new</span> Request(url);<br>        req.putExtra(<span class="hljs-string">&quot;pageName&quot;</span>,pageName);<br>        page.setRequest(req);<br>        <span class="hljs-keyword">return</span> page;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setThread</span><span class="hljs-params">(<span class="hljs-keyword">int</span> i)</span> </span>&#123;<br><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="MyBossPageInterceptor：处理列表页、详情页、下一页"><a href="#MyBossPageInterceptor：处理列表页、详情页、下一页" class="headerlink" title="MyBossPageInterceptor：处理列表页、详情页、下一页"></a><strong>MyBossPageInterceptor</strong>：处理列表页、详情页、下一页</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyBossPageInterceptor</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">PageProcessor</span> </span>&#123;<br><br>    <span class="hljs-keyword">private</span> String domain = <span class="hljs-string">&quot;https://www.zhipin.com&quot;</span>;<br><br>    <span class="hljs-keyword">private</span> Random random = <span class="hljs-keyword">new</span> Random();<br><br>    <span class="hljs-meta">@SneakyThrows</span><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">process</span><span class="hljs-params">(Page page)</span> </span>&#123;<br>        <span class="hljs-comment">//1、列表页 2、详情页</span><br>        Html html = page.getHtml();<br>        Document document = html.getDocument();<br>        String pageName = (String) page.getRequest().getExtras().get(<span class="hljs-string">&quot;pageName&quot;</span>);<br>        <span class="hljs-keyword">if</span>(<span class="hljs-string">&quot;page&quot;</span>.equals(pageName))&#123;<br>            <span class="hljs-comment">//下一页</span><br>            Request request = <span class="hljs-keyword">new</span> Request();<br>            request.setPriority(RandomUtil.randomInt(<span class="hljs-number">20</span>,<span class="hljs-number">100</span>));<br>            request.setUrl(<span class="hljs-string">&quot;nextPage&quot;</span> + UUID.randomUUID().toString().replace(<span class="hljs-string">&quot;-&quot;</span>, <span class="hljs-string">&quot;&quot;</span>));<br>            request.putExtra(<span class="hljs-string">&quot;url&quot;</span>,page.getUrl().get());<br>            page.addTargetRequest(request);<br><br>            Elements selects = document.select(<span class="hljs-string">&quot;#wrap &gt; div.page-job-wrapper &gt; div.page-job-inner &gt; div &gt; div.job-list-wrapper &gt; div.search-job-result &gt; ul &gt; li&quot;</span>);<br>            <span class="hljs-keyword">if</span>(CollUtil.isNotEmpty(selects))&#123;<br>                <span class="hljs-comment">//列表页</span><br>                List&lt;JobInfo&gt; itemList = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();<br>                <span class="hljs-keyword">for</span> (Element select : selects) &#123;<br>                    String jobName = select.selectFirst(<span class="hljs-string">&quot;div.job-card-body.clearfix &gt; a &gt; div.job-title.clearfix &gt; span.job-name&quot;</span>).text();<br>                    System.out.println(<span class="hljs-string">&quot;jobName:&quot;</span> + jobName);<br>                    String companyName = select.selectFirst(<span class="hljs-string">&quot;div.job-card-body.clearfix &gt; div &gt; div.company-info &gt; h3 &gt; a&quot;</span>).text();<br>                    System.out.println(<span class="hljs-string">&quot;companyName:&quot;</span> + companyName);<br>                    String workLocation = select.selectFirst(<span class="hljs-string">&quot;div.job-card-body.clearfix &gt; a &gt; div.job-title.clearfix &gt; span.job-area-wrapper &gt; span&quot;</span>).text();<br>                    System.out.println(<span class="hljs-string">&quot;workLocation:&quot;</span> + workLocation);<br>                    String companyInfo = select.select(<span class="hljs-string">&quot;div.job-card-body.clearfix &gt; div &gt; div.company-info &gt; ul &gt; li&quot;</span>).stream().map(Element::text).collect(Collectors.joining(<span class="hljs-string">&quot;,&quot;</span>));<br>                    System.out.println(<span class="hljs-string">&quot;companyInfo:&quot;</span>+companyInfo);<br>                    String jobBenifit = select.select(<span class="hljs-string">&quot;div.job-card-footer.clearfix &gt; div&quot;</span>).stream().map(Element::text).collect(Collectors.joining(<span class="hljs-string">&quot;,&quot;</span>));<br>                    System.out.println(<span class="hljs-string">&quot;jobBenifit:&quot;</span>+jobBenifit);<br>                    String salary = select.select(<span class="hljs-string">&quot;div.job-card-body.clearfix span.salary&quot;</span>).text();<br><br>                    String[] split = salary.split(<span class="hljs-string">&quot;-&quot;</span>);<br>                    Float min = Float.valueOf(split[<span class="hljs-number">0</span>]);<br>                    Float max;<br>                    <span class="hljs-keyword">int</span> month = <span class="hljs-number">12</span>;<br>                            String maxStr = split[<span class="hljs-number">1</span>];<br>                    String[] split1 = maxStr.split(<span class="hljs-string">&quot;\\·&quot;</span>);<br>                    <span class="hljs-keyword">if</span>(split1.length == <span class="hljs-number">1</span>)&#123;<br>                        max = Float.valueOf(maxStr.substring(<span class="hljs-number">0</span>,maxStr.length()-<span class="hljs-number">1</span>));<br>                    &#125;<span class="hljs-keyword">else</span>&#123;<br>                        max = Float.valueOf(split1[<span class="hljs-number">0</span>].substring(<span class="hljs-number">0</span>,split1[<span class="hljs-number">0</span>].length()-<span class="hljs-number">1</span>));<br>                        month = Integer.parseInt(split1[<span class="hljs-number">1</span>].substring(<span class="hljs-number">0</span>,split1[<span class="hljs-number">1</span>].length()-<span class="hljs-number">1</span>));<br>                    &#125;<br>                    System.out.println(<span class="hljs-string">&quot;salary:&quot;</span>+min+<span class="hljs-string">&quot;-&quot;</span>+max+<span class="hljs-string">&quot;*&quot;</span>+month);<br>                    <span class="hljs-comment">//把详情链接放到Request</span><br>                    String detailUrl = select.select(<span class="hljs-string">&quot;div.job-card-body.clearfix &gt; a&quot;</span>).attr(<span class="hljs-string">&quot;href&quot;</span>);<br>                    String jobId = detailUrl.substring(detailUrl.lastIndexOf(<span class="hljs-string">&quot;/&quot;</span>) + <span class="hljs-number">1</span>,detailUrl.lastIndexOf(<span class="hljs-string">&quot;.html?&quot;</span>));<br>                    System.out.println(<span class="hljs-string">&quot;jobId:&quot;</span>+jobId);<br><br>                    JobInfo jobInfo = <span class="hljs-keyword">new</span> JobInfo();<br>                    jobInfo.setJobId(jobId);<br>                    jobInfo.setWorkLocation(workLocation);<br>                    jobInfo.setJobBenifit(jobBenifit);<br>                    jobInfo.setCompanyName(companyName);<br>                    jobInfo.setCompanyInfo(companyInfo);<br>                    jobInfo.setJobName(jobName);<br>                    jobInfo.setSalaryMonth(month);<br>                    jobInfo.setSalaryMin(min);<br>                    jobInfo.setSalaryMax(max);<br>                    jobInfo.setUrl(detailUrl);<br>                    itemList.add(jobInfo);<br>                    System.out.println();<br>                    detailUrl = domain + detailUrl;<br>                    Request detailRequest = <span class="hljs-keyword">new</span> Request();<br>                    detailRequest.setPriority(RandomUtil.randomInt(<span class="hljs-number">1</span>,<span class="hljs-number">10</span>));<br>                    detailRequest.putExtra(<span class="hljs-string">&quot;jobId&quot;</span>, jobId);<br>                    detailRequest.setUrl(detailUrl);<br>                    page.addTargetRequest(detailRequest);<br>                &#125;<br>                page.putField(<span class="hljs-string">&quot;itemList&quot;</span>,itemList);<br>            &#125;<br>        &#125;<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(<span class="hljs-string">&quot;pageDetail&quot;</span>.equals(pageName))&#123;<br>            String jobId = page.getResultItems().get(<span class="hljs-string">&quot;jobId&quot;</span>);<br>            <span class="hljs-comment">//详情页-获取岗位描述、要求                            #main &gt; div.job-banner &gt; div &gt; div &gt; div.info-primary &gt; p &gt; span.text-desc.text-experiece</span><br>            String workExperience = document.select(<span class="hljs-string">&quot;#main &gt; div.job-banner &gt; div &gt; div &gt; div.info-primary &gt; p &gt; span.text-desc.text-experiece&quot;</span>).text();<br>            System.out.println(<span class="hljs-string">&quot;workExperience:&quot;</span>+ workExperience);<br>            String degreeExperience = document.select(<span class="hljs-string">&quot;#main &gt; div.job-banner &gt; div &gt; div &gt; div.info-primary &gt; p &gt; span.text-desc.text-degree&quot;</span>).text();<br>            System.out.println(<span class="hljs-string">&quot;degreeExperience:&quot;</span> + degreeExperience);<br>            String jobDesc = document.select(<span class="hljs-string">&quot;#main &gt; div.job-box &gt; div &gt; div.job-detail &gt; div:nth-child(1) &gt; div.job-sec-text&quot;</span>).text();<br>            System.out.println(<span class="hljs-string">&quot;jobDesc:&quot;</span> + jobDesc);<br>            String bossActiveTime = document.select(<span class="hljs-string">&quot;#main &gt; div.job-box &gt; div &gt; div.job-detail &gt; div:nth-child(1) &gt; div.job-boss-info &gt; h2 &gt; span&quot;</span>).text();<br>            System.out.println(<span class="hljs-string">&quot;bossActiveTime:&quot;</span> + bossActiveTime);<br>            String lastUpdateTime = document.select(<span class="hljs-string">&quot;#main &gt; div.job-box &gt; div &gt; div.job-detail &gt; p&quot;</span>).text();<br>            lastUpdateTime = lastUpdateTime.substring(lastUpdateTime.indexOf(<span class="hljs-string">&quot;：&quot;</span>) + <span class="hljs-number">1</span>);<br>            System.out.println(<span class="hljs-string">&quot;lastUpdateTime:&quot;</span> + lastUpdateTime);<br>            String workAddr = document.select(<span class="hljs-string">&quot;#main &gt; div.job-box &gt; div &gt; div.job-detail &gt; div.job-detail-section.job-detail-company &gt; div.detail-section-item.company-address &gt; div &gt; div.location-address&quot;</span>).text();<br>            System.out.println(<span class="hljs-string">&quot;workAddr:&quot;</span> + workAddr);<br>            String companyCreatTime = document.select(<span class="hljs-string">&quot;#main &gt; div.job-box &gt; div &gt; div.job-detail &gt; div.job-detail-section.job-detail-company &gt; div.detail-section-item.business-info-box &gt; div &gt; ul &gt; li.res-time&quot;</span>).text();<br>            System.out.println(<span class="hljs-string">&quot;companyCreatTime:&quot;</span> + companyCreatTime);<br>            String companyFund = document.select(<span class="hljs-string">&quot;#main &gt; div.job-box &gt; div &gt; div.job-detail &gt; div.job-detail-section.job-detail-company &gt; div.detail-section-item.business-info-box &gt; div &gt; ul &gt; li.company-fund&quot;</span>).text();<br>            System.out.println(<span class="hljs-string">&quot;companyFund:&quot;</span> + companyFund);<br>            System.out.println();<br><br>            JobInfo jobInfo = <span class="hljs-keyword">new</span> JobInfo();<br>            jobInfo.setJobId(jobId);<br>            jobInfo.setWorkExperience(workExperience);<br>            jobInfo.setDegreeExperience(degreeExperience);<br>            jobInfo.setJobDesc(jobDesc);<br>            jobInfo.setJobAddr(workAddr);<br>            jobInfo.setTime(lastUpdateTime);<br>            jobInfo.setCompanyCreatTime(companyCreatTime);<br>            jobInfo.setCompanyFund(companyFund);<br>            jobInfo.setBossActiveTime(bossActiveTime);<br>            page.putField(<span class="hljs-string">&quot;item&quot;</span>,jobInfo);<br><br>        &#125;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Site <span class="hljs-title">getSite</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> Site.me().setSleepTime(<span class="hljs-number">1000</span>).setTimeOut(<span class="hljs-number">2000</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="MyBossPipeline"><a href="#MyBossPipeline" class="headerlink" title="MyBossPipeline"></a><strong>MyBossPipeline</strong></h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyBossPipeline</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Pipeline</span> </span>&#123;<br><br>    <span class="hljs-meta">@Resource</span><br>    <span class="hljs-keyword">private</span> JobInfoService jobInfoService;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">process</span><span class="hljs-params">(ResultItems resultItems, Task task)</span> </span>&#123;<br>        JobInfo item = resultItems.get(<span class="hljs-string">&quot;item&quot;</span>);<br>        <span class="hljs-keyword">if</span>(Objects.nonNull(item))&#123;<br>            JobInfo jobInfo = jobInfoService.lambdaQuery().eq(JobInfo::getJobId, item.getJobId()).one();<br>            <span class="hljs-keyword">if</span>(Objects.nonNull(jobInfo))&#123;<br>                item.setId(jobInfo.getId());<br>                jobInfoService.updateById(item);<br>            &#125;<span class="hljs-keyword">else</span>&#123;<br>                jobInfoService.save(item);<br>            &#125;<br>            <span class="hljs-keyword">return</span>;<br>        &#125;<br>        List&lt;JobInfo&gt; itemList = resultItems.get(<span class="hljs-string">&quot;itemList&quot;</span>);<br>        <span class="hljs-keyword">if</span>(CollUtil.isNotEmpty(itemList))&#123;<br>            <span class="hljs-keyword">for</span> (JobInfo jobInfo : itemList) &#123;<br>                JobInfo selectJob = jobInfoService.lambdaQuery().eq(JobInfo::getJobId, jobInfo.getJobId()).one();<br>                <span class="hljs-keyword">if</span>(Objects.nonNull(selectJob))&#123;<br>                    jobInfo.setId(selectJob.getId());<br>                    jobInfoService.updateById(jobInfo);<br>                &#125;<span class="hljs-keyword">else</span>&#123;<br>                    jobInfoService.save(jobInfo);<br>                &#125;<br>            &#125;<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BossSpiderStart</span> </span>&#123;<br>    <span class="hljs-meta">@Resource</span><br>    <span class="hljs-keyword">private</span> MyBossPageInterceptor myBossPageInterceptor;<br>    <span class="hljs-meta">@Resource</span><br>    <span class="hljs-keyword">private</span> MyBossPipeline myBossPipeline;<br>    <span class="hljs-meta">@Resource</span><br>    <span class="hljs-keyword">private</span> MyBossDownloader myBossDownloader;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">start</span><span class="hljs-params">()</span></span>&#123;<br>        Spider.create(myBossPageInterceptor)<br>                .setPipelines(Arrays.asList(myBossPipeline))<br>                .setDownloader(myBossDownloader)<br>                .setScheduler(<span class="hljs-keyword">new</span> PriorityScheduler())<br>                .addUrl(<span class="hljs-string">&quot;https://www.zhipin.com/web/geek/job?query=Java&amp;city=101280100&amp;jobType=1901&quot;</span>)<br>                .thread(<span class="hljs-number">1</span>)<br>                .start();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="难题"><a href="#难题" class="headerlink" title="难题"></a>难题</h2><p>1、被识别出ip存在异常访问行为需要人工验证滑动滑块。</p>
+<p><img src="/images/Java%E7%88%AC%E8%99%AB02-webmagic/image-20240928221420318.png" alt="image-20240928221420318"></p>
+<h3 id="解决方案一"><a href="#解决方案一" class="headerlink" title="解决方案一"></a>解决方案一</h3><p>守在电脑前，人力手动验证。</p>
+<h3 id="解决方案二"><a href="#解决方案二" class="headerlink" title="解决方案二"></a>解决方案二</h3><p>在Downloader动态设置代理ip，按照特性规则每50个请求换一个ip</p>
+<h3 id="方案三"><a href="#方案三" class="headerlink" title="方案三"></a>方案三</h3><p>​    滑动验证码识别技术。这种技术通常利用机器学习或深度学习算法来识别滑动验证码的图案和特征，并模拟用户进行滑动操作。然而，由于滑动验证码的复杂性和变化性，识别技术的准确性和稳定性仍然是一个挑战，目前常用的验证码平台是超级鹰：<a target="_blank" rel="noopener" href="https://www.chaojiying.com/api-45.html%EF%BC%8C%E4%B8%80%E8%88%AC%E7%94%A8%E6%9D%A5%E8%AF%86%E5%88%AB%E9%AA%8C%E8%AF%81%E7%A0%81%EF%BC%8C%E8%BF%98%E4%B8%8D%E8%83%BD%E8%A7%A3%E5%86%B3%E6%BB%91%E5%9D%97%E9%97%AE%E9%A2%98%E3%80%82">https://www.chaojiying.com/api-45.html，一般用来识别验证码，还不能解决滑块问题。</a></p>
+<p>​    如果要解决滑块问题，需要定位获取滑块区域，通过算法来解析凹槽的位置，计算得出滑块需要移动的距离，但是该方案难度很高，如果采用第三方解析成本极高，故尽量降低被反扒的可能</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%88%AC%E8%99%AB/" rel="tag"># 爬虫</a>
+              <a href="/tags/webmagic/" rel="tag"># webmagic</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/09/08/Java%E7%88%AC%E8%99%AB01-httpclient%E5%92%8Cjsoup/" rel="prev" title="Java爬虫01-httpclient和jsoup">
+      <i class="fa fa-chevron-left"></i> Java爬虫01-httpclient和jsoup
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/09/22/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9805-Mysql8%E7%9A%84%E4%BC%98%E5%8C%96/" rel="next" title="性能调优05-Mysql8的优化">
+      性能调优05-Mysql8的优化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Webmagic"><span class="nav-number">1.</span> <span class="nav-text">Webmagic</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">1.1.</span> <span class="nav-text">是什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.2.</span> <span class="nav-text">架构设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#WebMagic%E7%9A%84%E5%9B%9B%E4%B8%AA%E7%BB%84%E4%BB%B6"><span class="nav-number">1.2.1.</span> <span class="nav-text">WebMagic的四个组件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Downloader"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">1.Downloader</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-PageProcessor"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">2.PageProcessor</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-Scheduler"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">3.Scheduler</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-Pipeline"><span class="nav-number">1.2.1.4.</span> <span class="nav-text">4.Pipeline</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E4%BA%8E%E6%95%B0%E6%8D%AE%E6%B5%81%E8%BD%AC%E7%9A%84%E5%AF%B9%E8%B1%A1"><span class="nav-number">1.2.2.</span> <span class="nav-text">用于数据流转的对象</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Request"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">1. Request</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-Page"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">2. Page</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-ResultItems"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">3. ResultItems</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E7%88%AC%E8%99%AB%E8%BF%90%E8%BD%AC%E7%9A%84%E5%BC%95%E6%93%8E%E2%80%93Spider"><span class="nav-number">1.2.3.</span> <span class="nav-text">控制爬虫运转的引擎–Spider</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9"><span class="nav-number">1.3.</span> <span class="nav-text">缺点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Selenium"><span class="nav-number">2.</span> <span class="nav-text">Selenium</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88-1"><span class="nav-number">2.1.</span> <span class="nav-text">是什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E7%94%A8"><span class="nav-number">2.2.</span> <span class="nav-text">怎么用</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Webmagic-Selenium-Chormedriver"><span class="nav-number">2.2.0.0.1.</span> <span class="nav-text">Webmagic+Selenium+Chormedriver</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Boss%E7%9B%B4%E8%81%98%E7%BD%91%E7%88%AC%E5%8F%96"><span class="nav-number">2.3.</span> <span class="nav-text">Boss直聘网爬取</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DDL"><span class="nav-number">2.3.0.1.</span> <span class="nav-text">DDL</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#application-properties"><span class="nav-number">2.3.0.2.</span> <span class="nav-text">application.properties</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pom-xml"><span class="nav-number">2.3.0.3.</span> <span class="nav-text">pom.xml</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#webmagic3%E4%BB%B6%E5%A5%97"><span class="nav-number">2.3.1.</span> <span class="nav-text">webmagic3件套</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MyBossDownloader-%E6%B3%A8%E5%85%A5%E8%B0%B7%E6%AD%8C%E6%B5%8F%E8%A7%88%E5%99%A8%E9%A9%B1%E5%8A%A8"><span class="nav-number">2.3.1.1.</span> <span class="nav-text">MyBossDownloader:注入谷歌浏览器驱动</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MyBossPageInterceptor%EF%BC%9A%E5%A4%84%E7%90%86%E5%88%97%E8%A1%A8%E9%A1%B5%E3%80%81%E8%AF%A6%E6%83%85%E9%A1%B5%E3%80%81%E4%B8%8B%E4%B8%80%E9%A1%B5"><span class="nav-number">2.3.1.2.</span> <span class="nav-text">MyBossPageInterceptor：处理列表页、详情页、下一页</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MyBossPipeline"><span class="nav-number">2.3.1.3.</span> <span class="nav-text">MyBossPipeline</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9A%BE%E9%A2%98"><span class="nav-number">2.4.</span> <span class="nav-text">难题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%B8%80"><span class="nav-number">2.4.1.</span> <span class="nav-text">解决方案一</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%BA%8C"><span class="nav-number">2.4.2.</span> <span class="nav-text">解决方案二</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E4%B8%89"><span class="nav-number">2.4.3.</span> <span class="nav-text">方案三</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">86</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">75</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

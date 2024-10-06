@@ -39,7 +39,7 @@
 <meta property="og:image" content="http://example.com/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902224541628.png">
 <meta property="og:image" content="http://example.com/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210903000820115.png">
 <meta property="article:published_time" content="2021-09-10T13:00:00.000Z">
-<meta property="article:modified_time" content="2022-09-28T15:05:33.079Z">
+<meta property="article:modified_time" content="2024-08-03T09:10:35.595Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="DDD">
 <meta property="article:tag" content="中台">
@@ -235,7 +235,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-09-28 23:05:33" itemprop="dateModified" datetime="2022-09-28T23:05:33+08:00">2022-09-28</time>
+                <time title="修改时间：2024-08-03 17:10:35" itemprop="dateModified" datetime="2024-08-03T17:10:35+08:00">2024-08-03</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -269,12 +269,20 @@
 <p><strong>微服务</strong>：强调业务的彻底组件化和服务化，每个服务可单独开发，迭代运行，更符合单一职责原则，通过网关</p>
 <p>服务发现与注册，restful api风格轻量级通信等等，各司其职</p>
 <h2 id="系统老化谁的锅"><a href="#系统老化谁的锅" class="headerlink" title="系统老化谁的锅"></a>系统老化谁的锅</h2><p><img src="/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210902221412119.png" alt="image-20210902221412119"></p>
+<h2 id="DDD是什么"><a href="#DDD是什么" class="headerlink" title="DDD是什么"></a>DDD是什么</h2><p>​    DDD最早由Eric Evans提出一种的软件设计理念，通过一些规则和概念来指导如何合理的进行领域划，防止程序腐化，帮助整个研发团队内部更好的进行沟通。</p>
+<h3 id="DDD的一些概念"><a href="#DDD的一些概念" class="headerlink" title="DDD的一些概念"></a>DDD的一些概念</h3><p><strong>领域（Domain）：</strong>指软件要解决的业务问题和诉求，是一个广义的概念，包括业务的各种概念、规则和逻辑。</p>
+<p><strong>领域模型（Model）：</strong>业务概念在程序中的一种表达方式，使用面向对象的编程语言中的类作为业务概念的承载体，也可以使用 UML 可视化地表达模型。<br><strong>通用语言（Ubiquitous language）：</strong>指在软件设计中，业务人员和开发人员需要使用无歧义的统一语言来对话，包括对概念的统一理解和定义，以及业务人员参与到软件建模中。<br><strong>实体（Entity）：</strong>领域模型中面向对象语言的具体体现，一般是一个类，具有唯一标识符，且标识符在经历过各种状态变更后仍能保持一致。<br><strong>值对象（Value Object）：</strong>一种特殊的实体，没有自己的状态和生命周期，用属性标识，任何属性的变化都视为新的对象。<br><strong>聚合（Aggregate）：</strong>一组生命周期一致的实体集合，表达统一的业务意义，其中有且只有一个聚合根，是聚合的核心对象。<br><strong>聚合根（Aggregate Root）：</strong>聚合中最核心的对象，是聚合的领航员，用于管理聚合，实现发现、持久化聚合的作用。<br><strong>界限上下文（Bounded Context）：</strong>由统一业务目标和概念的聚合组成的集合，用于识别上下文，避免模型的不正确复用带来的问题。<br><strong>服务（Service）：</strong>领域模型的操作者，承载领域的业务规则，用于处理业务逻辑，让逻辑更为清晰明了。<br><strong>模块（Module）：</strong>同领域的类或者对象组成的集合，模块的划分没有固定的模式，可以根据业务逻辑的复杂程度进行划分。<br><strong>工厂（Factory）：</strong>以构建模型为职责的类或方法，可以把不同的业务参数转化为领域模型。<br><strong>仓库（Repository）：</strong>以持久化领域模型为职责的类，用于屏蔽业务逻辑和持久化基础设施的差异。</p>
 <h1 id="DDD的特点"><a href="#DDD的特点" class="headerlink" title="DDD的特点"></a>DDD的特点</h1><h2 id="基于充血模型的面向对象开发"><a href="#基于充血模型的面向对象开发" class="headerlink" title="基于充血模型的面向对象开发"></a>基于充血模型的面向对象开发</h2><p>贫血模型：</p>
 <p>​    定义对象的简单的属性值，没有业务逻辑上的方法（个人理解）</p>
 <p>​    MVC模式开发是是面向过程的编程方式，符合人类大脑逻辑。定义DTO，定义数据库Model，BO等，对其进行get set方法，然后通过service 对Bo对象进行操作，最后通过copy属性持久化数据库和DTO传输。</p>
 <p>充血模型：</p>
 <p>​    就是我们在定义属性的同时也会定义方法，我们的属性是可以通过某些方式直接得到属性值，那我们也就可以在对象中嵌入方法直接创建出一个具有属性值的对象。也就是说这个对象不再需要我们在进行进一步的操作，这也就复合了OOP的三大特性之一的封装</p>
-<h2 id="DDD四层架构"><a href="#DDD四层架构" class="headerlink" title="DDD四层架构"></a>DDD四层架构</h2><ul>
+<h2 id="参考DDD的部分概念落地方案"><a href="#参考DDD的部分概念落地方案" class="headerlink" title="参考DDD的部分概念落地方案"></a>参考DDD的部分概念落地方案</h2><p>借鉴到的DDD的思路，避免循环依赖或者使代码接口清晰，延缓腐化</p>
+<p>1、进行领域划分，不同领域的服务之间不能相互注入，但可以通过别的方式来调用，把他当做跨微服务调用，通过在防腐层的xxxLocalclient调用查询相关或者走消息总线的事件方式执行操作相关的动作</p>
+<p>2、领域对象实体</p>
+<p>3、聚合：把操同一领域数据库的操作分为查询xxxquery和执行xxxexcute2个类</p>
+<p>4、对领域相关数据的转化固定放在data层：DTO转entity，entity转VO等的数据处理，统一放置</p>
+<ul>
 <li><p>interface（接口层）</p>
 <ul>
 <li>很薄的一层</li>
@@ -289,8 +297,10 @@
 </li>
 <li><p>domain（领域服务层）</p>
 <ul>
-<li>Aservice 只能注入execute、query聚合根来操作持久层<ul>
-<li>A1子领域<ul>
+<li>Aservice 领域服务：定义领域方法，只能注入execute、query聚合根来操作持久层<ul>
+<li>A1子领域</li>
+<li>A2子领域</li>
+<li>transfer层 领域内部之前通过该层调用 如 A1service -&gt; A2transfer</li>
 <li>repository 存放领域内部仓库，操作持久化层<ul>
 <li>dao 存放Mybatis Mapper接口和实现的XML文件</li>
 <li>data（可选）查询前后的数据计算、转化</li>
@@ -300,34 +310,44 @@
 </li>
 </ul>
 </li>
-<li>A2子领域</li>
-<li>transfer层 领域内部之前通过该层调用 如 A1service -&gt; A2transfer</li>
-</ul>
-</li>
 </ul>
 </li>
 <li><p>infrastructure（基础设施层）（配置、自研组件、缓存、防腐层（client）、工具包）</p>
 <ul>
 <li><p>client</p>
 <ul>
-<li>native<ul>
+<li>remote<ul>
 <li>外围、外部服务client客户端</li>
 </ul>
 </li>
-<li>local 本地大领域之间调用 比如 A调用B Aservice -&gt; BLocalClient <ul>
+<li>native 不同领域对外开放的跨领域本地客户端 比如 A调用B Aservice -&gt; BLocalClient <ul>
 <li>BLocalClient</li>
 <li>ALocalClient</li>
 </ul>
 </li>
 </ul>
 </li>
-<li><p>helper 工具类包</p>
+</ul>
 </li>
-<li><p>config 引入各组件的配置</p>
+<li><p>helper 工具类包</p>
+<ul>
+<li>config 引入各组件的配置</li>
+</ul>
 </li>
 <li><p>component 存放着系统无关、可以随时迁移的自定义组件</p>
+<ul>
+<li>common 存放着系统无关、可以随时迁移的实体、常量类、异常类</li>
+</ul>
 </li>
-<li><p>common 存放着系统无关、可以随时迁移的实体、常量类、异常类</p>
+<li><p>bus（消息总线层）</p>
+<ul>
+<li>remote<ul>
+<li>外围MQ等</li>
+</ul>
+</li>
+<li>native <ul>
+<li>跨领域操作的事件监听</li>
+</ul>
 </li>
 </ul>
 </li>
@@ -383,7 +403,7 @@
 <p>实例一：今年我们的库存周转率如何协调财务、库存、运营的口径或者标准</p>
 <p>实例二：如何统一提供sku管理和服务（商品中台）</p>
 <p><img src="/images/DDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E4%BB%8B%E7%BB%8D/image-20210903000820115.png" alt="image-20210903000820115"></p>
-<h2 id="SPI"><a href="#SPI" class="headerlink" title="SPI"></a>SPI</h2>
+
     </div>
 
     
@@ -468,7 +488,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8D%E8%AF%8D%E7%A7%91%E6%99%AE"><span class="nav-number">1.</span> <span class="nav-text">名词科普</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E3%80%81%E5%88%86%E5%B8%83%E5%BC%8F%E3%80%81SOA%E3%80%81%E5%BE%AE%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.1.</span> <span class="nav-text">集群、分布式、SOA、微服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%80%81%E5%8C%96%E8%B0%81%E7%9A%84%E9%94%85"><span class="nav-number">2.</span> <span class="nav-text">系统老化谁的锅</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DDD%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number"></span> <span class="nav-text">DDD的特点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%85%85%E8%A1%80%E6%A8%A1%E5%9E%8B%E7%9A%84%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%BC%80%E5%8F%91"><span class="nav-number">1.</span> <span class="nav-text">基于充血模型的面向对象开发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDD%E5%9B%9B%E5%B1%82%E6%9E%B6%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">DDD四层架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDD%E4%BB%A3%E7%A0%81%E7%BC%96%E6%8E%92%EF%BC%9A"><span class="nav-number">3.</span> <span class="nav-text">DDD代码编排：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDD%E5%8F%AF%E6%8C%87%E5%AF%BC%E5%8D%95%E4%BD%93%E9%A1%B9%E7%9B%AE%E5%92%8C%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84"><span class="nav-number">4.</span> <span class="nav-text">DDD可指导单体项目和微服务架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E6%B2%BB%E6%A0%87%E4%B8%8D%E6%B2%BB%E6%9C%AC"><span class="nav-number">4.1.</span> <span class="nav-text">微服务架构治标不治本</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDD%E4%B8%8E%E4%B8%AD%E5%8F%B0"><span class="nav-number">5.</span> <span class="nav-text">DDD与中台</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDD%E5%B9%B6%E9%9D%9E%E9%93%B6%E5%BC%B9"><span class="nav-number">6.</span> <span class="nav-text">DDD并非银弹</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SPI"><span class="nav-number">7.</span> <span class="nav-text">SPI</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8D%E8%AF%8D%E7%A7%91%E6%99%AE"><span class="nav-number">1.</span> <span class="nav-text">名词科普</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E3%80%81%E5%88%86%E5%B8%83%E5%BC%8F%E3%80%81SOA%E3%80%81%E5%BE%AE%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.1.</span> <span class="nav-text">集群、分布式、SOA、微服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%80%81%E5%8C%96%E8%B0%81%E7%9A%84%E9%94%85"><span class="nav-number">2.</span> <span class="nav-text">系统老化谁的锅</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDD%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">3.</span> <span class="nav-text">DDD是什么</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DDD%E7%9A%84%E4%B8%80%E4%BA%9B%E6%A6%82%E5%BF%B5"><span class="nav-number">3.1.</span> <span class="nav-text">DDD的一些概念</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DDD%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number"></span> <span class="nav-text">DDD的特点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%85%85%E8%A1%80%E6%A8%A1%E5%9E%8B%E7%9A%84%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%BC%80%E5%8F%91"><span class="nav-number">1.</span> <span class="nav-text">基于充血模型的面向对象开发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83DDD%E7%9A%84%E9%83%A8%E5%88%86%E6%A6%82%E5%BF%B5%E8%90%BD%E5%9C%B0%E6%96%B9%E6%A1%88"><span class="nav-number">2.</span> <span class="nav-text">参考DDD的部分概念落地方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDD%E4%BB%A3%E7%A0%81%E7%BC%96%E6%8E%92%EF%BC%9A"><span class="nav-number">3.</span> <span class="nav-text">DDD代码编排：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDD%E5%8F%AF%E6%8C%87%E5%AF%BC%E5%8D%95%E4%BD%93%E9%A1%B9%E7%9B%AE%E5%92%8C%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84"><span class="nav-number">4.</span> <span class="nav-text">DDD可指导单体项目和微服务架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E6%B2%BB%E6%A0%87%E4%B8%8D%E6%B2%BB%E6%9C%AC"><span class="nav-number">4.1.</span> <span class="nav-text">微服务架构治标不治本</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDD%E4%B8%8E%E4%B8%AD%E5%8F%B0"><span class="nav-number">5.</span> <span class="nav-text">DDD与中台</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDD%E5%B9%B6%E9%9D%9E%E9%93%B6%E5%BC%B9"><span class="nav-number">6.</span> <span class="nav-text">DDD并非银弹</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -484,20 +504,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">83</span>
+          <span class="site-state-item-count">86</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-count">31</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-count">75</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
