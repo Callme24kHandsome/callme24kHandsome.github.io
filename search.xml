@@ -13467,7 +13467,8 @@
   <entry>
     <title>性能调优05-Mysql8的优化</title>
     <url>/2024/09/22/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9805-Mysql8%E7%9A%84%E4%BC%98%E5%8C%96/</url>
-    <content><![CDATA[<h1 id="Mysql8与5-7的对比"><a href="#Mysql8与5-7的对比" class="headerlink" title="Mysql8与5.7的对比"></a>Mysql8与5.7的对比</h1><h2 id="功能增强"><a href="#功能增强" class="headerlink" title="功能增强"></a>功能增强</h2><h3 id="系统表更换为InnoDB引擎"><a href="#系统表更换为InnoDB引擎" class="headerlink" title="系统表更换为InnoDB引擎"></a>系统表更换为InnoDB引擎</h3><p>​    系统表全部换成事务型的innodb表，默认的MySQL实例将不包含任何MyISAM表，除非手动创建MyISAM表</p>
+    <content><![CDATA[<h1 id="Mysql8与5-7的对比"><a href="#Mysql8与5-7的对比" class="headerlink" title="Mysql8与5.7的对比"></a>Mysql8与5.7的对比</h1><p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9805-Mysql8%E7%9A%84%E4%BC%98%E5%8C%96/image-20241013230924304.png" alt="image-20241013230924304"></p>
+<h2 id="功能增强"><a href="#功能增强" class="headerlink" title="功能增强"></a>功能增强</h2><h3 id="系统表更换为InnoDB引擎"><a href="#系统表更换为InnoDB引擎" class="headerlink" title="系统表更换为InnoDB引擎"></a>系统表更换为InnoDB引擎</h3><p>​    系统表全部换成事务型的innodb表，默认的MySQL实例将不包含任何MyISAM表，除非手动创建MyISAM表</p>
 <h3 id="默认字符集由latin1变为utf8mb4"><a href="#默认字符集由latin1变为utf8mb4" class="headerlink" title="默认字符集由latin1变为utf8mb4"></a>默认字符集由latin1变为utf8mb4</h3><p>​    在8.0版本之前，默认字符集为latin1，utf8指向的是utf8mb3，8.0版本默认字符集为utf8mb4，utf8默认指向的也是utf8mb4</p>
 <h3 id="DDL原子化"><a href="#DDL原子化" class="headerlink" title="DDL原子化"></a>DDL原子化</h3><p>​    InnoDB表的DDL支持事务完整性，要么成功要么回滚，将DDL操作回滚日志写入到data dictionary 数据字典表 mysql.innodb_ddl_log 中用于回滚操作，该表是隐藏的表，通过show tables无法看到。通过设置参数，可将ddl操作日志打印输出到mysql错误日志中</p>
 <h3 id="DDL秒加列"><a href="#DDL秒加列" class="headerlink" title="DDL秒加列"></a>DDL秒加列</h3><p>​    MySQL 8.0.12 开始，引入新的 DDL 算法 INSTANT ，支持快速加列，但需要注意的是，该版本仅支持将列添加到表的最后一列。</p>
@@ -13510,10 +13511,20 @@
 <td>0.01 sec</td>
 </tr>
 </tbody></table>
-<h3 id="通用表表达式（CTE-Common-Table-Expression）"><a href="#通用表表达式（CTE-Common-Table-Expression）" class="headerlink" title="通用表表达式（CTE:Common Table Expression）"></a>通用表表达式（CTE:Common Table Expression）</h3><p>​    CTE(Common Table Expression)可以认为是派生表(derived table)的替代，在一定程度上，CTE简化了复杂的join查询和子查询，另外CTE可以很方便地实现递归查询，提高了SQL的可读性和执行性能。CTE是ANSI SQL 99标准的一部分，在MySQL 8.0.1版本被引入。</p>
+<h3 id="通用表表达式（CTE-Common-Table-Expression）"><a href="#通用表表达式（CTE-Common-Table-Expression）" class="headerlink" title="通用表表达式（CTE:Common Table Expression）"></a>通用表表达式（CTE:Common Table Expression）</h3><p>​    CTE(Common Table Expression)可以认为是派生表(derived table)或者视图的替代，在一定程度上，CTE简化了复杂的join查询和子查询，另外CTE可以很方便地实现递归查询，提高了SQL的可读性和执行性能。CTE是ANSI SQL 99标准的一部分，在MySQL 8.0.1版本被引入。CTE和派生表最大的区别在于，CTE先定义，后续可以无限嵌套使用前面定义的CTE</p>
 <p><img src="images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9805-Mysql8%E7%9A%84%E4%BC%98%E5%8C%96/image-20240922171104532.png" alt="image-20240922171104532"></p>
 <p><img src="images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9805-Mysql8%E7%9A%84%E4%BC%98%E5%8C%96/image-20240922171704769.png" alt="image-20240922171704769"></p>
-<p>递归cte</p>
+<p>cte1(id) 表示这个派生表或者表达式内有一个字段 id</p>
+<h3 id="递归表达式"><a href="#递归表达式" class="headerlink" title="递归表达式"></a>递归表达式</h3><p>使用递归CET的使用需要注意递归终止条件，mysql默认内置了最大的递归执行深度和执行时间</p>
+<p><img src="images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9805-Mysql8%E7%9A%84%E4%BC%98%E5%8C%96/image-20241013232258426.png" alt="image-20241013232258426"></p>
+<p>举例：递归查询员工的上级路径</p>
+<p><img src="images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9805-Mysql8%E7%9A%84%E4%BC%98%E5%8C%96/image-20241013233551420.png" alt="image-20241013233551420"></p>
+<p><img src="images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9805-Mysql8%E7%9A%84%E4%BC%98%E5%8C%96/image-20241013233614243.png" alt="image-20241013233614243"></p>
+<p><img src="images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9805-Mysql8%E7%9A%84%E4%BC%98%E5%8C%96/image-20241013233634348.png" alt="image-20241013233634348"> </p>
+<p><img src="images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9805-Mysql8%E7%9A%84%E4%BC%98%E5%8C%96/image-20241013234426514.png" alt="image-20241013234426514"></p>
+<p>利用CTE实现斐波那契数</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><code class="hljs mysql">with recursive fib (n1, n2) as (<br>select 0, 1<br>union all<br>select n2, n1 + n2 from fib where n1 &lt; 10000<br>)<br>select n1 from fib;<br></code></pre></td></tr></table></figure>
+
 <h3 id="角色管理"><a href="#角色管理" class="headerlink" title="角色管理"></a>角色管理</h3><p>​    角色可以认为是一些权限的集合，为用户赋予统一的角色，权限的修改直接通过角色来进行，无需为每个用户单独授权。</p>
 <h2 id="索引增强（重要）"><a href="#索引增强（重要）" class="headerlink" title="索引增强（重要）"></a>索引增强（重要）</h2><h3 id="降序索引"><a href="#降序索引" class="headerlink" title="降序索引"></a>降序索引</h3><h3 id="2、隐藏索引"><a href="#2、隐藏索引" class="headerlink" title="2、隐藏索引"></a>2、隐藏索引</h3><h4 id="3、函数索引"><a href="#3、函数索引" class="headerlink" title="3、函数索引"></a>3、函数索引</h4><h2 id="窗口函数（重要）"><a href="#窗口函数（重要）" class="headerlink" title="窗口函数（重要）"></a>窗口函数（重要）</h2><h2 id="InnoDB增强"><a href="#InnoDB增强" class="headerlink" title="InnoDB增强"></a>InnoDB增强</h2><p>select for update跳过锁等待</p>
 <p>innodb_dedicated_server自适应参数</p>
