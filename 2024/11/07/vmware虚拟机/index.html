@@ -27,7 +27,7 @@
 <meta property="og:site_name" content="24khandsome&#39;s Blog">
 <meta property="og:description" content="VMvare Workstation的网络模式以及如何搭建网络互通的固定ip的虚拟机集群,参考博客园：https:&#x2F;&#x2F;www.cnblogs.com&#x2F;linjiaxin&#x2F;p&#x2F;6476480.html">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2024/11/07/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/Users/81566/AppData/Roaming/Typora/typora-user-images/image-20241107225733583.png">
+<meta property="og:image" content="http://example.com/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/image-20241107225733583.png">
 <meta property="og:image" content="http://example.com/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/image-20241107225924189.png">
 <meta property="og:image" content="http://example.com/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/20160408184441387">
 <meta property="og:image" content="http://example.com/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/20160408185234834">
@@ -40,13 +40,13 @@
 <meta property="og:image" content="http://example.com/2024/11/07/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/image-20241107232858669.png">
 <meta property="og:image" content="http://example.com/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/image-20241107233010378.png">
 <meta property="article:published_time" content="2024-11-07T13:00:00.000Z">
-<meta property="article:modified_time" content="2024-11-07T15:36:29.284Z">
+<meta property="article:modified_time" content="2024-11-20T16:53:59.053Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="计算机基础">
 <meta property="article:tag" content="vmware">
 <meta property="article:tag" content="虚拟机">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2024/11/07/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/Users/81566/AppData/Roaming/Typora/typora-user-images/image-20241107225733583.png">
+<meta name="twitter:image" content="http://example.com/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/image-20241107225733583.png">
 
 <link rel="canonical" href="http://example.com/2024/11/07/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/">
 
@@ -228,10 +228,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2024-11-07 21:00:00 / 修改时间：23:36:29" itemprop="dateCreated datePublished" datetime="2024-11-07T21:00:00+08:00">2024-11-07</time>
+              <time title="创建时间：2024-11-07 21:00:00" itemprop="dateCreated datePublished" datetime="2024-11-07T21:00:00+08:00">2024-11-07</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-11-21 00:53:59" itemprop="dateModified" datetime="2024-11-21T00:53:59+08:00">2024-11-21</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -261,7 +267,7 @@
 <p><strong>Host-Only（仅主机模式）</strong></p>
 <p>​    打开vmware虚拟机，我们可以在选项栏的“编辑”下的“虚拟网络编辑器”中看到VMnet0（桥接模式）、VMnet1（仅主机模式）、VMnet8（NAT模式），那么这些都是有什么作用呢？其实，我们现在看到的</p>
 <p>​    VMnet0表示的是用于桥接模式下的虚拟交换机；<br>​    VMnet1表示的是用于仅主机模式下的虚拟交换机；<br>​    VMnet8表示的是用于NAT模式下的虚拟交换机</p>
-<p><img src="/2024/11/07/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/Users\81566\AppData\Roaming\Typora\typora-user-images\image-20241107225733583.png" alt="image-20241107225733583"></p>
+<p><img src="/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/image-20241107225733583.png" alt="image-20241107225733583"></p>
 <p>​    并且在主机上对应的有VMware Network Adapter VMnet1和VMware Network Adapter VMnet8两块虚拟网卡，它们分别作用于仅主机模式与NAT模式下。在“网络连接”中我们可以看到这两块虚拟网卡，如果将这两块卸载了，可以在vmware的“编辑”下的“虚拟网络编辑器”中点击“还原默认设置”，可重新将虚拟网卡还原。</p>
 <p><img src="/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/image-20241107225924189.png" alt="image-20241107225924189"></p>
 <h2 id="Bridged（桥接模式）"><a href="#Bridged（桥接模式）" class="headerlink" title="Bridged（桥接模式）"></a>Bridged（桥接模式）</h2><p>​    什么是桥接模式？桥接模式就是将主机网卡与虚拟机虚拟的网卡利用虚拟网桥进行通信。在桥接的作用下，类似于把物理主机虚拟为一个交换机，所有桥接设置的虚拟机连接到这个交换机的一个接口上，物理主机也同样插在这个交换机当中，所以所有桥接下的网卡与网卡都是交换模式的，相互可以访问而不干扰。在桥接模式下，虚拟机ip地址需要与主机在同一个网段。</p>
@@ -295,6 +301,7 @@
 <p>4、宿主机ping通虚拟机</p>
 <p><img src="/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/image-20241107233010378.png" alt="image-20241107233010378"></p>
 <p>至此已经搭建成功一台固定ip的虚拟机，且和宿主机网络互通，且能上网，再重复搭建192.168.136.2，192.168.136.1即可。</p>
+<h2 id="YUM换源"><a href="#YUM换源" class="headerlink" title="YUM换源"></a>YUM换源</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43132192/article/details/140402266">https://blog.csdn.net/weixin_43132192/article/details/140402266</a></p>
 
     </div>
 
@@ -318,7 +325,10 @@
     <a href="/2024/09/22/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9805-Mysql8%E7%9A%84%E4%BC%98%E5%8C%96/" rel="prev" title="性能调优05-Mysql8的优化">
       <i class="fa fa-chevron-left"></i> 性能调优05-Mysql8的优化
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2024/11/17/docker%E4%BD%BF%E7%94%A8%E5%8F%8A%E5%AE%89%E8%A3%85/" rel="next" title="docker使用及安装">
+      docker使用及安装 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -377,7 +387,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#VMvare-Workstation"><span class="nav-number">1.</span> <span class="nav-text">VMvare Workstation</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VM%E4%B8%89%E7%A7%8D%E7%BD%91%E7%BB%9C%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.2.</span> <span class="nav-text">VM三种网络工作模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bridged%EF%BC%88%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">Bridged（桥接模式）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NAT%EF%BC%88%E5%9C%B0%E5%9D%80%E8%BD%AC%E6%8D%A2%E6%A8%A1%E5%BC%8F%EF%BC%89"><span class="nav-number">1.4.</span> <span class="nav-text">NAT（地址转换模式）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Host-Only%EF%BC%88%E4%BB%85%E4%B8%BB%E6%9C%BA%E6%A8%A1%E5%BC%8F%EF%BC%89"><span class="nav-number">1.5.</span> <span class="nav-text">Host-Only（仅主机模式）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NAT%E6%A8%A1%E5%BC%8F%E6%90%AD%E5%BB%BA3%E5%8F%B0%E5%9B%BA%E5%AE%9Aip%E7%9A%84%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">1.6.</span> <span class="nav-text">NAT模式搭建3台固定ip的虚拟机</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#VMvare-Workstation"><span class="nav-number">1.</span> <span class="nav-text">VMvare Workstation</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VM%E4%B8%89%E7%A7%8D%E7%BD%91%E7%BB%9C%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.2.</span> <span class="nav-text">VM三种网络工作模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bridged%EF%BC%88%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">Bridged（桥接模式）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NAT%EF%BC%88%E5%9C%B0%E5%9D%80%E8%BD%AC%E6%8D%A2%E6%A8%A1%E5%BC%8F%EF%BC%89"><span class="nav-number">1.4.</span> <span class="nav-text">NAT（地址转换模式）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Host-Only%EF%BC%88%E4%BB%85%E4%B8%BB%E6%9C%BA%E6%A8%A1%E5%BC%8F%EF%BC%89"><span class="nav-number">1.5.</span> <span class="nav-text">Host-Only（仅主机模式）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NAT%E6%A8%A1%E5%BC%8F%E6%90%AD%E5%BB%BA3%E5%8F%B0%E5%9B%BA%E5%AE%9Aip%E7%9A%84%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">1.6.</span> <span class="nav-text">NAT模式搭建3台固定ip的虚拟机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#YUM%E6%8D%A2%E6%BA%90"><span class="nav-number">1.7.</span> <span class="nav-text">YUM换源</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -393,20 +403,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">87</span>
+          <span class="site-state-item-count">88</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">32</span>
+        <span class="site-state-item-count">33</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">77</span>
+        <span class="site-state-item-count">78</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

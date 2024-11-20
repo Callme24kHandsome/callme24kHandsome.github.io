@@ -1457,7 +1457,7 @@
 <p><strong>Host-Only（仅主机模式）</strong></p>
 <p>​    打开vmware虚拟机，我们可以在选项栏的“编辑”下的“虚拟网络编辑器”中看到VMnet0（桥接模式）、VMnet1（仅主机模式）、VMnet8（NAT模式），那么这些都是有什么作用呢？其实，我们现在看到的</p>
 <p>​    VMnet0表示的是用于桥接模式下的虚拟交换机；<br>​    VMnet1表示的是用于仅主机模式下的虚拟交换机；<br>​    VMnet8表示的是用于NAT模式下的虚拟交换机</p>
-<p><img src="/2024/11/07/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/Users\81566\AppData\Roaming\Typora\typora-user-images\image-20241107225733583.png" alt="image-20241107225733583"></p>
+<p><img src="/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/image-20241107225733583.png" alt="image-20241107225733583"></p>
 <p>​    并且在主机上对应的有VMware Network Adapter VMnet1和VMware Network Adapter VMnet8两块虚拟网卡，它们分别作用于仅主机模式与NAT模式下。在“网络连接”中我们可以看到这两块虚拟网卡，如果将这两块卸载了，可以在vmware的“编辑”下的“虚拟网络编辑器”中点击“还原默认设置”，可重新将虚拟网卡还原。</p>
 <p><img src="/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/image-20241107225924189.png" alt="image-20241107225924189"></p>
 <h2 id="Bridged（桥接模式）"><a href="#Bridged（桥接模式）" class="headerlink" title="Bridged（桥接模式）"></a>Bridged（桥接模式）</h2><p>​    什么是桥接模式？桥接模式就是将主机网卡与虚拟机虚拟的网卡利用虚拟网桥进行通信。在桥接的作用下，类似于把物理主机虚拟为一个交换机，所有桥接设置的虚拟机连接到这个交换机的一个接口上，物理主机也同样插在这个交换机当中，所以所有桥接下的网卡与网卡都是交换模式的，相互可以访问而不干扰。在桥接模式下，虚拟机ip地址需要与主机在同一个网段。</p>
@@ -1491,6 +1491,7 @@
 <p>4、宿主机ping通虚拟机</p>
 <p><img src="/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/image-20241107233010378.png" alt="image-20241107233010378"></p>
 <p>至此已经搭建成功一台固定ip的虚拟机，且和宿主机网络互通，且能上网，再重复搭建192.168.136.2，192.168.136.1即可。</p>
+<h2 id="YUM换源"><a href="#YUM换源" class="headerlink" title="YUM换源"></a>YUM换源</h2><p><a href="https://blog.csdn.net/weixin_43132192/article/details/140402266">https://blog.csdn.net/weixin_43132192/article/details/140402266</a></p>
 ]]></content>
       <categories>
         <category>vmware</category>
@@ -13674,6 +13675,65 @@
       </categories>
       <tags>
         <tag>设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>docker使用及安装</title>
+    <url>/2024/11/17/docker%E4%BD%BF%E7%94%A8%E5%8F%8A%E5%AE%89%E8%A3%85/</url>
+    <content><![CDATA[<h1 id="Docker"><a href="#Docker" class="headerlink" title="Docker"></a>Docker</h1><h2 id="1、安装DOCKER和DOCKER-COMPOSE"><a href="#1、安装DOCKER和DOCKER-COMPOSE" class="headerlink" title="1、安装DOCKER和DOCKER-COMPOSE"></a>1、安装DOCKER和DOCKER-COMPOSE</h2><p>首先我们需要安装GCC相关的环境</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">yum -y install gcc<br>yum -y install gcc-c++<br></code></pre></td></tr></table></figure>
+
+<p>安装Docker需要的依赖软件包：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">yum install -y yum-utils device-mapper-persistent-data lvm2<br></code></pre></td></tr></table></figure>
+
+<p>设置国内的镜像（提高速度）</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo<br></code></pre></td></tr></table></figure>
+
+<p>更新yum软件包索引：</p>
+<figure class="highlight ebnf"><table><tr><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">yum makecache fast</span><br></code></pre></td></tr></table></figure>
+
+<p>安装DOCKER CE(注意：Docker分为CE版和EE版，一般我们用CE版就够用了.)</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">yum -y install docker-ce<br></code></pre></td></tr></table></figure>
+
+<p>启动Docker：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">systemctl start docker<br></code></pre></td></tr></table></figure>
+
+<p>下载回来的Docker版本：:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">docker version<br></code></pre></td></tr></table></figure>
+
+<p>运行以下命令以下载 Docker Compose 的当前稳定版本：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">sudo curl -L <span class="hljs-string">&quot;https://github.com/docker/compose/releases/download/1.24.1/docker-compose-<span class="hljs-subst">$(uname -s)</span>-<span class="hljs-subst">$(uname -m)</span>&quot;</span> -o /usr/<span class="hljs-built_in">local</span>/bin/docker-compose<br><br></code></pre></td></tr></table></figure>
+
+<p>将可执行权限应用于二进制文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">sudo chmod +x /usr/<span class="hljs-built_in">local</span>/bin/docker-compose<br></code></pre></td></tr></table></figure>
+
+<p>创建软链：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">sudo ln -s /usr/<span class="hljs-built_in">local</span>/bin/docker-compose /usr/bin/docker-compose<br></code></pre></td></tr></table></figure>
+
+<p>测试是否安装成功：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">docker-compose --version<br></code></pre></td></tr></table></figure>
+
+<h2 id="2、docker镜像仓库及代理配置"><a href="#2、docker镜像仓库及代理配置" class="headerlink" title="2、docker镜像仓库及代理配置"></a>2、docker镜像仓库及代理配置</h2><p>解决：Get “<a href="https://registry-1.docker.io/v2/%E2%80%9C">https://registry-1.docker.io/v2/“</a>: net/http: request canceled while waiting for connection</p>
+<p>1、配置docker镜像仓库地址</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">vim /etc/docker/daemon.json	<br><br>&#123;<br>  <span class="hljs-string">&quot;registry-mirrors&quot;</span>: [<br>    <span class="hljs-string">&quot;https://xx4bwyg2.mirror.aliyuncs.com&quot;</span>,<br>    <span class="hljs-string">&quot;http://f1361db2.m.daocloud.io&quot;</span>,<br>    <span class="hljs-string">&quot;https://registry.docker-cn.com&quot;</span>,<br>    <span class="hljs-string">&quot;http://hub-mirror.c.163.com&quot;</span>,<br>    <span class="hljs-string">&quot;https://docker.mirrors.ustc.edu.cn&quot;</span>,<br>    <span class="hljs-string">&quot;https://w14ki3ju.mirror.aliyuncs.com&quot;</span><br>  ]<br>&#125;<br>systemctl daemon-reload<br>systemctl restart docker<br><br></code></pre></td></tr></table></figure>
+
+<p>解决：VMware、Docker - 让虚拟机走主机代理，解决镜像封禁问题</p>
+<p>2、配置docker代理</p>
+<p>192.168.136.10是安装vmware的宿主机</p>
+<p>7890是科学上网的clash for window的端口</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">vim /etc/systemd/system/docker.service.d/proxy.conf<br><br>[Service]<br>Environment=<span class="hljs-string">&quot;HTTP_PROXY=http://192.168.136.10:7890&quot;</span><br>Environment=<span class="hljs-string">&quot;HTTP_PROXY=http://192.168.136.10:7890&quot;</span><br><br><span class="hljs-comment"># 加载配置</span><br>systemctl daemon-reload<br><span class="hljs-comment"># 重启docker</span><br>systemctl restart docker<br><span class="hljs-comment"># 查看代理配置是否生效</span><br>systemctl show --property=Environment docker<br></code></pre></td></tr></table></figure>
+
+<h2 id="3、docker-compse-安装zookeeper、kafka、kafka-manager"><a href="#3、docker-compse-安装zookeeper、kafka、kafka-manager" class="headerlink" title="3、docker compse 安装zookeeper、kafka、kafka-manager"></a>3、docker compse 安装zookeeper、kafka、kafka-manager</h2><p>kafka manager添加集群报错：KeeperErrorCode = Unimplemented for /kafka-manager/mutex Try again</p>
+<p><a href="https://www.jianshu.com/p/9d7f64b49d51">https://www.jianshu.com/p/9d7f64b49d51</a></p>
+]]></content>
+      <categories>
+        <category>docker</category>
+      </categories>
+      <tags>
+        <tag>计算机基础</tag>
+        <tag>vmware</tag>
+        <tag>虚拟机</tag>
+        <tag>docker</tag>
       </tags>
   </entry>
 </search>
