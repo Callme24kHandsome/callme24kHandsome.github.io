@@ -40,7 +40,7 @@
 <meta property="og:image" content="http://example.com/2024/11/07/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/image-20241107232858669.png">
 <meta property="og:image" content="http://example.com/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/image-20241107233010378.png">
 <meta property="article:published_time" content="2024-11-07T13:00:00.000Z">
-<meta property="article:modified_time" content="2024-11-20T16:53:59.053Z">
+<meta property="article:modified_time" content="2024-11-24T07:16:24.014Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="计算机基础">
 <meta property="article:tag" content="vmware">
@@ -236,7 +236,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-11-21 00:53:59" itemprop="dateModified" datetime="2024-11-21T00:53:59+08:00">2024-11-21</time>
+                <time title="修改时间：2024-11-24 15:16:24" itemprop="dateModified" datetime="2024-11-24T15:16:24+08:00">2024-11-24</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -289,7 +289,7 @@
 <p>3、新建虚拟机，设置网卡网络配置信息</p>
 <p>vim /etc/sysconfig/network-scripts/ifcfg-ens33</p>
 <p><img src="/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/image-20241107232144868.png" alt="image-20241107232144868"></p>
-<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs txt">TYPE=&quot;Ethernet&quot;<br>PROXY_METHOD=&quot;none&quot;<br>BROWSER_ONLY=&quot;no&quot;<br>BOOTPROTO=&quot;static&quot; //开启静态ip模式<br>DEFROUTE=&quot;yes&quot;<br>IPV4_FAILURE_FATAL=&quot;no&quot;<br>IPV6INIT=&quot;yes&quot;<br>IPV6_AUTOCONF=&quot;yes&quot;<br>IPV6_DEFROUTE=&quot;yes&quot;<br>IPV6_FAILURE_FATAL=&quot;no&quot;<br>IPV6_ADDR_GEN_MODE=&quot;stable-privacy&quot;<br>NAME=&quot;ens33&quot;<br>#UUID=&quot;f8e1b7b3-4aaf-487a-9c91-a883fe938397&quot;<br>DEVICE=&quot;ens33&quot;<br>ONBOOT=&quot;yes&quot; //是否激活网卡，激活后就可以连接到外网了<br>IPADDR=192.168.136.3 // linux机器的固定ip，最好不要与网关ip冲突<br>NETMASK=255.255.255.0 // 子网掩码<br>GATEWAY=192.168.136.5 // 子网网关ip<br>DNS1=114.114.114.114<br>#HWADDR=&quot;00:0c:29:22:d0:42&quot;<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs bash">TYPE=<span class="hljs-string">&quot;Ethernet&quot;</span><br>PROXY_METHOD=<span class="hljs-string">&quot;none&quot;</span><br>BROWSER_ONLY=<span class="hljs-string">&quot;no&quot;</span><br>BOOTPROTO=<span class="hljs-string">&quot;static&quot;</span> //开启静态ip模式<br>DEFROUTE=<span class="hljs-string">&quot;yes&quot;</span><br>IPV4_FAILURE_FATAL=<span class="hljs-string">&quot;no&quot;</span><br>IPV6INIT=<span class="hljs-string">&quot;yes&quot;</span><br>IPV6_AUTOCONF=<span class="hljs-string">&quot;yes&quot;</span><br>IPV6_DEFROUTE=<span class="hljs-string">&quot;yes&quot;</span><br>IPV6_FAILURE_FATAL=<span class="hljs-string">&quot;no&quot;</span><br>IPV6_ADDR_GEN_MODE=<span class="hljs-string">&quot;stable-privacy&quot;</span><br>NAME=<span class="hljs-string">&quot;ens33&quot;</span><br><span class="hljs-comment">#UUID=&quot;f8e1b7b3-4aaf-487a-9c91-a883fe938397&quot;</span><br>DEVICE=<span class="hljs-string">&quot;ens33&quot;</span><br>ONBOOT=<span class="hljs-string">&quot;yes&quot;</span> //是否激活网卡，激活后就可以连接到外网了<br>IPADDR=192.168.136.3 // linux机器的固定ip，最好不要与网关ip冲突<br>NETMASK=255.255.255.0 // 子网掩码<br>GATEWAY=192.168.136.5 // 子网网关ip<br>DNS1=114.114.114.114<br><span class="hljs-comment">#HWADDR=&quot;00:0c:29:22:d0:42&quot;</span><br></code></pre></td></tr></table></figure>
 
 <p>保存后通过 systemctl restart network 重新加载网卡</p>
 <p>1、ipconfig查看虚拟机ip</p>
@@ -301,7 +301,12 @@
 <p>4、宿主机ping通虚拟机</p>
 <p><img src="/images/vmware%E8%99%9A%E6%8B%9F%E6%9C%BA/image-20241107233010378.png" alt="image-20241107233010378"></p>
 <p>至此已经搭建成功一台固定ip的虚拟机，且和宿主机网络互通，且能上网，再重复搭建192.168.136.2，192.168.136.1即可。</p>
-<h2 id="YUM换源"><a href="#YUM换源" class="headerlink" title="YUM换源"></a>YUM换源</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43132192/article/details/140402266">https://blog.csdn.net/weixin_43132192/article/details/140402266</a></p>
+<h2 id="YUM换源"><a href="#YUM换源" class="headerlink" title="YUM换源"></a>YUM换源</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/2301_80687933/article/details/143675579">https://blog.csdn.net/2301_80687933/article/details/143675579</a></p>
+<p>yum下载报错：Could not retrieve mirrorlist <a target="_blank" rel="noopener" href="http://mirrorlist.centos.org/?release=7&amp;arch=x86_64&amp;repo=os&amp;infra=stock">http://mirrorlist.centos.org/?release=7&amp;arch=x86_64&amp;repo=os&amp;infra=stock</a> </p>
+<p>原因：centos7和centos8 均在 2024年6月30号停止维护</p>
+<p>解决：只要修改默认镜像地址即可。按照如下步骤设置镜像后即可重新下载yum了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup<br>curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo<br>yum clean all<br>yum makecache<br></code></pre></td></tr></table></figure>
+
 
     </div>
 
