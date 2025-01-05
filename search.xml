@@ -13683,8 +13683,8 @@
       </tags>
   </entry>
   <entry>
-    <title>docker使用及安装</title>
-    <url>/2024/11/17/docker%E4%BD%BF%E7%94%A8%E5%8F%8A%E5%AE%89%E8%A3%85/</url>
+    <title>docker-docker-compose基础使用教程</title>
+    <url>/2024/12/22/docker%E4%BD%BF%E7%94%A8%E5%8F%8A%E5%AE%89%E8%A3%85/</url>
     <content><![CDATA[<h1 id="Docker"><a href="#Docker" class="headerlink" title="Docker"></a>Docker</h1><h2 id="1、安装DOCKER和DOCKER-COMPOSE"><a href="#1、安装DOCKER和DOCKER-COMPOSE" class="headerlink" title="1、安装DOCKER和DOCKER-COMPOSE"></a>1、安装DOCKER和DOCKER-COMPOSE</h2><p>首先我们需要安装GCC相关的环境</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">yum -y install gcc<br>yum -y install gcc-c++<br></code></pre></td></tr></table></figure>
 
@@ -13707,9 +13707,9 @@
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">docker version<br></code></pre></td></tr></table></figure>
 
 <p>运行以下命令以下载 Docker Compose 的当前稳定版本：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">sudo curl -L <span class="hljs-string">&quot;https://github.com/docker/compose/releases/download/1.24.1/docker-compose-<span class="hljs-subst">$(uname -s)</span>-<span class="hljs-subst">$(uname -m)</span>&quot;</span> -o /usr/<span class="hljs-built_in">local</span>/bin/docker-compose<br><br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">sudo curl -L <span class="hljs-string">&quot;https://github.com/docker/compose/releases/download/1.24.1/docker-compose-<span class="hljs-subst">$(uname -s)</span>-<span class="hljs-subst">$(uname -m)</span>&quot;</span> -o /usr/<span class="hljs-built_in">local</span>/bin/docker-compose<br>or<br>sudo curl -L <span class="hljs-string">&quot;https://github.com/docker/compose/releases/download/1.29.2/docker-compose-<span class="hljs-subst">$(uname -s)</span>-<span class="hljs-subst">$(uname -m)</span>&quot;</span> -o /usr/<span class="hljs-built_in">local</span>/bin/docker-compose<br><br><br></code></pre></td></tr></table></figure>
 
-<p>将可执行权限应用于二进制文件：</p>
+<p>将可执行权限应用于二进制文件： </p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">sudo chmod +x /usr/<span class="hljs-built_in">local</span>/bin/docker-compose<br></code></pre></td></tr></table></figure>
 
 <p>创建软链：</p>
@@ -13735,10 +13735,8 @@
         <category>docker</category>
       </categories>
       <tags>
-        <tag>计算机基础</tag>
-        <tag>vmware</tag>
-        <tag>虚拟机</tag>
         <tag>docker</tag>
+        <tag>docker-compose</tag>
       </tags>
   </entry>
 </search>
