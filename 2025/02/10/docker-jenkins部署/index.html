@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="使用jenkins实践快速部署项目">
+<meta property="og:type" content="article">
+<meta property="og:title" content="docker-jenkins部署">
+<meta property="og:url" content="http://example.com/2025/02/10/docker-jenkins%E9%83%A8%E7%BD%B2/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="使用jenkins实践快速部署项目">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210232437245.png">
+<meta property="og:image" content="http://example.com/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210232504857.png">
+<meta property="og:image" content="http://example.com/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210232643009.png">
+<meta property="og:image" content="http://example.com/images/docker-jenkins%E9%83%A8%E7%BD%B2/43e1138df1b94af094d749d52f010a0f.webp">
+<meta property="og:image" content="http://example.com/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210233023160.png">
+<meta property="og:image" content="http://example.com/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250213000134265.png">
+<meta property="og:image" content="http://example.com/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210233134170.png">
+<meta property="og:image" content="http://example.com/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210233256531.png">
+<meta property="og:image" content="http://example.com/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250213000422054.png">
+<meta property="og:image" content="http://example.com/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250213000630844.png">
+<meta property="article:published_time" content="2025-02-10T13:00:00.000Z">
+<meta property="article:modified_time" content="2025-02-12T16:06:52.473Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="docker">
+<meta property="article:tag" content="jenkins">
+<meta property="article:tag" content="CICD">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210232437245.png">
+
+<link rel="canonical" href="http://example.com/2025/02/10/docker-jenkins%E9%83%A8%E7%BD%B2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>docker-jenkins部署 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/02/10/docker-jenkins%E9%83%A8%E7%BD%B2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          docker-jenkins部署
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-02-10 21:00:00" itemprop="dateCreated datePublished" datetime="2025-02-10T21:00:00+08:00">2025-02-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-02-13 00:06:52" itemprop="dateModified" datetime="2025-02-13T00:06:52+08:00">2025-02-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/jenkins/" itemprop="url" rel="index"><span itemprop="name">jenkins</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">使用jenkins实践快速部署项目</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Jenkins"><a href="#Jenkins" class="headerlink" title="Jenkins"></a>Jenkins</h1><h2 id="是什么"><a href="#是什么" class="headerlink" title="是什么"></a>是什么</h2><p>​    Jenkins 是一个开源的<strong>持续集成和持续交付（CI/CD）工具</strong>，用于自动化软件开发过程中的构建、测试和部署任务。它帮助开发团队更高效地管理代码变更，确保软件质量。</p>
+<h3 id="主要功能"><a href="#主要功能" class="headerlink" title="主要功能"></a>主要功能</h3><ol>
+<li><strong>持续集成（CI continous intergration）</strong>：自动构建和测试代码，快速发现并修复问题。</li>
+<li><strong>持续交付/部署（CD continous deliver/deployment）</strong>：自动化部署流程，确保软件能快速、可靠地发布。</li>
+<li><strong>插件支持</strong>：通过丰富的插件扩展功能，支持多种开发工具和平台。</li>
+<li><strong>分布式构建</strong>：支持在多台机器上并行构建，提升效率。</li>
+<li><strong>流水线（Pipeline）</strong>：通过定义流水线脚本，实现复杂工作流的自动化管理。</li>
+</ol>
+<h3 id="核心目标"><a href="#核心目标" class="headerlink" title="核心目标"></a>核心目标</h3><p>1、提高效率：自动化构建、测试、部署，减少手动繁琐的操作</p>
+<p>2、快速交付：缩短从开发到部署的时间，更快响应需求</p>
+<p>3、提升质量：通过频繁部署测试和快速反馈，降低错误率</p>
+<h2 id="怎么用"><a href="#怎么用" class="headerlink" title="怎么用"></a>怎么用</h2><p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1We411q7FS/?spm_id_from=333.337.search-card.all.click&vd_source=41042e45d4153dbeef9497c29d126b3e">参考视频</a></p>
+<p>方便演示，我们采用docker安装jenkins，并且以下效果：<br>1、github项目main有新提交时触发构建<br>2、构建时达成jar包<br>3、调用宿主机的docker生成jar包的镜像<br>4、docker启动镜像</p>
+<p><strong>1、安装</strong></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmd">docker pull jenkins/jenkins<br></code></pre></td></tr></table></figure>
+
+<p><strong>2、启动jenkins</strong></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cmd"># 启动jenkins<br>docker run -u root -itd --name jenkins -p <span class="hljs-number">6001</span>:<span class="hljs-number">8080</span> -v $(which docker):/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock -e TZ=&quot;Asia/Shanghai&quot; -v /etc/localtime:/etc/localtime:ro -v /volume1/docker/jenkins:/var/jenkins_home jenkins/jenkins<br># 进入jenkins<br>docker exec -it jenkins bash<br># 查看密码<br>cat /var/jenkins_home/secrets/initialAdminPassword<br></code></pre></td></tr></table></figure>
+
+<p><code>-p 6001:8080</code></p>
+<p>​    Jenkins默认网页访问端口为8080，将端口映射到外部主机</p>
+<p><code>-v $(which docker):/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock</code>\</p>
+<p>​    使Jenkins内部可以使用docker命令</p>
+<p><code>-e TZ=&quot;Asia/Shanghai&quot; -v /etc/localtime:/etc/localtime:ro</code></p>
+<p>​    配置Jenkins容器的时区</p>
+<p><code>-v /volume1/docker/jenkins:/var/jenkins_home</code> </p>
+<p>​    将Jenkins的配置映射到外部主机卷，容器删除仍可保留配置，且可以把jdk、maven等软件挂载进来</p>
+<p><strong>3、初始化jenkins</strong></p>
+<p>1、登录 宿主机ip:6001进入jenkins页面，输入密码、设置第一个管理员密码root/root</p>
+<p>2、安装推荐的插件</p>
+<p>3、安装 Maven 、Publish Over SSH（用于把产物包通过ssh方式传给部署机器并配置执行命令，本次举例就是本机，所以没用到）</p>
+<p>4、配置jdk、maven（虽然jenkins docker方式已内置jdk和git，但jdk版本比较高，我们实例项目用的jdk8，所以要配置）<br>设置maven目录和setting文件，<strong>注意文件目录其实就是挂载的目录</strong></p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210232437245.png" alt="image-20250210232437245"></p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210232504857.png" alt="image-20250210232504857"></p>
+<p>配置jdk</p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210232643009.png" alt="image-20250210232643009"></p>
+<p>5、新建任务：maven项目</p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/43e1138df1b94af094d749d52f010a0f.webp" alt="1650643032247-9bc9e23e-bdcf-4966-a279-8810560b2cbe.png"></p>
+<p>6、配置任务</p>
+<p><strong>源码管理</strong></p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210233023160.png" alt="image-20250210233023160"></p>
+<p><strong>触发器（可选）</strong></p>
+<p>可以配置push后自动触发构建，由于是本机内网演示</p>
+<p>1、利用natap生成一个内网穿透地址</p>
+<p>2、在github仓库上设置钩子</p>
+<pre><code>进入 GitHub 仓库 → Settings → Webhooks → Add webhook:
+Payload URL: http://&lt;JENKINS-IP&gt;/github-webhook/
+Content Type: application/json
+事件：Just the push event
+</code></pre>
+<p>3、在github上生成acces s token拿到token</p>
+<p>4、配置github server secret text的value=token的值</p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250213000134265.png" alt="image-20250213000134265"></p>
+<p><strong>编译</strong></p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210233134170.png" alt="image-20250210233134170"><strong>编译后触发脚本</strong></p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs cmd"># 进入项目工作区<br><span class="hljs-built_in">cd</span> /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker<br># 检查文件是否存在<br>ls -l Dockerfile               # 应存在<br>ls -l target/*.jar             # 应存在<br># 打印 JAR 包路径，方便调试<br><span class="hljs-built_in">echo</span> &quot;JAR 包路径: $(<span class="hljs-built_in">find</span> target -name &#x27;*.jar&#x27;)&quot;<br><br># 构建 Docker 镜像<br>docker build -t docker-jenkins-test-pkg-runindocker:latest .<br><br># 停止并删除之前运行的容器（如果存在）<br>docker stop docker-jenkins-test-pkg-runindocker || true<br>docker rm docker-jenkins-test-pkg-runindocker || true<br><br># 运行新的 Docker 容器<br>docker run -d -p <span class="hljs-number">18080</span>:<span class="hljs-number">8080</span> --name docker-jenkins-test-pkg-runindocker docker-jenkins-test-pkg-runindocker:latest<br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210233256531.png" alt="image-20250210233256531"></p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>项目push后自动触发构建</p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250213000422054.png" alt="image-20250213000422054"></p>
+<p>控制台日志</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br></pre></td><td class="code"><pre><code class="hljs txt">Started by GitHub push by Callme24kHandsome<br>Running as SYSTEM<br>Building in workspace /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker<br>The recommended git tool is: NONE<br>No credentials specified<br> &gt; git rev-parse --resolve-git-dir /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/.git # timeout=10<br>Fetching changes from the remote Git repository<br> &gt; git config remote.origin.url https://github.com/Callme24kHandsome/docker-jenkins-test.git # timeout=10<br>Fetching upstream changes from https://github.com/Callme24kHandsome/docker-jenkins-test.git<br> &gt; git --version # timeout=10<br> &gt; git --version # &#x27;git version 2.39.5&#x27;<br> &gt; git fetch --tags --force --progress -- https://github.com/Callme24kHandsome/docker-jenkins-test.git +refs/heads/*:refs/remotes/origin/* # timeout=10<br> &gt; git rev-parse refs/remotes/origin/main^&#123;commit&#125; # timeout=10<br>Checking out Revision e02733c6cbff85d5622ede2327dc48549a63bbd8 (refs/remotes/origin/main)<br> &gt; git config core.sparsecheckout # timeout=10<br> &gt; git checkout -f e02733c6cbff85d5622ede2327dc48549a63bbd8 # timeout=10<br>Commit message: &quot;修改Dockerfile&quot;<br> &gt; git rev-list --no-walk 840813635c7d52b9aa354a225f9eea7feb2a3243 # timeout=10<br>Parsing POMs<br>Established TCP socket on 37200<br>[docker-jenkins-test-pkg-runInDocker] $ /var/jenkins_home/gzip/jdk1.8.0_152/bin/java -cp /var/jenkins_home/plugins/maven-plugin/WEB-INF/lib/maven35-agent-1.14.jar:/var/jenkins_home/gzip/apache-maven-3.8.1/boot/plexus-classworlds-2.6.0.jar:/var/jenkins_home/gzip/apache-maven-3.8.1/conf/logging jenkins.maven3.agent.Maven35Main /var/jenkins_home/gzip/apache-maven-3.8.1 /var/jenkins_home/war/WEB-INF/lib/remoting-3283.v92c105e0f819.jar /var/jenkins_home/plugins/maven-plugin/WEB-INF/lib/maven35-interceptor-1.14.jar /var/jenkins_home/plugins/maven-plugin/WEB-INF/lib/maven3-interceptor-commons-1.14.jar 37200<br>Exception in thread &quot;main&quot; java.lang.UnsupportedClassVersionError: hudson/remoting/Launcher has been compiled by a more recent version of the Java Runtime (class file version 55.0), this version of the Java Runtime only recognizes class file versions up to 52.0<br>	at java.lang.ClassLoader.defineClass1(Native Method)<br>	at java.lang.ClassLoader.defineClass(ClassLoader.java:763)<br>	at java.security.SecureClassLoader.defineClass(SecureClassLoader.java:142)<br>	at java.net.URLClassLoader.defineClass(URLClassLoader.java:467)<br>	at java.net.URLClassLoader.access$100(URLClassLoader.java:73)<br>	at java.net.URLClassLoader$1.run(URLClassLoader.java:368)<br>	at java.net.URLClassLoader$1.run(URLClassLoader.java:362)<br>	at java.security.AccessController.doPrivileged(Native Method)<br>	at java.net.URLClassLoader.findClass(URLClassLoader.java:361)<br>	at org.codehaus.plexus.classworlds.realm.ClassRealm.loadClassFromSelf(ClassRealm.java:425)<br>	at org.codehaus.plexus.classworlds.strategy.SelfFirstStrategy.loadClass(SelfFirstStrategy.java:42)<br>	at org.codehaus.plexus.classworlds.realm.ClassRealm.unsynchronizedLoadClass(ClassRealm.java:271)<br>	at org.codehaus.plexus.classworlds.realm.ClassRealm.loadClass(ClassRealm.java:247)<br>	at org.codehaus.plexus.classworlds.realm.ClassRealm.loadClass(ClassRealm.java:239)<br>	at jenkins.maven3.agent.Maven35Main.main(Maven35Main.java:136)<br>	at jenkins.maven3.agent.Maven35Main.main(Maven35Main.java:66)<br>ERROR: ================================================================================<br>ERROR: Invalid project setup: Connection reset<br>ERROR: [JENKINS-18403][JENKINS-28294] JDK &#x27;jdk8&#x27; not supported to run Maven projects.<br>ERROR: Maven projects have to be launched with a Java version greater or equal to the minimum version required by the controller.<br>ERROR: Use the Maven JDK Toolchains (plugin) to build your maven project with an older JDK.<br>ERROR: Retrying with agent Java and setting compile/test properties to point to /var/jenkins_home/gzip/jdk1.8.0_152.<br>ERROR: ================================================================================<br>Established TCP socket on 42399<br>[docker-jenkins-test-pkg-runInDocker] $ /opt/java/openjdk/bin/java -cp /var/jenkins_home/plugins/maven-plugin/WEB-INF/lib/maven35-agent-1.14.jar:/var/jenkins_home/gzip/apache-maven-3.8.1/boot/plexus-classworlds-2.6.0.jar:/var/jenkins_home/gzip/apache-maven-3.8.1/conf/logging jenkins.maven3.agent.Maven35Main /var/jenkins_home/gzip/apache-maven-3.8.1 /var/jenkins_home/war/WEB-INF/lib/remoting-3283.v92c105e0f819.jar /var/jenkins_home/plugins/maven-plugin/WEB-INF/lib/maven35-interceptor-1.14.jar /var/jenkins_home/plugins/maven-plugin/WEB-INF/lib/maven3-interceptor-commons-1.14.jar 42399<br>&lt;===[JENKINS REMOTING CAPACITY]===&gt;���channel started<br>Executing Maven:  -B -f /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/pom.xml clean package -Dmaven.test.skip=true<br>[INFO] Scanning for projects...<br>[INFO] <br>[INFO] ------------------&lt; org.example:docker-jenkins-test &gt;-------------------<br>[INFO] Building docker-jenkins-test 1.0-SNAPSHOT<br>[INFO] --------------------------------[ jar ]---------------------------------<br>[INFO] <br>[INFO] --- maven-clean-plugin:3.1.0:clean (default-clean) @ docker-jenkins-test ---<br>[INFO] Deleting /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/target<br>[INFO] <br>[INFO] --- maven-resources-plugin:3.2.0:resources (default-resources) @ docker-jenkins-test ---<br>[INFO] Using &#x27;UTF-8&#x27; encoding to copy filtered resources.<br>[INFO] Using &#x27;UTF-8&#x27; encoding to copy filtered properties files.<br>[INFO] skip non existing resourceDirectory /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/src/main/resources<br>[INFO] skip non existing resourceDirectory /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/src/main/resources<br>[INFO] <br>[INFO] --- maven-compiler-plugin:3.8.1:compile (default-compile) @ docker-jenkins-test ---<br>[INFO] Changes detected - recompiling the module!<br>[INFO] Compiling 2 source files to /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/target/classes<br>[INFO] <br>[INFO] --- maven-resources-plugin:3.2.0:testResources (default-testResources) @ docker-jenkins-test ---<br>[INFO] Not copying test resources<br>[INFO] <br>[INFO] --- maven-compiler-plugin:3.8.1:testCompile (default-testCompile) @ docker-jenkins-test ---<br>[INFO] Not compiling test sources<br>[INFO] <br>[INFO] --- maven-surefire-plugin:2.22.2:test (default-test) @ docker-jenkins-test ---<br>[INFO] Tests are skipped.<br>[INFO] <br>[INFO] --- maven-jar-plugin:3.2.0:jar (default-jar) @ docker-jenkins-test ---<br>[INFO] Building jar: /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/target/docker-jenkins-test-1.0-SNAPSHOT.jar<br>[INFO] <br>[INFO] --- spring-boot-maven-plugin:2.5.6:repackage (repackage) @ docker-jenkins-test ---<br>[INFO] Replacing main artifact with repackaged archive<br>[INFO] ------------------------------------------------------------------------<br>[INFO] BUILD SUCCESS<br>[INFO] ------------------------------------------------------------------------<br>[INFO] Total time:  55.754 s<br>[INFO] Finished at: 2025-02-12T23:57:02+08:00<br>[INFO] ------------------------------------------------------------------------<br>Waiting for Jenkins to finish collecting data<br>[JENKINS] Archiving /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/pom.xml to org.example/docker-jenkins-test/1.0-SNAPSHOT/docker-jenkins-test-1.0-SNAPSHOT.pom<br>[JENKINS] Archiving /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/target/docker-jenkins-test-1.0-SNAPSHOT.jar to org.example/docker-jenkins-test/1.0-SNAPSHOT/docker-jenkins-test-1.0-SNAPSHOT.jar<br>[docker-jenkins-test-pkg-runInDocker] $ /bin/sh -xe /tmp/jenkins5156680462021271743.sh<br>channel stopped<br>+ cd /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker<br>+ ls -l Dockerfile<br>-rw-r--r--. 1 root root 120 Feb  9 23:21 Dockerfile<br>+ ls -l target/docker-jenkins-test-1.0-SNAPSHOT.jar<br>-rw-r--r--. 1 root root 17490950 Feb 12 23:56 target/docker-jenkins-test-1.0-SNAPSHOT.jar<br>+ find target -name *.jar<br>+ echo JAR 包路径: target/docker-jenkins-test-1.0-SNAPSHOT.jar<br>JAR 包路径: target/docker-jenkins-test-1.0-SNAPSHOT.jar<br>+ docker build -t docker-jenkins-test-pkg-runindocker:latest .<br>DEPRECATED: The legacy builder is deprecated and will be removed in a future release.<br>            Install the buildx component to build images with BuildKit:<br>            https://docs.docker.com/go/buildx/<br><br>Sending build context to Docker daemon  17.63MB<br><br>Step 1/5 : FROM openjdk:8<br> ---&gt; b273004037cc<br>Step 2/5 : COPY target/*.jar /app.jar<br> ---&gt; d8d778b1aa35<br>Step 3/5 : CMD [&quot;--server.port=8080&quot;]<br> ---&gt; Running in d1f198c573e4<br> ---&gt; Removed intermediate container d1f198c573e4<br> ---&gt; 30daec3524db<br>Step 4/5 : EXPOSE 8080<br> ---&gt; Running in 720318661c76<br> ---&gt; Removed intermediate container 720318661c76<br> ---&gt; 86fb695a5c0c<br>Step 5/5 : ENTRYPOINT [&quot;java&quot;,&quot;-jar&quot;,&quot;/app.jar&quot;]<br> ---&gt; Running in dd1f1629bc7a<br> ---&gt; Removed intermediate container dd1f1629bc7a<br> ---&gt; 88bb368191f9<br>Successfully built 88bb368191f9<br>Successfully tagged docker-jenkins-test-pkg-runindocker:latest<br>+ docker stop docker-jenkins-test-pkg-runindocker<br>docker-jenkins-test-pkg-runindocker<br>+ docker rm docker-jenkins-test-pkg-runindocker<br>docker-jenkins-test-pkg-runindocker<br>+ docker run -d -p 18080:8080 --name docker-jenkins-test-pkg-runindocker docker-jenkins-test-pkg-runindocker:latest<br>b983b6731e7c15730605d53681235195bbbb45be4c9bb11d5e74f21743763359<br>Finished: SUCCESS<br></code></pre></td></tr></table></figure>
+
+<p>3、部署成功</p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250213000630844.png" alt="image-20250213000630844"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/docker/" rel="tag"># docker</a>
+              <a href="/tags/jenkins/" rel="tag"># jenkins</a>
+              <a href="/tags/CICD/" rel="tag"># CICD</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/01/25/K8S%E7%AE%80%E4%BB%8B%E5%8F%8A%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/" rel="prev" title="K8S简介及概念介绍">
+      <i class="fa fa-chevron-left"></i> K8S简介及概念介绍
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Jenkins"><span class="nav-number">1.</span> <span class="nav-text">Jenkins</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">1.1.</span> <span class="nav-text">是什么</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E5%8A%9F%E8%83%BD"><span class="nav-number">1.1.1.</span> <span class="nav-text">主要功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E7%9B%AE%E6%A0%87"><span class="nav-number">1.1.2.</span> <span class="nav-text">核心目标</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E7%94%A8"><span class="nav-number">1.2.</span> <span class="nav-text">怎么用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">1.3.</span> <span class="nav-text">测试</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">91</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">83</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

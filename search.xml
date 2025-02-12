@@ -3741,17 +3741,15 @@
 <p><img src="/images/docker-docker-compose%E5%9F%BA%E7%A1%80/0b83310fabe80f5428dea313bb2c5791.png" alt="img"></p>
 <h3 id="dockerfile搭建过程"><a href="#dockerfile搭建过程" class="headerlink" title="dockerfile搭建过程"></a><strong>dockerfile搭建过程</strong></h3><figure class="highlight txt"><table><tr><td class="code"><pre><code class="hljs txt">1、每个保留关键字(指令)都是必须是大写字母<br>2、执行从上到下顺序执行<br>3、#表示注释<br>4、每个指令都会创建提交一个新的镜像层，并提交<br></code></pre></td></tr></table></figure>
 
-<h3 id="docker基本命令"><a href="#docker基本命令" class="headerlink" title="docker基本命令"></a><strong>docker基本命令</strong></h3><figure class="highlight cmd"><table><tr><td class="code"><pre><code class="hljs cmd">FROM			#基础镜像，一切从这里开始构建<br>MAINTAINER		#镜像是谁写的，姓名+邮箱<br>RUN				#镜像运行的时候需要运行的命令<br>ADD				#步骤，tomcat镜像，这个tomcat压缩包！添加内容<br>WORKDIR			#镜像的工作目录<br>VOLUME			#挂载的目录<br>EXPOSE			#保留端口配置<br><span class="hljs-built_in">CMD</span>				#指定这个容器启动的时候需要运行的命令<br>ENTRYPOINT		#指定这个容器启动的时候需要运行的命令，可以追加命令<br>ONBUILD			#当构建一个被继承dockerfile 这个的时候就会运行ONBUILD的指令<br><span class="hljs-built_in">COPY</span>			#类似ADD，我们文件拷贝到镜像中 <br>ENV				#构建的时候设置环境变量<br></code></pre></td></tr></table></figure>
+<h3 id="Dockerfile基本命令"><a href="#Dockerfile基本命令" class="headerlink" title="Dockerfile基本命令"></a><strong>Dockerfile基本命令</strong></h3><figure class="highlight cmd"><table><tr><td class="code"><pre><code class="hljs cmd">FROM			#基础镜像，一切从这里开始构建<br>MAINTAINER		#镜像是谁写的，姓名+邮箱<br>RUN				#镜像运行的时候需要运行的命令<br>ADD				#步骤，tomcat镜像，这个tomcat压缩包！添加内容<br>WORKDIR			#镜像的工作目录<br>VOLUME			#挂载的目录<br>EXPOSE			#保留端口配置<br><span class="hljs-built_in">CMD</span>				#指定这个容器启动的时候需要运行的命令<br>ENTRYPOINT		#指定这个容器启动的时候需要运行的命令，可以追加命令<br>ONBUILD			#当构建一个被继承dockerfile 这个的时候就会运行ONBUILD的指令<br><span class="hljs-built_in">COPY</span>			#类似ADD，我们文件拷贝到镜像中 <br>ENV				#构建的时候设置环境变量<br></code></pre></td></tr></table></figure>
 
 <p><img src="/images/docker-docker-compose%E5%9F%BA%E7%A1%80/83e076992ac1c4de38bf3074de7cb686.png" alt="img"></p>
-<p><strong>CMD和ENTRYPOINT的区别</strong></p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><code class="hljs cmd"><span class="hljs-built_in">CMD</span>	#指定这个容器启动的时候需要运行的命令，只有最后一个会生效，可被替代<br>ENTRYPOINT #指定这个容器启动的时候需要运行的命令，可以追加命令<br>一般用ENTRYPOINT结尾<br></code></pre></td></tr></table></figure>
+<h4 id="CMD和ENTRYPOINT的区别"><a href="#CMD和ENTRYPOINT的区别" class="headerlink" title="CMD和ENTRYPOINT的区别"></a>CMD和ENTRYPOINT的区别</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><code class="hljs cmd"><span class="hljs-built_in">CMD</span>	#指定这个容器启动的时候需要运行的命令，只有最后一个会生效，可被替代<br>ENTRYPOINT #指定这个容器启动的时候需要运行的命令，可以追加命令<br>一般用ENTRYPOINT结尾<br></code></pre></td></tr></table></figure>
 
-<p>DIY自制Centos镜像</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><code class="hljs cmd"><br></code></pre></td></tr></table></figure>
+<h4 id="DIY自制Centos镜像"><a href="#DIY自制Centos镜像" class="headerlink" title="DIY自制Centos镜像"></a>DIY自制Centos镜像</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><code class="hljs cmd">FROM centos:<span class="hljs-number">7</span><br>MAINTAINER handsome&lt;handsome@<span class="hljs-number">126</span>.com&gt;<br><br>RUN rm -rf /etc/yum.repos.d/CentOS-Base.repo<br>RUN curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-<span class="hljs-number">7</span>.repo<br>RUN yum clean all<br>RUN yum makecache<br>ENV MYPATH /usr/local<br>WORKDIR $MYPATH<br>RUN yum -y install vim<br>RUN yum -y install <span class="hljs-built_in">net</span>-tools<br><br>EXPOSE <span class="hljs-number">100</span><br><span class="hljs-built_in">CMD</span> <span class="hljs-built_in">echo</span> $MYPATH<br><span class="hljs-built_in">CMD</span> <span class="hljs-built_in">echo</span> &quot;--------end----------&quot;<br><span class="hljs-built_in">CMD</span> /bin/bash<br></code></pre></td></tr></table></figure>
 
-<p>DIY自制Tomcat镜像</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><code class="hljs cmd"><br></code></pre></td></tr></table></figure>
+<h4 id="DIY自制Tomcat镜像"><a href="#DIY自制Tomcat镜像" class="headerlink" title="DIY自制Tomcat镜像"></a>DIY自制Tomcat镜像</h4><p><img src="/images/docker-docker-compose%E5%9F%BA%E7%A1%80/image-20250126163106092.png" alt="image-20250126163106092"></p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><code class="hljs cmd">FROM centos:<span class="hljs-number">7</span><br>ADD jdk-<span class="hljs-number">8</span>u152-linux-x64.tar.gz /usr/local<br>ADD apache-tomcat-<span class="hljs-number">9</span>.<span class="hljs-number">0</span>.<span class="hljs-number">98</span>.tar.gz /usr/local<br><br>RUN rm -rf /etc/yum.repos.d/CentOS-Base.repo<br>RUN curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-<span class="hljs-number">7</span>.repo<br>RUN yum clean all<br>RUN yum makecache<br>RUN yum -y install <span class="hljs-built_in">net</span>-tools<br><br><br><br>ENV MYPATH /usr/local<br>WORKDIR $MYPATH<br><br>ENV JAVA_HOME /usr/local/jdk1.<span class="hljs-number">8</span>.<span class="hljs-number">0</span>_152<br>ENV CLASSPATH $JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar<br>ENV CATALINA_HOME /usr/local/apache-tomcat-<span class="hljs-number">9</span>.<span class="hljs-number">0</span>.<span class="hljs-number">98</span><br>ENV <span class="hljs-built_in">PATH</span> $<span class="hljs-built_in">PATH</span>:$JAVA_HOME/bin:$CATALINA_HOME/lib #设置环境变量 分隔符是：<br>EXPOSE <span class="hljs-number">8080</span><br><span class="hljs-built_in">CMD</span> /usr/local/apache-tomcat-<span class="hljs-number">9</span>.<span class="hljs-number">0</span>.<span class="hljs-number">98</span>/bin/startup.sh &amp;&amp; tail -F /usr/local/apache-tomcat-<span class="hljs-number">9</span>.<span class="hljs-number">0</span>.<span class="hljs-number">98</span>/logs/catalina.out # 设置默认命令<br></code></pre></td></tr></table></figure>
 
 <h3 id="SpringBoot微服务打包Docker镜像"><a href="#SpringBoot微服务打包Docker镜像" class="headerlink" title="SpringBoot微服务打包Docker镜像"></a>SpringBoot微服务打包Docker镜像</h3><p>1、定义controller</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestController(&quot;/test&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestController</span> </span>&#123;<br>    <span class="hljs-meta">@GetMapping(&quot;/aaa&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Object <span class="hljs-title">aaa</span><span class="hljs-params">()</span></span>&#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;bbb&quot;</span>;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
@@ -3820,7 +3818,47 @@
 
 
 <p><img src="/images/docker-docker-compose%E5%9F%BA%E7%A1%80/image-20250122225932814.png" alt="image-20250122225932814"></p>
-<h1 id="Docker-Compose"><a href="#Docker-Compose" class="headerlink" title="Docker Compose"></a>Docker Compose</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h2 id="YAML规则"><a href="#YAML规则" class="headerlink" title="YAML规则"></a>YAML规则</h2><h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2>]]></content>
+<h1 id="Docker-Compose"><a href="#Docker-Compose" class="headerlink" title="Docker Compose"></a>Docker Compose</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>​    简单来说，Docker Compose是Docker开源的另一个项目，来轻松高效的管理容器，定义运行多个容器。</p>
+<p>Dockerfile build run 只能启动一个容器，如果有多个容器，可以借助docker-compose.yaml定义文件和docker-compose up -d 命令启动来编排和定义先后依赖关系，做到批量启动。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>​    参考前文</p>
+<h2 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h2><p>只构建镜像</p>
+<p>当构建文件（Dockerfile）出错时，修改后，加build会重新构建</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">docker-compose build<br></code></pre></td></tr></table></figure>
+
+<p>只下载镜像docker-compose.yml文件中的镜像</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">docker-compose pull<br></code></pre></td></tr></table></figure>
+
+<p>启动容器，<code>-d</code>后台启动</p>
+<p>执行此命令会先pull后启动</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">docker-compose up -d<br></code></pre></td></tr></table></figure>
+
+<p>查看使用docker-compose.yml启动的容器</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">docker-compose ps<br></code></pre></td></tr></table></figure>
+
+<p>临时进入docker-compose.yml启动的容器(查看不到)</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">docker-compose run  容器名 /bin/sh<br></code></pre></td></tr></table></figure>
+
+<p>启动docker-compose.yml中的容器</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">docker-compose start<br></code></pre></td></tr></table></figure>
+
+<p>停止docker-compose.yml中的容器</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">docker-compose stop<br></code></pre></td></tr></table></figure>
+
+<p>删除使用docker-compose.yml运行的容器(需要先stop)</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">docker-compose rm<br></code></pre></td></tr></table></figure>
+
+<h2 id="YAML规则"><a href="#YAML规则" class="headerlink" title="YAML规则"></a>YAML规则</h2><p><a href="https://docs.docker.com/compose/compose-file/#compose-file-structure-and-examples">https://docs.docker.com/compose/compose-file/#compose-file-structure-and-examples</a></p>
+<p><code>docker-compose.yaml</code> 的语法规则，包括版本、服务（含众多服务关键字）、网络（含网络关键字）、卷、配置项、密钥等的定义</p>
+<p>docker-compose.yaml举例</p>
+<p>主要有几个部分组成：version、services、volumes、networks，每个service的内容与每个dockerFile定义镜像类似的去describe每个服务的信息</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">version:</span> <span class="hljs-string">&quot;3&quot;</span>  <span class="hljs-comment"># 指定docker-compose语法版本</span><br><span class="hljs-attr">services:</span>    <span class="hljs-comment"># 从以下定义服务配置列表</span><br>  <span class="hljs-attr">server_name:</span>   <span class="hljs-comment"># 可将server_name替换为自定义的名字，如mysql/php都可以</span><br>    <span class="hljs-attr">container_name:</span> <span class="hljs-string">container_name</span>  <span class="hljs-comment"># 指定实例化后的容器名，可将container_name替换为自定义名</span><br>    <span class="hljs-attr">image:</span> <span class="hljs-string">xxx:latest</span> <span class="hljs-comment"># 指定使用的镜像名及标签</span><br>    <span class="hljs-attr">build:</span>  <span class="hljs-comment"># 如果没有现成的镜像，需要自己构建使用这个选项</span><br>      <span class="hljs-attr">context:</span> <span class="hljs-string">/xxx/xxx/Dockerfile</span>  <span class="hljs-comment"># 指定构建镜像文件的路径</span><br>      <span class="hljs-attr">dockerfile:</span> <span class="hljs-string">....</span>     <span class="hljs-comment"># 指定Dockerfile文件名，上一条指定，这一条就不要了</span><br>    <span class="hljs-attr">ports:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;00:00&quot;</span>  <span class="hljs-comment"># 容器内的映射端口，本地端口:容器内端口</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;00:00&quot;</span>  <span class="hljs-comment"># 可指定多个</span><br>    <span class="hljs-attr">volumes:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">test1:/xx/xx</span>  <span class="hljs-comment"># 这里使用managed volume的方法，将容器内的目录映射到物理机，方便管理</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">test2:/xx/xx</span>  <span class="hljs-comment"># 前者是volumes目录下的名字，后者是容器内目录</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">test3:/xx/xx</span>  <span class="hljs-comment"># 在文件的最后还要使用volumes指定这几个tests</span><br>    <span class="hljs-attr">volumes_from:</span>  <span class="hljs-comment"># 指定卷容器</span><br>       <span class="hljs-bullet">-</span> <span class="hljs-string">volume_container_name</span>  <span class="hljs-comment"># 卷容器名</span><br>    <span class="hljs-attr">restarts:</span> <span class="hljs-string">always</span>  <span class="hljs-comment"># 设置无论遇到什么错，重启容器</span><br>    <span class="hljs-attr">depends_on:</span>       <span class="hljs-comment"># 用来解决依赖关系，如这个服务的启动，必须在哪个服务启动之后</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">server_name</span>   <span class="hljs-comment"># 这个是名字其他服务在这个文件中的server_name</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">server_name1</span>  <span class="hljs-comment"># 按照先后顺序启动</span><br>    <span class="hljs-attr">links:</span>  <span class="hljs-comment"># 与depend_on相对应，上面控制容器启动，这个控制容器连接</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">mysql</span>  <span class="hljs-comment"># 值可以是- 服务名，比较复杂，可以在该服务中使用links中mysql代替这个mysql的ip</span><br>    <span class="hljs-attr">networks:</span> <span class="hljs-comment"># 加入指定的网络，与之前的添加网卡名类似</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">my_net</span>  <span class="hljs-comment"># bridge类型的网卡名</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">myapp_net</span> <span class="hljs-comment"># 如果没有网卡会被创建,建议使用时先创建号，在指定</span><br>    <span class="hljs-attr">environment:</span> <span class="hljs-comment"># 定义变量，类似dockerfile中的ENV</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">TZ=Asia/Shanghai</span>  <span class="hljs-comment"># 这里设置容器的时区为亚洲上海，也就解决了容器通过compose编排启动的 时区问题！！！！解决了容器的时区问题！！！</span><br>      <span class="hljs-string">变量值:</span> <span class="hljs-string">变量名</span>   <span class="hljs-comment"># 这些变量将会被直接写到镜像中的/etc/profile</span><br>    <span class="hljs-attr">command:</span> [                        <span class="hljs-comment">#使用 command 可以覆盖容器启动后默认执行的命令</span><br>            <span class="hljs-string">&#x27;--character-set-server=utf8mb4&#x27;</span>,            <span class="hljs-comment">#设置数据库表的数据集</span><br>            <span class="hljs-string">&#x27;--collation-server=utf8mb4_unicode_ci&#x27;</span>,    <span class="hljs-comment">#设置数据库表的数据集</span><br>            <span class="hljs-string">&#x27;--default-time-zone=+8:00&#x27;</span>                    <span class="hljs-comment">#设置mysql数据库的 时区问题！！！！ 而不是设置容器的时区问题！！！！</span><br>    ]<br>  <span class="hljs-attr">server_name2:</span>  <span class="hljs-comment"># 开始第二个容器</span><br>    <span class="hljs-attr">server_name:</span><br>      <span class="hljs-attr">stdin_open:</span> <span class="hljs-literal">true</span> <span class="hljs-comment"># 类似于docker run -d</span><br>      <span class="hljs-attr">tty:</span> <span class="hljs-literal">true</span>  <span class="hljs-comment"># 类似于docker run -t</span><br><span class="hljs-attr">volumes:</span>   <span class="hljs-comment"># 以上每个服务中挂载映射的目录都在这里写入一次,也叫作声明volume</span><br>  <span class="hljs-attr">test1:</span><br>  <span class="hljs-attr">test2:</span><br>  <span class="hljs-attr">test3:</span><br><span class="hljs-attr">networks:</span>  <span class="hljs-comment"># 如果要指定ip网段，还是创建好在使用即可，声明networks</span><br>  <span class="hljs-attr">my_net:</span><br>    <span class="hljs-attr">driver:</span> <span class="hljs-string">bridge</span>  <span class="hljs-comment"># 指定网卡类型</span><br>  <span class="hljs-attr">myapp_net:</span><br>    <span class="hljs-attr">driver:</span> <span class="hljs-string">bridge</span> <br></code></pre></td></tr></table></figure>
+
+<h1 id="Docker-Swarm"><a href="#Docker-Swarm" class="headerlink" title="Docker Swarm"></a>Docker Swarm</h1><p>docker：容器</p>
+<p>docker-compose：一个节点上的一系列容器</p>
+<p>docker-swarm：多个主机或者集群上的多套环境容器的管理大规模容器化应用，</p>
+<p>docker-swarm对标K8S</p>
+<p>不过业界用docker-swarm比较少，学习意义不大</p>
+]]></content>
       <categories>
         <category>docker</category>
       </categories>
@@ -13909,6 +13947,287 @@
       </categories>
       <tags>
         <tag>设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>K8S简介及概念介绍</title>
+    <url>/2025/01/25/K8S%E7%AE%80%E4%BB%8B%E5%8F%8A%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/</url>
+    <content><![CDATA[<h1 id="K8S简介及概念介绍"><a href="#K8S简介及概念介绍" class="headerlink" title="K8S简介及概念介绍"></a>K8S简介及概念介绍</h1><h2 id="认识-Kubernetes"><a href="#认识-Kubernetes" class="headerlink" title="认识 Kubernetes"></a>认识 Kubernetes</h2><h3 id="什么是Kubernetes"><a href="#什么是Kubernetes" class="headerlink" title="什么是Kubernetes"></a>什么是Kubernetes</h3><p><img src="/images/K8S%E7%AE%80%E4%BB%8B%E5%8F%8A%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/image-20250125184932012.png" alt="image-20250125184932012"></p>
+<p>​    如图所见，k8s是一个船舵的logo，联想docker的logo：装满集装箱的船，预示着k8s是用来管理容器的。kubernetes简称k8s，因为k和s间隔着8个字符。<strong>Google</strong> 在 2014 年开源了 Kubernetes 项目。 Kubernetes 建立在 Google 大规模运行生产工作负载十几年经验的基础上， 结合了社区中最优秀的想法和实践。最初由谷歌开发，后贡献给云原生计算基金会（CNCF）进行维护和发展。</p>
+<p>​    一句话来说，k8s是一个开源的容器编排和管理平台。</p>
+<p>​    对标的产品有<strong>Docker Swarm、Apache Mesos</strong></p>
+<h3 id="为什么需要Kubernetes"><a href="#为什么需要Kubernetes" class="headerlink" title="为什么需要Kubernetes"></a>为什么需要Kubernetes</h3><h4 id="应用部署的三个阶段"><a href="#应用部署的三个阶段" class="headerlink" title="应用部署的三个阶段"></a>应用部署的三个阶段</h4><p>传统部署：购买物理机，环境不隔离</p>
+<p>虚拟化部署：通过虚拟机隔离不同的应用，资源隔离了，但是虚拟机过重占用资源过多</p>
+<p>容器化部署：环境隔离，不像虚拟机那么重</p>
+<p><img src="/images/K8S%E7%AE%80%E4%BB%8B%E5%8F%8A%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/image-20250125191219282.png" alt="image-20250125191219282"></p>
+<h4 id="K8S的特点"><a href="#K8S的特点" class="headerlink" title="K8S的特点"></a>K8S的特点</h4><ul>
+<li>自动化部署<ul>
+<li>Kubernetes可以根据预定定义好的YAML配置文件，自动创建部署容器服务，在不同的环境<strong>一致地</strong>运行同一套代码</li>
+</ul>
+</li>
+<li>弹性伸缩<ul>
+<li>能够根据应用的负载情况（cpu使用率，内存使用率）自动调整应用实例的数量以满足业务使用需求，提高资源利用率</li>
+</ul>
+</li>
+<li>服务发现和负载均衡<ul>
+<li>服务发现<ul>
+<li>k8s为每个应用程序定义了一个稳定的网络地址，使得不同容器之间能通过这个地址或者域名来互相通信，无需手动配置ip和端口</li>
+</ul>
+</li>
+<li>负载均衡<ul>
+<li>将外部请求均匀地发到多个实力上，避免单点故障</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>自我修复<ul>
+<li>会持续检测容器运行状态，当容器崩溃或者不可用时，会自动重启，并且把请求流量调度到其他健康的节点上。</li>
+</ul>
+</li>
+<li>存储编排<ul>
+<li>支持多种存储系统（如 NFS、iSCSI、Ceph 等），可以为容器化应用动态地挂载和管理存储卷，确保数据的持久化和可访问性</li>
+</ul>
+</li>
+<li>滚动更新与回滚<ul>
+<li>滚动更新<ul>
+<li>在更新应用程序时，Kubernetes 可以逐步替换旧版本的容器为新版本的容器，确保在更新过程中应用的正常运行，减少停机时间。比如容器实例是2，发布时容器实例会这样演变 2旧 -&gt; 2旧1新（启动中） -&gt; 1旧1新(已更新) -&gt;  1旧1新（已更新）1新（启动中） -&gt; 2新（已更新）</li>
+</ul>
+</li>
+<li>版本回滚<ul>
+<li>如果更新过程中出现问题，可以快速将应用程序回滚到上一个稳定版本，回滚过程与发布更新类型</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>机密和配置管理<ul>
+<li>k8s提供了配置管理服务，并且支持对敏感数据加密</li>
+</ul>
+</li>
+</ul>
+<h2 id="集群架构与组件"><a href="#集群架构与组件" class="headerlink" title="集群架构与组件"></a>集群架构与组件</h2><h3 id="控制面板组件（Master）"><a href="#控制面板组件（Master）" class="headerlink" title="控制面板组件（Master）"></a>控制面板组件（Master）</h3><ul>
+<li><strong>kube-apiserver</strong><ul>
+<li>API 服务器是 Kubernetes 控制平面的组件， 该组件负责公开了 Kubernetes API，负责处理接受请求的工作。 API 服务器是 Kubernetes 控制平面的前端。</li>
+</ul>
+</li>
+<li><strong>kube-controller-manager</strong><ul>
+<li>kube-controller-manager 是控制平面的组件， 负责运行控制器进程。<ul>
+<li>节点控制器（Node Controller）：负责在节点出现故障时进行通知和响应</li>
+<li>任务控制器（Job Controller）：监测代表一次性任务的 Job 对象，然后创建 Pods 来运行这些任务直至完成</li>
+<li>端点分片控制器（EndpointSlice controller）：填充端点分片（EndpointSlice）对象（以提供 Service 和 Pod 之间的链接）。</li>
+<li>服务账号控制器（ServiceAccount controller）：为新的命名空间创建默认的服务账号（ServiceAccount）。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>cloud-controller-manager<ul>
+<li>嵌入了特定于云平台的控制逻辑。 云控制器管理器（Cloud Controller Manager）允许你将你的集群连接到云提供商的 API 之上， 并将与该云平台交互的组件同与你的集群交互的组件分离开来。</li>
+</ul>
+</li>
+<li><strong>kube-scheduleer</strong><ul>
+<li>scheduler 负责资源的调度，按照预定的调度策略将 Pod 调度到相应的机器上；</li>
+</ul>
+</li>
+<li><strong>etcd</strong><ul>
+<li>一致且高度可用的<strong>键值存储</strong>，用作 Kubernetes 的所有集群数据的后台数据库。</li>
+</ul>
+</li>
+</ul>
+<h3 id="节点组件"><a href="#节点组件" class="headerlink" title="节点组件"></a>节点组件</h3><ul>
+<li>kubelet<ul>
+<li>kubelet 负责维护容器的生命周期，同时也负责 Volume（CVI）和网络（CNI）的管理；</li>
+</ul>
+</li>
+<li>kube-proxy<ul>
+<li>kube-proxy 负责为 Service 提供 cluster 内部的服务发现和负载均衡；</li>
+</ul>
+</li>
+<li>containner-runtime<ul>
+<li>Container runtime 负责镜像管理以及 Pod 和容器的真正运行（CRI）；</li>
+<li>Kubernetes 支持许多容器运行环境，例如 containerd、 CRI-O 以及 Kubernetes CRI (容器运行环境接口) 的其他任何实现。</li>
+</ul>
+</li>
+</ul>
+<h3 id="附加组件"><a href="#附加组件" class="headerlink" title="附加组件"></a>附加组件</h3><ul>
+<li>kube-dns<ul>
+<li>kube-dns 负责为整个集群提供 DNS 服务</li>
+</ul>
+</li>
+<li>Ingress Controller<ul>
+<li>Ingress Controller 为服务提供外网入口</li>
+</ul>
+</li>
+<li>Prometheus<ul>
+<li>Prometheus 提供资源监控</li>
+</ul>
+</li>
+<li>Dashboard<ul>
+<li>Dashboard 提供 GUI</li>
+</ul>
+</li>
+<li>Federation<ul>
+<li>Federation 提供跨可用区的集群</li>
+</ul>
+</li>
+<li>Fluentd-elasticsearch<ul>
+<li>Fluentd-elasticsearch 提供集群日志采集、存储与查询</li>
+</ul>
+</li>
+</ul>
+<p><img src="/images/K8S%E7%AE%80%E4%BB%8B%E5%8F%8A%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/image-20250125204106849.png" alt="image-20250125204106849"></p>
+<h2 id="核心概念与专业术语"><a href="#核心概念与专业术语" class="headerlink" title="核心概念与专业术语"></a>核心概念与专业术语</h2><h3 id="服务的分类"><a href="#服务的分类" class="headerlink" title="服务的分类"></a>服务的分类</h3><h4 id="有状态"><a href="#有状态" class="headerlink" title="有状态"></a>有状态</h4><p>​    服务存在状态，一般指服务需要存储数据，这种服务就是有状态的，比如redis，mysql这些。</p>
+<p><strong>优点：</strong>可以独立存储数据，实现数据管理</p>
+<p><strong>缺点：</strong>集群环境下需要实现主从、数据同步、备份、水平扩容复杂</p>
+<h4 id="无状态"><a href="#无状态" class="headerlink" title="无状态"></a>无状态</h4><p>​    nginx等，重启前后不影响服务的正常运行</p>
+<p><strong>优点：</strong>对客户端透明，无依赖关系，可以高效实现扩容、迁移</p>
+<p><strong>缺点：</strong>不能存储数据，需要额外的数据服务支撑</p>
+<h1 id="资源和对象"><a href="#资源和对象" class="headerlink" title="资源和对象"></a>资源和对象</h1><h2 id="资源分类"><a href="#资源分类" class="headerlink" title="资源分类"></a>资源分类</h2><p><img src="/images/K8S%E7%AE%80%E4%BB%8B%E5%8F%8A%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/image-20250206220209341.png" alt="image-20250206220209341"></p>
+<p><img src="/images/K8S%E7%AE%80%E4%BB%8B%E5%8F%8A%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/image-20250206221035336.png" alt="image-20250206221035336"></p>
+<h3 id="元数据级"><a href="#元数据级" class="headerlink" title="元数据级"></a>元数据级</h3><h4 id="Horizontal-Pod-Autoscaler（HPA）"><a href="#Horizontal-Pod-Autoscaler（HPA）" class="headerlink" title="Horizontal Pod Autoscaler（HPA）"></a>Horizontal Pod Autoscaler（HPA）</h4><p>​    <strong>Pod 自动扩容缩容</strong>：可以根据 CPU 使用率或自定义指标（metrics）自动对 Pod 进行扩/缩容。<br>控制管理器每隔30s（可以通过–horizontal-pod-autoscaler-sync-period修改）查询metrics的资源使用情况<br>支持三种metrics类型<br>​    预定义metrics（比如Pod的CPU）以利用率的方式计算<br>​    自定义的Pod metrics，以原始值（raw value）的方式计算<br>​    自定义的object metrics</p>
+<p>支持两种metrics查询方式：Heapster和自定义的REST API，支持多metrics</p>
+<h4 id="PodTemplate"><a href="#PodTemplate" class="headerlink" title="PodTemplate"></a>PodTemplate</h4><p>​    顾名思义：pod创建的模版，是关于 Pod 的定义，但是被包含在其他的 Kubernetes 对象中（例如 Deployment、StatefulSet、DaemonSet 等控制器）。控制器通过 Pod Template 信息来创建 Pod</p>
+<h4 id="LimitRange"><a href="#LimitRange" class="headerlink" title="LimitRange"></a>LimitRange</h4><p>​    可以对集群内 Request 和 Limits 的配置做一个全局的统一的限制，相当于批量设置了某一个范围内（某个命名空间）的 Pod 的<strong>资源使用限制</strong>。</p>
+<h3 id="集群级"><a href="#集群级" class="headerlink" title="集群级"></a>集群级</h3><h4 id="Namespace"><a href="#Namespace" class="headerlink" title="Namespace"></a>Namespace</h4><figure class="highlight txt"><table><tr><td class="code"><pre><code class="hljs txt">Kubernetes 支持多个虚拟集群，它们底层依赖于同一个物理集群，这些虚拟集群被称为命名空间。<br>作用是用于实现多团队/环境的资源隔离。命名空间 namespace 是 k8s 集群级别的资源，可以给不同的用户、租户、环境或项目创建对应的命名空间。<br></code></pre></td></tr></table></figure>
+
+<p>默认 namespace：</p>
+<ul>
+<li>kube-system 主要用于运行系统级资源，存放 k8s 自身的组件</li>
+<li>kube-public 此命名空间是自动创建的，并且可供所有用户（包括未经过身份验证的用户）读取。此命名空间主要用于集群使用，关联的一些资源在集群中是可见的并且可以公开读取。此命名空间的公共方面知识一个约定，但不是非要这么要求。</li>
+<li>default 未指定名称空间的资源就是 default，即你在创建pod 时如果没有指定 namespace，则会默认使用 default</li>
+</ul>
+<h4 id="Node："><a href="#Node：" class="headerlink" title="Node："></a>Node：</h4><h4 id="ClusterRole"><a href="#ClusterRole" class="headerlink" title="ClusterRole"></a>ClusterRole</h4><p>​    ClusterRole 是一组权限的集合，但与 Role 不同的是，ClusterRole 可以在包括所有 Namespace 和集群级别的资源或非资源类型进行鉴权。</p>
+<h4 id="ClusterRoleBinding"><a href="#ClusterRoleBinding" class="headerlink" title="ClusterRoleBinding"></a>ClusterRoleBinding</h4><p>​    ClusterRoleBinding：将 Subject 绑定到 ClusterRole，ClusterRoleBinding 将使规则在所有命名空间中生效。</p>
+<h3 id="命名空间别"><a href="#命名空间别" class="headerlink" title="命名空间别"></a>命名空间别</h3><p><img src="/images/K8S%E7%AE%80%E4%BB%8B%E5%8F%8A%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/image-20250206221652637.png" alt="image-20250206221652637"></p>
+<h4 id="工作负载型"><a href="#工作负载型" class="headerlink" title="工作负载型"></a>工作负载型</h4><h5 id="Pod"><a href="#Pod" class="headerlink" title="Pod"></a>Pod</h5><p>​    pod大致分为副本（replicas）和控制器</p>
+<p>​    Pod（容器组）是 Kubernetes 中最小的可部署单元。一个 Pod（容器组）包含了一个应用程序容器（某些情况下是多个容器）、存储资源、一个唯一的网络 IP 地址、以及一些确定容器该如何运行的选项。Pod 容器组代表了 Kubernetes 中一个独立的应用程序运行实例，该实例可能由单个容器或者几个紧耦合在一起的容器组成。</p>
+<p>​    Docker 是 Kubernetes Pod 中使用最广泛的容器引擎；Kubernetes Pod 同时也支持其他类型的容器引擎。</p>
+<p>Kubernetes 集群中的 Pod 存在如下两种使用途径：</p>
+<ol>
+<li>一个 Pod 中只运行一个容器。”one-container-per-pod” 是 Kubernetes 中最常见的使用方式。此时，您可以认为 Pod 容器组是该容器的 wrapper，Kubernetes 通过 Pod 管理容器，而不是直接管理容器。</li>
+<li>一个 Pod 中运行多个需要互相协作的容器。您可以将多个紧密耦合、共享资源且始终在一起运行的容器编排在同一个 Pod 中</li>
+</ol>
+<h5 id="副本"><a href="#副本" class="headerlink" title="副本"></a>副本</h5><blockquote>
+<p>先引入“副本”的概念——一个 Pod 可以被复制成多份，每一份可被称之为一个“副本”，这些“副本”除了一些描述性的信息（Pod 的名字、uid 等）不一样以外，其它信息都是一样的，譬如 Pod 内部的容器、容器数量、容器里面运行的应用等的这些信息都是一样的，这些副本提供同样的功能。</p>
+<p>Pod 的“控制器”通常包含一个名为 “replicas” 的属性。“replicas”属性则指定了特定 Pod 的副本的数量，当当前集群中该 Pod 的数量与该属性指定的值不一致时，k8s 会采取一些策略去使得当前状态满足配置的要求。</p>
+</blockquote>
+<h5 id="控制器"><a href="#控制器" class="headerlink" title="控制器"></a>控制器</h5><p><strong>ReplicationController（RC）</strong>：动态保证副本数<br><strong>ReplicaSet（RS）：</strong>打标签，支持selector<br><strong>Deployment：</strong>Deployment 为 Pod 和 Replica Set 提供声明式更新。你只需要在 Deployment 中描述你想要的目标状态是什么，Deployment controller 就会帮你将 Pod 和 Replica Set 的实际状态改变到你的目标状态。你可以定义一个全新的 Deployment，也可以创建一个新的替换旧的 Deployment。</p>
+<p><img src="/images/K8S%E7%AE%80%E4%BB%8B%E5%8F%8A%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/image-20250206222211431.png" alt="image-20250206222211431"></p>
+<p><strong>StatefulSet：</strong></p>
+<figure class="highlight txt"><table><tr><td class="code"><pre><code class="hljs txt">StatefulSet 中每个 Pod 的 DNS 格式为 <br>statefulSetName-&#123;0..N-1&#125;.serviceName.namespace.svc.cluster.local<br>serviceName 为 Headless Service 的名字0..N-1 为 Pod 所在的序号，从 0 开始到 N-1<br>statefulSetName 为 StatefulSet 的名字namespace 为服务所在的 namespace，Headless Servic 和 StatefulSet 必须在相同的 namespace<br>.cluster.local 为 Cluster Domain<br></code></pre></td></tr></table></figure>
+
+<p><strong>Daemonet：</strong></p>
+<figure class="highlight txt"><table><tr><td class="code"><pre><code class="hljs txt">DaemonSet 保证在每个 Node 上都运行一个容器副本，常用来部署一些集群的日志、监控或者其他系统管理应用。典型的应用包括：<br>日志收集，比如 fluentd，logstash 等<br>系统监控，比如 Prometheus Node Exporter，collectd，New Relic agent，Ganglia gmond 等<br>系统程序，比如 kube-proxy, kube-dns, glusterd, ceph 等<br></code></pre></td></tr></table></figure>
+
+<p><strong>Job和CronJob：</strong></p>
+<figure class="highlight txt"><table><tr><td class="code"><pre><code class="hljs txt">Job:一次性任务，运行完成后Pod销毁，不再重新启动新容器。<br>CronJob:CronJob 是在 Job 基础上加上了定时功能。<br></code></pre></td></tr></table></figure>
+
+
+
+<p><img src="/images/K8S%E7%AE%80%E4%BB%8B%E5%8F%8A%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/image-20250206222946057.png" alt="image-20250206222946057"></p>
+<h4 id="服务发现"><a href="#服务发现" class="headerlink" title="服务发现"></a>服务发现</h4><h5 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h5><pre><code>“Service” 简写 “svc”。Pod 不能直接提供给外网访问，而是应该使用 service。Service 就是把 Pod 暴露出来提供服务，Service 才是真正的“服务”，它的中文名就叫“服务”。
+</code></pre>
+<p>​    可以说 Service 是一个应用服务的抽象，定义了 Pod 逻辑集合和访问这个 Pod 集合的策略。Service 代理 Pod 集合，对外表现为一个访问入口，访问该入口的请求将经过负载均衡，转发到后端 Pod 中的容器。</p>
+<h5 id="Ingress"><a href="#Ingress" class="headerlink" title="Ingress"></a>Ingress</h5><pre><code>Ingress 可以提供外网访问 Service 的能力。可以把某个请求地址映射、路由到特定的 service。
+</code></pre>
+<p>​    ingress 需要配合 ingress controller 一起使用才能发挥作用，ingress 只是相当于路由规则的集合而已，真正实现路由功能的，是 Ingress Controller，ingress controller 和其它 k8s 组件一样，也是在 Pod 中运行。</p>
+<p><img src="/images/K8S%E7%AE%80%E4%BB%8B%E5%8F%8A%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/image-20250206224859211.png" alt="image-20250206224859211"></p>
+<h4 id="存储"><a href="#存储" class="headerlink" title="存储"></a>存储</h4><h5 id="Volume"><a href="#Volume" class="headerlink" title="Volume"></a>Volume</h5><p>​    数据卷，共享 Pod 中容器使用的数据。用来放持久化的数据，比如数据库数据。</p>
+<h5 id="CSI"><a href="#CSI" class="headerlink" title="CSI"></a>CSI</h5><pre><code>Container Storage Interface 是由来自 Kubernetes、Mesos、Docker 等社区成员联合制定的一个行业标准接口规范，旨在将任意存储系统暴露给容器化应用程序。
+CSI 规范定义了存储提供商实现 CSI 兼容的 Volume Plugin 的最小操作集和部署建议。CSI 规范的主要焦点是声明 Volume Plugin 必须实现的接口。
+</code></pre>
+<h4 id="特殊类型配置"><a href="#特殊类型配置" class="headerlink" title="特殊类型配置"></a>特殊类型配置</h4><h5 id="ConfigMap"><a href="#ConfigMap" class="headerlink" title="ConfigMap"></a>ConfigMap</h5><p>​    用来放配置，与 Secret 是类似的，只是 ConfigMap 放的是明文的数据，Secret 是密文存放。</p>
+<h5 id="Secret"><a href="#Secret" class="headerlink" title="Secret"></a>Secret</h5><figure class="highlight txt"><table><tr><td class="code"><pre><code class="hljs txt">Secret 解决了密码、token、密钥等敏感数据的配置问题，而不需要把这些敏感数据暴露到镜像或者 Pod Spec 中。Secret 可以以 Volume 或者环境变量的方式使用。<br>Secret 有三种类型：<br>Service Account：用来访问 Kubernetes API，由 Kubernetes 自动创建，并且会自动挂载到 Pod 的 /run/secrets/kubernetes.io/serviceaccount 目录中；<br>Opaque：base64 编码格式的 Secret，用来存储密码、密钥等；<br>kubernetes.io/dockerconfigjson：用来存储私有 docker registry 的认证信息。<br></code></pre></td></tr></table></figure>
+
+<h5 id="DownwardAPI"><a href="#DownwardAPI" class="headerlink" title="DownwardAPI"></a>DownwardAPI</h5><figure class="highlight txt"><table><tr><td class="code"><pre><code class="hljs txt">downwardAPI 这个模式和其他模式不一样的地方在于它不是为了存放容器的数据也不是用来进行容器和宿主机的数据交换的，而是让 pod 里的容器能够直接获取到这个 pod 对象本身的一些信息。<br>downwardAPI 提供了两种方式用于将 pod 的信息注入到容器内部：<br>环境变量：用于单个变量，可以将 pod 信息和容器信息直接注入容器内部<br>volume 挂载：将 pod 信息生成为文件，直接挂载到容器内部中去<br></code></pre></td></tr></table></figure>
+
+<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4><p>Role:</p>
+<p>​    Role 是一组权限的集合，例如 Role 可以包含列出 Pod 权限及列出 Deployment 权限，Role 用于给某个 Namespace 中的资源进行鉴权。</p>
+<p>RoleBinding</p>
+<p>​    RoleBinding将Subject 绑定到 Role，RoleBinding 使规则在命名空间内生效。</p>
+<h4 id="资源清单"><a href="#资源清单" class="headerlink" title="资源清单"></a>资源清单</h4><h3 id="对象规约和状态"><a href="#对象规约和状态" class="headerlink" title="对象规约和状态"></a>对象规约和状态</h3><h4 id="规约（Spec）"><a href="#规约（Spec）" class="headerlink" title="规约（Spec）"></a>规约（Spec）</h4><h4 id="状态-Status"><a href="#状态-Status" class="headerlink" title="状态(Status)"></a>状态(Status)</h4>]]></content>
+      <categories>
+        <category>docker</category>
+      </categories>
+      <tags>
+        <tag>k8s</tag>
+        <tag>kubernetes</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>docker-jenkins部署</title>
+    <url>/2025/02/10/docker-jenkins%E9%83%A8%E7%BD%B2/</url>
+    <content><![CDATA[<h1 id="Jenkins"><a href="#Jenkins" class="headerlink" title="Jenkins"></a>Jenkins</h1><h2 id="是什么"><a href="#是什么" class="headerlink" title="是什么"></a>是什么</h2><p>​    Jenkins 是一个开源的<strong>持续集成和持续交付（CI/CD）工具</strong>，用于自动化软件开发过程中的构建、测试和部署任务。它帮助开发团队更高效地管理代码变更，确保软件质量。</p>
+<h3 id="主要功能"><a href="#主要功能" class="headerlink" title="主要功能"></a>主要功能</h3><ol>
+<li><strong>持续集成（CI continous intergration）</strong>：自动构建和测试代码，快速发现并修复问题。</li>
+<li><strong>持续交付/部署（CD continous deliver/deployment）</strong>：自动化部署流程，确保软件能快速、可靠地发布。</li>
+<li><strong>插件支持</strong>：通过丰富的插件扩展功能，支持多种开发工具和平台。</li>
+<li><strong>分布式构建</strong>：支持在多台机器上并行构建，提升效率。</li>
+<li><strong>流水线（Pipeline）</strong>：通过定义流水线脚本，实现复杂工作流的自动化管理。</li>
+</ol>
+<h3 id="核心目标"><a href="#核心目标" class="headerlink" title="核心目标"></a>核心目标</h3><p>1、提高效率：自动化构建、测试、部署，减少手动繁琐的操作</p>
+<p>2、快速交付：缩短从开发到部署的时间，更快响应需求</p>
+<p>3、提升质量：通过频繁部署测试和快速反馈，降低错误率</p>
+<h2 id="怎么用"><a href="#怎么用" class="headerlink" title="怎么用"></a>怎么用</h2><p><a href="https://www.bilibili.com/video/BV1We411q7FS/?spm_id_from=333.337.search-card.all.click&vd_source=41042e45d4153dbeef9497c29d126b3e">参考视频</a></p>
+<p>方便演示，我们采用docker安装jenkins，并且以下效果：<br>1、github项目main有新提交时触发构建<br>2、构建时达成jar包<br>3、调用宿主机的docker生成jar包的镜像<br>4、docker启动镜像</p>
+<p><strong>1、安装</strong></p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><code class="hljs cmd">docker pull jenkins/jenkins<br></code></pre></td></tr></table></figure>
+
+<p><strong>2、启动jenkins</strong></p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><code class="hljs cmd"># 启动jenkins<br>docker run -u root -itd --name jenkins -p <span class="hljs-number">6001</span>:<span class="hljs-number">8080</span> -v $(which docker):/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock -e TZ=&quot;Asia/Shanghai&quot; -v /etc/localtime:/etc/localtime:ro -v /volume1/docker/jenkins:/var/jenkins_home jenkins/jenkins<br># 进入jenkins<br>docker exec -it jenkins bash<br># 查看密码<br>cat /var/jenkins_home/secrets/initialAdminPassword<br></code></pre></td></tr></table></figure>
+
+<p><code>-p 6001:8080</code></p>
+<p>​    Jenkins默认网页访问端口为8080，将端口映射到外部主机</p>
+<p><code>-v $(which docker):/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock</code>\</p>
+<p>​    使Jenkins内部可以使用docker命令</p>
+<p><code>-e TZ=&quot;Asia/Shanghai&quot; -v /etc/localtime:/etc/localtime:ro</code></p>
+<p>​    配置Jenkins容器的时区</p>
+<p><code>-v /volume1/docker/jenkins:/var/jenkins_home</code> </p>
+<p>​    将Jenkins的配置映射到外部主机卷，容器删除仍可保留配置，且可以把jdk、maven等软件挂载进来</p>
+<p><strong>3、初始化jenkins</strong></p>
+<p>1、登录 宿主机ip:6001进入jenkins页面，输入密码、设置第一个管理员密码root/root</p>
+<p>2、安装推荐的插件</p>
+<p>3、安装 Maven 、Publish Over SSH（用于把产物包通过ssh方式传给部署机器并配置执行命令，本次举例就是本机，所以没用到）</p>
+<p>4、配置jdk、maven（虽然jenkins docker方式已内置jdk和git，但jdk版本比较高，我们实例项目用的jdk8，所以要配置）<br>设置maven目录和setting文件，<strong>注意文件目录其实就是挂载的目录</strong></p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210232437245.png" alt="image-20250210232437245"></p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210232504857.png" alt="image-20250210232504857"></p>
+<p>配置jdk</p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210232643009.png" alt="image-20250210232643009"></p>
+<p>5、新建任务：maven项目</p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/43e1138df1b94af094d749d52f010a0f.webp" alt="1650643032247-9bc9e23e-bdcf-4966-a279-8810560b2cbe.png"></p>
+<p>6、配置任务</p>
+<p><strong>源码管理</strong></p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210233023160.png" alt="image-20250210233023160"></p>
+<p><strong>触发器（可选）</strong></p>
+<p>可以配置push后自动触发构建，由于是本机内网演示</p>
+<p>1、利用natap生成一个内网穿透地址</p>
+<p>2、在github仓库上设置钩子</p>
+<pre><code>进入 GitHub 仓库 → Settings → Webhooks → Add webhook:
+Payload URL: http://&lt;JENKINS-IP&gt;/github-webhook/
+Content Type: application/json
+事件：Just the push event
+</code></pre>
+<p>3、在github上生成acces s token拿到token</p>
+<p>4、配置github server secret text的value=token的值</p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250213000134265.png" alt="image-20250213000134265"></p>
+<p><strong>编译</strong></p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210233134170.png" alt="image-20250210233134170"><strong>编译后触发脚本</strong></p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><code class="hljs cmd"># 进入项目工作区<br><span class="hljs-built_in">cd</span> /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker<br># 检查文件是否存在<br>ls -l Dockerfile               # 应存在<br>ls -l target/*.jar             # 应存在<br># 打印 JAR 包路径，方便调试<br><span class="hljs-built_in">echo</span> &quot;JAR 包路径: $(<span class="hljs-built_in">find</span> target -name &#x27;*.jar&#x27;)&quot;<br><br># 构建 Docker 镜像<br>docker build -t docker-jenkins-test-pkg-runindocker:latest .<br><br># 停止并删除之前运行的容器（如果存在）<br>docker stop docker-jenkins-test-pkg-runindocker || true<br>docker rm docker-jenkins-test-pkg-runindocker || true<br><br># 运行新的 Docker 容器<br>docker run -d -p <span class="hljs-number">18080</span>:<span class="hljs-number">8080</span> --name docker-jenkins-test-pkg-runindocker docker-jenkins-test-pkg-runindocker:latest<br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250210233256531.png" alt="image-20250210233256531"></p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>项目push后自动触发构建</p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250213000422054.png" alt="image-20250213000422054"></p>
+<p>控制台日志</p>
+<figure class="highlight txt"><table><tr><td class="code"><pre><code class="hljs txt">Started by GitHub push by Callme24kHandsome<br>Running as SYSTEM<br>Building in workspace /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker<br>The recommended git tool is: NONE<br>No credentials specified<br> &gt; git rev-parse --resolve-git-dir /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/.git # timeout=10<br>Fetching changes from the remote Git repository<br> &gt; git config remote.origin.url https://github.com/Callme24kHandsome/docker-jenkins-test.git # timeout=10<br>Fetching upstream changes from https://github.com/Callme24kHandsome/docker-jenkins-test.git<br> &gt; git --version # timeout=10<br> &gt; git --version # &#x27;git version 2.39.5&#x27;<br> &gt; git fetch --tags --force --progress -- https://github.com/Callme24kHandsome/docker-jenkins-test.git +refs/heads/*:refs/remotes/origin/* # timeout=10<br> &gt; git rev-parse refs/remotes/origin/main^&#123;commit&#125; # timeout=10<br>Checking out Revision e02733c6cbff85d5622ede2327dc48549a63bbd8 (refs/remotes/origin/main)<br> &gt; git config core.sparsecheckout # timeout=10<br> &gt; git checkout -f e02733c6cbff85d5622ede2327dc48549a63bbd8 # timeout=10<br>Commit message: &quot;修改Dockerfile&quot;<br> &gt; git rev-list --no-walk 840813635c7d52b9aa354a225f9eea7feb2a3243 # timeout=10<br>Parsing POMs<br>Established TCP socket on 37200<br>[docker-jenkins-test-pkg-runInDocker] $ /var/jenkins_home/gzip/jdk1.8.0_152/bin/java -cp /var/jenkins_home/plugins/maven-plugin/WEB-INF/lib/maven35-agent-1.14.jar:/var/jenkins_home/gzip/apache-maven-3.8.1/boot/plexus-classworlds-2.6.0.jar:/var/jenkins_home/gzip/apache-maven-3.8.1/conf/logging jenkins.maven3.agent.Maven35Main /var/jenkins_home/gzip/apache-maven-3.8.1 /var/jenkins_home/war/WEB-INF/lib/remoting-3283.v92c105e0f819.jar /var/jenkins_home/plugins/maven-plugin/WEB-INF/lib/maven35-interceptor-1.14.jar /var/jenkins_home/plugins/maven-plugin/WEB-INF/lib/maven3-interceptor-commons-1.14.jar 37200<br>Exception in thread &quot;main&quot; java.lang.UnsupportedClassVersionError: hudson/remoting/Launcher has been compiled by a more recent version of the Java Runtime (class file version 55.0), this version of the Java Runtime only recognizes class file versions up to 52.0<br>	at java.lang.ClassLoader.defineClass1(Native Method)<br>	at java.lang.ClassLoader.defineClass(ClassLoader.java:763)<br>	at java.security.SecureClassLoader.defineClass(SecureClassLoader.java:142)<br>	at java.net.URLClassLoader.defineClass(URLClassLoader.java:467)<br>	at java.net.URLClassLoader.access$100(URLClassLoader.java:73)<br>	at java.net.URLClassLoader$1.run(URLClassLoader.java:368)<br>	at java.net.URLClassLoader$1.run(URLClassLoader.java:362)<br>	at java.security.AccessController.doPrivileged(Native Method)<br>	at java.net.URLClassLoader.findClass(URLClassLoader.java:361)<br>	at org.codehaus.plexus.classworlds.realm.ClassRealm.loadClassFromSelf(ClassRealm.java:425)<br>	at org.codehaus.plexus.classworlds.strategy.SelfFirstStrategy.loadClass(SelfFirstStrategy.java:42)<br>	at org.codehaus.plexus.classworlds.realm.ClassRealm.unsynchronizedLoadClass(ClassRealm.java:271)<br>	at org.codehaus.plexus.classworlds.realm.ClassRealm.loadClass(ClassRealm.java:247)<br>	at org.codehaus.plexus.classworlds.realm.ClassRealm.loadClass(ClassRealm.java:239)<br>	at jenkins.maven3.agent.Maven35Main.main(Maven35Main.java:136)<br>	at jenkins.maven3.agent.Maven35Main.main(Maven35Main.java:66)<br>ERROR: ================================================================================<br>ERROR: Invalid project setup: Connection reset<br>ERROR: [JENKINS-18403][JENKINS-28294] JDK &#x27;jdk8&#x27; not supported to run Maven projects.<br>ERROR: Maven projects have to be launched with a Java version greater or equal to the minimum version required by the controller.<br>ERROR: Use the Maven JDK Toolchains (plugin) to build your maven project with an older JDK.<br>ERROR: Retrying with agent Java and setting compile/test properties to point to /var/jenkins_home/gzip/jdk1.8.0_152.<br>ERROR: ================================================================================<br>Established TCP socket on 42399<br>[docker-jenkins-test-pkg-runInDocker] $ /opt/java/openjdk/bin/java -cp /var/jenkins_home/plugins/maven-plugin/WEB-INF/lib/maven35-agent-1.14.jar:/var/jenkins_home/gzip/apache-maven-3.8.1/boot/plexus-classworlds-2.6.0.jar:/var/jenkins_home/gzip/apache-maven-3.8.1/conf/logging jenkins.maven3.agent.Maven35Main /var/jenkins_home/gzip/apache-maven-3.8.1 /var/jenkins_home/war/WEB-INF/lib/remoting-3283.v92c105e0f819.jar /var/jenkins_home/plugins/maven-plugin/WEB-INF/lib/maven35-interceptor-1.14.jar /var/jenkins_home/plugins/maven-plugin/WEB-INF/lib/maven3-interceptor-commons-1.14.jar 42399<br>&lt;===[JENKINS REMOTING CAPACITY]===&gt;���channel started<br>Executing Maven:  -B -f /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/pom.xml clean package -Dmaven.test.skip=true<br>[INFO] Scanning for projects...<br>[INFO] <br>[INFO] ------------------&lt; org.example:docker-jenkins-test &gt;-------------------<br>[INFO] Building docker-jenkins-test 1.0-SNAPSHOT<br>[INFO] --------------------------------[ jar ]---------------------------------<br>[INFO] <br>[INFO] --- maven-clean-plugin:3.1.0:clean (default-clean) @ docker-jenkins-test ---<br>[INFO] Deleting /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/target<br>[INFO] <br>[INFO] --- maven-resources-plugin:3.2.0:resources (default-resources) @ docker-jenkins-test ---<br>[INFO] Using &#x27;UTF-8&#x27; encoding to copy filtered resources.<br>[INFO] Using &#x27;UTF-8&#x27; encoding to copy filtered properties files.<br>[INFO] skip non existing resourceDirectory /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/src/main/resources<br>[INFO] skip non existing resourceDirectory /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/src/main/resources<br>[INFO] <br>[INFO] --- maven-compiler-plugin:3.8.1:compile (default-compile) @ docker-jenkins-test ---<br>[INFO] Changes detected - recompiling the module!<br>[INFO] Compiling 2 source files to /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/target/classes<br>[INFO] <br>[INFO] --- maven-resources-plugin:3.2.0:testResources (default-testResources) @ docker-jenkins-test ---<br>[INFO] Not copying test resources<br>[INFO] <br>[INFO] --- maven-compiler-plugin:3.8.1:testCompile (default-testCompile) @ docker-jenkins-test ---<br>[INFO] Not compiling test sources<br>[INFO] <br>[INFO] --- maven-surefire-plugin:2.22.2:test (default-test) @ docker-jenkins-test ---<br>[INFO] Tests are skipped.<br>[INFO] <br>[INFO] --- maven-jar-plugin:3.2.0:jar (default-jar) @ docker-jenkins-test ---<br>[INFO] Building jar: /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/target/docker-jenkins-test-1.0-SNAPSHOT.jar<br>[INFO] <br>[INFO] --- spring-boot-maven-plugin:2.5.6:repackage (repackage) @ docker-jenkins-test ---<br>[INFO] Replacing main artifact with repackaged archive<br>[INFO] ------------------------------------------------------------------------<br>[INFO] BUILD SUCCESS<br>[INFO] ------------------------------------------------------------------------<br>[INFO] Total time:  55.754 s<br>[INFO] Finished at: 2025-02-12T23:57:02+08:00<br>[INFO] ------------------------------------------------------------------------<br>Waiting for Jenkins to finish collecting data<br>[JENKINS] Archiving /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/pom.xml to org.example/docker-jenkins-test/1.0-SNAPSHOT/docker-jenkins-test-1.0-SNAPSHOT.pom<br>[JENKINS] Archiving /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker/target/docker-jenkins-test-1.0-SNAPSHOT.jar to org.example/docker-jenkins-test/1.0-SNAPSHOT/docker-jenkins-test-1.0-SNAPSHOT.jar<br>[docker-jenkins-test-pkg-runInDocker] $ /bin/sh -xe /tmp/jenkins5156680462021271743.sh<br>channel stopped<br>+ cd /var/jenkins_home/workspace/docker-jenkins-test-pkg-runInDocker<br>+ ls -l Dockerfile<br>-rw-r--r--. 1 root root 120 Feb  9 23:21 Dockerfile<br>+ ls -l target/docker-jenkins-test-1.0-SNAPSHOT.jar<br>-rw-r--r--. 1 root root 17490950 Feb 12 23:56 target/docker-jenkins-test-1.0-SNAPSHOT.jar<br>+ find target -name *.jar<br>+ echo JAR 包路径: target/docker-jenkins-test-1.0-SNAPSHOT.jar<br>JAR 包路径: target/docker-jenkins-test-1.0-SNAPSHOT.jar<br>+ docker build -t docker-jenkins-test-pkg-runindocker:latest .<br>DEPRECATED: The legacy builder is deprecated and will be removed in a future release.<br>            Install the buildx component to build images with BuildKit:<br>            https://docs.docker.com/go/buildx/<br><br>Sending build context to Docker daemon  17.63MB<br><br>Step 1/5 : FROM openjdk:8<br> ---&gt; b273004037cc<br>Step 2/5 : COPY target/*.jar /app.jar<br> ---&gt; d8d778b1aa35<br>Step 3/5 : CMD [&quot;--server.port=8080&quot;]<br> ---&gt; Running in d1f198c573e4<br> ---&gt; Removed intermediate container d1f198c573e4<br> ---&gt; 30daec3524db<br>Step 4/5 : EXPOSE 8080<br> ---&gt; Running in 720318661c76<br> ---&gt; Removed intermediate container 720318661c76<br> ---&gt; 86fb695a5c0c<br>Step 5/5 : ENTRYPOINT [&quot;java&quot;,&quot;-jar&quot;,&quot;/app.jar&quot;]<br> ---&gt; Running in dd1f1629bc7a<br> ---&gt; Removed intermediate container dd1f1629bc7a<br> ---&gt; 88bb368191f9<br>Successfully built 88bb368191f9<br>Successfully tagged docker-jenkins-test-pkg-runindocker:latest<br>+ docker stop docker-jenkins-test-pkg-runindocker<br>docker-jenkins-test-pkg-runindocker<br>+ docker rm docker-jenkins-test-pkg-runindocker<br>docker-jenkins-test-pkg-runindocker<br>+ docker run -d -p 18080:8080 --name docker-jenkins-test-pkg-runindocker docker-jenkins-test-pkg-runindocker:latest<br>b983b6731e7c15730605d53681235195bbbb45be4c9bb11d5e74f21743763359<br>Finished: SUCCESS<br></code></pre></td></tr></table></figure>
+
+<p>3、部署成功</p>
+<p><img src="/images/docker-jenkins%E9%83%A8%E7%BD%B2/image-20250213000630844.png" alt="image-20250213000630844"></p>
+]]></content>
+      <categories>
+        <category>jenkins</category>
+      </categories>
+      <tags>
+        <tag>docker</tag>
+        <tag>jenkins</tag>
+        <tag>CICD</tag>
       </tags>
   </entry>
 </search>
