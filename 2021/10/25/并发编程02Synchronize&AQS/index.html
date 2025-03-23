@@ -35,14 +35,14 @@
 <meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024231911266.png">
 <meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024232528178.png">
 <meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024234942906.png">
-<meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/synchronized%E9%94%81%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%8D%87%E7%BA%A7%E8%BF%87%E7%A8%8B-1635176427187.png">
+<meta property="og:image" content="http://example.com/2021/10/25/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/synchronized%E9%94%81%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%8D%87%E7%BA%A7%E8%BF%87%E7%A8%8B.png">
 <meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/JVM%E9%94%81%E7%9A%84%E8%86%A8%E8%83%80%E5%8D%87%E7%BA%A7.jpg">
 <meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20210907225841711.png">
 <meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20210927235446858.png">
 <meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20210928000406955.png">
 <meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20210928233525697.png">
 <meta property="article:published_time" content="2021-10-25T13:00:00.000Z">
-<meta property="article:modified_time" content="2024-04-05T13:42:08.479Z">
+<meta property="article:modified_time" content="2025-03-09T15:24:57.144Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="并发编程">
 <meta property="article:tag" content="Synchronized">
@@ -237,7 +237,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-04-05 21:42:08" itemprop="dateModified" datetime="2024-04-05T21:42:08+08:00">2024-04-05</time>
+                <time title="修改时间：2025-03-09 23:24:57" itemprop="dateModified" datetime="2025-03-09T23:24:57+08:00">2025-03-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -294,7 +294,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Test</span> </span>&#123;<br>    StringBuffer stb = <span class="hljs-keyword">new</span> StringBuffer();<br><br>		<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">test1</span><span class="hljs-params">()</span></span>&#123;<br>        <span class="hljs-comment">//jvm的优化，锁的粗化</span><br>        stb.append(<span class="hljs-string">&quot;1&quot;</span>);<br><br>        stb.append(<span class="hljs-string">&quot;2&quot;</span>);<br><br>        stb.append(<span class="hljs-string">&quot;3&quot;</span>);<br><br>        stb.append(<span class="hljs-string">&quot;4&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 锁的消除</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">test2</span><span class="hljs-params">()</span></span>&#123;<br>        <span class="hljs-comment">//jvm的优化，JVM不会对同步块进行加锁</span><br>        <span class="hljs-comment">//因为 new Object()这种匿名对象不会被别的线程使用到</span><br>        <span class="hljs-keyword">synchronized</span> (<span class="hljs-keyword">new</span> Object()) &#123;<br>            <span class="hljs-comment">//伪代码：很多逻辑</span><br>            <span class="hljs-comment">//jvm是否会加锁？</span><br>            <span class="hljs-comment">//jvm会进行逃逸分析</span><br>        &#125;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        Test test = <span class="hljs-keyword">new</span> Test();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <h4 id="JVM内置锁的优化升级过程"><a href="#JVM内置锁的优化升级过程" class="headerlink" title="JVM内置锁的优化升级过程"></a>JVM内置锁的优化升级过程</h4><p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024234942906.png" alt="image-20211024234942906"></p>
-<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/synchronized%E9%94%81%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%8D%87%E7%BA%A7%E8%BF%87%E7%A8%8B-1635176427187.png"></p>
+<p><img src="images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/synchronized%E9%94%81%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%8D%87%E7%BA%A7%E8%BF%87%E7%A8%8B.png"></p>
 <p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/JVM%E9%94%81%E7%9A%84%E8%86%A8%E8%83%80%E5%8D%87%E7%BA%A7.jpg"></p>
 <h4 id="偏向锁"><a href="#偏向锁" class="headerlink" title="偏向锁"></a>偏向锁</h4><p><strong>偏向锁，它会偏向于第一个访问锁的线程</strong></p>
 <ul>

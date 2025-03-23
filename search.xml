@@ -1929,7 +1929,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Test</span> </span>&#123;<br>    StringBuffer stb = <span class="hljs-keyword">new</span> StringBuffer();<br><br>		<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">test1</span><span class="hljs-params">()</span></span>&#123;<br>        <span class="hljs-comment">//jvm的优化，锁的粗化</span><br>        stb.append(<span class="hljs-string">&quot;1&quot;</span>);<br><br>        stb.append(<span class="hljs-string">&quot;2&quot;</span>);<br><br>        stb.append(<span class="hljs-string">&quot;3&quot;</span>);<br><br>        stb.append(<span class="hljs-string">&quot;4&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 锁的消除</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">test2</span><span class="hljs-params">()</span></span>&#123;<br>        <span class="hljs-comment">//jvm的优化，JVM不会对同步块进行加锁</span><br>        <span class="hljs-comment">//因为 new Object()这种匿名对象不会被别的线程使用到</span><br>        <span class="hljs-keyword">synchronized</span> (<span class="hljs-keyword">new</span> Object()) &#123;<br>            <span class="hljs-comment">//伪代码：很多逻辑</span><br>            <span class="hljs-comment">//jvm是否会加锁？</span><br>            <span class="hljs-comment">//jvm会进行逃逸分析</span><br>        &#125;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        Test test = <span class="hljs-keyword">new</span> Test();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <h4 id="JVM内置锁的优化升级过程"><a href="#JVM内置锁的优化升级过程" class="headerlink" title="JVM内置锁的优化升级过程"></a>JVM内置锁的优化升级过程</h4><p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/image-20211024234942906.png" alt="image-20211024234942906"></p>
-<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/synchronized%E9%94%81%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%8D%87%E7%BA%A7%E8%BF%87%E7%A8%8B-1635176427187.png"></p>
+<p><img src="images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/synchronized%E9%94%81%E5%AE%9E%E7%8E%B0%E4%B8%8E%E5%8D%87%E7%BA%A7%E8%BF%87%E7%A8%8B.png"></p>
 <p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02Synchronize&AQS/JVM%E9%94%81%E7%9A%84%E8%86%A8%E8%83%80%E5%8D%87%E7%BA%A7.jpg"></p>
 <h4 id="偏向锁"><a href="#偏向锁" class="headerlink" title="偏向锁"></a>偏向锁</h4><p><strong>偏向锁，它会偏向于第一个访问锁的线程</strong></p>
 <ul>
@@ -4176,10 +4176,11 @@
 <li><strong>一致性Hash</strong>(consistenthash ):相同的参数总是发到同一台机器</li>
 </ol>
 <p>为避免热点问题，一致性哈希使用虚拟节点，增大节点数量，根据指定的参数的hash的结果分散在0-2 31-1 之间</p>
-<figure class="highlight delphi"><table><tr><td class="code"><pre><code class="hljs delphi">一致性哈希（Consistent Hashing）是一种在分布式系统中用于负载均衡的技术。它的主要目标是在动态添加或删除服务器时，最小化已经存在的键-值对与服务器之间的映射关系的变化。<br><br>在传统的哈希表中，键通过哈希函数映射到一组固定的桶中，每个桶对应一个特定的服务器或节点。但是，在动态环境中，当节点数量发生变化时，这种静态的映射可能会导致大量的数据迁移，影响系统性能。<br><br>一致性哈希通过引入虚拟节点（<span class="hljs-keyword">Virtual</span> Nodes）和一种特殊的哈希函数来解决这个问题。具体来说，一致性哈希将哈希空间映射到一个环上，每个服务器或节点在环上对应一个位置。虚拟节点是对实际节点的多次复制，每个节点对应多个虚拟节点，它们也均匀地分布在环上。<br><br>当需要存储或检索数据时，首先将数据的键哈希到环上的一个位置，然后沿着环顺时针查找，直到找到第一个不小于该位置的节点，这个节点就是负责处理这个键的节点。这样做的好处是，当节点被添加或删除时，只有部分数据会受到影响，大部分数据仍然映射到原来的节点上，从而减少了数据迁移的开销。<br><br>一致性哈希在构建分布式缓存、分布式数据库等系统时广泛应用，能够提高系统的可扩展性和容错性。<br></code></pre></td></tr></table></figure>
-
-
-
+<p>​    一致性哈希（Consistent Hashing）是一种在分布式系统中用于负载均衡的技术。它的主要目标是在动态添加或删除服务器时，最小化已经存在的键-值对与服务器之间的映射关系的变化。</p>
+<p>在传统的哈希表中，键通过哈希函数映射到一组固定的桶中，每个桶对应一个特定的服务器或节点。但是，在动态环境中，当节点数量发生变化时，这种静态的映射可能会导致大量的数据迁移，影响系统性能。</p>
+<p>​    一致性哈希通过引入虚拟节点（Virtual Nodes）和一种特殊的哈希函数来解决这个问题。具体来说，一致性哈希将哈希空间映射到一个环上，每个服务器或节点在环上对应一个位置。虚拟节点是对实际节点的多次复制，每个节点对应多个虚拟节点，它们也均匀地分布在环上。</p>
+<p>​    当需要存储或检索数据时，首先将数据的键哈希到环上的一个位置，然后沿着环顺时针查找，直到找到第一个不小于该位置的节点，这个节点就是负责处理这个键的节点。这样做的好处是，当节点被添加或删除时，只有部分数据会受到影响，大部分数据仍然映射到原来的节点上，从而减少了数据迁移的开销。</p>
+<p>​    一致性哈希在构建分布式缓存、分布式数据库等系统时广泛应用，能够提高系统的可扩展性和容错性。</p>
 <img src="/images/分布式-Dubbo01-认识分布式/image-20220728222535490.png" alt="image-20220728222535490" style="zoom:50%;">
 
 <p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-Dubbo01-%E8%AE%A4%E8%AF%86%E5%88%86%E5%B8%83%E5%BC%8F/image-20220728222812973.png" alt="image-20220728222812973"></p>
@@ -4229,10 +4230,10 @@
 <p><strong>bingding</strong>: 绑定 exchange 与queue的虚拟连接,bingding中可以包含route_key </p>
 <p><strong>route_key</strong> 路由key ，他的作用是在交换机上通过route_key来把消息路由到哪个队列上 </p>
 <p><strong>queue</strong>：队列，用于来保存消息的载体，有消费者监听，然后消费消息</p>
-<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-rabbitMQ01/image-20220513080448800.png" alt="image-20220513080448800"></p>
-<h3 id="4、RabbitMQ的整体架构模型"><a href="#4、RabbitMQ的整体架构模型" class="headerlink" title="4、RabbitMQ的整体架构模型"></a>4、RabbitMQ的整体架构模型</h3><img src="/images/分布式-MQ-rabbitMQ01/image-20220513081348810.png" alt="image-20220513081348810" style="zoom:50%;">
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-01RabbitMQ%E5%AE%89%E8%A3%85%E4%BB%A5%E5%8F%8A%E5%85%A5%E9%97%A8/image-20220513080448800.png" alt="image-20220513080448800"></p>
+<h3 id="4、RabbitMQ的整体架构模型"><a href="#4、RabbitMQ的整体架构模型" class="headerlink" title="4、RabbitMQ的整体架构模型"></a>4、RabbitMQ的整体架构模型</h3><img src="/images/分布式-MQ-01RabbitMQ安装以及入门/image-20220513081348810.png" alt="image-20220513081348810" style="zoom:50%;">
 
-<h3 id="5、RabbitMQ的消息是如何流转的"><a href="#5、RabbitMQ的消息是如何流转的" class="headerlink" title="5、RabbitMQ的消息是如何流转的"></a>5、RabbitMQ的消息是如何流转的</h3><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-rabbitMQ01/image-20220513081427272.png" alt="image-20220513081427272"></p>
+<h3 id="5、RabbitMQ的消息是如何流转的"><a href="#5、RabbitMQ的消息是如何流转的" class="headerlink" title="5、RabbitMQ的消息是如何流转的"></a>5、RabbitMQ的消息是如何流转的</h3><p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-01RabbitMQ%E5%AE%89%E8%A3%85%E4%BB%A5%E5%8F%8A%E5%85%A5%E9%97%A8/image-20220513081427272.png" alt="image-20220513081427272"></p>
 <h3 id="6、RabbitMQ、RabbitMQ、Kafka比较"><a href="#6、RabbitMQ、RabbitMQ、Kafka比较" class="headerlink" title="6、RabbitMQ、RabbitMQ、Kafka比较"></a>6、RabbitMQ、RabbitMQ、Kafka比较</h3><table>
 <thead>
 <tr>
@@ -4291,7 +4292,7 @@
 <td>优点：支持事务消息<br>缺点：生态不完善，图形化界面不友好、只支持java</td>
 </tr>
 </tbody></table>
-<p>![](images/分布式-MQ-01RabbitMQ安装以及入门/MQ对比：Kafka VS Rocketmq VS Rabbitmq_00.png)</p>
+<p>![](/images/分布式-MQ-01RabbitMQ安装以及入门/MQ对比：Kafka VS Rocketmq VS Rabbitmq_00.png)</p>
 <h2 id="RabbitMQ安装与启动"><a href="#RabbitMQ安装与启动" class="headerlink" title="RabbitMQ安装与启动"></a>RabbitMQ安装与启动</h2><p><strong>①</strong>:<strong>安装</strong>rabbitmq<strong>所需要的依赖包</strong> </p>
 <p>yum install build-essential openssl openssl-devel unixODBC unixODBC-devel make gcc gcc- </p>
 <p>c++ kernel-devel m4 ncurses-devel tk tc xz </p>
@@ -4308,7 +4309,7 @@
 <p><strong>④</strong>:<strong>修改集群用户与连接心跳检测</strong> </p>
 <p><strong>注意修改</strong>vim /usr/lib/rabbitmq/lib/rabbitmq_server-3.6.5/ebin/rabbit.app<strong>文件</strong> </p>
 <p>修改：loopback_users 中的 &lt;&lt;”guest”&gt;&gt;,只保留guest（不修改只能通过localhost访问）</p>
-<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-rabbitMQ01/image-20220514124004407.png" alt="image-20220514124004407"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-01RabbitMQ%E5%AE%89%E8%A3%85%E4%BB%A5%E5%8F%8A%E5%85%A5%E9%97%A8/image-20220514124004407.png" alt="image-20220514124004407"></p>
 <p>5、下载延时组件</p>
 <p>wget <a href="https://dl.bintray.com/rabbitmq/community-plugins/3.6.x/rabbitmq_delayed_message_exchange/rabbitmq_delayed_message_exchange-20171215-3.6.x.zip">https://dl.bintray.com/rabbitmq/community-plugins/3.6.x/rabbitmq_delayed_message_exchange/rabbitmq_delayed_message_exchange-20171215-3.6.x.zip</a></p>
 <p>解压延时插件:  unzip  </p>
@@ -4326,7 +4327,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RabbitmqConsumer</span> </span>&#123;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> IOException, InterruptedException, TimeoutException </span>&#123;<br>        <span class="hljs-comment">//创建连接工厂</span><br>        ConnectionFactory connectionFactory  = <span class="hljs-keyword">new</span> ConnectionFactory();<br>        connectionFactory.setHost(<span class="hljs-string">&quot;192.168.136.1&quot;</span>);<br>        connectionFactory.setPort(<span class="hljs-number">5672</span>);<br>        connectionFactory.setVirtualHost(<span class="hljs-string">&quot;/&quot;</span>);<br>        connectionFactory.setUsername(<span class="hljs-string">&quot;guest&quot;</span>);<br>        connectionFactory.setPassword(<span class="hljs-string">&quot;guest&quot;</span>);<br><br>        <span class="hljs-comment">//创建连接</span><br>        Connection connection = connectionFactory.newConnection();<br><br>        <span class="hljs-comment">//创建一个channel</span><br>        Channel channel = connection.createChannel();<br><br>        <span class="hljs-comment">//声明队列</span><br>        String queueName = <span class="hljs-string">&quot;test-queue-01&quot;</span>;<br>        <span class="hljs-comment">/**</span><br><span class="hljs-comment">         * queue:队列的名称</span><br><span class="hljs-comment">         * durable:是否持久化, 队列的声明默认是存放到内存中的，如果rabbitmq重启会丢失，如果想重启之后还存在就要使队列持久化，</span><br><span class="hljs-comment">         * 保存到Erlang自带的Mnesia数据库中，当rabbitmq重启之后会读取该数据库</span><br><span class="hljs-comment">         * exclusive:当连接关闭时connection.close()该队列是否会自动删除；</span><br><span class="hljs-comment">         * 二：该队列是否是私有的private，如果不是排外的，可以使用两个消费者都访问同一个队列，</span><br><span class="hljs-comment">         * 没有任何问题，如果是排外的，会对当前队列加锁，其他通道channel是不能访问的，如果强制访问会报异常</span><br><span class="hljs-comment">         * com.rabbitmq.client.ShutdownSignalException: channel error; protocol method: #method&lt;channel.close&gt;(reply-code=405, reply-text=RESOURCE_LOCKED - cannot obtain exclusive access to locked queue &#x27;queue_name&#x27; in vhost &#x27;/&#x27;, class-id=50, method-id=20)</span><br><span class="hljs-comment">         * 一般等于true的话用于一个队列只能有一个消费者来消费的场景</span><br><span class="hljs-comment">         * autodelete:是否自动删除，当最后一个消费者断开连接之后队列是否自动被删除，可以通过RabbitMQ Management，</span><br><span class="hljs-comment">         * 查看某个队列的消费者数量，当consumers = 0时队列就会自动删除</span><br><span class="hljs-comment">         */</span><br>        channel.queueDeclare(queueName,<span class="hljs-keyword">true</span>,<span class="hljs-keyword">false</span>,<span class="hljs-keyword">false</span>,<span class="hljs-keyword">null</span>);<br><br>        <span class="hljs-comment">//创建消费者</span><br>        QueueingConsumer queueingConsumer = <span class="hljs-keyword">new</span> QueueingConsumer(channel);<br>        channel.basicConsume(queueName,<span class="hljs-keyword">true</span>,queueingConsumer);<br><br>        <span class="hljs-keyword">while</span> (<span class="hljs-keyword">true</span>) &#123;<br>            QueueingConsumer.Delivery delivery = queueingConsumer.nextDelivery();<br>            String reserveMsg = <span class="hljs-keyword">new</span> String(delivery.getBody());<br>            System.out.println(<span class="hljs-string">&quot;消费消息:&quot;</span>+reserveMsg);<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <h2 id="Rabbitmq交换机详解"><a href="#Rabbitmq交换机详解" class="headerlink" title="Rabbitmq交换机详解"></a>Rabbitmq交换机详解</h2><h3 id="1、作用"><a href="#1、作用" class="headerlink" title="1、作用"></a>1、作用</h3><p>​    接受生产者的消息，然后根据路由键 把消息投递到跟交换机绑定的对应的队列上 </p>
-<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-rabbitMQ01/image-20220514145837082.png" alt="image-20220514145837082"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-01RabbitMQ%E5%AE%89%E8%A3%85%E4%BB%A5%E5%8F%8A%E5%85%A5%E9%97%A8/image-20220514145837082.png" alt="image-20220514145837082"></p>
 <h3 id="2、属性"><a href="#2、属性" class="headerlink" title="2、属性"></a>2、属性</h3><p>Name:交换机的名称 </p>
 <p>Type:交换机的类型,direct,topic,fanout,headers </p>
 <p>Durability:是否需要持久化 </p>
@@ -4334,7 +4335,7 @@
 <p>Internal:当前交换机是否用户rabbitmq内部使用不常用,默认为false </p>
 <p>Argurements:扩展参数,用户扩展AMQP 定制化协议</p>
 <h3 id="3、类型"><a href="#3、类型" class="headerlink" title="3、类型"></a>3、类型</h3><h4 id="直连交换机-directExchange"><a href="#直连交换机-directExchange" class="headerlink" title="直连交换机 directExchange"></a>直连交换机 directExchange</h4><p>所以发送的direct exhchange 的消息都会被投递到与该交换机绑定且routing key = Key 的queue上。</p>
-<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-rabbitMQ01/image-20220514150212644.png" alt="image-20220514150212644"></p>
+<p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-01RabbitMQ%E5%AE%89%E8%A3%85%E4%BB%A5%E5%8F%8A%E5%85%A5%E9%97%A8/image-20220514150212644.png" alt="image-20220514150212644"></p>
 <figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Consumer</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> IOException, TimeoutException, InterruptedException </span>&#123;<br>        Connection connection = ConnectionUtils.getConnection();<br>        Channel channel = connection.createChannel();<br>        <span class="hljs-comment">/**</span><br><span class="hljs-comment">         * 声明一个交换机</span><br><span class="hljs-comment">         * exchange:交换机的名称</span><br><span class="hljs-comment">         * type:交换机的类型 常见的有direct,fanout,topic等</span><br><span class="hljs-comment">         * durable:设置是否持久化。durable设置为true时表示持久化，反之非持久化.持久化可以将交换器存入磁盘，在服务器重启的时候不会丢失相关信息</span><br><span class="hljs-comment">         * autodelete:设置是否自动删除。autoDelete设置为true时，则表示自动删除。自动删除的前提是至少有一个队列或者交换器与这个交换器绑定，之后，所有与这个交换器绑定的队列或者交换器都与此解绑。</span><br><span class="hljs-comment">         * 不能错误的理解—当与此交换器连接的客户端都断开连接时，RabbitMq会自动删除本交换器</span><br><span class="hljs-comment">         * arguments:其它一些结构化的参数，比如：alternate-exchange</span><br><span class="hljs-comment">         */</span><br>        channel.exchangeDeclare(<span class="hljs-string">&quot;directChange&quot;</span>,<span class="hljs-string">&quot;direct&quot;</span>,<span class="hljs-keyword">false</span>,<span class="hljs-keyword">false</span>,<span class="hljs-keyword">null</span>);<br>        String queueName = <span class="hljs-string">&quot;directQueue&quot;</span>;<br><br>        <span class="hljs-comment">/**</span><br><span class="hljs-comment">         * 声明一个队列</span><br><span class="hljs-comment">         * durable:表示rabbitmq关闭删除队列</span><br><span class="hljs-comment">         * autodelete:表示没有程序和队列建立连接 那么就会自动删除队列</span><br><span class="hljs-comment">         *</span><br><span class="hljs-comment">         */</span><br>        channel.queueDeclare(queueName,<span class="hljs-keyword">true</span>,<span class="hljs-keyword">false</span>,<span class="hljs-keyword">false</span>,<span class="hljs-keyword">null</span>);<br><br>        channel.queueBind(queueName,<span class="hljs-string">&quot;directChange&quot;</span>,<span class="hljs-string">&quot;directChange.key&quot;</span>);<br>        channel.queueBind(queueName,<span class="hljs-string">&quot;directChange&quot;</span>,<span class="hljs-string">&quot;directChange.key1&quot;</span>);<br><br>        <span class="hljs-comment">/**</span><br><span class="hljs-comment">         * 创建一个消费者</span><br><span class="hljs-comment">         */</span><br>        QueueingConsumer queueingConsumer = <span class="hljs-keyword">new</span> QueueingConsumer(channel);<br><br>        <span class="hljs-comment">/**</span><br><span class="hljs-comment">         * 开始消费</span><br><span class="hljs-comment">         */</span><br>        channel.basicConsume(queueName,<span class="hljs-keyword">true</span>,queueingConsumer);<br><br>        <span class="hljs-keyword">while</span> (<span class="hljs-keyword">true</span>) &#123;<br>            QueueingConsumer.Delivery delivery = queueingConsumer.nextDelivery();<br>            String reciverMessage = <span class="hljs-keyword">new</span> String(delivery.getBody());<br>            System.out.println(<span class="hljs-string">&quot;消费消息:-----&quot;</span>+reciverMessage);<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Producer</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> IOException, TimeoutException </span>&#123;<br>        Connection connection = ConnectionUtils.getConnection();<br>        Channel channel = connection.createChannel();<br>        <span class="hljs-comment">//定义交换机名称</span><br>        String exchangeName = <span class="hljs-string">&quot;directChange&quot;</span>;<br><br>        <span class="hljs-comment">//定义routingKey</span><br>        String routingKey = <span class="hljs-string">&quot;directChange.key&quot;</span>;<br>        <span class="hljs-comment">//定义routingKey</span><br>        <span class="hljs-comment">//String routingKey = &quot;directChange.key1&quot;;</span><br><br>        <span class="hljs-comment">//消息体内容</span><br>        String messageBody = <span class="hljs-string">&quot;hello handsomeboy &quot;</span>;<br>        channel.basicPublish(exchangeName,routingKey,<span class="hljs-keyword">null</span>,messageBody.getBytes());<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
@@ -4489,7 +4490,44 @@
 <p>1、这种大内存的情况一般都要用G1垃圾收集器，因为年轻代内存比较大，用G1可以设置GC最大停顿时间，不至于一次minor gc就花费太长 时间</p>
 <h3 id="线上问题及优化"><a href="#线上问题及优化" class="headerlink" title="线上问题及优化"></a>线上问题及优化</h3><h4 id="消息丢失情况"><a href="#消息丢失情况" class="headerlink" title="消息丢失情况"></a>消息丢失情况</h4><p><strong>消息发送端：</strong> </p>
 <p>（1）acks=0： 表示producer不需要等待任何broker确认收到消息的回复，就可以继续发送下一条消息。性能最高，但是最容易丢消 息。大数据统计报表场景，对性能要求很高，对数据丢失不敏感的情况可以用这种。 </p>
-<p>（2）acks=1： 至少要等待leader已经成功将数据写入本地log，但是不需要等待所有follower是否成功写入。就可以继续发送下一条消 息。这种情况下，如果follower没有成功备份数据，而此时leader又挂掉，则消息会丢失。 （3）acks=-1或all： 这意味着leader需要等待所有备份(min.insync.replicas配置的备份个数)都成功写入日志，这种策略会保证只要有一 个备份存活就不会丢失数据。这是最强的数据保证。一般除非是金融级别，或跟钱打交道的场景才会使用这种配置。当然如果 min.insync.replicas配置的是1则也可能丢消息，跟acks=1情况类似。 </p>
+<p>（2）acks=1： 至少要等待leader已经成功将数据写入本地log，但是不需要等待所有follower是否成功写入。就可以继续发送下一条消 息。这种情况下，如果follower没有成功备份数据，而此时leader又挂掉，则消息会丢失。 （3）acks=-1或all： 这意味着leader需要等待所有备份(min.insync.replicas配置的备份个数)都成功写入日志，这种策略会保证只要有一 个备份存活就不会丢失数据。这是最强的数据保证。一般除非是金融级别，或跟钱打交道的场景才会使用这种配置。当然如果 min.insync.replicas配置的是1则也可能丢消息，跟acks=1情况类似。</p>
+<p><strong>min.insync.replicas</strong> 该参数是 Broker 端或主题级别的配置，表示 <strong>允许处理 <code>acks=all</code> 请求的最低 ISR 副本数</strong>（默认值为 1），当新的publisher推新消息时，ISR副本数小于<strong>min.insync.replicas</strong>，则直接拒绝写入。</p>
+<p><strong>两者的协同工作流程</strong></p>
+<ol>
+<li><p><strong>写入流程步骤</strong></p>
+<p><strong>步骤 1</strong>：生产者发送消息到 Leader 副本。</p>
+<p><strong>步骤 2</strong> Leader 检查当前 ISR 副本数是否 ≥ min.insync.replicas</p>
+<p>若否，直接拒绝写入，返回错误</p>
+<p>若是，继续等待所有 ISR 副本写入成功</p>
+<p><strong>步骤 3</strong>，所有 ISR 副本写入成功后，Leader 返回成功响应给生产者</p>
+</li>
+<li><p><strong>示例场景</strong></p>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th align="center"><strong>ISR 副本数</strong></th>
+<th align="center"><strong><code>min.insync.replicas</code></strong></th>
+<th align="center"><strong>写入结果</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">3</td>
+<td align="center">2</td>
+<td align="center">需 3 个副本写入成功。</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">2</td>
+<td align="center">需 2 个副本写入成功。</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">2</td>
+<td align="center">拒绝写入（ISR 副本数 &lt; min 值</td>
+</tr>
+</tbody></table>
 <p><strong>消息消费端</strong>：<br>如果消费这边配置的是自动提交，万一消费到数据还没处理完，就自动提交offset了，但是此时你consumer直接宕机了，未处理完的数据 丢失了，下次也消费不到了。</p>
 <p><strong>消息重复消费：</strong></p>
 <p>如果发送端配置了重试机制，kafka不会等之前那条消息完全发送成功才去发送下一条消息，这样可能会出现，发送了1，2，3条消息，第 一条超时了，后面两条发送成功，再重试发送第1条消息，这时消息在broker端的顺序就是2，3，1了 所以，是否一定要配置重试要根据业务情况而定。也可以用同步发送的模式去发消息，当然acks不能设置为0，这样也能保证消息从发送 端到消费端全链路有序。</p>
@@ -6112,6 +6150,7 @@
 <li>超时等待</li>
 </ul>
 <p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/image-20210830152624403.png" alt="image-20210830152624403"></p>
+<p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01JMM&volatile/640.webp" alt="图片"></p>
 <h1 id="并发（多线程）的意义"><a href="#并发（多线程）的意义" class="headerlink" title="并发（多线程）的意义"></a>并发（多线程）的意义</h1><h2 id="并发的作用"><a href="#并发的作用" class="headerlink" title="并发的作用"></a>并发的作用</h2><p><strong>1、充分利用多核CPU的计算能力</strong></p>
 <blockquote>
 <p>​    在单cpu系统中，每一时间点只能有一道程序执行，即微观上这些程序是分时的交替执行，因为分时交替运行的时间是非常短的，只不过给人的感觉是同时运行，在宏观上并发和并行一样都是同时在进行但是在微观上是不一样的。在多个cpu的操作系统中，这些可以并发执行的程序便可以分配到多个处理器（cpu），实现多任务并行执行，就是利用每个处理器来处理一个可以并发执行的程序，这样<strong>多个程序便可以同时执行</strong>。核越多，并行处理的程序越多，可以大大<strong>提高电脑的运行效率</strong>。如果能够合理地使用多线程，将能够缩减复杂应用程序的开发和维护成本，并能提供更好的性能。通过将异步工作流转换为多个序列化工作流，多线程可以更好地对人类的工作和交互方式建模。使用多线程，很多复杂的代码将变得更加直截了当，因此更容易编写、阅读和维护，但是使用多线程也意味着有很大的<strong>风险</strong>。</p>
@@ -8280,6 +8319,42 @@
 <p>5、如果响应时间最重要，并且不能超过1秒，使用并发收集器 </p>
 <p>下图有连线的可以搭配使用，官方推荐使用G1，因为性能高</p>
 <p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9813-JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E8%AF%A6%E8%A7%A3/image-20220311213409341.png" alt="image-20220311213409341"></p>
+<h2 id="G1和ParNew-CMS孰优孰劣？"><a href="#G1和ParNew-CMS孰优孰劣？" class="headerlink" title="G1和ParNew+CMS孰优孰劣？"></a>G1和ParNew+CMS孰优孰劣？</h2><table>
+<thead>
+<tr>
+<th align="center"><strong>场景</strong></th>
+<th align="center"><strong>推荐收集器</strong></th>
+<th align="center"><strong>理由</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><strong>大堆</strong>（&gt;16GB）</td>
+<td align="center">G1</td>
+<td align="center">分区模型优化内存使用，避免碎片化</td>
+</tr>
+<tr>
+<td align="center"><strong>低延迟小堆</strong>（&lt;4GB）</td>
+<td align="center">ParNew + CMS</td>
+<td align="center">并发清除阶段资源占用低，延迟可控</td>
+</tr>
+<tr>
+<td align="center">吞吐量优先</td>
+<td align="center">Parallel Scavenge</td>
+<td align="center">G1 和 CMS 均侧重延迟，Parallel 更适合计算密集型任务</td>
+</tr>
+<tr>
+<td align="center"><strong>兼容旧系统</strong></td>
+<td align="center">ParNew + CMS</td>
+<td align="center">避免参数迁移和稳定性风险</td>
+</tr>
+</tbody></table>
+<h3 id="G1-的局限性"><a href="#G1-的局限性" class="headerlink" title="G1 的局限性"></a><strong>G1 的局限性</strong></h3><ol>
+<li><strong>内存与 CPU 开销</strong><br>G1 的 Remembered Set（便于扫描Region区域的对象是否处于可达路径中，避免全堆扫描）和 Card Table（Region 在逻辑上划分为若干个固定大小（介于128到512字节之间）的连续区域，每个区域称之为卡片 Card） 机制需要额外内存（约 10%-20% 堆大小），且后台线程（如并发标记）可能占用较多 CPU，影响吞吐量</li>
+<li><strong>小堆性能劣势</strong><br>在堆内存小于 4GB 时，G1 的分区管理可能带来额外开销，而 CMS 的简单分代模型更高效</li>
+<li><strong>Full GC 风险</strong><br>G1 的 Full GC 退化为单线程 Serial Old，而 CMS 可通过 <code>-XX:+UseCMSInitiatingOccupancyOnly</code> 调整触发阈值。例如，内存分配过快时，G1 的 Full GC 可能导致更长的停顿。</li>
+</ol>
+<p><img src="/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9813-JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E8%AF%A6%E8%A7%A3/d878a4262ab909c97e43b2ad4a463ecc.png" alt="在这里插入图片描述"></p>
+<p>综上所述，在小堆场景，过度优秀的垃圾收集算法比如G1需要占用更多的内存和CPU算力，反而会拖慢垃圾回收</p>
 ]]></content>
       <categories>
         <category>JVM</category>
@@ -12664,7 +12739,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">majorityElement</span><span class="hljs-params">(<span class="hljs-keyword">int</span>[] nums)</span> </span>&#123;<br>    Map&lt;Integer,Integer&gt; data = <span class="hljs-keyword">new</span> HashMap&lt;&gt;();<br>    <span class="hljs-keyword">int</span> length = nums.length;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; length; i++) &#123;<br>        <span class="hljs-keyword">int</span> times = data.getOrDefault(nums[i], <span class="hljs-number">0</span>) + <span class="hljs-number">1</span>;<br>        data.put(nums[i], times);<br>        <span class="hljs-keyword">if</span>(times &gt; length / <span class="hljs-number">2</span>)&#123;<br>            <span class="hljs-keyword">return</span> nums[i];<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p><strong>摩尔投票法：</strong> 核心理念为<strong>票数正负抵消</strong> 。此方法时间和空间复杂度分别为 O(N) 和 O(1)，为本题的最佳解法。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * https://leetcode.cn/problems/majority-element/?envType=study-plan-v2&amp;envId=top-100-liked</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">majorityElement1</span><span class="hljs-params">(<span class="hljs-keyword">int</span>[] nums)</span> </span>&#123;<br>        <span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>, votes = <span class="hljs-number">0</span>;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> num : nums)&#123;<br>            <span class="hljs-keyword">if</span> (votes == <span class="hljs-number">0</span>) x = num;<br>            votes += num == x ? <span class="hljs-number">1</span> : -<span class="hljs-number">1</span>;<br>        &#125;<br>        <span class="hljs-keyword">return</span> x;<br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 1、遍历数组时，假设vote=0时，认为下一个读到的数X是众数，如果接下来遍历时遇到=x的，则投票加一，否则减1</span><br><span class="hljs-comment"> * 2、当vote重新等于0时，重复第一步，前面的结果打平，不影响后面的投票。就能及时修正x值，全部遍历完后，x=值肯定是真正的众数。</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">majorityElement1</span><span class="hljs-params">(<span class="hljs-keyword">int</span>[] nums)</span> </span>&#123;<br>        <span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>, votes = <span class="hljs-number">0</span>;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> num : nums)&#123;<br>            <span class="hljs-keyword">if</span> (votes == <span class="hljs-number">0</span>) x = num;<br>            votes += num == x ? <span class="hljs-number">1</span> : -<span class="hljs-number">1</span>;<br>        &#125;<br>        <span class="hljs-keyword">return</span> x;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <h2 id="75-颜色分类"><a href="#75-颜色分类" class="headerlink" title="75. 颜色分类"></a><a href="https://leetcode.cn/problems/sort-colors/">75. 颜色分类</a></h2><p><img src="/images/leetcode100-2/image-20240522192824037.png" alt="image-20240522192824037"></p>
 <p>经典的荷兰国旗问题</p>
