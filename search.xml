@@ -339,7 +339,7 @@
 <td>快</td>
 </tr>
 <tr>
-<td></td>
+<td>存储空间</td>
 <td>少</td>
 <td>较大，链表比数组需要额外存储引用</td>
 </tr>
@@ -1939,13 +1939,13 @@ Content Type: application/json
 <li>request.timeout.ms<br>定义：这个配置参数指定了客户端等待Kafka服务端响应的最长时间。如果请求在这个时间内没有收到响应，客户端会重试发送请求（根据重试策略）。<br>影响：设置太短可能导致在正常的负载和轻微网络延迟情况下出现不必要的重试。设置太长，可能在服务端处理出现问题时，导致客户端长时间等待响应，影响客户端处理效率。</li>
 <li>session.timeout.ms<br>定义：这个配置参数用于控制消费者被认为是存活的最小时间间隔。如果在这个时间间隔内，消费者没有向Kafka集群发送心跳，则认为该消费者已经死亡，会从它所在的消费者组中移除。<br>影响：设置太短可能导致在正常的网络波动或者处理较大消息时，消费者被误认为已经死亡。设置太长，当消费者真的失败时，Kafka集群需要更长的时间来检测到这一点，并进行重新平衡，影响消息的及时消费。</li>
 <li>heartbeat.interval.ms<br>定义：这个配置参数指定了消费者发送心跳给Kafka协调者的频率。心跳是用来表明消费者存活的状态、加入和退出消费者组的机制。<br>影响：设置太短会导致消费者发送过多的心跳，增加Kafka集群的负载。设置太长，可能会导致Kafka协调者在session.timeout.ms时间内检测不到消费者的存活状态，导致消费者被误判为已经死亡。</li>
-<li>max.poll.interval.ms<br>定义：这个配置参数指定了消费者在两次调用poll()方法之间的最大时间间隔。如果超过这个时间没有调用poll()，Kafka会认为消费者已经死亡，将其从消费者组中移除，并触发重新平衡。<br>影响：设置太短可能会导致在处理大批量消息、网络延迟或系统负载高的情况下，无法在时间间隔内完成poll()调用。设置太长，就像session.timeout.ms一样，影响故障检测和重新平衡的响应速度。</li>
+<li>max.poll.interval.ms<br> 定义：这个配置参数指定了消费者在两次调用poll()方法之间的最大时间间隔。如果超过这个时间没有调用poll()，Kafka会认为消费者已经死亡，将其从消费者组中移除，并触发重新平衡。<br> 影响：设置太短可能会导致在处理大批量消息、网络延迟或系统负载高的情况下，无法在时间间隔内完成poll()调用。设置太长，就像session.timeout.ms一样，影响故障检测和重新平衡的响应速度。</li>
 </ol>
 <p><strong>结论</strong></p>
 <p>​    这些配置参数之间的关系非常密切，需要根据实际使用场景和Kafka集群的性能来合理设置。session.timeout.ms、heartbeat.interval.ms和max.poll.interval.ms特别关系到消费者的健康检测和消费者组的稳定性。request.timeout.ms更多的影响到客户端与服务端之间通信的效率和稳定性。合理配置这些参数可帮助保证Kafka消费者服务的高可用性和消息的及时处理。</p>
 <h2 id="9、kafka生产者发送消息的同步机制"><a href="#9、kafka生产者发送消息的同步机制" class="headerlink" title="9、kafka生产者发送消息的同步机制"></a>9、kafka生产者发送消息的同步机制</h2><p>（1）acks=0： 表示producer不需要等待任何broker确认收到消息的回复，就可以继续发送下一条消息。性能最高，但是最容易丢消 息。大数据统计报表场景，对性能要求很高，对数据丢失不敏感的情况可以用这种。</p>
 <p>（2）acks=1： 至少要等待leader已经成功将数据写入本地log，但是不需要等待所有follower是否成功写入。就可以继续发送下一条消 息。这种情况下，如果follower没有成功备份数据，而此时leader又挂掉，则消息会丢失。 </p>
-<p>（3）acks=-1或all： 这意味着leader需要等待所有备份(min.insync.replicas配置的备份个数)都成功写入日志，这种策略会保证只要有一 个备份存活就不会丢失数据。这是最强的数据保证。一般除非是金融级别，或跟钱打交道的场景才会使用这种配置。当然如果 min.insync.replicas配置的是1则也可能丢消息，跟acks=1情况类似。</p>
+<p>（3）acks=-1或all： 生产者需要等待 <strong>所有当前 ISR（同步副本）中的副本成功写入消息</strong>，而 ISR 的数量必须 **至少等于 <code>min.insync.replicas</code>**。这种策略会保证只要有一个备份存活就不会丢失数据。这是最强的数据保证。一般除非是金融级别，或跟钱打交道的场景才会使用这种配置。当然如果 min.insync.replicas配置的是1则也可能丢消息，跟acks=1情况类似。</p>
 <p>在分区存在副本的情况下，使用leader-follower，leader负责读写请求，follower从分区leader那复制数据</p>
 <figure class="highlight txt"><table><tr><td class="code"><pre><code class="hljs txt">（1）、在分区存在副本的情况下，使用leader-follower，leader负责读写请求，follower从分区leader那复制数据<br>（2）、复制数据时：leader接收到写请求，写入到本地日志，紧接着folloer从leader获取数据并将其写入到自己的日志。<br>（3）、一旦超过Kafka Broker端的配置min.insync.replicas数量的ISR副本都成功复制了数据，leader则认为数据已被成功复制。<br>（4）、Kafka设计了复制延迟的容忍机制，如果Follower与Leader之间的复制延迟超过配置的阈值，则Follower会被认为是落后的，并可能从ISR列表中移除。<br></code></pre></td></tr></table></figure>
 
@@ -1954,7 +1954,7 @@ Content Type: application/json
 <p>结论：kafka通过分区来提升并发度，利用分区副本和leader-follower+ISR来保障高可用性和一致性。</p>
 <h2 id="11、Kafka消费发布流程"><a href="#11、Kafka消费发布流程" class="headerlink" title="11、Kafka消费发布流程"></a>11、Kafka消费发布流程</h2><p>1、producer先根据路由规则，把消息发送到指定partition的leader<br>2、leader将消息写入本地log<br>3、folloer从leader pull消息，写入本地log后leader发送ack<br>4、leader接受到一定数量的ISR中的分区副本的ack后，增加HW（hight watermark，最后后一条commit的offset ），并向producer发送ack</p>
 <p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-MQ-06Kafka%E7%89%B9%E6%80%A7%E8%AF%A6%E8%A7%A3&%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D(%E4%BA%8C)/image-20240615230628783.png" alt="image-20240615230628783"></p>
-<h2 id="12、消息丢失"><a href="#12、消息丢失" class="headerlink" title="12、消息丢失"></a>12、消息丢失</h2><p>1、生产者-&gt;server：设置重试，重试间隔，设置ack=alls(实际采用ISR机制)，如果额外设置min.insync.replicas，则要求ISR中至少多少个副本成功写入<br>2、消费者：手动提交+消费完再提交</p>
+<h2 id="12、消息丢失"><a href="#12、消息丢失" class="headerlink" title="12、消息丢失"></a>12、消息丢失</h2><p>1、生产者-&gt;server：设置重试，重试间隔，设置ack=alls(实际采用ISR机制)<br>2、消费者：手动提交+消费完再提交</p>
 <h2 id="13、消息重复消费"><a href="#13、消息重复消费" class="headerlink" title="13、消息重复消费"></a>13、消息重复消费</h2><p>1、生产者重复投递-消费者支持幂等<br>2、消费超时等失败场景导致重复投递：加快单条消费速度+适当调整max.poll.interval.ms和调小max.poll.records，避免消费太多无法及时poll从而触发rebalance。一般而言max.poll.interval.ms &gt; session.timeout.ms</p>
 <h2 id="14、消息积压"><a href="#14、消息积压" class="headerlink" title="14、消息积压"></a>14、消息积压</h2><p>1、增加分区，增加消费者数量<br>2、分析堆积原因，通过设置消费偏移量解决<br>3、kafka不适合长任务，避免引起重平衡，长耗时任务丢给异步任务处理<br>4、1个分区时，临时调整，根据需要开多个消费组处理特定逻辑<br>5、临时增加消息保留时间<br>6、评估多个分区，局部有序的方案</p>
 <h2 id="15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量"><a href="#15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量" class="headerlink" title="15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量"></a>15、Kafka相较于其他平台比如RabbitMQ的优势，为什么支持大数据量</h2><p><strong>优点：</strong></p>
@@ -13076,7 +13076,7 @@ Content Type: application/json
 <p><strong>2、跨数据库实例产生分布式事务</strong></p>
 <img src="/images/分布式-分布式事务01/164d67e0c6026ac4_tplv-t2oaga2asx-zoom-in-crop-mark_3024_0_0_0.awebp" alt="img" style="zoom: 80%;">
 
-<h2 id="分布式事务的基础"><a href="#分布式事务的基础" class="headerlink" title="分布式事务的基础"></a>分布式事务的基础</h2><p>​    分布式系统之所以叫分布式，是因 为提供服务的各个节点分布在不同机器上，相互之间通过网络交互。不能因为有一点网络问题就导致整个系统无法 提供服务，网络因素成为了分布式事务的考量标准之一。因此，分布式事务需要更进一步的理论支持。</p>
+<h2 id="分布式事务的基础"><a href="#分布式事务的基础" class="headerlink" title="分布式事务的基础"></a>分布式事务的基础</h2><p>​    分布式系统之所以叫分布式，是因为提供服务的各个节点分布在不同机器上，相互之间通过网络交互。不能因为有一点网络问题就导致整个系统无法提供服务，网络因素成为了分布式事务的考量标准之一。因此，分布式事务需要更进一步的理论支持。</p>
 <h3 id="CAP"><a href="#CAP" class="headerlink" title="CAP"></a>CAP</h3><p>CAP(定理，又被叫作布鲁尔定理。对于设计分布式系统来说(不仅仅是分布式事务)的架构师来说，CAP就是入门理论。</p>
 <p><img src="/images/%E5%88%86%E5%B8%83%E5%BC%8F-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A101/image-20230317090206074.png" alt="image-20230317090206074"></p>
 <h4 id="C-Consistency-一致性"><a href="#C-Consistency-一致性" class="headerlink" title="C - Consistency-一致性"></a>C - Consistency-一致性</h4><p>​    一致性是指写操作后的读操作可以读取到最新的数据状态，当数据分布在多个节点上，从任意结点读取到的数据都是最新的状态。对于数据分布在不同节点上的数据上来说，如果在某个节点更新了数据，那么在其他节点如果都能读取到这个最新的数据，那么就称为强一致，如果有某个节点没有读取到，那就是分布式不一致。</p>
