@@ -616,7 +616,9 @@ CSI 规范定义了存储提供商实现 CSI 兼容的 Volume Plugin 的最小�
 <p>​    Role 是一组权限的集合，例如 Role 可以包含列出 Pod 权限及列出 Deployment 权限，Role 用于给某个 Namespace 中的资源进行鉴权。</p>
 <p>RoleBinding</p>
 <p>​    RoleBinding将Subject 绑定到 Role，RoleBinding 使规则在命名空间内生效。</p>
-<h4 id="资源清单"><a href="#资源清单" class="headerlink" title="资源清单"></a>资源清单</h4><h3 id="对象规约和状态"><a href="#对象规约和状态" class="headerlink" title="对象规约和状态"></a>对象规约和状态</h3><h4 id="规约（Spec）"><a href="#规约（Spec）" class="headerlink" title="规约（Spec）"></a>规约（Spec）</h4><h4 id="状态-Status"><a href="#状态-Status" class="headerlink" title="状态(Status)"></a>状态(Status)</h4>]]></content>
+<h4 id="资源清单"><a href="#资源清单" class="headerlink" title="资源清单"></a>资源清单</h4><h3 id="对象规约和状态"><a href="#对象规约和状态" class="headerlink" title="对象规约和状态"></a>对象规约和状态</h3><h4 id="规约（Spec）"><a href="#规约（Spec）" class="headerlink" title="规约（Spec）"></a>规约（Spec）</h4><h4 id="状态-Status"><a href="#状态-Status" class="headerlink" title="状态(Status)"></a>状态(Status)</h4><h1 id="DevOps"><a href="#DevOps" class="headerlink" title="DevOps"></a>DevOps</h1><p><img src="images/K8S%E7%AE%80%E4%BB%8B%E5%8F%8A%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/image-20250330220009904.png" alt="image-20250330220009904"></p>
+<p><img src="images/K8S%E7%AE%80%E4%BB%8B%E5%8F%8A%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D/image-20250330220301196.png" alt="image-20250330220301196"></p>
+]]></content>
       <categories>
         <category>docker</category>
       </categories>
@@ -2116,7 +2118,7 @@ Content Type: application/json
 <h2 id="分布式锁总结"><a href="#分布式锁总结" class="headerlink" title="分布式锁总结"></a>分布式锁总结</h2><p>在目前分布式锁实现方案中，比较成熟、主流的方案有两种：</p>
 <p>（1）基于Redis的分布式锁：适合并发量高，性能要求很高，对数据一致性要求较低，允许最终一致性的场景</p>
 <p>（2）基于ZooKeeper的分布式锁：适合对数据一致性要求较高且并发量较低的场景</p>
-]]></content>
+<h1 id="基于jedis实现分布式锁"><a href="#基于jedis实现分布式锁" class="headerlink" title="基于jedis实现分布式锁"></a>基于jedis实现分布式锁</h1>]]></content>
       <categories>
         <category>Redis</category>
       </categories>
@@ -14303,6 +14305,31 @@ Content Type: application/json
       </categories>
       <tags>
         <tag>设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ES(ElasticSearch)-RestfulAPI</title>
+    <url>/2025/06/05/ES(ElasticSearch)-RestfulAPI%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<h1 id="Restful-API使用"><a href="#Restful-API使用" class="headerlink" title="Restful-API使用"></a>Restful-API使用</h1><blockquote>
+<p>接口文档可参考上一边ES文章8.x版本的文档，下文都以8.x语法为例</p>
+</blockquote>
+<h2 id="什么是DSL"><a href="#什么是DSL" class="headerlink" title="什么是DSL"></a>什么是DSL</h2><p>​    </p>
+<p>​    </p>
+<h2 id="RestfulAPI使用"><a href="#RestfulAPI使用" class="headerlink" title="RestfulAPI使用"></a>RestfulAPI使用</h2><h2 id="操作索引"><a href="#操作索引" class="headerlink" title="操作索引"></a>操作索引</h2><h3 id="新增"><a href="#新增" class="headerlink" title="新增"></a>新增</h3><figure class="highlight json"><table><tr><td class="code"><pre><code class="hljs json">#创建一个索引<br>PUT music_V1<br>&#123;<br>    <span class="hljs-attr">&quot;mappings&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;properties&quot;</span>: &#123;<br>            <span class="hljs-attr">&quot;singers&quot;</span>: &#123;<br>                <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span>,<br>                <span class="hljs-attr">&quot;fields&quot;</span>: &#123;<br>                    <span class="hljs-attr">&quot;keyword&quot;</span>: &#123;<br>                        <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;keyword&quot;</span><br>                    &#125;,<br>                    <span class="hljs-attr">&quot;pinyin&quot;</span>: &#123;<br>                        <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span>,<br>                        <span class="hljs-attr">&quot;analyzer&quot;</span>: <span class="hljs-string">&quot;pinyin&quot;</span><br>                    &#125;,<br>                    <span class="hljs-attr">&quot;zh&quot;</span>: &#123;<br>                        <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span>,<br>                        <span class="hljs-attr">&quot;analyzer&quot;</span>: <span class="hljs-string">&quot;smartcn&quot;</span><br>                    &#125;<br>                &#125;<br>            &#125;,<br>            <span class="hljs-attr">&quot;song_name&quot;</span>: &#123;<br>                <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span>,<br>                <span class="hljs-attr">&quot;fields&quot;</span>: &#123;<br>                    <span class="hljs-attr">&quot;keyword&quot;</span>: &#123;<br>                        <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;keyword&quot;</span><br>                    &#125;,<br>                    <span class="hljs-attr">&quot;pinyin&quot;</span>: &#123;<br>                        <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span>,<br>                        <span class="hljs-attr">&quot;analyzer&quot;</span>: <span class="hljs-string">&quot;pinyin&quot;</span><br>                    &#125;,<br>                    <span class="hljs-attr">&quot;zh&quot;</span>: &#123;<br>                        <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span>,<br>                        <span class="hljs-attr">&quot;analyzer&quot;</span>: <span class="hljs-string">&quot;smartcn&quot;</span><br>                    &#125;<br>                &#125;<br>            &#125;,<br>            <span class="hljs-attr">&quot;lyrics&quot;</span>: &#123;<br>                <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span>,<br>                <span class="hljs-attr">&quot;fields&quot;</span>: &#123;<br>                    <span class="hljs-attr">&quot;keyword&quot;</span>: &#123;<br>                        <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;keyword&quot;</span><br>                    &#125;,<br>                    <span class="hljs-attr">&quot;pinyin&quot;</span>: &#123;<br>                        <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span>,<br>                        <span class="hljs-attr">&quot;analyzer&quot;</span>: <span class="hljs-string">&quot;pinyin&quot;</span><br>                    &#125;,<br>                    <span class="hljs-attr">&quot;zh&quot;</span>: &#123;<br>                        <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span>,<br>                        <span class="hljs-attr">&quot;analyzer&quot;</span>: <span class="hljs-string">&quot;smartcn&quot;</span><br>                    &#125;<br>                &#125;<br>            &#125;,<br>            <span class="hljs-attr">&quot;md5&quot;</span>: &#123;<br>                <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;keyword&quot;</span><br>            &#125;,<br>            <span class="hljs-attr">&quot;music_score_data&quot;</span>: &#123;<br>                <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span><br>            &#125;,<br>            <span class="hljs-attr">&quot;origin&quot;</span>: &#123;<br>                <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;keyword&quot;</span><br>            &#125;,<br>            <span class="hljs-attr">&quot;chord_item_id&quot;</span>: &#123;<br>                <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;keyword&quot;</span><br>            &#125;,<br>            <span class="hljs-attr">&quot;song_item_id&quot;</span>: &#123;<br>                <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;keyword&quot;</span><br>            &#125;<br>        &#125;<br>    &#125;<br>&#125;<br><span class="hljs-comment">//起别名</span><br>POST /_aliases<br>&#123;<br>  <span class="hljs-attr">&quot;actions&quot;</span> : [<br>    &#123; <span class="hljs-attr">&quot;add&quot;</span> : &#123; <span class="hljs-attr">&quot;index&quot;</span> : <span class="hljs-string">&quot;music_V1&quot;</span>, <span class="hljs-attr">&quot;alias&quot;</span> : <span class="hljs-string">&quot;music&quot;</span> &#125; &#125;<br>  ]<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>注意song_name原本是text类型，但是创建索引时通过fields字段定义了多个类型数据，比如keyword和不同分词效果的text，在全文检索中便于用这些field参与搜索</p>
+<h3 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h3><figure class="highlight"><table><tr><td class="code"><pre><code class="hljs json">GET /person<br></code></pre></td></tr></table></figure>
+
+<h3 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h3><figure class="highlight"><table><tr><td class="code"><pre><code class="hljs json"># 删除索引<br>DELETE /person<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="查询文档"><a href="#查询文档" class="headerlink" title="查询文档"></a>查询文档</h2>]]></content>
+      <categories>
+        <category>Elasticsearch</category>
+      </categories>
+      <tags>
+        <tag>Elasticsearch</tag>
       </tags>
   </entry>
 </search>
