@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="相关性概述、自定义评分策略、多字段的搜索场景优化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ES(ElasticSearch)-相关性&amp;搜索评分策略">
+<meta property="og:url" content="http://example.com/2025/07/19/ES(ElasticSearch)-%E7%9B%B8%E5%85%B3%E6%80%A7&%E6%90%9C%E7%B4%A2%E8%AF%84%E5%88%86%E7%AD%96%E7%95%A5/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="相关性概述、自定义评分策略、多字段的搜索场景优化">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2025/07/19/ES(ElasticSearch)-%E7%9B%B8%E5%85%B3%E6%80%A7&%E6%90%9C%E7%B4%A2%E8%AF%84%E5%88%86%E7%AD%96%E7%95%A5/images/ES(ElasticSearch)-%E7%9B%B8%E5%85%B3%E6%80%A7&%E6%90%9C%E7%B4%A2%E8%AF%84%E5%88%86%E7%AD%96%E7%95%A5/image-20250719212747917.png">
+<meta property="og:image" content="http://example.com/2025/07/19/ES(ElasticSearch)-%E7%9B%B8%E5%85%B3%E6%80%A7&%E6%90%9C%E7%B4%A2%E8%AF%84%E5%88%86%E7%AD%96%E7%95%A5/images/ES(ElasticSearch)-相关性&amp;搜索评分策略/image-20250719212622236.png">
+<meta property="article:published_time" content="2025-07-19T13:00:00.000Z">
+<meta property="article:modified_time" content="2025-08-18T15:50:19.316Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="Elasticsearch">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2025/07/19/ES(ElasticSearch)-%E7%9B%B8%E5%85%B3%E6%80%A7&%E6%90%9C%E7%B4%A2%E8%AF%84%E5%88%86%E7%AD%96%E7%95%A5/images/ES(ElasticSearch)-%E7%9B%B8%E5%85%B3%E6%80%A7&%E6%90%9C%E7%B4%A2%E8%AF%84%E5%88%86%E7%AD%96%E7%95%A5/image-20250719212747917.png">
+
+<link rel="canonical" href="http://example.com/2025/07/19/ES(ElasticSearch)-%E7%9B%B8%E5%85%B3%E6%80%A7&%E6%90%9C%E7%B4%A2%E8%AF%84%E5%88%86%E7%AD%96%E7%95%A5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>ES(ElasticSearch)-相关性&搜索评分策略 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/07/19/ES(ElasticSearch)-%E7%9B%B8%E5%85%B3%E6%80%A7&%E6%90%9C%E7%B4%A2%E8%AF%84%E5%88%86%E7%AD%96%E7%95%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ES(ElasticSearch)-相关性&搜索评分策略
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-07-19 21:00:00" itemprop="dateCreated datePublished" datetime="2025-07-19T21:00:00+08:00">2025-07-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-08-18 23:50:19" itemprop="dateModified" datetime="2025-08-18T23:50:19+08:00">2025-08-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Elasticsearch/" itemprop="url" rel="index"><span itemprop="name">Elasticsearch</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">相关性概述、自定义评分策略、多字段的搜索场景优化</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="相关性-amp-搜索评分策略"><a href="#相关性-amp-搜索评分策略" class="headerlink" title="相关性&amp;搜索评分策略"></a>相关性&amp;搜索评分策略</h1><h2 id="相关性概述"><a href="#相关性概述" class="headerlink" title="相关性概述"></a>相关性概述</h2><h3 id="什么是相关性（Relevance）"><a href="#什么是相关性（Relevance）" class="headerlink" title="什么是相关性（Relevance）"></a>什么是相关性（Relevance）</h3><p>​    相关性是<strong>衡量搜索结果与用户查询意图匹配程度的核心指标</strong>。在Elasticsearch中，每个文档都有<code>_score</code>字段表示相关性分数，值越高表示匹配度越好。</p>
+<h4 id="核心算法演进："><a href="#核心算法演进：" class="headerlink" title="核心算法演进："></a><strong>核心算法演进：</strong></h4><ul>
+<li>TF-IDF（早期版本）：基于词频和逆文档频率</li>
+<li>BM25（5.X+之后版本默认）：改进的文本相似度算法，解决TF-IDF的不足</li>
+<li>语义模型（8.x扩展）：支持文本嵌入向量等现代技术</li>
+</ul>
+<h4 id="TF-IDF算法"><a href="#TF-IDF算法" class="headerlink" title="TF-IDF算法"></a>TF-IDF算法</h4><p><img src="images/ES(ElasticSearch)-%E7%9B%B8%E5%85%B3%E6%80%A7&%E6%90%9C%E7%B4%A2%E8%AF%84%E5%88%86%E7%AD%96%E7%95%A5/image-20250719212747917.png" alt="image-20250719212747917"></p>
+<h4 id="BM25算法核心要素"><a href="#BM25算法核心要素" class="headerlink" title="BM25算法核心要素"></a>BM25算法核心要素</h4><ul>
+<li>词频（TF-term frequency）：词项在该文档文档中出现的次数</li>
+<li>逆文档频率（IDF）: 词项在整个索引中的稀有程度</li>
+<li>字段长度归一化：较短的字段（如标题）中包含的关键词比在较长字段（如正文）中的相同关键词更重要</li>
+<li>可调参数：<code>k1</code>（控制词频饱和度），<code>b</code>（控制字段长度影响）</li>
+</ul>
+<figure class="highlight mathematica"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mathematica"><span class="hljs-variable">score</span><span class="hljs-punctuation">(</span><span class="hljs-built_in">D</span><span class="hljs-operator">,</span> <span class="hljs-variable">Q</span><span class="hljs-punctuation">)</span> <span class="hljs-operator">=</span> ∑<span class="hljs-punctuation">(</span><span class="hljs-variable">i</span><span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-variable">to</span> <span class="hljs-variable">n</span><span class="hljs-punctuation">)</span> <span class="hljs-variable">IDF</span><span class="hljs-punctuation">(</span><span class="hljs-variable">qi</span><span class="hljs-punctuation">)</span> <span class="hljs-operator">*</span> <span class="hljs-punctuation">(</span><span class="hljs-variable">f</span><span class="hljs-punctuation">(</span><span class="hljs-variable">qi</span><span class="hljs-operator">,</span> <span class="hljs-built_in">D</span><span class="hljs-punctuation">)</span> <span class="hljs-operator">*</span> <span class="hljs-punctuation">(</span><span class="hljs-variable">k1</span> <span class="hljs-operator">+</span> <span class="hljs-number">1</span><span class="hljs-punctuation">)</span><span class="hljs-punctuation">)</span> <span class="hljs-operator">/</span> <span class="hljs-punctuation">(</span><span class="hljs-variable">f</span><span class="hljs-punctuation">(</span><span class="hljs-variable">qi</span><span class="hljs-operator">,</span> <span class="hljs-built_in">D</span><span class="hljs-punctuation">)</span> <span class="hljs-operator">+</span> <span class="hljs-variable">k1</span> <span class="hljs-operator">*</span> <span class="hljs-punctuation">(</span><span class="hljs-number">1</span> <span class="hljs-operator">-</span> <span class="hljs-variable">b</span> <span class="hljs-operator">+</span> <span class="hljs-variable">b</span> <span class="hljs-operator">*</span> <span class="hljs-punctuation">(</span><span class="hljs-operator">|</span><span class="hljs-built_in">D</span><span class="hljs-operator">|</span> <span class="hljs-operator">/</span> <span class="hljs-variable">avgdl</span><span class="hljs-punctuation">)</span><span class="hljs-punctuation">)</span><span class="hljs-punctuation">)</span><br></code></pre></td></tr></table></figure>
+
+<img src="images/ES(ElasticSearch)-相关性&amp;搜索评分策略/image-20250719212622236.png" alt="image-20250719212622236" style="zoom: 80%;">
+
+<h4 id="BM25与TF-IDF对比优势："><a href="#BM25与TF-IDF对比优势：" class="headerlink" title="BM25与TF-IDF对比优势："></a>BM25与TF-IDF对比优势：</h4><table>
+<thead>
+<tr>
+<th align="left">特性</th>
+<th align="left">TF-IDF</th>
+<th align="left">BM25</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">词频饱和度</td>
+<td align="left">线性增长</td>
+<td align="left">渐进饱和</td>
+</tr>
+<tr>
+<td align="left">字段长度影响</td>
+<td align="left">固定权重</td>
+<td align="left">可调参数(b)</td>
+</tr>
+<tr>
+<td align="left">长尾词项处理</td>
+<td align="left">普通</td>
+<td align="left">更优</td>
+</tr>
+<tr>
+<td align="left">短文档匹配</td>
+<td align="left">可能过度匹配</td>
+<td align="left">更平衡</td>
+</tr>
+</tbody></table>
+<h4 id="查看ES打分明细"><a href="#查看ES打分明细" class="headerlink" title="查看ES打分明细"></a>查看ES打分明细</h4><p>explain:true</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /products/_search<br>&#123;<br>  <span class="hljs-attr">&quot;explain&quot;</span>: <span class="hljs-literal">true</span>, <br>  <span class="hljs-attr">&quot;query&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;match&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;description&quot;</span>: <span class="hljs-string">&quot;wireless headphones&quot;</span><br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="自定义评分"><a href="#自定义评分" class="headerlink" title="自定义评分"></a>自定义评分</h2><p>​    <strong>自定义评分的核心是通过修改评分来修改文档的相关性，在最前面的位置返回用户最期望的结果</strong></p>
+<h3 id="自定义评分策略"><a href="#自定义评分策略" class="headerlink" title="自定义评分策略"></a>自定义评分策略</h3><h4 id="1、index-boost-索引级加权"><a href="#1、index-boost-索引级加权" class="headerlink" title="1、index boost 索引级加权"></a>1、index boost 索引级加权</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /index_*/_search<br>&#123;<br>  <span class="hljs-attr">&quot;query&quot;</span>:&#123;<br>      &quot;match_all&quot;&#123;&#125;<br>  &#125;<br>  &quot;indices_boost&quot;: [<br>    &#123; &quot;index_1&quot;: 1.5 &#125;,   // 提升index_1的权重<br>    &#123; <span class="hljs-attr">&quot;index_2&quot;</span>: <span class="hljs-number">0.8</span> &#125;<br>  ]<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="2、boosting-negative-boost-文档级加权-减权"><a href="#2、boosting-negative-boost-文档级加权-减权" class="headerlink" title="2、boosting/negative_boost 文档级加权/减权"></a>2、boosting/negative_boost 文档级加权/减权</h4><p><strong>boost加权</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /news/_search<br>&#123;<br>  <span class="hljs-attr">&quot;query&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;match&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;content&quot;</span>: <span class="hljs-string">&quot;AI&quot;</span>,<br>        <span class="hljs-attr">&quot;boost&quot;</span>: <span class="hljs-number">2.0</span>  <span class="hljs-comment">// 内容匹配提升2倍</span><br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>negative_boost降权</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /news/_search<br>&#123;<br>  <span class="hljs-attr">&quot;query&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;boosting&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;positive&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;match&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;content&quot;</span>: <span class="hljs-string">&quot;AI&quot;</span>,<br>          <span class="hljs-attr">&quot;boost&quot;</span>: <span class="hljs-number">2.0</span>  <span class="hljs-comment">// 内容匹配提升2倍</span><br>        &#125;<br>      &#125;,<br>      <span class="hljs-attr">&quot;negative&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;match&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;title&quot;</span>: <span class="hljs-string">&quot;AI&quot;</span>  <span class="hljs-comment">// 标题匹配的文档会被降权</span><br>        &#125;<br>      &#125;,<br>      <span class="hljs-attr">&quot;negative_boost&quot;</span>: <span class="hljs-number">0.2</span>  <span class="hljs-comment">// 降权系数</span><br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="3、function-score-完全自定义评分"><a href="#3、function-score-完全自定义评分" class="headerlink" title="3、function_score 完全自定义评分"></a>3、function_score 完全自定义评分</h4><p><strong>场景</strong>：评分 = 原始评分 * （销量+浏览人数）</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs JSON">POST my_index_products/_search<br>&#123;<br>  <span class="hljs-attr">&quot;query&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;function_score&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;query&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;match_all&quot;</span>: &#123;&#125;<br>      &#125;,<br>      <span class="hljs-attr">&quot;script_score&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;script&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;source&quot;</span>: <span class="hljs-string">&quot;_score * (doc[&#x27;sales&#x27;].value + doc[&#x27;visitors&#x27;].value)&quot;</span><br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="4、rescore-query-二次评分"><a href="#4、rescore-query-二次评分" class="headerlink" title="4、rescore_query 二次评分"></a>4、rescore_query 二次评分</h4><p>对一定数量的查询结果，二次评分</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /logs/_search<br>&#123;<br>  <span class="hljs-attr">&quot;from&quot;</span>: <span class="hljs-number">0</span>,<br>  <span class="hljs-attr">&quot;size&quot;</span>:<span class="hljs-number">10</span>,<br>  <span class="hljs-attr">&quot;query&quot;</span>: &#123;<span class="hljs-attr">&quot;match&quot;</span>: &#123;<span class="hljs-attr">&quot;message&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>&#125;&#125;,<br>  <span class="hljs-attr">&quot;rescore&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;window_size&quot;</span>: <span class="hljs-number">50</span>,<br>    <span class="hljs-attr">&quot;query_weight&quot;</span>: <span class="hljs-number">0.7</span>,           <span class="hljs-comment">// 主查询分数权重（默认1.0）</span><br>    <span class="hljs-attr">&quot;rescore_query_weight&quot;</span>: <span class="hljs-number">0.3</span>,     <span class="hljs-comment">// 二次评分权重（默认1.0）</span><br>    <span class="hljs-attr">&quot;query&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;rescore_query&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;function_score&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;script_score&quot;</span>: &#123;<br>            <span class="hljs-attr">&quot;script&quot;</span>: <span class="hljs-string">&quot;Math.log10(doc[&#x27;severity&#x27;].value + 2)&quot;</span><br>          &#125;<br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li><strong><code>window_size</code> 的作用</strong><ul>
+<li>表示对主查询结果的<strong>前 N 条</strong>进行二次评分（这里是前50条），而非全局排序。</li>
+<li>若主查询返回100条，<code>window_size=50</code> 则只对<strong>前50条</strong>重新计算分数，后50条保持原分。</li>
+</ul>
+</li>
+<li><strong>评分合并逻辑</strong><ul>
+<li>默认情况下，最终分数 = 主查询分 + 二次评分分。</li>
+<li>可通过 <code>query_weight</code> 和 <code>rescore_query_weight</code> 控制权重（如示例中的 70% 主查询分 + 30% 二次评分分）。</li>
+</ul>
+</li>
+</ol>
+<h4 id="5、function-score-和-rescore-query的差异比对"><a href="#5、function-score-和-rescore-query的差异比对" class="headerlink" title="5、function_score 和 rescore_query的差异比对"></a>5、function_score 和 rescore_query的差异比对</h4><table>
+<thead>
+<tr>
+<th align="left"><strong>特性</strong></th>
+<th align="left"><strong><code>function_score</code></strong></th>
+<th align="left"><strong><code>rescore_query</code></strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>作用阶段</strong></td>
+<td align="left"><strong>主查询阶段</strong>（直接影响原始评分）</td>
+<td align="left"><strong>后处理阶段</strong>（对初步结果二次调整）</td>
+</tr>
+<tr>
+<td align="left"><strong>执行顺序</strong></td>
+<td align="left">在原始查询匹配时立即生效</td>
+<td align="left">在主查询完成后，对部分结果重新计算评分</td>
+</tr>
+<tr>
+<td align="left"><strong>性能影响</strong></td>
+<td align="left">对所有匹配文档计算，可能成本较高</td>
+<td align="left">仅对窗口内（<code>window_size</code>）的文档计算，更轻量</td>
+</tr>
+<tr>
+<td align="left"><strong>灵活性</strong></td>
+<td align="left">支持多函数组合（权重、衰减、脚本等）</td>
+<td align="left">仅支持单一评分逻辑（通常用 <code>function_score</code>）</td>
+</tr>
+<tr>
+<td align="left"><strong>典型场景</strong></td>
+<td align="left">需要全局性、复杂的业务评分逻辑</td>
+<td align="left">对 Top-N 结果微调，或避免全局计算的高成本</td>
+</tr>
+</tbody></table>
+<h2 id="多字段搜索场景优化"><a href="#多字段搜索场景优化" class="headerlink" title="多字段搜索场景优化"></a>多字段搜索场景优化</h2><h3 id="最佳字段策略（Best-Fields）"><a href="#最佳字段策略（Best-Fields）" class="headerlink" title="最佳字段策略（Best Fields）"></a>最佳字段策略（Best Fields）</h3><p>​    某个文档多个匹配字段都匹配命中检索条件时，返回其中评分最高的作为该文档得分</p>
+<p><strong>最终评分 = 最佳字段评分 + (tie_breaker * 其他匹配字段评分)</strong></p>
+<p>tie_breaker 用于指定非最佳匹配的得分系数，默认是0</p>
+<h4 id="multi-match-best-fields"><a href="#multi-match-best-fields" class="headerlink" title="multi_match:best_fields"></a>multi_match:best_fields</h4><p>​    当你使用 <code>multi_match</code> 查询而不指定<code>type</code>参数时，会<strong>默认</strong>使用<code>best_fields</code>类型</p>
+<p><strong>场景</strong>：商品搜索（标题/描述分开匹配）</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /products/_search<br>&#123;<br>  <span class="hljs-attr">&quot;query&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;multi_match&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;query&quot;</span>: <span class="hljs-string">&quot;bluetooth speaker&quot;</span>,<br>      <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;best_fields&quot;</span>,<br>      <span class="hljs-attr">&quot;fields&quot;</span>: [<span class="hljs-string">&quot;title^3&quot;</span>, <span class="hljs-string">&quot;description&quot;</span>], <span class="hljs-comment">// 标题权重x3</span><br>      <span class="hljs-attr">&quot;tie_breaker&quot;</span>: <span class="hljs-number">0.3</span><br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="dis-max-query"><a href="#dis-max-query" class="headerlink" title="dis max query"></a>dis max query</h4><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /products/_search<br>&#123;<br>  <span class="hljs-attr">&quot;query&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;dis_max&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;queries&quot;</span>: [<br>        &#123;<span class="hljs-attr">&quot;match&quot;</span>: &#123;<span class="hljs-attr">&quot;title&quot;</span>: <span class="hljs-string">&quot;phone&quot;</span>&#125;&#125;,<br>        &#123;<span class="hljs-attr">&quot;match&quot;</span>: &#123;<span class="hljs-attr">&quot;features&quot;</span>: <span class="hljs-string">&quot;waterproof&quot;</span>&#125;&#125;<br>      ],<br>      <span class="hljs-attr">&quot;tie_breaker&quot;</span>: <span class="hljs-number">0.7</span><br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="两者关系"><a href="#两者关系" class="headerlink" title="两者关系"></a>两者关系</h4><p><strong>实际上，<code>multi_match</code> 的 <code>best_fields</code> 类型在内部会被转换成 <code>dis_max</code> 查询：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-comment">// multi_match 查询</span><br>&#123;<br>  <span class="hljs-attr">&quot;query&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;multi_match&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;query&quot;</span>: <span class="hljs-string">&quot;quick brown fox&quot;</span>,<br>      <span class="hljs-attr">&quot;fields&quot;</span>: [<span class="hljs-string">&quot;title&quot;</span>, <span class="hljs-string">&quot;body&quot;</span>],<br>      <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;best_fields&quot;</span>,<br>      <span class="hljs-attr">&quot;tie_breaker&quot;</span>: <span class="hljs-number">0.3</span><br>    &#125;<br>  &#125;<br>&#125;<br><br><span class="hljs-comment">// 等效的 dis_max 查询</span><br>&#123;<br>  <span class="hljs-attr">&quot;query&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;dis_max&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;queries&quot;</span>: [<br>        &#123; <span class="hljs-attr">&quot;match&quot;</span>: &#123; <span class="hljs-attr">&quot;title&quot;</span>: <span class="hljs-string">&quot;quick brown fox&quot;</span> &#125;&#125;,<br>        &#123; <span class="hljs-attr">&quot;match&quot;</span>: &#123; <span class="hljs-attr">&quot;body&quot;</span>:  <span class="hljs-string">&quot;quick brown fox&quot;</span> &#125;&#125;<br>      ],<br>      <span class="hljs-attr">&quot;tie_breaker&quot;</span>: <span class="hljs-number">0.3</span><br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="多数字段统计-Most-Field"><a href="#多数字段统计-Most-Field" class="headerlink" title="多数字段统计(Most Field)"></a>多数字段统计(Most Field)</h3><p>​    某个文档多个匹配字段都匹配命中检索条件时，返回各个字段评分之和</p>
+<h4 id="multi-match-most-fields"><a href="#multi-match-most-fields" class="headerlink" title="multi_match:most_fields"></a>multi_match:most_fields</h4><p>使用multi_mach 且指定 type = Most Fields</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs json">PUT /articles<br>&#123;<br>  <span class="hljs-attr">&quot;mappings&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;properties&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;text&quot;</span>: &#123; <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span> &#125;,<br>      <span class="hljs-attr">&quot;text_english&quot;</span>: &#123; <br>        <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;text&quot;</span>,<br>        <span class="hljs-attr">&quot;analyzer&quot;</span>: <span class="hljs-string">&quot;english&quot;</span><br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br><br><span class="hljs-comment">// 查询时同时搜索原字段和分词优化字段</span><br>POST /articles/_search<br>&#123;<br>  <span class="hljs-attr">&quot;multi_match&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;query&quot;</span>: <span class="hljs-string">&quot;running&quot;</span>,<br>    <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;most_fields&quot;</span>,<br>    <span class="hljs-attr">&quot;fields&quot;</span>: [<span class="hljs-string">&quot;text&quot;</span>, <span class="hljs-string">&quot;text_english&quot;</span>]<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="should"><a href="#should" class="headerlink" title="should"></a>should</h4><p><strong>should 子句的基本特性：</strong></p>
+<ol>
+<li><p>属于 bool 查询的一部分：用于表示”或”逻辑</p>
+</li>
+<li><p>匹配越多 should 条件，得分越高：</p>
+</li>
+<li><p>默认情况下，文档只需匹配一个 should 条件就会被返回</p>
+</li>
+<li><p>通过 minimum_should_match 参数可以控制最少匹配数量</p>
+</li>
+</ol>
+<p><strong>评分特点：</strong></p>
+<ol>
+<li><p>每个匹配的 should 条件都会贡献到总分</p>
+</li>
+<li><p>匹配的条件越多，总分通常越高</p>
+</li>
+</ol>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs json">&#123;<br>  <span class="hljs-attr">&quot;query&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;bool&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;should&quot;</span>: [<br>        &#123; <span class="hljs-attr">&quot;match&quot;</span>: &#123; <span class="hljs-attr">&quot;title&quot;</span>: <span class="hljs-string">&quot;quick brown fox&quot;</span> &#125;&#125;,<br>        &#123; <span class="hljs-attr">&quot;match&quot;</span>: &#123; <span class="hljs-attr">&quot;body&quot;</span>:  <span class="hljs-string">&quot;quick brown fox&quot;</span> &#125;&#125;,<br>        &#123; <span class="hljs-attr">&quot;match&quot;</span>: &#123; <span class="hljs-attr">&quot;description&quot;</span>: <span class="hljs-string">&quot;quick brown fox&quot;</span> &#125;&#125;<br>      ],<br>      <span class="hljs-attr">&quot;minimum_should_match&quot;</span>: <span class="hljs-number">1</span><br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="两者关系-1"><a href="#两者关系-1" class="headerlink" title="两者关系"></a>两者关系</h4><table>
+<thead>
+<tr>
+<th align="left">特性</th>
+<th align="left"><code>should</code> 多字段实现</th>
+<th align="left"><code>multi_match</code> 查询</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>实现方式</strong></td>
+<td align="left">手动组合多个 match 查询</td>
+<td align="left">专用多字段查询语法</td>
+</tr>
+<tr>
+<td align="left"><strong>评分策略</strong></td>
+<td align="left">累加所有匹配字段的评分</td>
+<td align="left">取决于 type 参数(best/most/cross_fields)</td>
+</tr>
+<tr>
+<td align="left"><strong>控制精度</strong></td>
+<td align="left">更灵活，可单独调整每个字段权重</td>
+<td align="left">统一控制</td>
+</tr>
+<tr>
+<td align="left"><strong>使用复杂度</strong></td>
+<td align="left">更冗长</td>
+<td align="left">更简洁</td>
+</tr>
+</tbody></table>
+<h3 id="跨字段搜索（Cross-Fields）"><a href="#跨字段搜索（Cross-Fields）" class="headerlink" title="跨字段搜索（Cross Fields）"></a>跨字段搜索（Cross Fields）</h3><h4 id="multi-match-corss-fields"><a href="#multi-match-corss-fields" class="headerlink" title="multi_match:corss_fields"></a>multi_match:corss_fields</h4><p>​    某个文档多个字段<strong>分别匹配</strong>匹配命中检索条件</p>
+<p><strong>适用场景</strong>：姓名/地址等分散字段</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /users/_search<br>&#123;<br>  <span class="hljs-attr">&quot;query&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;multi_match&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;query&quot;</span>: <span class="hljs-string">&quot;John Smith&quot;</span>,<br>      <span class="hljs-attr">&quot;type&quot;</span>: <span class="hljs-string">&quot;cross_fields&quot;</span>,<br>      <span class="hljs-attr">&quot;fields&quot;</span>: [<span class="hljs-string">&quot;first_name&quot;</span>, <span class="hljs-string">&quot;last_name&quot;</span>],<br>      <span class="hljs-attr">&quot;operator&quot;</span>: <span class="hljs-string">&quot;and&quot;</span><br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Elasticsearch/" rel="tag"># Elasticsearch</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/06/05/ES(ElasticSearch)-RestfulAPI%E4%BD%BF%E7%94%A8/" rel="prev" title="ES(ElasticSearch)-RestfulAPI">
+      <i class="fa fa-chevron-left"></i> ES(ElasticSearch)-RestfulAPI
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/07/19/ES(ElasticSearch)-%E5%90%91%E9%87%8F%E6%90%9C%E7%B4%A2/" rel="next" title="ES(ElasticSearch)-向量搜索">
+      ES(ElasticSearch)-向量搜索 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E6%80%A7-amp-%E6%90%9C%E7%B4%A2%E8%AF%84%E5%88%86%E7%AD%96%E7%95%A5"><span class="nav-number">1.</span> <span class="nav-text">相关性&amp;搜索评分策略</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E6%80%A7%E6%A6%82%E8%BF%B0"><span class="nav-number">1.1.</span> <span class="nav-text">相关性概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E7%9B%B8%E5%85%B3%E6%80%A7%EF%BC%88Relevance%EF%BC%89"><span class="nav-number">1.1.1.</span> <span class="nav-text">什么是相关性（Relevance）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E7%AE%97%E6%B3%95%E6%BC%94%E8%BF%9B%EF%BC%9A"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">核心算法演进：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TF-IDF%E7%AE%97%E6%B3%95"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">TF-IDF算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BM25%E7%AE%97%E6%B3%95%E6%A0%B8%E5%BF%83%E8%A6%81%E7%B4%A0"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">BM25算法核心要素</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BM25%E4%B8%8ETF-IDF%E5%AF%B9%E6%AF%94%E4%BC%98%E5%8A%BF%EF%BC%9A"><span class="nav-number">1.1.1.4.</span> <span class="nav-text">BM25与TF-IDF对比优势：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8BES%E6%89%93%E5%88%86%E6%98%8E%E7%BB%86"><span class="nav-number">1.1.1.5.</span> <span class="nav-text">查看ES打分明细</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%84%E5%88%86"><span class="nav-number">1.2.</span> <span class="nav-text">自定义评分</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%84%E5%88%86%E7%AD%96%E7%95%A5"><span class="nav-number">1.2.1.</span> <span class="nav-text">自定义评分策略</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1%E3%80%81index-boost-%E7%B4%A2%E5%BC%95%E7%BA%A7%E5%8A%A0%E6%9D%83"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">1、index boost 索引级加权</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2%E3%80%81boosting-negative-boost-%E6%96%87%E6%A1%A3%E7%BA%A7%E5%8A%A0%E6%9D%83-%E5%87%8F%E6%9D%83"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">2、boosting&#x2F;negative_boost 文档级加权&#x2F;减权</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3%E3%80%81function-score-%E5%AE%8C%E5%85%A8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%84%E5%88%86"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">3、function_score 完全自定义评分</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4%E3%80%81rescore-query-%E4%BA%8C%E6%AC%A1%E8%AF%84%E5%88%86"><span class="nav-number">1.2.1.4.</span> <span class="nav-text">4、rescore_query 二次评分</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5%E3%80%81function-score-%E5%92%8C-rescore-query%E7%9A%84%E5%B7%AE%E5%BC%82%E6%AF%94%E5%AF%B9"><span class="nav-number">1.2.1.5.</span> <span class="nav-text">5、function_score 和 rescore_query的差异比对</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E5%AD%97%E6%AE%B5%E6%90%9C%E7%B4%A2%E5%9C%BA%E6%99%AF%E4%BC%98%E5%8C%96"><span class="nav-number">1.3.</span> <span class="nav-text">多字段搜索场景优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E4%BD%B3%E5%AD%97%E6%AE%B5%E7%AD%96%E7%95%A5%EF%BC%88Best-Fields%EF%BC%89"><span class="nav-number">1.3.1.</span> <span class="nav-text">最佳字段策略（Best Fields）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#multi-match-best-fields"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">multi_match:best_fields</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#dis-max-query"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">dis max query</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%A4%E8%80%85%E5%85%B3%E7%B3%BB"><span class="nav-number">1.3.1.3.</span> <span class="nav-text">两者关系</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E6%95%B0%E5%AD%97%E6%AE%B5%E7%BB%9F%E8%AE%A1-Most-Field"><span class="nav-number">1.3.2.</span> <span class="nav-text">多数字段统计(Most Field)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#multi-match-most-fields"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">multi_match:most_fields</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#should"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">should</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%A4%E8%80%85%E5%85%B3%E7%B3%BB-1"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">两者关系</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%A8%E5%AD%97%E6%AE%B5%E6%90%9C%E7%B4%A2%EF%BC%88Cross-Fields%EF%BC%89"><span class="nav-number">1.3.3.</span> <span class="nav-text">跨字段搜索（Cross Fields）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#multi-match-corss-fields"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">multi_match:corss_fields</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">83</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

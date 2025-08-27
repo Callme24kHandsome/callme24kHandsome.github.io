@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="聚合查询的概念和实现举例">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ES(ElasticSearch)-聚合查询">
+<meta property="og:url" content="http://example.com/2025/08/26/ES(ElasticSearch)-%E8%81%9A%E5%90%88%E6%9F%A5%E8%AF%A2/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="聚合查询的概念和实现举例">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-26T13:00:00.000Z">
+<meta property="article:modified_time" content="2025-08-27T14:14:30.854Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="Elasticsearch">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2025/08/26/ES(ElasticSearch)-%E8%81%9A%E5%90%88%E6%9F%A5%E8%AF%A2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>ES(ElasticSearch)-聚合查询 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/08/26/ES(ElasticSearch)-%E8%81%9A%E5%90%88%E6%9F%A5%E8%AF%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ES(ElasticSearch)-聚合查询
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-08-26 21:00:00" itemprop="dateCreated datePublished" datetime="2025-08-26T21:00:00+08:00">2025-08-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-08-27 22:14:30" itemprop="dateModified" datetime="2025-08-27T22:14:30+08:00">2025-08-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Elasticsearch/" itemprop="url" rel="index"><span itemprop="name">Elasticsearch</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">聚合查询的概念和实现举例</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="聚合查询"><a href="#聚合查询" class="headerlink" title="聚合查询"></a>聚合查询</h1><h2 id="相关概念"><a href="#相关概念" class="headerlink" title="相关概念"></a>相关概念</h2><p><strong>桶（Buckets）</strong>：满足特定条件的文档集合。可以理解为 SQL 中的 <code>GROUP BY</code>。例如：“北京”是一个桶，“上海”也是一个桶。</p>
+<p><strong>指标（Metrics）</strong>：对桶内的文档进行的统计计算。可以理解为 SQL 中的 <code>COUNT()</code>, <code>SUM()</code>, <code>AVG()</code> 等。例如：计算北京这个桶里有多少人（计数），平均薪资是多少（求平均值）。</p>
+<p><strong>聚合查询</strong>：其实就是通和指标的各种组合嵌套的统计查询</p>
+<h2 id="聚合查询的语法结构"><a href="#聚合查询的语法结构" class="headerlink" title="聚合查询的语法结构"></a>聚合查询的语法结构</h2><p>一个标准的聚合查询 (<code>aggs</code>) 通常与查询 (<code>query</code>) 同级，用于在全数据集或查询结果集上进行聚合分析</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /your_index/_search<br>&#123;<br>  <span class="hljs-attr">&quot;size&quot;</span>: <span class="hljs-number">0</span>,  <span class="hljs-comment">// 通常我们不关心具体的命中文档，只关心聚合结果，所以设为0以提高性能</span><br>  <span class="hljs-attr">&quot;query&quot;</span>: &#123;  <span class="hljs-comment">// （可选）先执行查询，再对查询结果进行聚合</span><br>    ...       // 例如 match, term, range 等查询<br>  &#125;,<br>  &quot;aggs&quot;: &#123;   // 聚合查询的主体，也可以简写为 &quot;aggregations&quot;<br>    &quot;给你的聚合结果起个名字&quot;: &#123; // 例如 &quot;avg_salary&quot;, &quot;group_by_city&quot;<br>      &quot;聚合类型&quot;: &#123;           // 例如 &quot;terms&quot;, &quot;avg&quot;, &quot;date_histogram&quot;<br>        &quot;聚合体&quot;: ...        // 不同类型有不同的参数，如 &quot;field&quot;: &quot;salary&quot;<br>      &#125;<br>    &#125;,<br>    <span class="hljs-comment">// ... 可以同时有多个同级聚合</span><br>    <span class="hljs-comment">// 也可以有子聚合</span><br>    &quot;另一个聚合&quot;: &#123;<br>      ...<br>      &quot;aggs&quot;: &#123; // 在当前聚合的桶内，继续进行嵌套聚合<br>        &quot;子聚合的名字&quot;: &#123;<br>          &quot;子聚合类型&quot;: &#123;<br>            ...<br>          &#125;<br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>举例：</p>
+<p><strong>目标</strong>：先找出所有“Electronics”类别的商品（查询），然后按品牌（<code>brand</code>）分组（桶聚合），并计算每个品牌的平均价格（指标聚合）。</p>
+<p>**查询请求 (Request)**：</p>
+<p>json</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /sales/_search<br>&#123;<br>  <span class="hljs-attr">&quot;size&quot;</span>: <span class="hljs-number">0</span>, <span class="hljs-comment">// 不关心具体文档，只关心聚合结果</span><br>  <span class="hljs-attr">&quot;query&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;term&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;category&quot;</span>: <span class="hljs-string">&quot;electronics&quot;</span> <span class="hljs-comment">// 先过滤出电子类商品</span><br>    &#125;<br>  &#125;,<br>  <span class="hljs-attr">&quot;aggs&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;group_by_brand&quot;</span>: &#123; <span class="hljs-comment">// 第一层聚合：按品牌分组</span><br>      <span class="hljs-attr">&quot;terms&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;field&quot;</span>: <span class="hljs-string">&quot;brand.keyword&quot;</span><br>      &#125;,<br>      <span class="hljs-attr">&quot;aggs&quot;</span>: &#123; <span class="hljs-comment">// 在每一个品牌桶内，做子聚合</span><br>        <span class="hljs-attr">&quot;avg_price&quot;</span>: &#123; <span class="hljs-comment">// 第二层聚合：计算平均价格</span><br>          <span class="hljs-attr">&quot;avg&quot;</span>: &#123;<br>            <span class="hljs-attr">&quot;field&quot;</span>: <span class="hljs-string">&quot;price&quot;</span><br>          &#125;<br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>**预期的聚合结果 (Response)**：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><code class="hljs json">&#123;<br>  <span class="hljs-attr">&quot;took&quot;</span>: <span class="hljs-number">5</span>,<br>  <span class="hljs-attr">&quot;timed_out&quot;</span>: <span class="hljs-literal">false</span>,<br>  &quot;_shards&quot;: &#123; ... &#125;,<br>  &quot;hits&quot;: &#123; // 命中文档部分（因为 size=0，所以只有总数）<br>    &quot;total&quot;: &#123;<br>      &quot;value&quot;: 100, // 一共有100个电子类商品文档<br>      &quot;relation&quot;: &quot;eq&quot;<br>    &#125;,<br>    &quot;max_score&quot;: null,<br>    &quot;hits&quot;: [] // 具体的文档列表为空<br>  &#125;,<br>  &quot;aggregations&quot;: &#123; // ！！！聚合结果部分 ！！！<br>    &quot;group_by_brand&quot;: &#123; // 对应请求中 &quot;group_by_brand&quot; 聚合的结果<br>      &quot;doc_count_error_upper_bound&quot;: 0,<br>      &quot;sum_other_doc_count&quot;: 0,<br>      &quot;buckets&quot;: [ // 这是一个桶聚合，所以核心是一个 buckets 数组<br>        &#123;<br>          <span class="hljs-attr">&quot;key&quot;</span>: <span class="hljs-string">&quot;Apple&quot;</span>, <span class="hljs-comment">// 第一个桶的键（品牌名）</span><br>          <span class="hljs-attr">&quot;doc_count&quot;</span>: <span class="hljs-number">35</span>, <span class="hljs-comment">// 属于Apple品牌的电子商品有35个</span><br>          <span class="hljs-attr">&quot;avg_price&quot;</span>: &#123;   <span class="hljs-comment">// ！！！这是子聚合的结果 ！！！</span><br>            <span class="hljs-attr">&quot;value&quot;</span>: <span class="hljs-number">899.99</span> <span class="hljs-comment">// Apple品牌的平均价格是899.99</span><br>          &#125;<br>        &#125;,<br>        &#123;<br>          <span class="hljs-attr">&quot;key&quot;</span>: <span class="hljs-string">&quot;Samsung&quot;</span>,<br>          <span class="hljs-attr">&quot;doc_count&quot;</span>: <span class="hljs-number">30</span>,<br>          <span class="hljs-attr">&quot;avg_price&quot;</span>: &#123;<br>            <span class="hljs-attr">&quot;value&quot;</span>: <span class="hljs-number">749.99</span><br>          &#125;<br>        &#125;,<br>        &#123;<br>          <span class="hljs-attr">&quot;key&quot;</span>: <span class="hljs-string">&quot;Sony&quot;</span>,<br>          <span class="hljs-attr">&quot;doc_count&quot;</span>: <span class="hljs-number">20</span>,<br>          <span class="hljs-attr">&quot;avg_price&quot;</span>: &#123;<br>            <span class="hljs-attr">&quot;value&quot;</span>: <span class="hljs-number">649.99</span><br>          &#125;<br>        &#125;,<br>        ... // 其他桶<br>      ]<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>group_by_brand、avg_price这两个聚合名称在结果里也会按层次出现，解析结果是需要识别自行业务处理。</p>
+<h2 id="聚合查询分类"><a href="#聚合查询分类" class="headerlink" title="聚合查询分类"></a><strong>聚合查询分类</strong></h2><p>假设我们有一个索引 <code>sales</code>，存储着商品销售记录，包含以下字段：</p>
+<ul>
+<li><code>product</code> (keyword): 产品名称，如 “iPhone 15”, “Coffee Maker”</li>
+<li><code>category</code> (keyword): 产品类别，如 “Electronics”, “Beverages”</li>
+<li><code>price</code> (double): 价格</li>
+<li><code>sold_date</code> (date): 销售日期</li>
+<li><code>region</code> (keyword): 销售地区，如 “North”, “South”</li>
+</ul>
+<h3 id="指标聚合（Metrics-Aggregations）"><a href="#指标聚合（Metrics-Aggregations）" class="headerlink" title="指标聚合（Metrics Aggregations）"></a><strong>指标聚合（Metrics Aggregations）</strong></h3><p>对数据集进行<strong>计算</strong>，输出一个或多个值。</p>
+<h4 id="平均值（Avg）"><a href="#平均值（Avg）" class="headerlink" title="平均值（Avg）"></a><strong>平均值（Avg）</strong></h4><ul>
+<li><strong>描述</strong>：计算一个字段的平均值。</li>
+<li><strong>示例</strong>：计算所有产品的平均售价</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /sales/_search<br>&#123;<br>  <span class="hljs-attr">&quot;size&quot;</span>: <span class="hljs-number">0</span>,<br>  <span class="hljs-attr">&quot;aggs&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;avg_price&quot;</span>: &#123;   <span class="hljs-comment">// 给你的聚合起个名</span><br>      <span class="hljs-attr">&quot;avg&quot;</span>: &#123;       <span class="hljs-comment">// 聚合类型是 avg</span><br>        <span class="hljs-attr">&quot;field&quot;</span>: <span class="hljs-string">&quot;price&quot;</span> <span class="hljs-comment">// 对 price 字段求平均</span><br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>结果</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs json">&#123;<br>  ...<br>  &quot;aggregations&quot; : &#123;<br>    &quot;avg_price&quot; : &#123;<br>      &quot;value&quot; : 245.72 // 这就是计算出的平均值<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="求和（Sum）"><a href="#求和（Sum）" class="headerlink" title="求和（Sum）"></a><strong>求和（Sum）</strong></h4><ul>
+<li><strong>描述</strong>：计算一个字段的总和。</li>
+<li><strong>示例</strong>：计算所有产品的销售总额。</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /sales/_search<br>&#123;<br>  <span class="hljs-attr">&quot;size&quot;</span>: <span class="hljs-number">0</span>,<br>  <span class="hljs-attr">&quot;aggs&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;total_sales&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;sum&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;field&quot;</span>: <span class="hljs-string">&quot;price&quot;</span><br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="最大值（Max）与最小值（Min）"><a href="#最大值（Max）与最小值（Min）" class="headerlink" title="最大值（Max）与最小值（Min）"></a><strong>最大值（Max）与最小值（Min）</strong></h4><ul>
+<li><strong>描述</strong>：找出一个字段的最大或最小值。</li>
+<li><strong>示例</strong>：找出最贵的产品价格。</li>
+</ul>
+<p>json</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /sales/_search<br>&#123;<br>  <span class="hljs-attr">&quot;size&quot;</span>: <span class="hljs-number">0</span>,<br>  <span class="hljs-attr">&quot;aggs&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;max_price&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;max&quot;</span>: &#123;<span class="hljs-comment">//min</span><br>        <span class="hljs-attr">&quot;field&quot;</span>: <span class="hljs-string">&quot;price&quot;</span><br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="统计（Stats）"><a href="#统计（Stats）" class="headerlink" title="统计（Stats）"></a><strong>统计（Stats）</strong></h4><ul>
+<li><strong>描述</strong>：一次性返回 count, max, min, avg, sum 五个基本指标。</li>
+<li><strong>示例</strong>：获取价格的基本统计信息。</li>
+</ul>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><ul>
+<li>指标聚合是<strong>计算</strong>，输出的是数值。</li>
+<li><code>avg</code>, <code>sum</code>, <code>max</code>, <code>min</code> 是单值指标聚合。</li>
+<li><code>stats</code> 是多值指标聚合，非常方便，一次获取所有常用统计值。</li>
+</ul>
+<h3 id="桶聚合（Bucket-Aggregations）"><a href="#桶聚合（Bucket-Aggregations）" class="headerlink" title="桶聚合（Bucket Aggregations）"></a>桶聚合（Bucket Aggregations）</h3><p>将文档<strong>分组</strong>到不同的桶中</p>
+<h4 id="词条聚合（Terms）"><a href="#词条聚合（Terms）" class="headerlink" title="词条聚合（Terms）"></a>词条聚合（Terms）</h4><ul>
+<li><strong>描述</strong>：按某个字段的确切值进行分组，是最常用的桶聚合。</li>
+<li><strong>示例</strong>：按产品类别进行分组，看每个类别有多少商品。</li>
+</ul>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /sales/_search<br>&#123;<br>  <span class="hljs-attr">&quot;size&quot;</span>: <span class="hljs-number">0</span>,<br>  <span class="hljs-attr">&quot;aggs&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;group_by_category&quot;</span>: &#123; <span class="hljs-comment">// 按类别分组</span><br>      <span class="hljs-attr">&quot;terms&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;field&quot;</span>: <span class="hljs-string">&quot;category&quot;</span>, <span class="hljs-comment">// 分组的依据字段</span><br>        <span class="hljs-attr">&quot;size&quot;</span>: <span class="hljs-number">20</span>           <span class="hljs-comment">// 返回排名前20的桶，默认是10</span><br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br><span class="hljs-comment">//结果</span><br>&#123;<br>  ...<br>  &quot;aggregations&quot; : &#123;<br>    &quot;group_by_category&quot; : &#123;<br>      &quot;doc_count_error_upper_bound&quot; : 0,<br>      &quot;sum_other_doc_count&quot; : 120, // 除了返回的桶之外，其他所有类别的文档总数<br>      &quot;buckets&quot; : [ // 桶的集合，默认按 doc_count 降序排列<br>        &#123;<br>          <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-string">&quot;Electronics&quot;</span>, <span class="hljs-comment">// 桶的键，即类别名称</span><br>          <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">85</span>       <span class="hljs-comment">// 属于该桶的文档数量</span><br>        &#125;,<br>        &#123;<br>          <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-string">&quot;Beverages&quot;</span>,<br>          <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">63</span><br>        &#125;,<br>        &#123;<br>          <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-string">&quot;Books&quot;</span>,<br>          <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">42</span><br>        &#125;<br>      ]<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="范围聚合（Range）"><a href="#范围聚合（Range）" class="headerlink" title="范围聚合（Range）"></a>范围聚合（Range）</h4><ul>
+<li><strong>描述</strong>：按数值范围创建桶。</li>
+<li><strong>示例</strong>：按价格区间分组（0-50, 50-100, 100-500, 500+）。</li>
+</ul>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /sales/_search<br>&#123;<br>  <span class="hljs-attr">&quot;size&quot;</span>: <span class="hljs-number">0</span>,<br>  <span class="hljs-attr">&quot;aggs&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;price_ranges&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;range&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;field&quot;</span>: <span class="hljs-string">&quot;price&quot;</span>,<br>        <span class="hljs-attr">&quot;ranges&quot;</span>: [<br>          &#123; <span class="hljs-attr">&quot;to&quot;</span>: <span class="hljs-number">50</span> &#125;,         <span class="hljs-comment">// 价格 &lt; 50</span><br>          &#123; <span class="hljs-attr">&quot;from&quot;</span>: <span class="hljs-number">50</span>, <span class="hljs-attr">&quot;to&quot;</span>: <span class="hljs-number">100</span> &#125;, <span class="hljs-comment">// 50 &lt;= 价格 &lt; 100</span><br>          &#123; <span class="hljs-attr">&quot;from&quot;</span>: <span class="hljs-number">100</span>, <span class="hljs-attr">&quot;to&quot;</span>: <span class="hljs-number">500</span> &#125;,<br>          &#123; <span class="hljs-attr">&quot;from&quot;</span>: <span class="hljs-number">500</span> &#125;<br>        ]<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br><br><span class="hljs-comment">//结果</span><br>&#123;<br>  ...<br>  &quot;aggregations&quot; : &#123;<br>    &quot;price_ranges&quot; : &#123;<br>      &quot;buckets&quot; : [<br>        &#123;<br>          <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-string">&quot;*-50.0&quot;</span>,      <span class="hljs-comment">// ES自动生成的key，也可以使用 &quot;keyed&quot;: true 来自定义</span><br>          <span class="hljs-attr">&quot;to&quot;</span> : <span class="hljs-number">50.0</span>,<br>          <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">128</span>      <span class="hljs-comment">// 价格 &lt; 50 的商品数量</span><br>        &#125;,<br>        &#123;<br>          <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-string">&quot;50.0-100.0&quot;</span>,<br>          <span class="hljs-attr">&quot;from&quot;</span> : <span class="hljs-number">50.0</span>,<br>          <span class="hljs-attr">&quot;to&quot;</span> : <span class="hljs-number">100.0</span>,<br>          <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">204</span><br>        &#125;,<br>        &#123;<br>          <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-string">&quot;100.0-500.0&quot;</span>,<br>          <span class="hljs-attr">&quot;from&quot;</span> : <span class="hljs-number">100.0</span>,<br>          <span class="hljs-attr">&quot;to&quot;</span> : <span class="hljs-number">500.0</span>,<br>          <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">312</span><br>        &#125;,<br>        &#123;<br>          <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-string">&quot;500.0-*&quot;</span>,<br>          <span class="hljs-attr">&quot;from&quot;</span> : <span class="hljs-number">500.0</span>,<br>          <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">56</span><br>        &#125;<br>      ]<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="日期直方图聚合（Date-Histogram）"><a href="#日期直方图聚合（Date-Histogram）" class="headerlink" title="日期直方图聚合（Date Histogram）"></a>日期直方图聚合（Date Histogram）</h4><ul>
+<li><strong>描述</strong>：按固定的时间间隔（如每天、每月）创建桶。<strong>处理时间序列数据必备</strong>。</li>
+<li><strong>示例</strong>：统计每月有多少销售额。</li>
+</ul>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /sales/_search<br>&#123;<br>  <span class="hljs-attr">&quot;size&quot;</span>: <span class="hljs-number">0</span>,<br>  <span class="hljs-attr">&quot;aggs&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;sales_per_month&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;date_histogram&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;field&quot;</span>: <span class="hljs-string">&quot;sold_date&quot;</span>,<br>        <span class="hljs-attr">&quot;calendar_interval&quot;</span>: <span class="hljs-string">&quot;month&quot;</span>, <span class="hljs-comment">// 时间间隔：月。也可以是 &quot;day&quot;, &quot;year&quot;</span><br>        <span class="hljs-attr">&quot;format&quot;</span>: <span class="hljs-string">&quot;yyyy-MM&quot;</span>           <span class="hljs-comment">// 返回结果的日期格式（可选）</span><br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br><br><span class="hljs-comment">//聚合</span><br>&#123;<br>  ...<br>  &quot;aggregations&quot; : &#123;<br>    &quot;sales_per_month&quot; : &#123;<br>      &quot;buckets&quot; : [<br>        &#123;<br>          <span class="hljs-attr">&quot;key_as_string&quot;</span> : <span class="hljs-string">&quot;2024-01&quot;</span>, <span class="hljs-comment">// 格式化后的日期字符串</span><br>          <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-number">1704067200000</span>,       <span class="hljs-comment">// 时间戳（毫秒）</span><br>          <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">150</span>            <span class="hljs-comment">// 2024年1月销售的文档数</span><br>        &#125;,<br>        &#123;<br>          <span class="hljs-attr">&quot;key_as_string&quot;</span> : <span class="hljs-string">&quot;2024-02&quot;</span>,<br>          <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-number">1706745600000</span>,<br>          <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">183</span><br>        &#125;,<br>        &#123;<br>          <span class="hljs-attr">&quot;key_as_string&quot;</span> : <span class="hljs-string">&quot;2024-03&quot;</span>,<br>          <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-number">1709251200000</span>,<br>          <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">210</span><br>        &#125;<br>        <span class="hljs-comment">// ... 其他月份</span><br>      ]<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="组合聚合：桶内嵌套指标"><a href="#组合聚合：桶内嵌套指标" class="headerlink" title="组合聚合：桶内嵌套指标"></a>组合聚合：桶内嵌套指标</h3><p><strong>查询：计算每个产品类别的平均价格。</strong></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /sales/_search<br>&#123;<br>  <span class="hljs-attr">&quot;size&quot;</span>: <span class="hljs-number">0</span>,<br>  <span class="hljs-attr">&quot;aggs&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;group_by_category&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;terms&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;field&quot;</span>: <span class="hljs-string">&quot;category&quot;</span><br>      &#125;,<br>      <span class="hljs-attr">&quot;aggs&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;avg_price_in_category&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;avg&quot;</span>: &#123;<br>            <span class="hljs-attr">&quot;field&quot;</span>: <span class="hljs-string">&quot;price&quot;</span><br>          &#125;<br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br><span class="hljs-comment">//结果</span><br>&#123;<br>  ...<br>  &quot;aggregations&quot; : &#123;<br>    &quot;group_by_category&quot; : &#123;<br>      &quot;buckets&quot; : [<br>        &#123;<br>          <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-string">&quot;Electronics&quot;</span>,<br>          <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">85</span>,<br>          <span class="hljs-attr">&quot;avg_price_in_category&quot;</span> : &#123; <span class="hljs-comment">// 子聚合的结果以其名称命名</span><br>            <span class="hljs-attr">&quot;value&quot;</span> : <span class="hljs-number">599.99</span>          <span class="hljs-comment">// 电子类产品的平均价格</span><br>          &#125;<br>        &#125;,<br>        &#123;<br>          <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-string">&quot;Beverages&quot;</span>,<br>          <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">63</span>,<br>          <span class="hljs-attr">&quot;avg_price_in_category&quot;</span> : &#123;<br>            <span class="hljs-attr">&quot;value&quot;</span> : <span class="hljs-number">5.99</span>           <span class="hljs-comment">// 饮品类产品的平均价格</span><br>          &#125;<br>        &#125;,<br>        &#123;<br>          <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-string">&quot;Books&quot;</span>,<br>          <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">42</span>,<br>          <span class="hljs-attr">&quot;avg_price_in_category&quot;</span> : &#123;<br>            <span class="hljs-attr">&quot;value&quot;</span> : <span class="hljs-number">25.49</span><br>          &#125;<br>        &#125;<br>      ]<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在每个类别桶（<code>key</code>）的内部，除了 <code>doc_count</code>，还多出了一个以子聚合名称（<code>avg_price_in_category</code>）命名的对象，其中包含了计算出的指标 <code>value</code></p>
+<h3 id="复杂组合聚合：多层嵌套"><a href="#复杂组合聚合：多层嵌套" class="headerlink" title="复杂组合聚合：多层嵌套"></a><strong>复杂组合聚合：多层嵌套</strong></h3><p><strong>查询：先按地区分组，再按月份分组，然后计算每个地区-月组合的销售总额。</strong></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><code class="hljs json">GET /sales/_search<br>&#123;<br>  <span class="hljs-attr">&quot;size&quot;</span>: <span class="hljs-number">0</span>,<br>  <span class="hljs-attr">&quot;aggs&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;group_by_region&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;terms&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;field&quot;</span>: <span class="hljs-string">&quot;region&quot;</span><br>      &#125;,<br>      <span class="hljs-attr">&quot;aggs&quot;</span>: &#123;<br>        <span class="hljs-attr">&quot;sales_over_time&quot;</span>: &#123;<br>          <span class="hljs-attr">&quot;date_histogram&quot;</span>: &#123;<br>            <span class="hljs-attr">&quot;field&quot;</span>: <span class="hljs-string">&quot;sold_date&quot;</span>,<br>            <span class="hljs-attr">&quot;calendar_interval&quot;</span>: <span class="hljs-string">&quot;month&quot;</span>,<br>            <span class="hljs-attr">&quot;format&quot;</span>: <span class="hljs-string">&quot;yyyy-MM&quot;</span><br>          &#125;,<br>          <span class="hljs-attr">&quot;aggs&quot;</span>: &#123;<br>            <span class="hljs-attr">&quot;monthly_revenue&quot;</span>: &#123;<br>              <span class="hljs-attr">&quot;sum&quot;</span>: &#123;<br>                <span class="hljs-attr">&quot;field&quot;</span>: <span class="hljs-string">&quot;price&quot;</span><br>              &#125;<br>            &#125;<br>          &#125;<br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br><span class="hljs-comment">//结果</span><br>&#123;<br>  ...<br>  &quot;aggregations&quot; : &#123;<br>    &quot;group_by_region&quot; : &#123;<br>      &quot;buckets&quot; : [<br>        &#123;<br>          <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-string">&quot;North&quot;</span>, <span class="hljs-comment">// 第一个地区桶</span><br>          <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">400</span>,<br>          <span class="hljs-attr">&quot;sales_over_time&quot;</span> : &#123; <span class="hljs-comment">// 该地区下的日期直方图子聚合</span><br>            <span class="hljs-attr">&quot;buckets&quot;</span> : [ <span class="hljs-comment">// 这个buckets是North地区下的月份桶</span><br>              &#123;<br>                <span class="hljs-attr">&quot;key_as_string&quot;</span> : <span class="hljs-string">&quot;2024-01&quot;</span>,<br>                <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-number">1704067200000</span>,<br>                <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">120</span>,<br>                <span class="hljs-attr">&quot;monthly_revenue&quot;</span> : &#123; <span class="hljs-comment">// 月份桶内的求和子聚合</span><br>                  <span class="hljs-attr">&quot;value&quot;</span> : <span class="hljs-number">35880.50</span> <span class="hljs-comment">// North地区2024年1月的总销售额</span><br>                &#125;<br>              &#125;,<br>              &#123;<br>                <span class="hljs-attr">&quot;key_as_string&quot;</span> : <span class="hljs-string">&quot;2024-02&quot;</span>,<br>                <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-number">1706745600000</span>,<br>                <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">145</span>,<br>                <span class="hljs-attr">&quot;monthly_revenue&quot;</span> : &#123;<br>                  <span class="hljs-attr">&quot;value&quot;</span> : <span class="hljs-number">42123.20</span><br>                &#125;<br>              &#125;<br>              <span class="hljs-comment">// ... North地区的其他月份</span><br>            ]<br>          &#125;<br>        &#125;,<br>        &#123;<br>          <span class="hljs-attr">&quot;key&quot;</span> : <span class="hljs-string">&quot;South&quot;</span>, <span class="hljs-comment">// 第二个地区桶</span><br>          <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">350</span>,<br>          <span class="hljs-attr">&quot;sales_over_time&quot;</span> : &#123;<br>            <span class="hljs-attr">&quot;buckets&quot;</span> : [ <span class="hljs-comment">// South地区下的月份桶</span><br>              &#123;<br>                <span class="hljs-attr">&quot;key_as_string&quot;</span> : <span class="hljs-string">&quot;2024-01&quot;</span>,<br>                <span class="hljs-attr">&quot;doc_count&quot;</span> : <span class="hljs-number">110</span>,<br>                <span class="hljs-attr">&quot;monthly_revenue&quot;</span> : &#123;<br>                  <span class="hljs-attr">&quot;value&quot;</span> : <span class="hljs-number">22500.00</span><br>                &#125;<br>              &#125;<br>              <span class="hljs-comment">// ... South地区的其他月份</span><br>            ]<br>          &#125;<br>        &#125;<br>      ]<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>“分层下钻”</strong>：先分大组（桶），再在组内进行计算（指标）或再分小组（桶）。</li>
+<li>可以无限嵌套，但性能会随着嵌套深度增加而下降。</li>
+<li>这是构建复杂数据分析报表的基础。</li>
+</ul>
+<p>这个结果完美展示了数据的“分层下钻”结构：</p>
+<ol>
+<li>第一层：<code>region</code> 桶（North, South）。</li>
+<li>在每一个 <code>region</code> 桶内，是第二层：<code>date_histogram</code> 桶（2024-01, 2024-02…）。</li>
+<li>在每一个 <code>日期</code> 桶内，是最终计算的指标：该月该地区的销售</li>
+</ol>
+<p>- </p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Elasticsearch/" rel="tag"># Elasticsearch</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/07/19/ES(ElasticSearch)-%E5%90%91%E9%87%8F%E6%90%9C%E7%B4%A2/" rel="prev" title="ES(ElasticSearch)-向量搜索">
+      <i class="fa fa-chevron-left"></i> ES(ElasticSearch)-向量搜索
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%81%9A%E5%90%88%E6%9F%A5%E8%AF%A2"><span class="nav-number">1.</span> <span class="nav-text">聚合查询</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5"><span class="nav-number">1.1.</span> <span class="nav-text">相关概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%81%9A%E5%90%88%E6%9F%A5%E8%AF%A2%E7%9A%84%E8%AF%AD%E6%B3%95%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">聚合查询的语法结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%81%9A%E5%90%88%E6%9F%A5%E8%AF%A2%E5%88%86%E7%B1%BB"><span class="nav-number">1.3.</span> <span class="nav-text">聚合查询分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E6%A0%87%E8%81%9A%E5%90%88%EF%BC%88Metrics-Aggregations%EF%BC%89"><span class="nav-number">1.3.1.</span> <span class="nav-text">指标聚合（Metrics Aggregations）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B3%E5%9D%87%E5%80%BC%EF%BC%88Avg%EF%BC%89"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">平均值（Avg）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B1%82%E5%92%8C%EF%BC%88Sum%EF%BC%89"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">求和（Sum）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%80%E5%A4%A7%E5%80%BC%EF%BC%88Max%EF%BC%89%E4%B8%8E%E6%9C%80%E5%B0%8F%E5%80%BC%EF%BC%88Min%EF%BC%89"><span class="nav-number">1.3.1.3.</span> <span class="nav-text">最大值（Max）与最小值（Min）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%9F%E8%AE%A1%EF%BC%88Stats%EF%BC%89"><span class="nav-number">1.3.1.4.</span> <span class="nav-text">统计（Stats）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.3.1.5.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%B6%E8%81%9A%E5%90%88%EF%BC%88Bucket-Aggregations%EF%BC%89"><span class="nav-number">1.3.2.</span> <span class="nav-text">桶聚合（Bucket Aggregations）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%8D%E6%9D%A1%E8%81%9A%E5%90%88%EF%BC%88Terms%EF%BC%89"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">词条聚合（Terms）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8C%83%E5%9B%B4%E8%81%9A%E5%90%88%EF%BC%88Range%EF%BC%89"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">范围聚合（Range）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A5%E6%9C%9F%E7%9B%B4%E6%96%B9%E5%9B%BE%E8%81%9A%E5%90%88%EF%BC%88Date-Histogram%EF%BC%89"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">日期直方图聚合（Date Histogram）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%84%E5%90%88%E8%81%9A%E5%90%88%EF%BC%9A%E6%A1%B6%E5%86%85%E5%B5%8C%E5%A5%97%E6%8C%87%E6%A0%87"><span class="nav-number">1.3.3.</span> <span class="nav-text">组合聚合：桶内嵌套指标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%8D%E6%9D%82%E7%BB%84%E5%90%88%E8%81%9A%E5%90%88%EF%BC%9A%E5%A4%9A%E5%B1%82%E5%B5%8C%E5%A5%97"><span class="nav-number">1.3.4.</span> <span class="nav-text">复杂组合聚合：多层嵌套</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">83</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>
