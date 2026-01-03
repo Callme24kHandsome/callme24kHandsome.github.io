@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="SpringAI MCP协议详解-STDIO与SSE两种传输方式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringAI-04-MCP协议详解">
+<meta property="og:url" content="http://example.com/2026/01/03/SpringAI-04-MCP%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="SpringAI MCP协议详解-STDIO与SSE两种传输方式">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-01-03T13:00:00.000Z">
+<meta property="article:modified_time" content="2026-01-03T06:54:27.482Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="SpringAI">
+<meta property="article:tag" content="MCP">
+<meta property="article:tag" content="协议">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2026/01/03/SpringAI-04-MCP%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SpringAI-04-MCP协议详解 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/01/03/SpringAI-04-MCP%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringAI-04-MCP协议详解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-01-03 21:00:00 / 修改时间：14:54:27" itemprop="dateCreated datePublished" datetime="2026-01-03T21:00:00+08:00">2026-01-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SpringAI/" itemprop="url" rel="index"><span itemprop="name">SpringAI</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">SpringAI MCP协议详解-STDIO与SSE两种传输方式</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、MCP-协议是什么"><a href="#一、MCP-协议是什么" class="headerlink" title="一、MCP 协议是什么"></a>一、MCP 协议是什么</h1><p>​    MCP（Model Context Protocol）是 Spring AI 提供的模型上下文协议，提供了一种标准化的方式来连接 AI 模型和外部工具。</p>
+<p><strong>简单理解：</strong></p>
+<ul>
+<li>之前我们直接在应用中使用 <code>@Tool</code> 定义工具</li>
+<li>MCP 协议可以把工具服务独立出来，作为一个独立的进程或服务</li>
+<li>AI 应用通过 MCP 协议调用这些独立的工具服务</li>
+</ul>
+<p><strong>MCP 的优势：</strong></p>
+<ul>
+<li><strong>解耦</strong>：工具服务和 AI 应用解耦，可以独立开发和部署</li>
+<li><strong>标准化</strong>：提供了标准化的协议，便于集成</li>
+<li><strong>灵活</strong>：支持多种传输方式，适应不同场景</li>
+<li><strong>可扩展</strong>：可以轻松添加新的工具服务</li>
+</ul>
+<p><strong>使用场景：</strong></p>
+<ul>
+<li>工具服务需要独立部署</li>
+<li>多个 AI 应用需要共享同一套工具</li>
+<li>工具服务需要跨语言实现</li>
+<li>需要进程隔离的场景</li>
+</ul>
+<h1 id="二、MCP-的三种传输方式"><a href="#二、MCP-的三种传输方式" class="headerlink" title="二、MCP 的三种传输方式"></a>二、MCP 的三种传输方式</h1><p>​    Spring AI 支持三种 MCP 传输方式：</p>
+<p><strong>1. Client + 公共 MCP-Server</strong></p>
+<ul>
+<li>连接到公共的 MCP 服务器</li>
+<li>适合使用第三方提供的工具服务</li>
+</ul>
+<p><strong>2. STDIO（标准输入输出）</strong></p>
+<ul>
+<li>通过标准输入输出流进行通信</li>
+<li>适合本地工具服务</li>
+<li>进程间通信</li>
+</ul>
+<p><strong>3. SSE（Server-Sent Events）</strong></p>
+<ul>
+<li>通过 HTTP + SSE 进行通信</li>
+<li>适合远程工具服务</li>
+<li>网络通信</li>
+</ul>
+<p><strong>本文主要介绍 STDIO 和 SSE 两种方式。</strong></p>
+<h1 id="三、MCP-Client-配置"><a href="#三、MCP-Client-配置" class="headerlink" title="三、MCP Client 配置"></a>三、MCP Client 配置</h1><h2 id="3-1-依赖配置"><a href="#3-1-依赖配置" class="headerlink" title="3.1 依赖配置"></a>3.1 依赖配置</h2><p>​    在 AI 应用（调用方）中添加 MCP Client 依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.ai<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-ai-starter-mcp-client-webflux<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>注意：</strong></p>
+<ul>
+<li>这个依赖包含了 STDIO 和 SSE 两种客户端</li>
+<li>需要 Spring WebFlux 支持（因为使用了响应式编程）</li>
+</ul>
+<h2 id="3-2-STDIO-配置"><a href="#3-2-STDIO-配置" class="headerlink" title="3.2 STDIO 配置"></a>3.2 STDIO 配置</h2><p><strong>application.properties：</strong></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-comment"># MCP Client STDIO 配置</span><br><span class="hljs-meta">spring.ai.mcp.client.stdio.servers-configuration</span>=<span class="hljs-string">classpath:/mcp/mcp-servers.json</span><br><span class="hljs-meta">spring.ai.mcp.client.timeout</span>=<span class="hljs-string">60000</span><br><br><span class="hljs-comment"># 日志配置（调试时开启）</span><br><span class="hljs-meta">logging.level.io.modelcontextprotocol</span>=<span class="hljs-string">DEBUG</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>mcp-servers.json：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs json">&#123;<br>  <span class="hljs-attr">&quot;mcpServers&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;getweather&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;command&quot;</span>: <span class="hljs-string">&quot;java&quot;</span>,<br>      <span class="hljs-attr">&quot;args&quot;</span>: [<br>        <span class="hljs-string">&quot;-Dspring.ai.mcp.server.stdio=true&quot;</span>,<br>        <span class="hljs-string">&quot;-Dlogging.pattern.console=&quot;</span>,<br>        <span class="hljs-string">&quot;-jar&quot;</span>,<br>        <span class="hljs-string">&quot;D:\\git\\code\\study\\spring-ai-study\\05mcp-server-stdio\\target\\05mcp-server-stdio-1.0-SNAPSHOT.jar&quot;</span><br>      ]<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>配置说明：</strong></p>
+<ul>
+<li><code>servers-configuration</code>：MCP Server 配置文件路径</li>
+<li><code>timeout</code>：超时时间（毫秒）</li>
+<li><code>command</code>：启动 MCP Server 的命令（这里是 java）</li>
+<li><code>args</code>：启动参数<ul>
+<li><code>-Dspring.ai.mcp.server.stdio=true</code>：启用 STDIO 模式</li>
+<li><code>-Dlogging.pattern.console=</code>：禁用控制台日志（避免干扰通信）</li>
+<li><code>-jar</code>：指定 jar 包路径</li>
+</ul>
+</li>
+</ul>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li>jar 包路径建议使用绝对路径</li>
+<li>Windows 路径使用 <code>\\</code> 或 <code>/</code> 都可以</li>
+<li>确保 jar 包已经打包好</li>
+</ul>
+<h2 id="3-3-SSE-配置"><a href="#3-3-SSE-配置" class="headerlink" title="3.3 SSE 配置"></a>3.3 SSE 配置</h2><p><strong>application.properties：</strong></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-comment"># MCP Client SSE 配置</span><br><span class="hljs-meta">spring.ai.mcp.client.sse.connections.userScores.url</span>=<span class="hljs-string">http://localhost:8088</span><br><span class="hljs-meta">spring.ai.mcp.client.sse.connections.userScores.sse-endpoint</span>=<span class="hljs-string">/sse</span><br><span class="hljs-meta">spring.ai.mcp.client.timeout</span>=<span class="hljs-string">60000</span><br><br><span class="hljs-comment"># 日志配置</span><br><span class="hljs-meta">logging.level.io.modelcontextprotocol</span>=<span class="hljs-string">DEBUG</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>配置说明：</strong></p>
+<ul>
+<li><code>connections.userScores</code>：连接名称，可以自定义</li>
+<li><code>url</code>：MCP Server 的地址</li>
+<li><code>sse-endpoint</code>：SSE 端点路径（通常是 <code>/sse</code>）</li>
+</ul>
+<p><strong>多服务器配置：</strong></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-comment"># 天气服务</span><br><span class="hljs-meta">spring.ai.mcp.client.sse.connections.weather.url</span>=<span class="hljs-string">http://localhost:8088</span><br><span class="hljs-meta">spring.ai.mcp.client.sse.connections.weather.sse-endpoint</span>=<span class="hljs-string">/sse</span><br><br><span class="hljs-comment"># 用户分数服务</span><br><span class="hljs-meta">spring.ai.mcp.client.sse.connections.userScores.url</span>=<span class="hljs-string">http://localhost:8089</span><br><span class="hljs-meta">spring.ai.mcp.client.sse.connections.userScores.sse-endpoint</span>=<span class="hljs-string">/sse</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="四、MCP-Server-STDIO-方式"><a href="#四、MCP-Server-STDIO-方式" class="headerlink" title="四、MCP Server - STDIO 方式"></a>四、MCP Server - STDIO 方式</h1><h2 id="4-1-项目搭建"><a href="#4-1-项目搭建" class="headerlink" title="4.1 项目搭建"></a>4.1 项目搭建</h2><p><strong>依赖配置：</strong></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.ai<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-ai-starter-mcp-server<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>注意：</strong></p>
+<ul>
+<li><code>spring-ai-starter-mcp-server</code>：MCP Server 的核心依赖</li>
+<li><code>spring-boot-starter-web</code>：虽然 STDIO 不需要 Web，但某些场景可能需要</li>
+</ul>
+<h2 id="4-2-工具服务实现"><a href="#4-2-工具服务实现" class="headerlink" title="4.2 工具服务实现"></a>4.2 工具服务实现</h2><p><strong>WeatherService：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> org.study.ai;<br><br><span class="hljs-keyword">import</span> org.springframework.ai.tool.annotation.Tool;<br><span class="hljs-keyword">import</span> org.springframework.stereotype.Service;<br><span class="hljs-keyword">import</span> org.springframework.web.client.RestClient;<br><br><span class="hljs-meta">@Service</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">WeatherService</span> </span>&#123;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> RestClient restClient;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">WeatherService</span><span class="hljs-params">()</span> </span>&#123;<br>        restClient = RestClient.builder().build();<br>    &#125;<br><br>    <span class="hljs-meta">@Tool(description = &quot;获取指定经纬度的天气预报&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getWeather</span><span class="hljs-params">(<span class="hljs-keyword">double</span> latitude, <span class="hljs-keyword">double</span> longitude)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> restClient.get()<br>                .uri(<span class="hljs-string">&quot;https://api.open-meteo.com/v1/forecast?latitude=&#123;latitude&#125;&amp;longitude=&#123;longitude&#125;&amp;current_weather=true&quot;</span>,<br>                     latitude, longitude)<br>                .retrieve()<br>                .body(String.class);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>关键点：</strong></p>
+<ul>
+<li>使用 <code>@Tool</code> 注解定义工具方法</li>
+<li>工具方法的实现和普通 Spring Bean 一样</li>
+<li>可以调用外部 API、数据库等</li>
+</ul>
+<h2 id="4-3-启动配置"><a href="#4-3-启动配置" class="headerlink" title="4.3 启动配置"></a>4.3 启动配置</h2><p><strong>启动类：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@SpringBootApplication</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">McpServerApplication</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        SpringApplication.run(McpServerApplication.class, args);<br>    &#125;<br><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> ToolCallbackProvider <span class="hljs-title">toolCallbackProvider</span><span class="hljs-params">(WeatherService weatherService)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> MethodToolCallbackProvider.builder()<br>            .toolObjects(weatherService)<br>            .build();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>打包：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">mvn clean package<br></code></pre></td></tr></table></figure>
+
+<p><strong>启动参数：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">java -Dspring.ai.mcp.server.stdio=<span class="hljs-literal">true</span> \<br>     -Dlogging.pattern.console= \<br>     -jar mcp-server-stdio.jar<br></code></pre></td></tr></table></figure>
+
+<p><strong>关键参数：</strong></p>
+<ul>
+<li><code>-Dspring.ai.mcp.server.stdio=true</code>：启用 STDIO 模式</li>
+<li><code>-Dlogging.pattern.console=</code>：禁用控制台日志（重要！否则会干扰通信）</li>
+</ul>
+<h2 id="4-4-工作原理"><a href="#4-4-工作原理" class="headerlink" title="4.4 工作原理"></a>4.4 工作原理</h2><p><strong>STDIO 工作流程：</strong></p>
+<ol>
+<li><strong>启动进程</strong>：MCP Client 根据配置启动 MCP Server 进程</li>
+<li><strong>标准输入</strong>：MCP Client 通过标准输入（stdin）发送工具调用请求</li>
+<li><strong>标准输出</strong>：MCP Server 通过标准输出（stdout）返回结果</li>
+<li><strong>进程通信</strong>：通过进程间通信实现数据传输</li>
+</ol>
+<p><strong>通信格式：</strong></p>
+<ul>
+<li>使用 JSON-RPC 2.0 协议</li>
+<li>请求和响应都是 JSON 格式</li>
+<li>通过标准输入输出流传输</li>
+</ul>
+<p><strong>优点：</strong></p>
+<ul>
+<li>进程隔离，工具服务崩溃不影响主应用</li>
+<li>部署简单，只需要一个 jar 包</li>
+<li>适合本地工具服务</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>只能本地部署</li>
+<li>进程启动有开销</li>
+<li>调试相对困难</li>
+</ul>
+<h1 id="五、MCP-Server-SSE-方式"><a href="#五、MCP-Server-SSE-方式" class="headerlink" title="五、MCP Server - SSE 方式"></a>五、MCP Server - SSE 方式</h1><h2 id="5-1-项目搭建"><a href="#5-1-项目搭建" class="headerlink" title="5.1 项目搭建"></a>5.1 项目搭建</h2><p><strong>依赖配置：</strong></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.ai<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-ai-starter-mcp-server-webflux<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-webflux<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>注意：</strong></p>
+<ul>
+<li><code>spring-ai-starter-mcp-server-webflux</code>：SSE 方式的 MCP Server</li>
+<li>需要 WebFlux 支持（响应式编程）</li>
+</ul>
+<h2 id="5-2-工具服务实现"><a href="#5-2-工具服务实现" class="headerlink" title="5.2 工具服务实现"></a>5.2 工具服务实现</h2><p><strong>UserToolService：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> org.study.ai;<br><br><span class="hljs-keyword">import</span> org.springframework.ai.tool.annotation.Tool;<br><span class="hljs-keyword">import</span> org.springframework.stereotype.Service;<br><br><span class="hljs-keyword">import</span> java.util.Map;<br><br><span class="hljs-meta">@Service</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserToolService</span> </span>&#123;<br><br>    <span class="hljs-keyword">private</span> Map&lt;String, Double&gt; userScore = Map.of(<br>        <span class="hljs-string">&quot;xushu&quot;</span>, <span class="hljs-number">2.0</span>,<br>        <span class="hljs-string">&quot;xiaoming&quot;</span>, <span class="hljs-number">1.0</span><br>    );<br><br>    <span class="hljs-meta">@Tool(description = &quot;获取用户分数&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getWeather</span><span class="hljs-params">(String userName)</span> </span>&#123;<br>        <span class="hljs-keyword">if</span> (userScore.containsKey(userName)) &#123;<br>            <span class="hljs-keyword">return</span> userScore.get(userName).toString();<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;未找到用户分数&quot;</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>启动类：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@SpringBootApplication</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">McpServerSSEApplication</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(String[] args)</span> </span>&#123;<br>        SpringApplication.run(McpServerSSEApplication.class, args);<br>    &#125;<br><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> ToolCallbackProvider <span class="hljs-title">toolCallbackProvider</span><span class="hljs-params">(UserToolService userToolService)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> MethodToolCallbackProvider.builder()<br>            .toolObjects(userToolService)<br>            .build();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>配置：</strong></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-meta">server.port</span>=<span class="hljs-string">8088</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="5-3-工作原理"><a href="#5-3-工作原理" class="headerlink" title="5.3 工作原理"></a>5.3 工作原理</h2><p><strong>SSE 工作流程：</strong></p>
+<ol>
+<li><strong>HTTP 连接</strong>：MCP Client 通过 HTTP 连接到 MCP Server</li>
+<li><strong>建立 SSE 流</strong>：建立 Server-Sent Events 流</li>
+<li><strong>双向通信</strong>：通过 SSE 流实现双向通信</li>
+<li><strong>实时传输</strong>：支持实时数据传输</li>
+</ol>
+<p><strong>通信格式：</strong></p>
+<ul>
+<li>使用 JSON-RPC 2.0 协议</li>
+<li>通过 HTTP + SSE 传输</li>
+<li>支持实时双向通信</li>
+</ul>
+<p><strong>SSE 端点：</strong></p>
+<ul>
+<li>MCP Server 会自动暴露 SSE 端点</li>
+<li>默认路径：<code>/sse</code></li>
+<li>可以通过配置修改</li>
+</ul>
+<p><strong>优点：</strong></p>
+<ul>
+<li>可以远程部署</li>
+<li>支持多个客户端连接</li>
+<li>实时性好</li>
+<li>调试方便（可以用浏览器测试）</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>需要网络连接</li>
+<li>需要 Web 服务器支持</li>
+<li>配置相对复杂</li>
+</ul>
+<h1 id="六、STDIO-vs-SSE"><a href="#六、STDIO-vs-SSE" class="headerlink" title="六、STDIO vs SSE"></a>六、STDIO vs SSE</h1><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>STDIO</th>
+<th>SSE</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>部署方式</td>
+<td>本地进程</td>
+<td>远程服务</td>
+</tr>
+<tr>
+<td>通信方式</td>
+<td>标准输入输出</td>
+<td>HTTP + SSE</td>
+</tr>
+<tr>
+<td>进程隔离</td>
+<td>✅ 是</td>
+<td>❌ 否</td>
+</tr>
+<tr>
+<td>远程访问</td>
+<td>❌ 否</td>
+<td>✅ 是</td>
+</tr>
+<tr>
+<td>实时性</td>
+<td>高</td>
+<td>高</td>
+</tr>
+<tr>
+<td>调试难度</td>
+<td>较难</td>
+<td>较易</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>本地工具服务</td>
+<td>远程工具服务</td>
+</tr>
+</tbody></table>
+<p><strong>选择建议：</strong></p>
+<ul>
+<li><strong>本地工具服务</strong>：使用 STDIO</li>
+<li><strong>远程工具服务</strong>：使用 SSE</li>
+<li><strong>需要进程隔离</strong>：使用 STDIO</li>
+<li><strong>需要多个客户端共享</strong>：使用 SSE</li>
+</ul>
+<h1 id="七、实际案例"><a href="#七、实际案例" class="headerlink" title="七、实际案例"></a>七、实际案例</h1><h2 id="7-1-天气服务（STDIO）"><a href="#7-1-天气服务（STDIO）" class="headerlink" title="7.1 天气服务（STDIO）"></a>7.1 天气服务（STDIO）</h2><p><strong>场景：</strong> 提供一个天气查询工具，通过 STDIO 方式提供服务。</p>
+<p><strong>MCP Server 项目结构：</strong></p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-number">05</span>mcp-server-stdio/<br>├── src<span class="hljs-regexp">/main/</span>java/<br>│   └── org<span class="hljs-regexp">/study/</span>ai/<br>│       ├── McpServerApplication.java<br>│       └── WeatherService.java<br>└── pom.xml<br></code></pre></td></tr></table></figure>
+
+<p><strong>WeatherService：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Service</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">WeatherService</span> </span>&#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> RestClient restClient;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">WeatherService</span><span class="hljs-params">()</span> </span>&#123;<br>        restClient = RestClient.builder().build();<br>    &#125;<br><br>    <span class="hljs-meta">@Tool(description = &quot;获取指定经纬度的天气预报&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getWeather</span><span class="hljs-params">(<span class="hljs-keyword">double</span> latitude, <span class="hljs-keyword">double</span> longitude)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> restClient.get()<br>                .uri(<span class="hljs-string">&quot;https://api.open-meteo.com/v1/forecast?latitude=&#123;latitude&#125;&amp;longitude=&#123;longitude&#125;&amp;current_weather=true&quot;</span>,<br>                     latitude, longitude)<br>                .retrieve()<br>                .body(String.class);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>MCP Client 配置（调用方）：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs json">&#123;<br>  <span class="hljs-attr">&quot;mcpServers&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;getweather&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;command&quot;</span>: <span class="hljs-string">&quot;java&quot;</span>,<br>      <span class="hljs-attr">&quot;args&quot;</span>: [<br>        <span class="hljs-string">&quot;-Dspring.ai.mcp.server.stdio=true&quot;</span>,<br>        <span class="hljs-string">&quot;-Dlogging.pattern.console=&quot;</span>,<br>        <span class="hljs-string">&quot;-jar&quot;</span>,<br>        <span class="hljs-string">&quot;path/to/mcp-server-stdio.jar&quot;</span><br>      ]<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>使用：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 在 AI 应用中，MCP Client 会自动发现并调用这个工具</span><br><span class="hljs-comment">// 用户问：&quot;北京（39.9, 116.4）的天气怎么样？&quot;</span><br><span class="hljs-comment">// AI 会自动调用 getWeather(39.9, 116.4)</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="7-2-用户分数服务（SSE）"><a href="#7-2-用户分数服务（SSE）" class="headerlink" title="7.2 用户分数服务（SSE）"></a>7.2 用户分数服务（SSE）</h2><p><strong>场景：</strong> 提供一个用户分数查询工具，通过 SSE 方式提供服务。</p>
+<p><strong>MCP Server 项目结构：</strong></p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-number">06</span>mcp-server-sse/<br>├── src<span class="hljs-regexp">/main/</span>java/<br>│   └── org<span class="hljs-regexp">/study/</span>ai/<br>│       ├── McpServerSSEApplication.java<br>│       └── UserToolService.java<br>└── pom.xml<br></code></pre></td></tr></table></figure>
+
+<p><strong>UserToolService：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Service</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserToolService</span> </span>&#123;<br>    <span class="hljs-keyword">private</span> Map&lt;String, Double&gt; userScore = Map.of(<br>        <span class="hljs-string">&quot;xushu&quot;</span>, <span class="hljs-number">2.0</span>,<br>        <span class="hljs-string">&quot;xiaoming&quot;</span>, <span class="hljs-number">1.0</span><br>    );<br><br>    <span class="hljs-meta">@Tool(description = &quot;获取用户分数&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getWeather</span><span class="hljs-params">(String userName)</span> </span>&#123;<br>        <span class="hljs-keyword">if</span> (userScore.containsKey(userName)) &#123;<br>            <span class="hljs-keyword">return</span> userScore.get(userName).toString();<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;未找到用户分数&quot;</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>MCP Client 配置（调用方）：</strong></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-meta">spring.ai.mcp.client.sse.connections.userScores.url</span>=<span class="hljs-string">http://localhost:8088</span><br><span class="hljs-meta">spring.ai.mcp.client.sse.connections.userScores.sse-endpoint</span>=<span class="hljs-string">/sse</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>使用：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 在 AI 应用中，MCP Client 会自动连接到 SSE 服务</span><br><span class="hljs-comment">// 用户问：&quot;xushu 的分数是多少？&quot;</span><br><span class="hljs-comment">// AI 会自动调用 getWeather(&quot;xushu&quot;)</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="八、常见问题"><a href="#八、常见问题" class="headerlink" title="八、常见问题"></a>八、常见问题</h1><h2 id="8-1-STDIO-方式启动失败"><a href="#8-1-STDIO-方式启动失败" class="headerlink" title="8.1 STDIO 方式启动失败"></a>8.1 STDIO 方式启动失败</h2><p><strong>问题：</strong> MCP Server 启动失败，提示找不到类或配置错误。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li>jar 包路径错误</li>
+<li>jar 包未正确打包</li>
+<li>启动参数错误</li>
+</ul>
+<p><strong>解决：</strong></p>
+<ol>
+<li>检查 jar 包路径是否正确（使用绝对路径）</li>
+<li>确认 jar 包已正确打包：<code>mvn clean package</code></li>
+<li>检查启动参数是否正确</li>
+</ol>
+<h2 id="8-2-STDIO-方式没有输出"><a href="#8-2-STDIO-方式没有输出" class="headerlink" title="8.2 STDIO 方式没有输出"></a>8.2 STDIO 方式没有输出</h2><p><strong>问题：</strong> MCP Client 调用工具但没有返回结果。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li>日志输出干扰了通信</li>
+<li>工具执行失败</li>
+<li>通信格式错误</li>
+</ul>
+<p><strong>解决：</strong></p>
+<ol>
+<li>确保设置了 <code>-Dlogging.pattern.console=</code></li>
+<li>检查工具方法是否有异常</li>
+<li>开启 DEBUG 日志查看通信内容</li>
+</ol>
+<h2 id="8-3-SSE-方式连接失败"><a href="#8-3-SSE-方式连接失败" class="headerlink" title="8.3 SSE 方式连接失败"></a>8.3 SSE 方式连接失败</h2><p><strong>问题：</strong> MCP Client 无法连接到 SSE 服务。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li>服务未启动</li>
+<li>URL 配置错误</li>
+<li>端口被占用</li>
+</ul>
+<p><strong>解决：</strong></p>
+<ol>
+<li>确认 MCP Server 已启动</li>
+<li>检查 URL 和端口是否正确</li>
+<li>使用浏览器访问 <code>http://localhost:8088/sse</code> 测试</li>
+</ol>
+<h2 id="8-4-工具调用超时"><a href="#8-4-工具调用超时" class="headerlink" title="8.4 工具调用超时"></a>8.4 工具调用超时</h2><p><strong>问题：</strong> 工具调用超时。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li>工具执行时间过长</li>
+<li>网络延迟</li>
+<li>超时时间设置过短</li>
+</ul>
+<p><strong>解决：</strong></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-comment"># 增加超时时间（毫秒）</span><br><span class="hljs-meta">spring.ai.mcp.client.timeout</span>=<span class="hljs-string">120000</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="8-5-多个-MCP-Server-配置"><a href="#8-5-多个-MCP-Server-配置" class="headerlink" title="8.5 多个 MCP Server 配置"></a>8.5 多个 MCP Server 配置</h2><p><strong>问题：</strong> 如何配置多个 MCP Server？</p>
+<p><strong>STDIO 方式：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs json">&#123;<br>  <span class="hljs-attr">&quot;mcpServers&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;weather&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;command&quot;</span>: <span class="hljs-string">&quot;java&quot;</span>,<br>      <span class="hljs-attr">&quot;args&quot;</span>: [<span class="hljs-string">&quot;-jar&quot;</span>, <span class="hljs-string">&quot;weather-server.jar&quot;</span>]<br>    &#125;,<br>    <span class="hljs-attr">&quot;stock&quot;</span>: &#123;<br>      <span class="hljs-attr">&quot;command&quot;</span>: <span class="hljs-string">&quot;java&quot;</span>,<br>      <span class="hljs-attr">&quot;args&quot;</span>: [<span class="hljs-string">&quot;-jar&quot;</span>, <span class="hljs-string">&quot;stock-server.jar&quot;</span>]<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>SSE 方式：</strong></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-meta">spring.ai.mcp.client.sse.connections.weather.url</span>=<span class="hljs-string">http://localhost:8088</span><br><span class="hljs-meta">spring.ai.mcp.client.sse.connections.weather.sse-endpoint</span>=<span class="hljs-string">/sse</span><br><br><span class="hljs-meta">spring.ai.mcp.client.sse.connections.stock.url</span>=<span class="hljs-string">http://localhost:8089</span><br><span class="hljs-meta">spring.ai.mcp.client.sse.connections.stock.sse-endpoint</span>=<span class="hljs-string">/sse</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="九、最佳实践"><a href="#九、最佳实践" class="headerlink" title="九、最佳实践"></a>九、最佳实践</h1><h2 id="9-1-工具服务设计"><a href="#9-1-工具服务设计" class="headerlink" title="9.1 工具服务设计"></a>9.1 工具服务设计</h2><p><strong>单一职责</strong><br>​    每个 MCP Server 只提供一类工具：</p>
+<ul>
+<li>天气服务：只提供天气相关工具</li>
+<li>用户服务：只提供用户相关工具</li>
+</ul>
+<p><strong>错误处理</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Tool(description = &quot;获取天气信息&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getWeather</span><span class="hljs-params">(<span class="hljs-keyword">double</span> latitude, <span class="hljs-keyword">double</span> longitude)</span> </span>&#123;<br>    <span class="hljs-keyword">try</span> &#123;<br>        <span class="hljs-keyword">return</span> restClient.get()<br>            .uri(<span class="hljs-string">&quot;https://api.open-meteo.com/v1/forecast?...&quot;</span>)<br>            .retrieve()<br>            .body(String.class);<br>    &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;获取天气信息失败：&quot;</span> + e.getMessage();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>日志记录</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Tool(description = &quot;获取天气信息&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getWeather</span><span class="hljs-params">(<span class="hljs-keyword">double</span> latitude, <span class="hljs-keyword">double</span> longitude)</span> </span>&#123;<br>    log.info(<span class="hljs-string">&quot;查询天气，纬度：&#123;&#125;，经度：&#123;&#125;&quot;</span>, latitude, longitude);<br>    <span class="hljs-comment">// ... 业务逻辑</span><br>    log.info(<span class="hljs-string">&quot;查询结果：&#123;&#125;&quot;</span>, result);<br>    <span class="hljs-keyword">return</span> result;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="9-2-部署建议"><a href="#9-2-部署建议" class="headerlink" title="9.2 部署建议"></a>9.2 部署建议</h2><p><strong>STDIO 方式：</strong></p>
+<ul>
+<li>jar 包路径使用绝对路径</li>
+<li>确保 jar 包有执行权限</li>
+<li>考虑使用进程管理工具（如 systemd）</li>
+</ul>
+<p><strong>SSE 方式：</strong></p>
+<ul>
+<li>使用反向代理（如 Nginx）</li>
+<li>配置健康检查</li>
+<li>考虑负载均衡</li>
+</ul>
+<h2 id="9-3-性能优化"><a href="#9-3-性能优化" class="headerlink" title="9.3 性能优化"></a>9.3 性能优化</h2><p><strong>连接池</strong><br>​    SSE 方式可以配置连接池：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-meta">spring.ai.mcp.client.sse.connections.userScores.max-connections</span>=<span class="hljs-string">10</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>超时设置</strong><br>​    合理设置超时时间：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-meta">spring.ai.mcp.client.timeout</span>=<span class="hljs-string">60000</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>资源管理</strong><br>​    及时释放资源，避免内存泄漏。</p>
+<h1 id="十、总结"><a href="#十、总结" class="headerlink" title="十、总结"></a>十、总结</h1><ol>
+<li><strong>MCP 协议</strong>：提供了标准化的工具调用协议，实现工具服务和 AI 应用的解耦</li>
+<li><strong>STDIO 方式</strong>：适合本地工具服务，通过标准输入输出通信</li>
+<li><strong>SSE 方式</strong>：适合远程工具服务，通过 HTTP + SSE 通信</li>
+<li><strong>配置要点</strong>：STDIO 需要配置文件，SSE 需要 URL 配置</li>
+<li><strong>工具实现</strong>：使用 <code>@Tool</code> 注解定义工具，和普通 Spring Bean 一样</li>
+<li><strong>常见问题</strong>：启动失败、连接失败、超时等</li>
+<li><strong>最佳实践</strong>：单一职责、错误处理、日志记录、性能优化</li>
+</ol>
+<p>​    下一篇文章会介绍 RAG（检索增强生成），这是 Spring AI 提供的另一个重要功能。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SpringAI/" rel="tag"># SpringAI</a>
+              <a href="/tags/MCP/" rel="tag"># MCP</a>
+              <a href="/tags/%E5%8D%8F%E8%AE%AE/" rel="tag"># 协议</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/01/03/SpringAI-03-Tools%E4%B8%8EFunctionCall/" rel="prev" title="SpringAI-03-Tools与FunctionCall">
+      <i class="fa fa-chevron-left"></i> SpringAI-03-Tools与FunctionCall
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/01/03/SpringAI-02-ChatClient%E4%BD%BF%E7%94%A8/" rel="next" title="SpringAI-02-ChatClient使用">
+      SpringAI-02-ChatClient使用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81MCP-%E5%8D%8F%E8%AE%AE%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">1.</span> <span class="nav-text">一、MCP 协议是什么</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81MCP-%E7%9A%84%E4%B8%89%E7%A7%8D%E4%BC%A0%E8%BE%93%E6%96%B9%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">二、MCP 的三种传输方式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81MCP-Client-%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">三、MCP Client 配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-%E4%BE%9D%E8%B5%96%E9%85%8D%E7%BD%AE"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 依赖配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-STDIO-%E9%85%8D%E7%BD%AE"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 STDIO 配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-SSE-%E9%85%8D%E7%BD%AE"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 SSE 配置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81MCP-Server-STDIO-%E6%96%B9%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">四、MCP Server - STDIO 方式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-%E9%A1%B9%E7%9B%AE%E6%90%AD%E5%BB%BA"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 项目搭建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-%E5%B7%A5%E5%85%B7%E6%9C%8D%E5%8A%A1%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 工具服务实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-%E5%90%AF%E5%8A%A8%E9%85%8D%E7%BD%AE"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 启动配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-4-%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">4.4.</span> <span class="nav-text">4.4 工作原理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E3%80%81MCP-Server-SSE-%E6%96%B9%E5%BC%8F"><span class="nav-number">5.</span> <span class="nav-text">五、MCP Server - SSE 方式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-%E9%A1%B9%E7%9B%AE%E6%90%AD%E5%BB%BA"><span class="nav-number">5.1.</span> <span class="nav-text">5.1 项目搭建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-%E5%B7%A5%E5%85%B7%E6%9C%8D%E5%8A%A1%E5%AE%9E%E7%8E%B0"><span class="nav-number">5.2.</span> <span class="nav-text">5.2 工具服务实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-3-%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">5.3.</span> <span class="nav-text">5.3 工作原理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AD%E3%80%81STDIO-vs-SSE"><span class="nav-number">6.</span> <span class="nav-text">六、STDIO vs SSE</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E5%AE%9E%E9%99%85%E6%A1%88%E4%BE%8B"><span class="nav-number">7.</span> <span class="nav-text">七、实际案例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#7-1-%E5%A4%A9%E6%B0%94%E6%9C%8D%E5%8A%A1%EF%BC%88STDIO%EF%BC%89"><span class="nav-number">7.1.</span> <span class="nav-text">7.1 天气服务（STDIO）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-2-%E7%94%A8%E6%88%B7%E5%88%86%E6%95%B0%E6%9C%8D%E5%8A%A1%EF%BC%88SSE%EF%BC%89"><span class="nav-number">7.2.</span> <span class="nav-text">7.2 用户分数服务（SSE）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="nav-number">8.</span> <span class="nav-text">八、常见问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-STDIO-%E6%96%B9%E5%BC%8F%E5%90%AF%E5%8A%A8%E5%A4%B1%E8%B4%A5"><span class="nav-number">8.1.</span> <span class="nav-text">8.1 STDIO 方式启动失败</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-2-STDIO-%E6%96%B9%E5%BC%8F%E6%B2%A1%E6%9C%89%E8%BE%93%E5%87%BA"><span class="nav-number">8.2.</span> <span class="nav-text">8.2 STDIO 方式没有输出</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-3-SSE-%E6%96%B9%E5%BC%8F%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5"><span class="nav-number">8.3.</span> <span class="nav-text">8.3 SSE 方式连接失败</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-4-%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8%E8%B6%85%E6%97%B6"><span class="nav-number">8.4.</span> <span class="nav-text">8.4 工具调用超时</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-5-%E5%A4%9A%E4%B8%AA-MCP-Server-%E9%85%8D%E7%BD%AE"><span class="nav-number">8.5.</span> <span class="nav-text">8.5 多个 MCP Server 配置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B9%9D%E3%80%81%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">9.</span> <span class="nav-text">九、最佳实践</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#9-1-%E5%B7%A5%E5%85%B7%E6%9C%8D%E5%8A%A1%E8%AE%BE%E8%AE%A1"><span class="nav-number">9.1.</span> <span class="nav-text">9.1 工具服务设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-2-%E9%83%A8%E7%BD%B2%E5%BB%BA%E8%AE%AE"><span class="nav-number">9.2.</span> <span class="nav-text">9.2 部署建议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-3-%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96"><span class="nav-number">9.3.</span> <span class="nav-text">9.3 性能优化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8D%81%E3%80%81%E6%80%BB%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text">十、总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">97</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

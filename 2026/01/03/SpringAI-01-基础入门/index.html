@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="SpringAI基础入门-快速开始与多模型接入">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringAI-01-基础入门">
+<meta property="og:url" content="http://example.com/2026/01/03/SpringAI-01-%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A8/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="SpringAI基础入门-快速开始与多模型接入">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-01-03T05:59:23.193Z">
+<meta property="article:modified_time" content="2026-01-03T06:23:00.378Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="SpringAI">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="大模型">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2026/01/03/SpringAI-01-%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SpringAI-01-基础入门 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/01/03/SpringAI-01-%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringAI-01-基础入门
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-01-03 13:59:23 / 修改时间：14:23:00" itemprop="dateCreated datePublished" datetime="2026-01-03T13:59:23+08:00">2026-01-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SpringAI/" itemprop="url" rel="index"><span itemprop="name">SpringAI</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">SpringAI基础入门-快速开始与多模型接入</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、Spring-AI-是什么"><a href="#一、Spring-AI-是什么" class="headerlink" title="一、Spring AI 是什么"></a>一、Spring AI 是什么</h1><p>​    Spring AI 是 Spring 官方推出的 AI 应用开发框架，主要目的是简化 AI 应用的开发。它提供了统一的 API，不管你用的是 DeepSeek、阿里百炼还是 OpenAI，代码写法都一样，只需要改配置就行。</p>
+<p>​    目前 Spring AI 支持的主要功能：</p>
+<ul>
+<li>统一的 ChatModel 接口，支持多种大模型</li>
+<li>流式响应（Streaming Response）</li>
+<li>Function Call（工具调用）</li>
+<li>RAG（检索增强生成）</li>
+<li>MCP 协议支持</li>
+</ul>
+<h1 id="二、项目搭建"><a href="#二、项目搭建" class="headerlink" title="二、项目搭建"></a>二、项目搭建</h1><h2 id="2-1-创建父工程"><a href="#2-1-创建父工程" class="headerlink" title="2.1 创建父工程"></a>2.1 创建父工程</h2><p>​    首先创建一个 Maven 父工程，统一管理版本。这里用的是 Spring Boot 3.5.7 和 Spring AI 1.0.1。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">project</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">modelVersion</span>&gt;</span>4.0.0<span class="hljs-tag">&lt;/<span class="hljs-name">modelVersion</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.study.ai<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-ai-study<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>1.0-SNAPSHOT<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">packaging</span>&gt;</span>pom<span class="hljs-tag">&lt;/<span class="hljs-name">packaging</span>&gt;</span><br>    <br>    <span class="hljs-tag">&lt;<span class="hljs-name">parent</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-parent<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>3.5.7<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">parent</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">properties</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">maven.compiler.source</span>&gt;</span>17<span class="hljs-tag">&lt;/<span class="hljs-name">maven.compiler.source</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">maven.compiler.target</span>&gt;</span>17<span class="hljs-tag">&lt;/<span class="hljs-name">maven.compiler.target</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">project.build.sourceEncoding</span>&gt;</span>UTF-8<span class="hljs-tag">&lt;/<span class="hljs-name">project.build.sourceEncoding</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">spring-ai.version</span>&gt;</span>1.0.1<span class="hljs-tag">&lt;/<span class="hljs-name">spring-ai.version</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">spring-ai-alibaba.version</span>&gt;</span>1.0.0.4<span class="hljs-tag">&lt;/<span class="hljs-name">spring-ai-alibaba.version</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">properties</span>&gt;</span><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">dependencyManagement</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span><br>            <span class="hljs-comment">&lt;!-- Spring AI BOM，统一管理 Spring AI 相关依赖版本 --&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.ai<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-ai-bom<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>$&#123;spring-ai.version&#125;<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">type</span>&gt;</span>pom<span class="hljs-tag">&lt;/<span class="hljs-name">type</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">scope</span>&gt;</span>import<span class="hljs-tag">&lt;/<span class="hljs-name">scope</span>&gt;</span><br>            <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>            <span class="hljs-comment">&lt;!-- Spring AI Alibaba BOM，管理阿里百炼相关依赖 --&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.alibaba.cloud.ai<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-ai-alibaba-bom<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>$&#123;spring-ai-alibaba.version&#125;<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">type</span>&gt;</span>pom<span class="hljs-tag">&lt;/<span class="hljs-name">type</span>&gt;</span><br>                <span class="hljs-tag">&lt;<span class="hljs-name">scope</span>&gt;</span>import<span class="hljs-tag">&lt;/<span class="hljs-name">scope</span>&gt;</span><br>            <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">dependencyManagement</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">project</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>注意点：</strong></p>
+<ul>
+<li>必须使用 Java 17 或以上版本</li>
+<li><code>dependencyManagement</code> 中引入 BOM 后，子模块就不需要指定版本了</li>
+</ul>
+<h2 id="2-2-子模块依赖配置"><a href="#2-2-子模块依赖配置" class="headerlink" title="2.2 子模块依赖配置"></a>2.2 子模块依赖配置</h2><h3 id="DeepSeek-接入"><a href="#DeepSeek-接入" class="headerlink" title="DeepSeek 接入"></a>DeepSeek 接入</h3><p>​    在子模块的 <code>pom.xml</code> 中添加：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.ai<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-ai-starter-model-deepseek<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>​    这个 starter 会自动配置 <code>DeepSeekChatModel</code>，只需要在配置文件中设置 API Key 就能用。</p>
+<h3 id="阿里百炼接入"><a href="#阿里百炼接入" class="headerlink" title="阿里百炼接入"></a>阿里百炼接入</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.alibaba.cloud.ai<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-ai-alibaba-starter-dashscope<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>​    阿里百炼的依赖是 <code>spring-ai-alibaba</code> 提供的，配置方式类似。</p>
+<h3 id="Ollama-接入（本地模型）"><a href="#Ollama-接入（本地模型）" class="headerlink" title="Ollama 接入（本地模型）"></a>Ollama 接入（本地模型）</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.ai<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-ai-starter-model-ollama<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>​    Ollama 适合本地部署，不需要 API Key，但需要本地安装 Ollama 服务。</p>
+<h2 id="2-3-配置文件"><a href="#2-3-配置文件" class="headerlink" title="2.3 配置文件"></a>2.3 配置文件</h2><p>​    在 <code>application.properties</code> 中配置：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-meta">spring.application.name</span>=<span class="hljs-string">quick-start</span><br><br><span class="hljs-comment"># DeepSeek 配置</span><br><span class="hljs-meta">spring.ai.deepseek.api-key</span>=<span class="hljs-string">sk-your-api-key-here</span><br><span class="hljs-meta">spring.ai.deepseek.chat.options.model</span>=<span class="hljs-string">deepseek-chat</span><br><br><span class="hljs-comment"># DashScope（阿里百炼）配置</span><br><span class="hljs-meta">spring.ai.dashscope.api-key</span>=<span class="hljs-string">sk-your-api-key-here</span><br><span class="hljs-meta">spring.ai.dashscope.chat.options.model</span>=<span class="hljs-string">qwen-plus</span><br><br><span class="hljs-comment"># 日志配置（调试时开启）</span><br><span class="hljs-meta">logging.level.org.springframework.ai</span>=<span class="hljs-string">INFO</span><br><span class="hljs-meta">logging.level.org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor</span>=<span class="hljs-string">DEBUG</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>配置说明：</strong></p>
+<ul>
+<li><code>api-key</code>：从对应平台获取的 API Key</li>
+<li><code>chat.options.model</code>：使用的模型名称，DeepSeek 常用 <code>deepseek-chat</code>，阿里百炼常用 <code>qwen-plus</code></li>
+<li>日志级别建议开发时设为 DEBUG，生产环境设为 INFO</li>
+</ul>
+<p><strong>获取 API Key：</strong></p>
+<ul>
+<li>DeepSeek：<a target="_blank" rel="noopener" href="https://platform.deepseek.com/">https://platform.deepseek.com/</a></li>
+<li>阿里百炼：<a target="_blank" rel="noopener" href="https://dashscope.aliyun.com/">https://dashscope.aliyun.com/</a></li>
+</ul>
+<h1 id="三、快速上手"><a href="#三、快速上手" class="headerlink" title="三、快速上手"></a>三、快速上手</h1><h2 id="3-1-同步调用"><a href="#3-1-同步调用" class="headerlink" title="3.1 同步调用"></a>3.1 同步调用</h2><p>​    最简单的用法，直接调用 <code>call()</code> 方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@SpringBootTest</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DeepSeekTest</span> </span>&#123;<br>    <br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> DeepSeekChatModel deepSeekChatModel;<br>    <br>    <span class="hljs-meta">@Test</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">call</span><span class="hljs-params">()</span> </span>&#123;<br>        String response = deepSeekChatModel.call(<span class="hljs-string">&quot;你好，你是谁&quot;</span>);<br>        System.out.println(response);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>​    这种方式会等待 AI 完整回复后再返回，适合简单场景。如果回复很长，会等很久。</p>
+<p><strong>实际运行结果：</strong></p>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs erlang">你好！我是 DeepSeek，一个由深度求索（DeepSeek）开发的 AI 助手...<br></code></pre></td></tr></table></figure>
+
+<h2 id="3-2-流式调用"><a href="#3-2-流式调用" class="headerlink" title="3.2 流式调用"></a>3.2 流式调用</h2><p>​    流式调用可以实时返回内容，用户体验更好。返回的是 <code>Flux&lt;ChatResponse&gt;</code>，需要处理响应流：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testDeepSeekStream</span><span class="hljs-params">(<span class="hljs-meta">@Autowired</span> DeepSeekChatModel deepSeekChatModel)</span> </span>&#123;<br>    <span class="hljs-comment">// 创建选项，设置温度值</span><br>    DeepSeekChatOptions options = <span class="hljs-keyword">new</span> DeepSeekChatOptions();<br>    options.setTemperature(<span class="hljs-number">2.0</span>);  <span class="hljs-comment">// 温度越高，输出越随机</span><br>    <br>    <span class="hljs-comment">// 创建 Prompt</span><br>    Prompt prompt = <span class="hljs-keyword">new</span> Prompt(<span class="hljs-string">&quot;写一首上班加班太累的打油诗&quot;</span>, options);<br><br>    <span class="hljs-comment">// 流式调用</span><br>    Flux&lt;ChatResponse&gt; stream = deepSeekChatModel.stream(prompt);<br>    <br>    <span class="hljs-comment">// 处理流：提取文本内容并打印</span><br>    stream.mapNotNull(e -&gt; e.getResult().getOutput().getText())<br>          .filter(Objects::nonNull)<br>          .toIterable()<br>          .forEach(System.out::print);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>关键点：</strong></p>
+<ul>
+<li><code>mapNotNull</code>：提取每个响应中的文本内容，过滤掉 null</li>
+<li><code>filter(Objects::nonNull)</code>：再次过滤，确保不为空</li>
+<li><code>toIterable().forEach</code>：转换为可迭代对象，逐个打印</li>
+</ul>
+<p><strong>实际效果：</strong><br>​    会逐字逐句打印出来，而不是一次性返回全部内容。</p>
+<h2 id="3-3-深度思考模式"><a href="#3-3-深度思考模式" class="headerlink" title="3.3 深度思考模式"></a>3.3 深度思考模式</h2><p>​    DeepSeek 支持深度思考模式（Reasoner），可以看到模型的思考过程。这在调试和优化 Prompt 时很有用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testDeepSeekThink</span><span class="hljs-params">(<span class="hljs-meta">@Autowired</span> DeepSeekChatModel deepSeekChatModel)</span> </span>&#123;<br>    DeepSeekChatOptions options = <span class="hljs-keyword">new</span> DeepSeekChatOptions();<br>    options.setTemperature(<span class="hljs-number">2.0</span>);<br>    Prompt prompt = <span class="hljs-keyword">new</span> Prompt(<span class="hljs-string">&quot;写一首上班加班太累的打油诗&quot;</span>, options);<br><br>    Flux&lt;ChatResponse&gt; stream = deepSeekChatModel.stream(prompt);<br>    <br>    stream.mapNotNull(e -&gt; &#123;<br>                AssistantMessage output = e.getResult().getOutput();<br>                <span class="hljs-keyword">return</span> output;<br>            &#125;)<br>            .filter(Objects::nonNull)<br>            .toIterable()<br>            .forEach(e -&gt; &#123;<br>                <span class="hljs-comment">// 获取思考过程（如果有）</span><br>                <span class="hljs-keyword">if</span> (Objects.nonNull(e.getMetadata().get(<span class="hljs-string">&quot;reasoningContent&quot;</span>))) &#123;<br>                    System.out.print(e.getMetadata().get(<span class="hljs-string">&quot;reasoningContent&quot;</span>));<br>                &#125;<br>                <span class="hljs-comment">// 获取最终回复</span><br>                <span class="hljs-keyword">if</span> (Objects.nonNull(e.getText())) &#123;<br>                    System.out.print(e.getText());<br>                &#125;<br>            &#125;);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>关键点：</strong></p>
+<ul>
+<li>思考内容在 <code>metadata</code> 的 <code>reasoningContent</code> 字段中</li>
+<li>最终回复在 <code>getText()</code> 方法中</li>
+<li>思考内容和最终回复是分开返回的</li>
+</ul>
+<p><strong>实际效果：</strong></p>
+<figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs prolog">[思考过程] 用户想要一首关于加班累的打油诗，我需要用幽默的方式表达...<br>[最终回复] 上班加班累成狗，代码写到手发抖...<br></code></pre></td></tr></table></figure>
+
+<h3 id="阿里百炼的思考模式"><a href="#阿里百炼的思考模式" class="headerlink" title="阿里百炼的思考模式"></a>阿里百炼的思考模式</h3><p>​    阿里百炼也支持思考模式，但需要显式开启：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testDashScopeThink</span><span class="hljs-params">(<span class="hljs-meta">@Autowired</span> DashScopeChatModel dashScopeChatModel)</span> </span>&#123;<br>    DashScopeChatOptions options = <span class="hljs-keyword">new</span> DashScopeChatOptions();<br>    options.setTemperature(<span class="hljs-number">1.9</span>);<br>    options.setEnableThinking(<span class="hljs-keyword">true</span>);  <span class="hljs-comment">// 必须显式开启</span><br>    <br>    Prompt prompt = <span class="hljs-keyword">new</span> Prompt(<span class="hljs-string">&quot;写一首上班加班太累的打油诗&quot;</span>, options);<br>    Flux&lt;ChatResponse&gt; stream = dashScopeChatModel.stream(prompt);<br>    <br>    StringBuilder reasoningContent = <span class="hljs-keyword">new</span> StringBuilder();<br>    StringBuilder finalContent = <span class="hljs-keyword">new</span> StringBuilder();<br>    <br>    stream.mapNotNull(e -&gt; &#123;<br>                <span class="hljs-keyword">if</span> (Objects.nonNull(e.getResult())) &#123;<br>                    <span class="hljs-keyword">return</span> e.getResult().getOutput();<br>                &#125;<br>                <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;<br>            &#125;)<br>            .filter(Objects::nonNull)<br>            .toIterable()<br>            .forEach(e -&gt; &#123;<br>                <span class="hljs-comment">// 收集思考内容</span><br>                <span class="hljs-keyword">if</span> (Objects.nonNull(e.getMetadata().get(<span class="hljs-string">&quot;reasoningContent&quot;</span>))) &#123;<br>                    reasoningContent.append(e.getMetadata().get(<span class="hljs-string">&quot;reasoningContent&quot;</span>));<br>                &#125;<br>                <span class="hljs-comment">// 收集最终回复</span><br>                <span class="hljs-keyword">if</span> (Objects.nonNull(e.getText())) &#123;<br>                    finalContent.append(e.getText());<br>                &#125;<br>            &#125;);<br>    <br>    System.out.println(<span class="hljs-string">&quot;【思考】&quot;</span> + reasoningContent);<br>    System.out.println(<span class="hljs-string">&quot;【回复】&quot;</span> + finalContent);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>区别：</strong></p>
+<ul>
+<li>DeepSeek：默认支持思考模式</li>
+<li>阿里百炼：需要设置 <code>enableThinking(true)</code> 才能看到思考过程</li>
+</ul>
+<h2 id="3-4-ChatOptions-参数说明"><a href="#3-4-ChatOptions-参数说明" class="headerlink" title="3.4 ChatOptions 参数说明"></a>3.4 ChatOptions 参数说明</h2><h3 id="DeepSeekChatOptions"><a href="#DeepSeekChatOptions" class="headerlink" title="DeepSeekChatOptions"></a>DeepSeekChatOptions</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java">DeepSeekChatOptions options = <span class="hljs-keyword">new</span> DeepSeekChatOptions();<br>options.setTemperature(<span class="hljs-number">2.0</span>);      <span class="hljs-comment">// 0-2，控制随机性，越大越随机</span><br>options.setMaxTokens(<span class="hljs-number">2000</span>);       <span class="hljs-comment">// 最大输出 token 数</span><br>options.setTopP(<span class="hljs-number">0.9</span>);             <span class="hljs-comment">// 核采样参数，0-1</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>参数建议：</strong></p>
+<ul>
+<li><code>temperature</code>：创作类任务用 1.5-2.0，问答类用 0.7-1.0</li>
+<li><code>maxTokens</code>：根据需求设置，一般 1000-2000 够用</li>
+<li><code>topP</code>：一般用默认值就行</li>
+</ul>
+<h3 id="DashScopeChatOptions"><a href="#DashScopeChatOptions" class="headerlink" title="DashScopeChatOptions"></a>DashScopeChatOptions</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java">DashScopeChatOptions options = <span class="hljs-keyword">new</span> DashScopeChatOptions();<br>options.setTemperature(<span class="hljs-number">1.9</span>);<br>options.setEnableThinking(<span class="hljs-keyword">true</span>);  <span class="hljs-comment">// 是否启用思考模式</span><br>options.setMaxTokens(<span class="hljs-number">2000</span>);<br></code></pre></td></tr></table></figure>
+
+<h1 id="四、常见问题"><a href="#四、常见问题" class="headerlink" title="四、常见问题"></a>四、常见问题</h1><h2 id="4-1-API-Key-配置不生效"><a href="#4-1-API-Key-配置不生效" class="headerlink" title="4.1 API Key 配置不生效"></a>4.1 API Key 配置不生效</h2><p><strong>问题：</strong> 配置了 API Key 但启动报错，提示找不到配置。</p>
+<p><strong>原因：</strong> </p>
+<ul>
+<li>API Key 配置错误</li>
+<li>配置文件路径不对</li>
+<li>环境变量覆盖了配置文件</li>
+</ul>
+<p><strong>解决：</strong></p>
+<ol>
+<li>检查配置文件中的 Key 是否正确</li>
+<li>确认配置文件在 <code>src/main/resources</code> 目录下</li>
+<li>检查是否有环境变量覆盖（如 <code>SPRING_AI_DEEPSEEK_API_KEY</code>）</li>
+</ol>
+<h2 id="4-2-流式调用没有输出"><a href="#4-2-流式调用没有输出" class="headerlink" title="4.2 流式调用没有输出"></a>4.2 流式调用没有输出</h2><p><strong>问题：</strong> 调用 <code>stream()</code> 方法后没有任何输出。</p>
+<p><strong>原因：</strong> </p>
+<ul>
+<li>没有订阅流（Flux 是惰性的）</li>
+<li>异常被吞掉了</li>
+</ul>
+<p><strong>解决：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 错误写法：没有订阅</span><br>Flux&lt;ChatResponse&gt; stream = deepSeekChatModel.stream(prompt);<br><span class="hljs-comment">// 这样不会执行</span><br><br><span class="hljs-comment">// 正确写法：必须订阅</span><br>stream.mapNotNull(...)<br>      .filter(...)<br>      .toIterable()  <span class="hljs-comment">// 这里会触发订阅</span><br>      .forEach(...);<br></code></pre></td></tr></table></figure>
+
+<h2 id="4-3-思考模式看不到思考内容"><a href="#4-3-思考模式看不到思考内容" class="headerlink" title="4.3 思考模式看不到思考内容"></a>4.3 思考模式看不到思考内容</h2><p><strong>问题：</strong> 开启了思考模式但看不到思考过程。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li>DeepSeek：某些模型不支持思考模式</li>
+<li>阿里百炼：忘记设置 <code>enableThinking(true)</code></li>
+</ul>
+<p><strong>解决：</strong></p>
+<ul>
+<li>DeepSeek：确认使用的是支持思考的模型（如 <code>deepseek-reasoner</code>）</li>
+<li>阿里百炼：必须显式设置 <code>options.setEnableThinking(true)</code></li>
+</ul>
+<h2 id="4-4-中文乱码"><a href="#4-4-中文乱码" class="headerlink" title="4.4 中文乱码"></a>4.4 中文乱码</h2><p><strong>问题：</strong> 返回的中文内容乱码。</p>
+<p><strong>原因：</strong> </p>
+<ul>
+<li>编码问题</li>
+<li>HTTP 响应头没有设置编码</li>
+</ul>
+<p><strong>解决：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@GetMapping(value = &quot;/stream&quot;, produces = &quot;text/stream;charset=utf-8&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> Flux&lt;String&gt; <span class="hljs-title">streamChat</span><span class="hljs-params">(...)</span> </span>&#123;<br>    <span class="hljs-comment">// produces 中指定 charset=utf-8</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="4-5-依赖冲突"><a href="#4-5-依赖冲突" class="headerlink" title="4.5 依赖冲突"></a>4.5 依赖冲突</h2><p><strong>问题：</strong> 引入 Spring AI 后出现依赖冲突。</p>
+<p><strong>原因：</strong> </p>
+<ul>
+<li>Spring Boot 版本不兼容</li>
+<li>其他依赖版本冲突</li>
+</ul>
+<p><strong>解决：</strong></p>
+<ol>
+<li>确认 Spring Boot 版本是 3.x（Spring AI 1.0.1 需要 Spring Boot 3.5+）</li>
+<li>使用 <code>mvn dependency:tree</code> 查看依赖树</li>
+<li>在父工程中统一管理版本</li>
+</ol>
+<h1 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h1><ol>
+<li><strong>统一接口</strong>：Spring AI 提供了统一的 <code>ChatModel</code> 接口，切换模型只需要改配置</li>
+<li><strong>同步 vs 流式</strong>：简单场景用同步调用，需要实时反馈用流式调用</li>
+<li><strong>思考模式</strong>：DeepSeek 默认支持，阿里百炼需要显式开启</li>
+<li><strong>配置要点</strong>：API Key 和模型名称是必须的，其他参数按需设置</li>
+<li><strong>常见坑</strong>：流式调用必须订阅、中文编码问题、依赖版本冲突</li>
+</ol>
+<p>​    下一篇文章会介绍 <code>ChatClient</code> 的使用，这是 Spring AI 提供的高级 API，比直接使用 <code>ChatModel</code> 更方便。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SpringAI/" rel="tag"># SpringAI</a>
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/" rel="tag"># 大模型</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/11/08/SpringWebFlux/" rel="prev" title="SpringWebFlux">
+      <i class="fa fa-chevron-left"></i> SpringWebFlux
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/01/03/SpringAI-05-RAG%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90/" rel="next" title="SpringAI-05-RAG检索增强生成">
+      SpringAI-05-RAG检索增强生成 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81Spring-AI-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">1.</span> <span class="nav-text">一、Spring AI 是什么</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E9%A1%B9%E7%9B%AE%E6%90%AD%E5%BB%BA"><span class="nav-number">2.</span> <span class="nav-text">二、项目搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E5%88%9B%E5%BB%BA%E7%88%B6%E5%B7%A5%E7%A8%8B"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 创建父工程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-%E5%AD%90%E6%A8%A1%E5%9D%97%E4%BE%9D%E8%B5%96%E9%85%8D%E7%BD%AE"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 子模块依赖配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DeepSeek-%E6%8E%A5%E5%85%A5"><span class="nav-number">2.2.1.</span> <span class="nav-text">DeepSeek 接入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%BF%E9%87%8C%E7%99%BE%E7%82%BC%E6%8E%A5%E5%85%A5"><span class="nav-number">2.2.2.</span> <span class="nav-text">阿里百炼接入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ollama-%E6%8E%A5%E5%85%A5%EF%BC%88%E6%9C%AC%E5%9C%B0%E6%A8%A1%E5%9E%8B%EF%BC%89"><span class="nav-number">2.2.3.</span> <span class="nav-text">Ollama 接入（本地模型）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 配置文件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B"><span class="nav-number">3.</span> <span class="nav-text">三、快速上手</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-%E5%90%8C%E6%AD%A5%E8%B0%83%E7%94%A8"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 同步调用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-%E6%B5%81%E5%BC%8F%E8%B0%83%E7%94%A8"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 流式调用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-%E6%B7%B1%E5%BA%A6%E6%80%9D%E8%80%83%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 深度思考模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%BF%E9%87%8C%E7%99%BE%E7%82%BC%E7%9A%84%E6%80%9D%E8%80%83%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.3.1.</span> <span class="nav-text">阿里百炼的思考模式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-ChatOptions-%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 ChatOptions 参数说明</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DeepSeekChatOptions"><span class="nav-number">3.4.1.</span> <span class="nav-text">DeepSeekChatOptions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DashScopeChatOptions"><span class="nav-number">3.4.2.</span> <span class="nav-text">DashScopeChatOptions</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="nav-number">4.</span> <span class="nav-text">四、常见问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-API-Key-%E9%85%8D%E7%BD%AE%E4%B8%8D%E7%94%9F%E6%95%88"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 API Key 配置不生效</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-%E6%B5%81%E5%BC%8F%E8%B0%83%E7%94%A8%E6%B2%A1%E6%9C%89%E8%BE%93%E5%87%BA"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 流式调用没有输出</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-%E6%80%9D%E8%80%83%E6%A8%A1%E5%BC%8F%E7%9C%8B%E4%B8%8D%E5%88%B0%E6%80%9D%E8%80%83%E5%86%85%E5%AE%B9"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 思考模式看不到思考内容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-4-%E4%B8%AD%E6%96%87%E4%B9%B1%E7%A0%81"><span class="nav-number">4.4.</span> <span class="nav-text">4.4 中文乱码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-5-%E4%BE%9D%E8%B5%96%E5%86%B2%E7%AA%81"><span class="nav-number">4.5.</span> <span class="nav-text">4.5 依赖冲突</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">五、总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">97</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="SpringAI Tools与FunctionCall功能详解">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringAI-03-Tools与FunctionCall">
+<meta property="og:url" content="http://example.com/2026/01/03/SpringAI-03-Tools%E4%B8%8EFunctionCall/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="SpringAI Tools与FunctionCall功能详解">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-01-03T13:00:00.000Z">
+<meta property="article:modified_time" content="2026-01-03T06:54:27.482Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="SpringAI">
+<meta property="article:tag" content="Tools">
+<meta property="article:tag" content="FunctionCall">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2026/01/03/SpringAI-03-Tools%E4%B8%8EFunctionCall/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SpringAI-03-Tools与FunctionCall | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/01/03/SpringAI-03-Tools%E4%B8%8EFunctionCall/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringAI-03-Tools与FunctionCall
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-01-03 21:00:00 / 修改时间：14:54:27" itemprop="dateCreated datePublished" datetime="2026-01-03T21:00:00+08:00">2026-01-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SpringAI/" itemprop="url" rel="index"><span itemprop="name">SpringAI</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">SpringAI Tools与FunctionCall功能详解</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、Function-Call-是什么"><a href="#一、Function-Call-是什么" class="headerlink" title="一、Function Call 是什么"></a>一、Function Call 是什么</h1><p>​    Function Call 是让 AI 调用外部工具的功能。简单说，就是 AI 可以调用你写的 Java 方法，执行实际的业务逻辑。</p>
+<p><strong>举个例子：</strong></p>
+<ul>
+<li>用户问：”查询我的航班信息，预订号是 101，乘客姓名是徐庶”</li>
+<li>AI 分析后，调用 <code>queryFlightInfo(&quot;101&quot;, &quot;徐庶&quot;)</code> 工具</li>
+<li>工具返回航班信息</li>
+<li>AI 根据返回结果生成回复：”您的航班信息如下：…”</li>
+</ul>
+<p><strong>Function Call 的优势：</strong></p>
+<ul>
+<li><strong>扩展能力</strong>：AI 可以调用外部工具，不再局限于文本生成</li>
+<li><strong>实时数据</strong>：可以获取实时数据，如天气、股票、航班信息等</li>
+<li><strong>业务集成</strong>：可以调用业务系统，实现真正的业务逻辑</li>
+</ul>
+<p><strong>什么时候需要 Function Call：</strong></p>
+<ul>
+<li>需要查询数据库</li>
+<li>需要调用外部 API</li>
+<li>需要执行业务操作（增删改查）</li>
+<li>需要获取实时信息</li>
+</ul>
+<h1 id="二、工具定义"><a href="#二、工具定义" class="headerlink" title="二、工具定义"></a>二、工具定义</h1><h2 id="2-1-Tool-注解"><a href="#2-1-Tool-注解" class="headerlink" title="2.1 @Tool 注解"></a>2.1 @Tool 注解</h2><p>​    使用 <code>@Tool</code> 注解定义工具方法，AI 就能识别并调用这个方法。</p>
+<p><strong>最简单的例子：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Service</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ToolService</span> </span>&#123;<br><br>    <span class="hljs-meta">@Tool(description = &quot;查询航班信息&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">queryFlightInfo</span><span class="hljs-params">(String bookingNumber, String passengerName)</span> </span>&#123;<br>        <span class="hljs-comment">// 查询逻辑</span><br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;航班信息：...&quot;</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>关键点：</strong></p>
+<ul>
+<li><code>@Tool</code> 注解标记这是一个工具方法</li>
+<li><code>description</code> 参数很重要，AI 根据这个描述判断是否需要调用</li>
+<li>方法必须是 public 的</li>
+<li>返回值通常是 String，AI 会读取这个返回值</li>
+</ul>
+<h2 id="2-2-description-的重要性"><a href="#2-2-description-的重要性" class="headerlink" title="2.2 description 的重要性"></a>2.2 description 的重要性</h2><p>​    <code>description</code> 是 AI 判断是否调用工具的唯一依据，所以描述要准确、清晰。</p>
+<p><strong>好的描述：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Tool(description = &quot;查询航班信息，需要提供预订号和乘客姓名&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">queryFlightInfo</span><span class="hljs-params">(String bookingNumber, String passengerName)</span> </span>&#123;<br>    <span class="hljs-comment">// ...</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>不好的描述：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Tool(description = &quot;查询&quot;)</span>  <span class="hljs-comment">// 太模糊，AI 不知道什么时候调用</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">queryFlightInfo</span><span class="hljs-params">(String bookingNumber, String passengerName)</span> </span>&#123;<br>    <span class="hljs-comment">// ...</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>描述要点：</strong></p>
+<ul>
+<li>清晰说明工具的功能</li>
+<li>说明需要什么参数</li>
+<li>说明返回什么结果</li>
+<li>避免歧义</li>
+</ul>
+<h2 id="2-3-参数设计"><a href="#2-3-参数设计" class="headerlink" title="2.3 参数设计"></a>2.3 参数设计</h2><p>​    工具方法的参数设计很重要，影响 AI 是否能正确调用。</p>
+<p><strong>实际案例：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Service</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ToolService</span> </span>&#123;<br><br>    <span class="hljs-meta">@Resource</span><br>    <span class="hljs-keyword">private</span> FlightBookingService flightBookingService;<br><br>    <span class="hljs-meta">@Tool(description = &quot;查询航班信息，需要提供预订号和乘客姓名&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">queryFlightInfo</span><span class="hljs-params">(</span></span><br><span class="hljs-function"><span class="hljs-params">            <span class="hljs-meta">@ToolParam</span> String bookingNumber,</span></span><br><span class="hljs-function"><span class="hljs-params">            <span class="hljs-meta">@ToolParam</span> String passengerName)</span> </span>&#123;<br>        FlightBooking booking = flightBookingService<br>            .findBookingByBookingNumberAndName(bookingNumber, passengerName);<br>        <span class="hljs-keyword">if</span> (booking != <span class="hljs-keyword">null</span>) &#123;<br>            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;航班信息：&quot;</span> + booking;<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;未找到航班信息&quot;</span>;<br>    &#125;<br><br>    <span class="hljs-meta">@Tool(description = &quot;退票/取消预定，需要提供预订号和乘客姓名&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">cancelBooking</span><span class="hljs-params">(</span></span><br><span class="hljs-function"><span class="hljs-params">            String bookingNumber,</span></span><br><span class="hljs-function"><span class="hljs-params">            String passengerName)</span> </span>&#123;<br>        flightBookingService.cancelBookingByBookingNumberAndName(<br>            bookingNumber, passengerName);<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;退票成功&quot;</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>参数设计要点：</strong></p>
+<ul>
+<li><strong>类型明确</strong>：使用明确的类型（String、int、double 等），避免 Object</li>
+<li><strong>数量适中</strong>：建议不超过 5 个参数</li>
+<li><strong>命名清晰</strong>：参数名要能表达含义</li>
+<li><strong>@ToolParam</strong>：虽然不强制，但建议使用，提高可读性</li>
+</ul>
+<p><strong>参数类型支持：</strong></p>
+<ul>
+<li>基本类型：String、int、double、boolean 等</li>
+<li>包装类型：Integer、Double、Boolean 等</li>
+<li>日期类型：LocalDate、LocalDateTime 等</li>
+<li>复杂对象：需要 AI 能理解的结构</li>
+</ul>
+<h2 id="2-4-返回值设计"><a href="#2-4-返回值设计" class="headerlink" title="2.4 返回值设计"></a>2.4 返回值设计</h2><p>​    返回值通常是 String，AI 会读取这个返回值并生成回复。</p>
+<p><strong>好的返回值：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Tool(description = &quot;查询航班信息&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">queryFlightInfo</span><span class="hljs-params">(String bookingNumber, String passengerName)</span> </span>&#123;<br>    FlightBooking booking = flightBookingService<br>        .findBookingByBookingNumberAndName(bookingNumber, passengerName);<br>    <span class="hljs-keyword">if</span> (booking != <span class="hljs-keyword">null</span>) &#123;<br>        <span class="hljs-keyword">return</span> String.format(<br>            <span class="hljs-string">&quot;预订号：%s，乘客：%s，出发地：%s，目的地：%s，出发日期：%s，状态：%s&quot;</span>,<br>            booking.getId(),<br>            booking.getPassengerName(),<br>            booking.getFrom(),<br>            booking.getTo(),<br>            booking.getDepartureDate(),<br>            booking.getStatus()<br>        );<br>    &#125;<br>    <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;未找到航班信息，请检查预订号和乘客姓名是否正确&quot;</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>返回值设计要点：</strong></p>
+<ul>
+<li><strong>信息完整</strong>：包含 AI 需要的信息</li>
+<li><strong>格式清晰</strong>：便于 AI 理解和处理</li>
+<li><strong>错误提示</strong>：失败时返回有意义的错误信息</li>
+</ul>
+<h1 id="三、工具集成"><a href="#三、工具集成" class="headerlink" title="三、工具集成"></a>三、工具集成</h1><h2 id="3-1-ToolCallbackProvider-配置"><a href="#3-1-ToolCallbackProvider-配置" class="headerlink" title="3.1 ToolCallbackProvider 配置"></a>3.1 ToolCallbackProvider 配置</h2><p>​    工具定义好后，需要配置 <code>ToolCallbackProvider</code> 来注册工具。</p>
+<p><strong>配置方式：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@SpringBootApplication</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ToolsApplication</span> </span>&#123;<br>    <br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> ToolCallbackProvider <span class="hljs-title">toolCallbackProvider</span><span class="hljs-params">(ToolService toolService)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> MethodToolCallbackProvider.builder()<br>            .toolObjects(toolService)  <span class="hljs-comment">// 传入工具对象</span><br>            .build();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>关键点：</strong></p>
+<ul>
+<li><code>MethodToolCallbackProvider</code>：基于方法反射的工具提供者</li>
+<li><code>toolObjects</code>：传入包含 <code>@Tool</code> 注解的对象</li>
+<li>可以传入多个对象：<code>.toolObjects(service1, service2, service3)</code></li>
+</ul>
+<h2 id="3-2-ChatClient-集成"><a href="#3-2-ChatClient-集成" class="headerlink" title="3.2 ChatClient 集成"></a>3.2 ChatClient 集成</h2><p>​    在 <code>ChatClient</code> 中配置工具：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Autowired</span><br><span class="hljs-keyword">private</span> ToolService toolService;<br><span class="hljs-meta">@Autowired</span><br><span class="hljs-keyword">private</span> ToolCallbackProvider toolCallbackProvider;<br><br>ChatClient chatClient = ChatClient.builder(chatModel)<br>    .defaultTools(toolService)                    <span class="hljs-comment">// 注册工具</span><br>    .defaultToolCallbacks(toolCallbackProvider)   <span class="hljs-comment">// 注册工具回调</span><br>    .build();<br></code></pre></td></tr></table></figure>
+
+<p><strong>注意：</strong></p>
+<ul>
+<li><code>defaultTools</code> 和 <code>defaultToolCallbacks</code> 都要配置</li>
+<li><code>defaultTools</code> 告诉 AI 有哪些工具可用</li>
+<li><code>defaultToolCallbacks</code> 提供工具的实际执行逻辑</li>
+</ul>
+<h2 id="3-3-完整示例"><a href="#3-3-完整示例" class="headerlink" title="3.3 完整示例"></a>3.3 完整示例</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span><br><span class="hljs-meta">@RequestMapping(&quot;/api/chat&quot;)</span><br><span class="hljs-meta">@CrossOrigin(origins = &quot;*&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChatController</span> </span>&#123;<br><br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> ChatModel chatModel;<br><br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> ChatMemory chatMemory;<br>    <br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> ToolService toolService;<br>    <br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> ToolCallbackProvider toolCallbackProvider;<br><br>    <span class="hljs-meta">@GetMapping(value = &quot;/stream&quot;, produces = MediaType.TEXT_EVENT_STREAM_VALUE)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Flux&lt;String&gt; <span class="hljs-title">streamChat</span><span class="hljs-params">(<span class="hljs-meta">@RequestParam</span> String message)</span> </span>&#123;<br>        <span class="hljs-keyword">if</span> (message == <span class="hljs-keyword">null</span> || message.trim().isEmpty()) &#123;<br>            <span class="hljs-keyword">return</span> Flux.error(<span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">&quot;message参数不能为空&quot;</span>));<br>        &#125;<br><br>        ChatClient chatClient = ChatClient.builder(chatModel)<br>                .defaultSystem(<span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;</span><br><span class="hljs-string">                #角色</span><br><span class="hljs-string">                你是一个专业的航空客服助手，名为&#x27;南方国际航空&#x27;的客服代表</span><br><span class="hljs-string">                你的职责是帮助客户处理航班预订相关的问题，包括查询航班信息、取消预订等。请用友好、专业的态度回复客户。</span><br><span class="hljs-string">                #要求</span><br><span class="hljs-string">                1、在涉及增删改（除了查询）function-call前，必须等用户回复&quot;</span>确认<span class="hljs-string">&quot;后再调用tools</span><br><span class="hljs-string">                2、请讲中文</span><br><span class="hljs-string">                </span><br><span class="hljs-string">                今天的日期是 &#123;currentDate&#125;</span><br><span class="hljs-string">                &quot;</span><span class="hljs-string">&quot;&quot;</span>)<br>                .defaultAdvisors(<br>                    PromptChatMemoryAdvisor.builder(chatMemory).build(),<br>                    <span class="hljs-keyword">new</span> SimpleLoggerAdvisor()<br>                )<br>                .defaultTools(toolService)<br>                .defaultToolCallbacks(toolCallbackProvider)<br>                .build();<br><br>        <span class="hljs-keyword">return</span> chatClient.prompt()<br>                .user(message)<br>                .system(p -&gt; p.param(<span class="hljs-string">&quot;currentDate&quot;</span>, LocalDate.now()))<br>                .stream()<br>                .content()<br>                .map(content -&gt; content == <span class="hljs-keyword">null</span> ? <span class="hljs-string">&quot;&quot;</span> : content);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="四、实际案例：航空客服助手"><a href="#四、实际案例：航空客服助手" class="headerlink" title="四、实际案例：航空客服助手"></a>四、实际案例：航空客服助手</h1><h2 id="4-1-业务场景"><a href="#4-1-业务场景" class="headerlink" title="4.1 业务场景"></a>4.1 业务场景</h2><p>​    假设我们要做一个航空客服助手，需要支持：</p>
+<ul>
+<li>查询航班信息</li>
+<li>取消航班预订</li>
+</ul>
+<p><strong>数据模型：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FlightBooking</span> </span>&#123;<br>    <span class="hljs-keyword">private</span> String id;                    <span class="hljs-comment">// 预订编号</span><br>    <span class="hljs-keyword">private</span> String passengerName;         <span class="hljs-comment">// 乘客姓名</span><br>    <span class="hljs-keyword">private</span> LocalDate departureDate;      <span class="hljs-comment">// 出发日期</span><br>    <span class="hljs-keyword">private</span> String from;                  <span class="hljs-comment">// 出发地</span><br>    <span class="hljs-keyword">private</span> String to;                    <span class="hljs-comment">// 目的地</span><br>    <span class="hljs-keyword">private</span> BookingStatus status;         <span class="hljs-comment">// 状态</span><br>    <span class="hljs-keyword">private</span> BookingClass bookingClass;    <span class="hljs-comment">// 舱位等级</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="4-2-工具实现"><a href="#4-2-工具实现" class="headerlink" title="4.2 工具实现"></a>4.2 工具实现</h2><p><strong>查询工具：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Service</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ToolService</span> </span>&#123;<br><br>    <span class="hljs-meta">@Resource</span><br>    <span class="hljs-keyword">private</span> FlightBookingService flightBookingService;<br><br>    <span class="hljs-meta">@Tool(description = &quot;查询航班信息，需要提供预订号和乘客姓名&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">queryFlightInfo</span><span class="hljs-params">(</span></span><br><span class="hljs-function"><span class="hljs-params">            <span class="hljs-meta">@ToolParam</span> String bookingNumber,</span></span><br><span class="hljs-function"><span class="hljs-params">            <span class="hljs-meta">@ToolParam</span> String passengerName)</span> </span>&#123;<br>        FlightBooking booking = flightBookingService<br>            .findBookingByBookingNumberAndName(bookingNumber, passengerName);<br>        <span class="hljs-keyword">if</span> (booking != <span class="hljs-keyword">null</span>) &#123;<br>            <span class="hljs-keyword">return</span> String.format(<br>                <span class="hljs-string">&quot;预订号：%s，乘客：%s，出发地：%s，目的地：%s，出发日期：%s，状态：%s&quot;</span>,<br>                booking.getId(),<br>                booking.getPassengerName(),<br>                booking.getFrom(),<br>                booking.getTo(),<br>                booking.getDepartureDate(),<br>                booking.getStatus()<br>            );<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;未找到航班信息，请检查预订号和乘客姓名是否正确&quot;</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>取消工具：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Tool(description = &quot;退票/取消预定，需要提供预订号和乘客姓名&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">cancelBooking</span><span class="hljs-params">(</span></span><br><span class="hljs-function"><span class="hljs-params">        String bookingNumber,</span></span><br><span class="hljs-function"><span class="hljs-params">        String passengerName)</span> </span>&#123;<br>    <span class="hljs-keyword">boolean</span> success = flightBookingService<br>        .cancelBookingByBookingNumberAndName(bookingNumber, passengerName);<br>    <span class="hljs-keyword">if</span> (success) &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;退票成功&quot;</span>;<br>    &#125;<br>    <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;退票失败，请检查预订号和乘客姓名是否正确&quot;</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="4-3-系统提示词设计"><a href="#4-3-系统提示词设计" class="headerlink" title="4.3 系统提示词设计"></a>4.3 系统提示词设计</h2><p>​    系统提示词要明确告诉 AI 如何使用工具：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java">.defaultSystem(<span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;</span><br><span class="hljs-string">#角色</span><br><span class="hljs-string">你是一个专业的航空客服助手，名为&#x27;南方国际航空&#x27;的客服代表</span><br><span class="hljs-string">你的职责是帮助客户处理航班预订相关的问题，包括查询航班信息、取消预订等。请用友好、专业的态度回复客户。</span><br><span class="hljs-string"></span><br><span class="hljs-string">#要求</span><br><span class="hljs-string">1、在涉及增删改（除了查询）function-call前，必须等用户回复&quot;</span>确认<span class="hljs-string">&quot;后再调用tools</span><br><span class="hljs-string">2、请讲中文</span><br><span class="hljs-string">3、如果用户的问题无法通过工具解决，请引导用户联系人工客服</span><br><span class="hljs-string"></span><br><span class="hljs-string">今天的日期是 &#123;currentDate&#125;</span><br><span class="hljs-string">&quot;</span><span class="hljs-string">&quot;&quot;</span>)<br></code></pre></td></tr></table></figure>
+
+<p><strong>提示词要点：</strong></p>
+<ul>
+<li><strong>明确角色</strong>：告诉 AI 你是谁</li>
+<li><strong>明确规则</strong>：什么时候可以调用工具，什么时候需要确认</li>
+<li><strong>错误处理</strong>：无法解决时如何处理</li>
+</ul>
+<h2 id="4-4-完整代码"><a href="#4-4-完整代码" class="headerlink" title="4.4 完整代码"></a>4.4 完整代码</h2><p><strong>ToolService：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> org.study.ai.service;<br><br><span class="hljs-keyword">import</span> jakarta.annotation.Resource;<br><span class="hljs-keyword">import</span> org.springframework.ai.tool.annotation.Tool;<br><span class="hljs-keyword">import</span> org.springframework.ai.tool.annotation.ToolParam;<br><span class="hljs-keyword">import</span> org.springframework.stereotype.Service;<br><span class="hljs-keyword">import</span> org.study.ai.model.FlightBooking;<br><br><span class="hljs-meta">@Service</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ToolService</span> </span>&#123;<br><br>    <span class="hljs-meta">@Resource</span><br>    <span class="hljs-keyword">private</span> FlightBookingService flightBookingService;<br><br>    <span class="hljs-meta">@Tool(description = &quot;查询航班信息，需要提供预订号和乘客姓名&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">queryFlightInfo</span><span class="hljs-params">(</span></span><br><span class="hljs-function"><span class="hljs-params">            <span class="hljs-meta">@ToolParam</span> String bookingNumber,</span></span><br><span class="hljs-function"><span class="hljs-params">            <span class="hljs-meta">@ToolParam</span> String passengerName)</span> </span>&#123;<br>        FlightBooking booking = flightBookingService<br>            .findBookingByBookingNumberAndName(bookingNumber, passengerName);<br>        <span class="hljs-keyword">if</span> (booking != <span class="hljs-keyword">null</span>) &#123;<br>            <span class="hljs-keyword">return</span> String.format(<br>                <span class="hljs-string">&quot;预订号：%s，乘客：%s，出发地：%s，目的地：%s，出发日期：%s，状态：%s&quot;</span>,<br>                booking.getId(),<br>                booking.getPassengerName(),<br>                booking.getFrom(),<br>                booking.getTo(),<br>                booking.getDepartureDate(),<br>                booking.getStatus()<br>            );<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;未找到航班信息，请检查预订号和乘客姓名是否正确&quot;</span>;<br>    &#125;<br><br>    <span class="hljs-meta">@Tool(description = &quot;退票/取消预定，需要提供预订号和乘客姓名&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">cancelBooking</span><span class="hljs-params">(</span></span><br><span class="hljs-function"><span class="hljs-params">            String bookingNumber,</span></span><br><span class="hljs-function"><span class="hljs-params">            String passengerName)</span> </span>&#123;<br>        <span class="hljs-keyword">boolean</span> success = flightBookingService<br>            .cancelBookingByBookingNumberAndName(bookingNumber, passengerName);<br>        <span class="hljs-keyword">if</span> (success) &#123;<br>            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;退票成功&quot;</span>;<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;退票失败，请检查预订号和乘客姓名是否正确&quot;</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>FlightBookingService：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Service</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FlightBookingService</span> </span>&#123;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ConcurrentHashMap&lt;String, FlightBooking&gt; bookings = <span class="hljs-keyword">new</span> ConcurrentHashMap&lt;&gt;();<br><br>    <span class="hljs-meta">@PostConstruct</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">init</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-comment">// 初始化示例数据</span><br>        addBooking(<span class="hljs-keyword">new</span> FlightBooking(<span class="hljs-string">&quot;101&quot;</span>, <span class="hljs-string">&quot;徐庶&quot;</span>, LocalDate.of(<span class="hljs-number">2025</span>, <span class="hljs-number">7</span>, <span class="hljs-number">15</span>), <br>                <span class="hljs-string">&quot;重庆&quot;</span>, <span class="hljs-string">&quot;成都&quot;</span>, BookingStatus.CONFIRMED, BookingClass.ECONOMY));<br>        addBooking(<span class="hljs-keyword">new</span> FlightBooking(<span class="hljs-string">&quot;102&quot;</span>, <span class="hljs-string">&quot;诸葛&quot;</span>, LocalDate.of(<span class="hljs-number">2025</span>, <span class="hljs-number">7</span>, <span class="hljs-number">16</span>), <br>                <span class="hljs-string">&quot;武汉&quot;</span>, <span class="hljs-string">&quot;南京&quot;</span>, BookingStatus.CONFIRMED, BookingClass.BUSINESS));<br>        <span class="hljs-comment">// ... 更多数据</span><br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> FlightBooking <span class="hljs-title">findBookingByBookingNumberAndName</span><span class="hljs-params">(String bookingNumber, String passengerName)</span> </span>&#123;<br>        FlightBooking booking = bookings.get(bookingNumber);<br>        <span class="hljs-keyword">if</span> (booking != <span class="hljs-keyword">null</span> &amp;&amp; booking.getPassengerName().equals(passengerName)) &#123;<br>            <span class="hljs-keyword">return</span> booking;<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">cancelBookingByBookingNumberAndName</span><span class="hljs-params">(String bookingNumber, String passengerName)</span> </span>&#123;<br>        FlightBooking booking = findBookingByBookingNumberAndName(bookingNumber, passengerName);<br>        <span class="hljs-keyword">if</span> (booking != <span class="hljs-keyword">null</span>) &#123;<br>            booking.setStatus(BookingStatus.CANCELLED);<br>            <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="五、工具调用流程"><a href="#五、工具调用流程" class="headerlink" title="五、工具调用流程"></a>五、工具调用流程</h1><p>​    完整的工具调用流程：</p>
+<p><strong>1. 用户提问</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plain">用户：查询我的航班信息，预订号是 101，乘客姓名是徐庶<br></code></pre></td></tr></table></figure>
+
+<p><strong>2. AI 分析</strong><br>​    AI 分析问题，判断需要调用 <code>queryFlightInfo</code> 工具。</p>
+<p><strong>3. 工具调用</strong><br>​    AI 生成工具调用请求（内部处理）：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs json">&#123;<br>  <span class="hljs-attr">&quot;function&quot;</span>: <span class="hljs-string">&quot;queryFlightInfo&quot;</span>,<br>  <span class="hljs-attr">&quot;arguments&quot;</span>: &#123;<br>    <span class="hljs-attr">&quot;bookingNumber&quot;</span>: <span class="hljs-string">&quot;101&quot;</span>,<br>    <span class="hljs-attr">&quot;passengerName&quot;</span>: <span class="hljs-string">&quot;徐庶&quot;</span><br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>4. 执行工具</strong><br>​    Spring AI 执行工具方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">queryFlightInfo(<span class="hljs-string">&quot;101&quot;</span>, <span class="hljs-string">&quot;徐庶&quot;</span>)<br></code></pre></td></tr></table></figure>
+
+<p><strong>5. 返回结果</strong><br>​    工具执行结果返回给 AI：</p>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs subunit">预订号：101，乘客：徐庶，出发地：重庆，目的地：成都，出发日期：2025<span class="hljs-string">-07</span><span class="hljs-string">-15</span>，状态：CONFIRMED<br></code></pre></td></tr></table></figure>
+
+<p><strong>6. 生成回复</strong><br>​    AI 根据工具执行结果生成最终回复：</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs asciidoc">根据您提供的信息，我查询到您的航班信息如下：<br><span class="hljs-bullet">- </span>预订号：101<br><span class="hljs-bullet">- </span>乘客姓名：徐庶<br><span class="hljs-bullet">- </span>出发地：重庆<br><span class="hljs-bullet">- </span>目的地：成都<br><span class="hljs-bullet">- </span>出发日期：2025年7月15日<br><span class="hljs-bullet">- </span>状态：已确认<br></code></pre></td></tr></table></figure>
+
+<p><strong>实际对话示例：</strong></p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs css">用户：查询我的航班信息，预订号是 <span class="hljs-number">101</span>，乘客姓名是徐庶<br>AI：<span class="hljs-selector-attr">[调用 queryFlightInfo(<span class="hljs-string">&quot;101&quot;</span>, <span class="hljs-string">&quot;徐庶&quot;</span>)]</span><br>AI：根据您提供的信息，我查询到您的航班信息如下：<br>    预订号：<span class="hljs-number">101</span><br>    乘客：徐庶<br>    出发地：重庆<br>    目的地：成都<br>    出发日期：<span class="hljs-number">2025</span>年<span class="hljs-number">7</span>月<span class="hljs-number">15</span>日<br>    状态：已确认<br></code></pre></td></tr></table></figure>
+
+<h1 id="六、常见问题"><a href="#六、常见问题" class="headerlink" title="六、常见问题"></a>六、常见问题</h1><h2 id="6-1-AI-不调用工具"><a href="#6-1-AI-不调用工具" class="headerlink" title="6.1 AI 不调用工具"></a>6.1 AI 不调用工具</h2><p><strong>问题：</strong> AI 不调用工具，直接回复。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li><code>description</code> 描述不准确</li>
+<li>系统提示词没有引导 AI 使用工具</li>
+<li>工具未正确注册</li>
+</ul>
+<p><strong>解决：</strong></p>
+<ol>
+<li>检查 <code>description</code> 是否清晰准确</li>
+<li>在系统提示词中明确告诉 AI 什么时候使用工具</li>
+<li>确认 <code>defaultTools</code> 和 <code>defaultToolCallbacks</code> 都已配置</li>
+</ol>
+<h2 id="6-2-AI-调用工具但参数错误"><a href="#6-2-AI-调用工具但参数错误" class="headerlink" title="6.2 AI 调用工具但参数错误"></a>6.2 AI 调用工具但参数错误</h2><p><strong>问题：</strong> AI 调用了工具，但参数值不对。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li>参数类型不匹配</li>
+<li>参数名称不清晰</li>
+<li>AI 理解有误</li>
+</ul>
+<p><strong>解决：</strong></p>
+<ol>
+<li>使用明确的参数类型（String、int 等）</li>
+<li>参数名称要清晰（如 <code>bookingNumber</code> 而不是 <code>id</code>）</li>
+<li>在 <code>description</code> 中说明参数的含义</li>
+</ol>
+<h2 id="6-3-工具执行失败"><a href="#6-3-工具执行失败" class="headerlink" title="6.3 工具执行失败"></a>6.3 工具执行失败</h2><p><strong>问题：</strong> 工具执行时报错。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li>参数验证不足</li>
+<li>业务逻辑错误</li>
+<li>异常未处理</li>
+</ul>
+<p><strong>解决：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Tool(description = &quot;查询航班信息&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">queryFlightInfo</span><span class="hljs-params">(String bookingNumber, String passengerName)</span> </span>&#123;<br>    <span class="hljs-keyword">try</span> &#123;<br>        <span class="hljs-comment">// 参数验证</span><br>        <span class="hljs-keyword">if</span> (bookingNumber == <span class="hljs-keyword">null</span> || bookingNumber.trim().isEmpty()) &#123;<br>            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;预订号不能为空&quot;</span>;<br>        &#125;<br>        <span class="hljs-keyword">if</span> (passengerName == <span class="hljs-keyword">null</span> || passengerName.trim().isEmpty()) &#123;<br>            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;乘客姓名不能为空&quot;</span>;<br>        &#125;<br>        <br>        <span class="hljs-comment">// 业务逻辑</span><br>        FlightBooking booking = flightBookingService<br>            .findBookingByBookingNumberAndName(bookingNumber, passengerName);<br>        <span class="hljs-keyword">if</span> (booking != <span class="hljs-keyword">null</span>) &#123;<br>            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;航班信息：&quot;</span> + booking;<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;未找到航班信息&quot;</span>;<br>    &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;查询失败：&quot;</span> + e.getMessage();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="6-4-工具返回值-AI-不理解"><a href="#6-4-工具返回值-AI-不理解" class="headerlink" title="6.4 工具返回值 AI 不理解"></a>6.4 工具返回值 AI 不理解</h2><p><strong>问题：</strong> 工具返回了结果，但 AI 回复不准确。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li>返回值格式不清晰</li>
+<li>返回值信息不完整</li>
+</ul>
+<p><strong>解决：</strong></p>
+<ul>
+<li>返回格式化的字符串，包含完整信息</li>
+<li>使用清晰的格式，便于 AI 理解</li>
+</ul>
+<h1 id="七、最佳实践"><a href="#七、最佳实践" class="headerlink" title="七、最佳实践"></a>七、最佳实践</h1><h2 id="7-1-工具设计原则"><a href="#7-1-工具设计原则" class="headerlink" title="7.1 工具设计原则"></a>7.1 工具设计原则</h2><p><strong>单一职责</strong><br>​    每个工具方法只做一件事：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 好的设计</span><br><span class="hljs-meta">@Tool(description = &quot;查询航班信息&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">queryFlightInfo</span><span class="hljs-params">(...)</span> </span>&#123; &#125;<br><br><span class="hljs-meta">@Tool(description = &quot;取消航班预订&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">cancelBooking</span><span class="hljs-params">(...)</span> </span>&#123; &#125;<br><br><span class="hljs-comment">// 不好的设计</span><br><span class="hljs-meta">@Tool(description = &quot;查询或取消航班&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">flightOperation</span><span class="hljs-params">(...)</span> </span>&#123; &#125;  <span class="hljs-comment">// 职责不单一</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>参数验证</strong><br>​    在工具方法中进行参数验证：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Tool(description = &quot;查询航班信息&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">queryFlightInfo</span><span class="hljs-params">(String bookingNumber, String passengerName)</span> </span>&#123;<br>    <span class="hljs-keyword">if</span> (bookingNumber == <span class="hljs-keyword">null</span> || bookingNumber.trim().isEmpty()) &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;预订号不能为空&quot;</span>;<br>    &#125;<br>    <span class="hljs-keyword">if</span> (passengerName == <span class="hljs-keyword">null</span> || passengerName.trim().isEmpty()) &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;乘客姓名不能为空&quot;</span>;<br>    &#125;<br>    <span class="hljs-comment">// ... 业务逻辑</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>错误处理</strong><br>​    完善的错误处理：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Tool(description = &quot;查询航班信息&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">queryFlightInfo</span><span class="hljs-params">(String bookingNumber, String passengerName)</span> </span>&#123;<br>    <span class="hljs-keyword">try</span> &#123;<br>        <span class="hljs-comment">// 业务逻辑</span><br>        <span class="hljs-keyword">return</span> result;<br>    &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;<br>        log.error(<span class="hljs-string">&quot;查询航班信息失败&quot;</span>, e);<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;查询失败，请稍后重试&quot;</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="7-2-系统提示词设计"><a href="#7-2-系统提示词设计" class="headerlink" title="7.2 系统提示词设计"></a>7.2 系统提示词设计</h2><p><strong>明确规则</strong><br>​    在系统提示词中明确工具使用规则：</p>
+<figure class="highlight vala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs vala"><span class="hljs-meta">#要求</span><br><span class="hljs-number">1</span>、查询操作可以直接调用工具<br><span class="hljs-number">2</span>、增删改操作必须等用户确认后再调用工具<br><span class="hljs-number">3</span>、如果工具返回错误，要向用户说明原因<br></code></pre></td></tr></table></figure>
+
+<p><strong>角色定义</strong><br>​    明确 AI 的角色和职责：</p>
+<figure class="highlight vala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs vala"><span class="hljs-meta">#角色</span><br>你是一个专业的航空客服助手<br>你的职责是帮助客户处理航班预订相关的问题<br></code></pre></td></tr></table></figure>
+
+<h2 id="7-3-日志记录"><a href="#7-3-日志记录" class="headerlink" title="7.3 日志记录"></a>7.3 日志记录</h2><p>​    在工具方法中记录日志，便于排查问题：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Tool(description = &quot;查询航班信息&quot;)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">queryFlightInfo</span><span class="hljs-params">(String bookingNumber, String passengerName)</span> </span>&#123;<br>    log.info(<span class="hljs-string">&quot;查询航班信息，预订号：&#123;&#125;，乘客姓名：&#123;&#125;&quot;</span>, bookingNumber, passengerName);<br>    <span class="hljs-comment">// ... 业务逻辑</span><br>    log.info(<span class="hljs-string">&quot;查询结果：&#123;&#125;&quot;</span>, result);<br>    <span class="hljs-keyword">return</span> result;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="八、总结"><a href="#八、总结" class="headerlink" title="八、总结"></a>八、总结</h1><ol>
+<li><strong>Function Call</strong> 让 AI 可以调用外部工具，扩展 AI 的能力</li>
+<li><strong>@Tool 注解</strong>：使用 <code>@Tool</code> 定义工具，<code>description</code> 很重要</li>
+<li><strong>工具注册</strong>：需要配置 <code>ToolCallbackProvider</code> 并在 <code>ChatClient</code> 中注册</li>
+<li><strong>参数设计</strong>：类型明确、数量适中、命名清晰</li>
+<li><strong>返回值设计</strong>：信息完整、格式清晰、错误提示明确</li>
+<li><strong>系统提示词</strong>：明确角色、规则、错误处理方式</li>
+<li><strong>最佳实践</strong>：单一职责、参数验证、错误处理、日志记录</li>
+</ol>
+<p>​    下一篇文章会介绍 MCP 协议，这是 Spring AI 提供的标准化工具调用协议。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SpringAI/" rel="tag"># SpringAI</a>
+              <a href="/tags/Tools/" rel="tag"># Tools</a>
+              <a href="/tags/FunctionCall/" rel="tag"># FunctionCall</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/01/03/SpringAI-05-RAG%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90/" rel="prev" title="SpringAI-05-RAG检索增强生成">
+      <i class="fa fa-chevron-left"></i> SpringAI-05-RAG检索增强生成
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/01/03/SpringAI-04-MCP%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/" rel="next" title="SpringAI-04-MCP协议详解">
+      SpringAI-04-MCP协议详解 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81Function-Call-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">1.</span> <span class="nav-text">一、Function Call 是什么</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%B7%A5%E5%85%B7%E5%AE%9A%E4%B9%89"><span class="nav-number">2.</span> <span class="nav-text">二、工具定义</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-Tool-%E6%B3%A8%E8%A7%A3"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 @Tool 注解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-description-%E7%9A%84%E9%87%8D%E8%A6%81%E6%80%A7"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 description 的重要性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-%E5%8F%82%E6%95%B0%E8%AE%BE%E8%AE%A1"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 参数设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-%E8%BF%94%E5%9B%9E%E5%80%BC%E8%AE%BE%E8%AE%A1"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 返回值设计</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%B7%A5%E5%85%B7%E9%9B%86%E6%88%90"><span class="nav-number">3.</span> <span class="nav-text">三、工具集成</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-ToolCallbackProvider-%E9%85%8D%E7%BD%AE"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 ToolCallbackProvider 配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-ChatClient-%E9%9B%86%E6%88%90"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 ChatClient 集成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-%E5%AE%8C%E6%95%B4%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 完整示例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%AE%9E%E9%99%85%E6%A1%88%E4%BE%8B%EF%BC%9A%E8%88%AA%E7%A9%BA%E5%AE%A2%E6%9C%8D%E5%8A%A9%E6%89%8B"><span class="nav-number">4.</span> <span class="nav-text">四、实际案例：航空客服助手</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 业务场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-%E5%B7%A5%E5%85%B7%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 工具实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-%E7%B3%BB%E7%BB%9F%E6%8F%90%E7%A4%BA%E8%AF%8D%E8%AE%BE%E8%AE%A1"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 系统提示词设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-4-%E5%AE%8C%E6%95%B4%E4%BB%A3%E7%A0%81"><span class="nav-number">4.4.</span> <span class="nav-text">4.4 完整代码</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B"><span class="nav-number">5.</span> <span class="nav-text">五、工具调用流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="nav-number">6.</span> <span class="nav-text">六、常见问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#6-1-AI-%E4%B8%8D%E8%B0%83%E7%94%A8%E5%B7%A5%E5%85%B7"><span class="nav-number">6.1.</span> <span class="nav-text">6.1 AI 不调用工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-2-AI-%E8%B0%83%E7%94%A8%E5%B7%A5%E5%85%B7%E4%BD%86%E5%8F%82%E6%95%B0%E9%94%99%E8%AF%AF"><span class="nav-number">6.2.</span> <span class="nav-text">6.2 AI 调用工具但参数错误</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-3-%E5%B7%A5%E5%85%B7%E6%89%A7%E8%A1%8C%E5%A4%B1%E8%B4%A5"><span class="nav-number">6.3.</span> <span class="nav-text">6.3 工具执行失败</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-4-%E5%B7%A5%E5%85%B7%E8%BF%94%E5%9B%9E%E5%80%BC-AI-%E4%B8%8D%E7%90%86%E8%A7%A3"><span class="nav-number">6.4.</span> <span class="nav-text">6.4 工具返回值 AI 不理解</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">7.</span> <span class="nav-text">七、最佳实践</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#7-1-%E5%B7%A5%E5%85%B7%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="nav-number">7.1.</span> <span class="nav-text">7.1 工具设计原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-2-%E7%B3%BB%E7%BB%9F%E6%8F%90%E7%A4%BA%E8%AF%8D%E8%AE%BE%E8%AE%A1"><span class="nav-number">7.2.</span> <span class="nav-text">7.2 系统提示词设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-3-%E6%97%A5%E5%BF%97%E8%AE%B0%E5%BD%95"><span class="nav-number">7.3.</span> <span class="nav-text">7.3 日志记录</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E6%80%BB%E7%BB%93"><span class="nav-number">8.</span> <span class="nav-text">八、总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">97</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="SpringAI ChatClient使用-流式响应与多模型管理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringAI-02-ChatClient使用">
+<meta property="og:url" content="http://example.com/2026/01/03/SpringAI-02-ChatClient%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="SpringAI ChatClient使用-流式响应与多模型管理">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-01-03T13:00:00.000Z">
+<meta property="article:modified_time" content="2026-01-03T06:23:25.494Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="SpringAI">
+<meta property="article:tag" content="ChatClient">
+<meta property="article:tag" content="流式响应">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2026/01/03/SpringAI-02-ChatClient%E4%BD%BF%E7%94%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SpringAI-02-ChatClient使用 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/01/03/SpringAI-02-ChatClient%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringAI-02-ChatClient使用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-01-03 21:00:00 / 修改时间：14:23:25" itemprop="dateCreated datePublished" datetime="2026-01-03T21:00:00+08:00">2026-01-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SpringAI/" itemprop="url" rel="index"><span itemprop="name">SpringAI</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">SpringAI ChatClient使用-流式响应与多模型管理</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一、ChatClient-简介"><a href="#一、ChatClient-简介" class="headerlink" title="一、ChatClient 简介"></a>一、ChatClient 简介</h1><p>​    <code>ChatClient</code> 是 Spring AI 提供的高级 API，比直接使用 <code>ChatModel</code> 更方便。它提供了链式调用的方式，代码更简洁，功能也更丰富。</p>
+<p><strong>ChatClient 的优势：</strong></p>
+<ul>
+<li>链式调用，代码更清晰</li>
+<li>内置对话记忆功能</li>
+<li>支持 Advisor 拦截器</li>
+<li>统一的工具调用接口</li>
+<li>更好的错误处理</li>
+</ul>
+<p><strong>什么时候用 ChatClient：</strong></p>
+<ul>
+<li>需要对话记忆的场景</li>
+<li>需要自定义拦截器的场景</li>
+<li>需要工具调用的场景</li>
+<li>需要更灵活配置的场景</li>
+</ul>
+<p><strong>什么时候用 ChatModel：</strong></p>
+<ul>
+<li>简单的单次调用</li>
+<li>不需要记忆功能</li>
+<li>对性能要求极高的场景</li>
+</ul>
+<h1 id="二、多模型管理"><a href="#二、多模型管理" class="headerlink" title="二、多模型管理"></a>二、多模型管理</h1><h2 id="2-1-为什么需要多模型管理"><a href="#2-1-为什么需要多模型管理" class="headerlink" title="2.1 为什么需要多模型管理"></a>2.1 为什么需要多模型管理</h2><p>​    实际项目中，我们可能需要同时使用多个 AI 模型：</p>
+<ul>
+<li>DeepSeek：适合代码生成、推理任务</li>
+<li>阿里百炼：适合中文对话、多模态任务</li>
+<li>OpenAI：适合英文场景</li>
+</ul>
+<p>​    如果每个地方都直接注入 <code>ChatModel</code>，代码会很混乱。更好的做法是统一管理，通过参数切换。</p>
+<h2 id="2-2-ChatModelService-实现"><a href="#2-2-ChatModelService-实现" class="headerlink" title="2.2 ChatModelService 实现"></a>2.2 ChatModelService 实现</h2><p>​    创建一个服务类来管理多个 ChatModel：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">package</span> org.study.ai.service;<br><br><span class="hljs-keyword">import</span> com.alibaba.cloud.ai.dashscope.chat.DashScopeChatModel;<br><span class="hljs-keyword">import</span> org.springframework.ai.chat.model.ChatModel;<br><span class="hljs-keyword">import</span> org.springframework.ai.deepseek.DeepSeekChatModel;<br><span class="hljs-keyword">import</span> org.springframework.beans.factory.annotation.Autowired;<br><span class="hljs-keyword">import</span> org.springframework.stereotype.Service;<br><br><span class="hljs-keyword">import</span> jakarta.annotation.PostConstruct;<br><span class="hljs-keyword">import</span> java.util.HashMap;<br><span class="hljs-keyword">import</span> java.util.Map;<br><br><span class="hljs-meta">@Service</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChatModelService</span> </span>&#123;<br><br>    <span class="hljs-comment">// 使用 required = false，避免某个模型未配置时启动失败</span><br>    <span class="hljs-meta">@Autowired(required = false)</span><br>    <span class="hljs-keyword">private</span> DeepSeekChatModel deepSeekChatModel;<br><br>    <span class="hljs-meta">@Autowired(required = false)</span><br>    <span class="hljs-keyword">private</span> DashScopeChatModel dashScopeChatModel;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * ChatModel映射表</span><br><span class="hljs-comment">     * Key: 平台标识 (ds, dashscope)</span><br><span class="hljs-comment">     * Value: ChatModel实例</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, ChatModel&gt; chatModelMap = <span class="hljs-keyword">new</span> HashMap&lt;&gt;();<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 初始化ChatModel映射表</span><br><span class="hljs-comment">     * 在应用启动时执行</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-meta">@PostConstruct</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initChatModels</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-comment">// 初始化DeepSeek平台</span><br>        <span class="hljs-keyword">if</span> (deepSeekChatModel != <span class="hljs-keyword">null</span>) &#123;<br>            chatModelMap.put(<span class="hljs-string">&quot;ds&quot;</span>, deepSeekChatModel);<br>            chatModelMap.put(<span class="hljs-string">&quot;deepseek&quot;</span>, deepSeekChatModel); <span class="hljs-comment">// 支持完整名称</span><br>        &#125;<br><br>        <span class="hljs-comment">// 初始化DashScope平台</span><br>        <span class="hljs-keyword">if</span> (dashScopeChatModel != <span class="hljs-keyword">null</span>) &#123;<br>            chatModelMap.put(<span class="hljs-string">&quot;dashscope&quot;</span>, dashScopeChatModel);<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 根据平台标识获取ChatModel</span><br><span class="hljs-comment">     * </span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> platform 平台标识</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@return</span> ChatModel实例，如果平台不存在则返回null</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> ChatModel <span class="hljs-title">getChatModel</span><span class="hljs-params">(String platform)</span> </span>&#123;<br>        <span class="hljs-keyword">if</span> (platform == <span class="hljs-keyword">null</span>) &#123;<br>            <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;<br>        &#125;<br>        <span class="hljs-keyword">return</span> chatModelMap.get(platform.toLowerCase());<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>关键点：</strong></p>
+<ul>
+<li><code>@Autowired(required = false)</code>：某个模型未配置时不会报错</li>
+<li><code>@PostConstruct</code>：应用启动时初始化映射表</li>
+<li>支持多个别名：<code>ds</code> 和 <code>deepseek</code> 都指向同一个模型</li>
+</ul>
+<h2 id="2-3-实际使用"><a href="#2-3-实际使用" class="headerlink" title="2.3 实际使用"></a>2.3 实际使用</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span><br><span class="hljs-meta">@RequestMapping(&quot;/api/chat&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChatController</span> </span>&#123;<br><br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> ChatModelService chatModelService;<br><br>    <span class="hljs-meta">@GetMapping(value = &quot;/stream&quot;, produces = &quot;text/stream;charset=utf-8&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Flux&lt;String&gt; <span class="hljs-title">streamChat</span><span class="hljs-params">(</span></span><br><span class="hljs-function"><span class="hljs-params">            <span class="hljs-meta">@RequestParam(&quot;platform&quot;)</span> String platform,</span></span><br><span class="hljs-function"><span class="hljs-params">            <span class="hljs-meta">@ModelAttribute</span> ChatRequest request)</span> </span>&#123;<br>        <br>        <span class="hljs-comment">// 获取对应的 ChatModel</span><br>        ChatModel chatModel = chatModelService.getChatModel(platform);<br>        <span class="hljs-keyword">if</span> (chatModel == <span class="hljs-keyword">null</span>) &#123;<br>            <span class="hljs-keyword">return</span> Flux.error(<span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">&quot;不支持的平台：&quot;</span> + platform));<br>        &#125;<br>        <br>        <span class="hljs-comment">// 使用 ChatClient</span><br>        ChatClient chatClient = ChatClient.builder(chatModel).build();<br>        <br>        <span class="hljs-keyword">return</span> chatClient.prompt()<br>                .user(request.getMessage())<br>                .stream()<br>                .content();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>调用示例：</strong></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs routeros"><span class="hljs-builtin-name">GET</span> /api/chat/stream?<span class="hljs-attribute">platform</span>=ds&amp;message=你好&amp;model=deepseek-chat<br><span class="hljs-builtin-name">GET</span> /api/chat/stream?<span class="hljs-attribute">platform</span>=dashscope&amp;message=你好&amp;model=qwen-plus<br></code></pre></td></tr></table></figure>
+
+<h1 id="三、流式对话接口实现"><a href="#三、流式对话接口实现" class="headerlink" title="三、流式对话接口实现"></a>三、流式对话接口实现</h1><h2 id="3-1-接口设计"><a href="#3-1-接口设计" class="headerlink" title="3.1 接口设计"></a>3.1 接口设计</h2><p>​    完整的流式对话接口需要考虑：</p>
+<ul>
+<li>参数校验</li>
+<li>错误处理</li>
+<li>默认值设置</li>
+<li>编码问题</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span><br><span class="hljs-meta">@RequestMapping(&quot;/api/chat&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChatController</span> </span>&#123;<br><br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> ChatModelService chatModelService;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 流式对话接口</span><br><span class="hljs-comment">     * </span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> platform 平台类型：ds(DeepSeek) 或 dashscope(DashScope)</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@param</span> request 对话请求参数对象（包含message、temperature、model）</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@return</span> 流式文本响应</span><br><span class="hljs-comment">     * </span><br><span class="hljs-comment">     * 调用示例：</span><br><span class="hljs-comment">     * http://localhost:8080/api/chat/stream?message=%E4%BD%A0%E5%A5%BD&amp;platform=ds&amp;model=deepseek-chat</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-meta">@GetMapping(value = &quot;/stream&quot;, produces = &quot;text/stream;charset=utf-8&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Flux&lt;String&gt; <span class="hljs-title">streamChat</span><span class="hljs-params">(</span></span><br><span class="hljs-function"><span class="hljs-params">            <span class="hljs-meta">@RequestParam(&quot;platform&quot;)</span> String platform,</span></span><br><span class="hljs-function"><span class="hljs-params">            <span class="hljs-meta">@ModelAttribute</span> ChatRequest request)</span> </span>&#123;<br>        <br>        <span class="hljs-comment">// 第一步：参数校验</span><br>        <span class="hljs-keyword">if</span> (platform == <span class="hljs-keyword">null</span> || platform.trim().isEmpty()) &#123;<br>            <span class="hljs-keyword">return</span> Flux.error(<span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">&quot;platform参数不能为空&quot;</span>));<br>        &#125;<br>        <br>        <span class="hljs-keyword">if</span> (request.getMessage() == <span class="hljs-keyword">null</span> || request.getMessage().trim().isEmpty()) &#123;<br>            <span class="hljs-keyword">return</span> Flux.error(<span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">&quot;message参数不能为空&quot;</span>));<br>        &#125;<br>        <span class="hljs-keyword">if</span> (StrUtil.isBlank(request.getModel())) &#123;<br>            <span class="hljs-keyword">return</span> Flux.error(<span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">&quot;model参数不能为空&quot;</span>));<br>        &#125;<br><br>        <span class="hljs-comment">// 设置默认温度值</span><br>        <span class="hljs-keyword">if</span> (request.getTemperature() == <span class="hljs-keyword">null</span>) &#123;<br>            request.setTemperature(<span class="hljs-number">0.7</span>);<br>        &#125;<br>        <br>        <span class="hljs-comment">// 第二步：从Map获取ChatModel并校验</span><br>        ChatModel chatModel = chatModelService.getChatModel(platform);<br>        <span class="hljs-keyword">if</span> (chatModel == <span class="hljs-keyword">null</span>) &#123;<br>            <span class="hljs-keyword">return</span> Flux.error(<span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">&quot;不支持的平台：&quot;</span> + platform));<br>        &#125;<br>        <br>        ChatClient chatClient = ChatClient.builder(chatModel).build();<br><br>        <span class="hljs-comment">// 第三步：使用ChatClient统一接口发起流式请求</span><br>        <span class="hljs-keyword">return</span> chatClient.prompt()<br>                .user(request.getMessage())<br>                .options(ChatOptions.builder()<br>                    .model(request.getModel())<br>                    .temperature(request.getTemperature())<br>                    .build())<br>                .stream()<br>                .content();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="3-2-参数校验"><a href="#3-2-参数校验" class="headerlink" title="3.2 参数校验"></a>3.2 参数校验</h2><p>​    参数校验很重要，可以避免无效请求：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// ChatRequest DTO</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChatRequest</span> </span>&#123;<br>    <span class="hljs-keyword">private</span> String message;<br>    <span class="hljs-keyword">private</span> String model;<br>    <span class="hljs-keyword">private</span> Double temperature = <span class="hljs-number">0.7</span>;  <span class="hljs-comment">// 默认值</span><br>    <br>    <span class="hljs-comment">// getter and setter</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>校验要点：</strong></p>
+<ul>
+<li><code>platform</code>：必须指定，否则不知道用哪个模型</li>
+<li><code>message</code>：不能为空</li>
+<li><code>model</code>：必须指定，不同平台的模型名称不同</li>
+<li><code>temperature</code>：有默认值，可以不传</li>
+</ul>
+<h2 id="3-3-流式响应处理"><a href="#3-3-流式响应处理" class="headerlink" title="3.3 流式响应处理"></a>3.3 流式响应处理</h2><p>​    流式响应需要注意：</p>
+<ul>
+<li>编码问题：<code>produces = &quot;text/stream;charset=utf-8&quot;</code></li>
+<li>空值处理：<code>.map(content -&gt; content == null ? &quot;&quot; : content)</code></li>
+<li>错误处理：使用 <code>Flux.error()</code> 返回错误</li>
+</ul>
+<h1 id="四、对话记忆功能"><a href="#四、对话记忆功能" class="headerlink" title="四、对话记忆功能"></a>四、对话记忆功能</h1><h2 id="4-1-Redis-配置"><a href="#4-1-Redis-配置" class="headerlink" title="4.1 Redis 配置"></a>4.1 Redis 配置</h2><p>​    对话记忆需要存储历史记录，Spring AI 支持 Redis 存储。</p>
+<p><strong>依赖配置：</strong></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.alibaba.cloud.ai<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-ai-alibaba-starter-memory-redis<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>配置文件：</strong></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-meta">spring.ai.memory.redis.host</span>=<span class="hljs-string">localhost</span><br><span class="hljs-meta">spring.ai.memory.redis.port</span>=<span class="hljs-string">6379</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>注意：</strong></p>
+<ul>
+<li>需要先启动 Redis 服务</li>
+<li>如果没有 Redis，记忆功能不会生效，但不会报错</li>
+</ul>
+<h2 id="4-2-使用记忆功能"><a href="#4-2-使用记忆功能" class="headerlink" title="4.2 使用记忆功能"></a>4.2 使用记忆功能</h2><p>​    在 <code>ChatClient</code> 中配置 <code>PromptChatMemoryAdvisor</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Autowired</span><br><span class="hljs-keyword">private</span> ChatMemory chatMemory;<br><br>ChatClient chatClient = ChatClient.builder(chatModel)<br>    .defaultAdvisors(<br>        PromptChatMemoryAdvisor.builder(chatMemory).build()<br>    )<br>    .build();<br></code></pre></td></tr></table></figure>
+
+<p><strong>完整示例：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span><br><span class="hljs-meta">@RequestMapping(&quot;/api/chat&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChatController</span> </span>&#123;<br><br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> ChatModel chatModel;<br>    <br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> ChatMemory chatMemory;<br><br>    <span class="hljs-meta">@GetMapping(value = &quot;/stream&quot;, produces = MediaType.TEXT_EVENT_STREAM_VALUE)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Flux&lt;String&gt; <span class="hljs-title">streamChat</span><span class="hljs-params">(<span class="hljs-meta">@RequestParam</span> String message)</span> </span>&#123;<br>        ChatClient chatClient = ChatClient.builder(chatModel)<br>                .defaultAdvisors(<br>                    PromptChatMemoryAdvisor.builder(chatMemory).build()<br>                )<br>                .build();<br><br>        <span class="hljs-keyword">return</span> chatClient.prompt()<br>                .user(message)<br>                .stream()<br>                .content();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="4-3-记忆功能原理"><a href="#4-3-记忆功能原理" class="headerlink" title="4.3 记忆功能原理"></a>4.3 记忆功能原理</h2><p>​    <code>PromptChatMemoryAdvisor</code> 的工作流程：</p>
+<ol>
+<li><strong>请求前</strong>：从 Redis 中读取历史对话记录</li>
+<li><strong>构建 Prompt</strong>：将历史记录添加到 Prompt 中</li>
+<li><strong>发送请求</strong>：调用 AI 模型</li>
+<li><strong>请求后</strong>：将新的对话记录保存到 Redis</li>
+</ol>
+<p><strong>实际效果：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plain">用户：我叫张三<br>AI：你好，张三！<br><br>用户：我的名字是什么？<br>AI：你的名字是张三。<br></code></pre></td></tr></table></figure>
+
+<p>​    第二次对话时，AI 能记住用户的名字，因为历史记录被自动添加到了 Prompt 中。</p>
+<h1 id="五、系统提示词"><a href="#五、系统提示词" class="headerlink" title="五、系统提示词"></a>五、系统提示词</h1><h2 id="5-1-从文件加载"><a href="#5-1-从文件加载" class="headerlink" title="5.1 从文件加载"></a>5.1 从文件加载</h2><p>​    系统提示词可能很长，放在代码里不优雅，可以放到文件中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 加载外部提示词文件</span><br>Resource resource = <span class="hljs-keyword">new</span> ClassPathResource(<span class="hljs-string">&quot;prompt/systemPrompt.md&quot;</span>);<br>String systemPrompt = <span class="hljs-keyword">new</span> String(resource.getInputStream().readAllBytes());<br><br>ChatClient chatClient = ChatClient.builder(chatModel)<br>    .defaultSystem(systemPrompt)<br>    .build();<br></code></pre></td></tr></table></figure>
+
+<p><strong>文件位置：</strong> <code>src/main/resources/prompt/systemPrompt.md</code></p>
+<h2 id="5-2-动态参数"><a href="#5-2-动态参数" class="headerlink" title="5.2 动态参数"></a>5.2 动态参数</h2><p>​    系统提示词中可能需要动态信息，比如当前日期：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs java">ChatClient chatClient = ChatClient.builder(chatModel)<br>    .defaultSystem(<span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;</span><br><span class="hljs-string">        #角色</span><br><span class="hljs-string">        你是一个专业的航空客服助手，名为&#x27;南方国际航空&#x27;的客服代表</span><br><span class="hljs-string">        你的职责是帮助客户处理航班预订相关的问题，包括查询航班信息、取消预订等。请用友好、专业的态度回复客户。</span><br><span class="hljs-string">        #要求</span><br><span class="hljs-string">        1、在涉及增删改（除了查询）function-call前，必须等用户回复&quot;</span>确认<span class="hljs-string">&quot;后再调用tools</span><br><span class="hljs-string">        2、请讲中文</span><br><span class="hljs-string">        </span><br><span class="hljs-string">        今天的日期是 &#123;currentDate&#125;</span><br><span class="hljs-string">        &quot;</span><span class="hljs-string">&quot;&quot;</span>)<br>    .build();<br><br><span class="hljs-keyword">return</span> chatClient.prompt()<br>    .user(message)<br>    .system(p -&gt; p.param(<span class="hljs-string">&quot;currentDate&quot;</span>, LocalDate.now()))<br>    .stream()<br>    .content();<br></code></pre></td></tr></table></figure>
+
+<p><strong>关键点：</strong></p>
+<ul>
+<li><code>&#123;currentDate&#125;</code> 是占位符</li>
+<li><code>.system(p -&gt; p.param(&quot;currentDate&quot;, LocalDate.now()))</code> 替换占位符</li>
+<li>每次请求都会使用最新的日期</li>
+</ul>
+<h2 id="5-3-实际案例"><a href="#5-3-实际案例" class="headerlink" title="5.3 实际案例"></a>5.3 实际案例</h2><p>​    航空客服助手的完整系统提示词：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs java">ChatClient chatClient = ChatClient.builder(chatModel)<br>    .defaultSystem(<span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;</span><br><span class="hljs-string">        #角色</span><br><span class="hljs-string">        你是一个专业的航空客服助手，名为&#x27;南方国际航空&#x27;的客服代表</span><br><span class="hljs-string">        你的职责是帮助客户处理航班预订相关的问题，包括查询航班信息、取消预订等。请用友好、专业的态度回复客户。</span><br><span class="hljs-string">        </span><br><span class="hljs-string">        #要求</span><br><span class="hljs-string">        1、在涉及增删改（除了查询）function-call前，必须等用户回复&quot;</span>确认<span class="hljs-string">&quot;后再调用tools</span><br><span class="hljs-string">        2、请讲中文</span><br><span class="hljs-string">        3、如果用户的问题无法通过工具解决，请引导用户联系人工客服</span><br><span class="hljs-string">        </span><br><span class="hljs-string">        今天的日期是 &#123;currentDate&#125;</span><br><span class="hljs-string">        &quot;</span><span class="hljs-string">&quot;&quot;</span>)<br>    .defaultAdvisors(<br>        PromptChatMemoryAdvisor.builder(chatMemory).build(),<br>        <span class="hljs-keyword">new</span> SimpleLoggerAdvisor()<br>    )<br>    .build();<br></code></pre></td></tr></table></figure>
+
+<p><strong>提示词设计要点：</strong></p>
+<ul>
+<li>明确角色：告诉 AI 你是谁</li>
+<li>明确职责：告诉 AI 你要做什么</li>
+<li>明确规则：告诉 AI 什么能做，什么不能做</li>
+<li>动态信息：使用占位符注入动态内容</li>
+</ul>
+<h1 id="六、Advisor-拦截器"><a href="#六、Advisor-拦截器" class="headerlink" title="六、Advisor 拦截器"></a>六、Advisor 拦截器</h1><h2 id="6-1-自定义-Advisor"><a href="#6-1-自定义-Advisor" class="headerlink" title="6.1 自定义 Advisor"></a>6.1 自定义 Advisor</h2><p>​    Advisor 可以在请求前后进行处理，比如日志记录、敏感词拦截等。</p>
+<p><strong>实现示例：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ReadReadAdvisor</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">BaseAdvisor</span> </span>&#123;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> String READ_TEMPLATE = <span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;</span><br><span class="hljs-string">            &#123;content&#125;</span><br><span class="hljs-string">            Read the question again: &#123;content&#125;</span><br><span class="hljs-string">            &quot;</span><span class="hljs-string">&quot;&quot;</span>;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> ChatClientRequest <span class="hljs-title">before</span><span class="hljs-params">(ChatClientRequest chatClientRequest, AdvisorChain advisorChain)</span> </span>&#123;<br>        <span class="hljs-comment">// 请求前处理：修改 Prompt</span><br>        String contents = chatClientRequest.prompt().getContents();<br>        String newContent = PromptTemplate.builder()<br>            .template(READ_TEMPLATE)<br>            .build()<br>            .render(Map.of(<span class="hljs-string">&quot;content&quot;</span>, contents));<br>        <br>        ChatClientRequest clientRequest = chatClientRequest.mutate()<br>            .prompt(Prompt.builder().content(newContent).build())<br>            .build();<br>        <span class="hljs-keyword">return</span> clientRequest;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> ChatClientResponse <span class="hljs-title">after</span><span class="hljs-params">(ChatClientResponse chatClientResponse, AdvisorChain advisorChain)</span> </span>&#123;<br>        <span class="hljs-comment">// 请求后处理：可以修改响应</span><br>        <span class="hljs-keyword">return</span> chatClientResponse;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">getOrder</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;  <span class="hljs-comment">// 执行顺序，值越小越先执行</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>使用场景：</strong></p>
+<ul>
+<li>日志记录：记录每次请求和响应</li>
+<li>敏感词拦截：在请求前检查敏感词</li>
+<li>翻译转换：将用户输入转换为其他语言</li>
+<li>文档后处理：对检索到的文档进行处理</li>
+</ul>
+<h2 id="6-2-内置-Advisor"><a href="#6-2-内置-Advisor" class="headerlink" title="6.2 内置 Advisor"></a>6.2 内置 Advisor</h2><h3 id="SimpleLoggerAdvisor"><a href="#SimpleLoggerAdvisor" class="headerlink" title="SimpleLoggerAdvisor"></a>SimpleLoggerAdvisor</h3><p>​    用于记录请求和响应的日志：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">ChatClient chatClient = ChatClient.builder(chatModel)<br>    .defaultAdvisors(<span class="hljs-keyword">new</span> SimpleLoggerAdvisor())<br>    .build();<br></code></pre></td></tr></table></figure>
+
+<p><strong>日志输出示例：</strong></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs routeros"><span class="hljs-builtin-name">DEBUG</span> SimpleLoggerAdvisor - User: 你好<br><span class="hljs-builtin-name">DEBUG</span> SimpleLoggerAdvisor - Assistant: 你好！我是<span class="hljs-built_in">..</span>.<br></code></pre></td></tr></table></figure>
+
+<h3 id="PromptChatMemoryAdvisor"><a href="#PromptChatMemoryAdvisor" class="headerlink" title="PromptChatMemoryAdvisor"></a>PromptChatMemoryAdvisor</h3><p>​    用于管理对话记忆：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java">ChatClient chatClient = ChatClient.builder(chatModel)<br>    .defaultAdvisors(<br>        PromptChatMemoryAdvisor.builder(chatMemory).build()<br>    )<br>    .build();<br></code></pre></td></tr></table></figure>
+
+<h2 id="6-3-执行顺序"><a href="#6-3-执行顺序" class="headerlink" title="6.3 执行顺序"></a>6.3 执行顺序</h2><p>​    多个 Advisor 的执行顺序由 <code>getOrder()</code> 方法决定：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java">ChatClient chatClient = ChatClient.builder(chatModel)<br>    .defaultAdvisors(<br>        <span class="hljs-keyword">new</span> ReadReadAdvisor(),           <span class="hljs-comment">// order = 0，最先执行</span><br>        <span class="hljs-keyword">new</span> SimpleLoggerAdvisor(),       <span class="hljs-comment">// order = 默认值，中间执行</span><br>        PromptChatMemoryAdvisor.builder(chatMemory).build()  <span class="hljs-comment">// order = 较大值，最后执行</span><br>    )<br>    .build();<br></code></pre></td></tr></table></figure>
+
+<p><strong>执行流程：</strong></p>
+<ol>
+<li><code>before()</code> 方法：按 order 从小到大执行</li>
+<li>调用 AI 模型</li>
+<li><code>after()</code> 方法：按 order 从大到小执行（与 before 相反）</li>
+</ol>
+<h1 id="七、SSE-流式响应"><a href="#七、SSE-流式响应" class="headerlink" title="七、SSE 流式响应"></a>七、SSE 流式响应</h1><h2 id="7-1-后端实现"><a href="#7-1-后端实现" class="headerlink" title="7.1 后端实现"></a>7.1 后端实现</h2><p>​    Spring WebFlux 会自动将 <code>Flux&lt;String&gt;</code> 转换为 SSE 格式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@GetMapping(value = &quot;/stream&quot;, produces = MediaType.TEXT_EVENT_STREAM_VALUE)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> Flux&lt;String&gt; <span class="hljs-title">streamChat</span><span class="hljs-params">(<span class="hljs-meta">@RequestParam</span> String message)</span> </span>&#123;<br>    <span class="hljs-keyword">return</span> chatClient.prompt()<br>        .user(message)<br>        .stream()<br>        .content()<br>        .map(content -&gt; content == <span class="hljs-keyword">null</span> ? <span class="hljs-string">&quot;&quot;</span> : content);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>关键点：</strong></p>
+<ul>
+<li><code>produces = MediaType.TEXT_EVENT_STREAM_VALUE</code>：指定返回 SSE 格式</li>
+<li>每个字符串会被自动包装为：<code>data: &#123;content&#125;\n\n</code></li>
+<li>不需要手动处理 SSE 格式</li>
+</ul>
+<h2 id="7-2-前端接收"><a href="#7-2-前端接收" class="headerlink" title="7.2 前端接收"></a>7.2 前端接收</h2><p><strong>JavaScript 实现：</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">const</span> eventSource = <span class="hljs-keyword">new</span> EventSource(<span class="hljs-string">&#x27;/api/chat/stream?message=你好&amp;platform=ds&amp;model=deepseek-chat&#x27;</span>);<br><br>eventSource.onmessage = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">event</span>) </span>&#123;<br>    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">&#x27;收到数据:&#x27;</span>, event.data);<br>    <span class="hljs-comment">// 将数据追加到页面</span><br>    <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">&#x27;output&#x27;</span>).innerHTML += event.data;<br>&#125;;<br><br>eventSource.onerror = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">event</span>) </span>&#123;<br>    <span class="hljs-built_in">console</span>.error(<span class="hljs-string">&#x27;连接错误:&#x27;</span>, event);<br>    eventSource.close();<br>&#125;;<br><br><span class="hljs-comment">// 关闭连接</span><br><span class="hljs-comment">// eventSource.close();</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>Vue 实现：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs vue">&lt;template&gt;<br>  &lt;div&gt;<br>    &lt;div id&#x3D;&quot;output&quot;&gt;&#123;&#123; output &#125;&#125;&lt;&#x2F;div&gt;<br>  &lt;&#x2F;div&gt;<br>&lt;&#x2F;template&gt;<br><br>&lt;script&gt;<br>export default &#123;<br>  data() &#123;<br>    return &#123;<br>      output: &#39;&#39;,<br>      eventSource: null<br>    &#125;<br>  &#125;,<br>  mounted() &#123;<br>    this.eventSource &#x3D; new EventSource(&#39;&#x2F;api&#x2F;chat&#x2F;stream?message&#x3D;你好&#39;);<br>    this.eventSource.onmessage &#x3D; (event) &#x3D;&gt; &#123;<br>      this.output +&#x3D; event.data;<br>    &#125;;<br>  &#125;,<br>  beforeUnmount() &#123;<br>    if (this.eventSource) &#123;<br>      this.eventSource.close();<br>    &#125;<br>  &#125;<br>&#125;<br>&lt;&#x2F;script&gt;<br></code></pre></td></tr></table></figure>
+
+<p><strong>注意事项：</strong></p>
+<ul>
+<li>SSE 是单向通信，只能服务器推送到客户端</li>
+<li>连接断开后需要重新建立连接</li>
+<li>浏览器对 SSE 连接数有限制（通常 6 个）</li>
+</ul>
+<h1 id="八、常见问题"><a href="#八、常见问题" class="headerlink" title="八、常见问题"></a>八、常见问题</h1><h2 id="8-1-ChatModel-注入失败"><a href="#8-1-ChatModel-注入失败" class="headerlink" title="8.1 ChatModel 注入失败"></a>8.1 ChatModel 注入失败</h2><p><strong>问题：</strong> <code>@Autowired ChatModel</code> 注入失败，返回 null。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li>没有配置对应的 starter</li>
+<li>API Key 配置错误</li>
+<li>配置文件路径不对</li>
+</ul>
+<p><strong>解决：</strong></p>
+<ol>
+<li>检查是否添加了对应的依赖（如 <code>spring-ai-starter-model-deepseek</code>）</li>
+<li>检查配置文件中的 API Key 是否正确</li>
+<li>确认配置文件在 <code>src/main/resources</code> 目录下</li>
+</ol>
+<h2 id="8-2-记忆功能不生效"><a href="#8-2-记忆功能不生效" class="headerlink" title="8.2 记忆功能不生效"></a>8.2 记忆功能不生效</h2><p><strong>问题：</strong> 配置了 <code>PromptChatMemoryAdvisor</code> 但对话没有记忆。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li>Redis 未启动</li>
+<li>Redis 配置错误</li>
+<li><code>ChatMemory</code> 未注入成功</li>
+</ul>
+<p><strong>解决：</strong></p>
+<ol>
+<li>检查 Redis 是否启动：<code>redis-cli ping</code></li>
+<li>检查 Redis 配置是否正确</li>
+<li>确认 <code>ChatMemory</code> 是否成功注入（添加日志）</li>
+</ol>
+<h2 id="8-3-SSE-连接断开"><a href="#8-3-SSE-连接断开" class="headerlink" title="8.3 SSE 连接断开"></a>8.3 SSE 连接断开</h2><p><strong>问题：</strong> 前端 SSE 连接经常断开。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li>网络问题</li>
+<li>服务器超时</li>
+<li>浏览器限制</li>
+</ul>
+<p><strong>解决：</strong></p>
+<ol>
+<li>添加心跳机制，定期发送空消息</li>
+<li>增加服务器超时时间</li>
+<li>前端添加重连机制</li>
+</ol>
+<h2 id="8-4-中文乱码"><a href="#8-4-中文乱码" class="headerlink" title="8.4 中文乱码"></a>8.4 中文乱码</h2><p><strong>问题：</strong> SSE 返回的中文乱码。</p>
+<p><strong>原因：</strong> 编码问题。</p>
+<p><strong>解决：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@GetMapping(value = &quot;/stream&quot;, produces = &quot;text/stream;charset=utf-8&quot;)</span><br><span class="hljs-comment">// 必须指定 charset=utf-8</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="8-5-Advisor-执行顺序不对"><a href="#8-5-Advisor-执行顺序不对" class="headerlink" title="8.5 Advisor 执行顺序不对"></a>8.5 Advisor 执行顺序不对</h2><p><strong>问题：</strong> Advisor 的执行顺序不符合预期。</p>
+<p><strong>原因：</strong> <code>getOrder()</code> 返回值设置错误。</p>
+<p><strong>解决：</strong></p>
+<ul>
+<li>值越小越先执行</li>
+<li><code>before()</code> 按从小到大执行</li>
+<li><code>after()</code> 按从大到小执行（与 before 相反）</li>
+</ul>
+<h1 id="九、总结"><a href="#九、总结" class="headerlink" title="九、总结"></a>九、总结</h1><ol>
+<li><strong>ChatClient vs ChatModel</strong>：ChatClient 更适合复杂场景，ChatModel 适合简单场景</li>
+<li><strong>多模型管理</strong>：通过 <code>ChatModelService</code> 统一管理，通过参数切换</li>
+<li><strong>对话记忆</strong>：使用 <code>PromptChatMemoryAdvisor</code> + Redis 实现</li>
+<li><strong>系统提示词</strong>：可以从文件加载，支持动态参数</li>
+<li><strong>Advisor</strong>：可以在请求前后进行处理，实现日志、拦截等功能</li>
+<li><strong>SSE</strong>：Spring WebFlux 自动处理 SSE 格式，前端用 EventSource 接收</li>
+</ol>
+<p>​    下一篇文章会介绍 Tools/Function Call 功能，这是让 AI 调用外部工具的关键功能。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SpringAI/" rel="tag"># SpringAI</a>
+              <a href="/tags/ChatClient/" rel="tag"># ChatClient</a>
+              <a href="/tags/%E6%B5%81%E5%BC%8F%E5%93%8D%E5%BA%94/" rel="tag"># 流式响应</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/01/03/SpringAI-04-MCP%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/" rel="prev" title="SpringAI-04-MCP协议详解">
+      <i class="fa fa-chevron-left"></i> SpringAI-04-MCP协议详解
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81ChatClient-%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">一、ChatClient 简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%A4%9A%E6%A8%A1%E5%9E%8B%E7%AE%A1%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">二、多模型管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%A4%9A%E6%A8%A1%E5%9E%8B%E7%AE%A1%E7%90%86"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 为什么需要多模型管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-ChatModelService-%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 ChatModelService 实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-%E5%AE%9E%E9%99%85%E4%BD%BF%E7%94%A8"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 实际使用</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%B5%81%E5%BC%8F%E5%AF%B9%E8%AF%9D%E6%8E%A5%E5%8F%A3%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">三、流式对话接口实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-%E6%8E%A5%E5%8F%A3%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 接口设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-%E5%8F%82%E6%95%B0%E6%A0%A1%E9%AA%8C"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 参数校验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-%E6%B5%81%E5%BC%8F%E5%93%8D%E5%BA%94%E5%A4%84%E7%90%86"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 流式响应处理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%AF%B9%E8%AF%9D%E8%AE%B0%E5%BF%86%E5%8A%9F%E8%83%BD"><span class="nav-number">4.</span> <span class="nav-text">四、对话记忆功能</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-Redis-%E9%85%8D%E7%BD%AE"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 Redis 配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-%E4%BD%BF%E7%94%A8%E8%AE%B0%E5%BF%86%E5%8A%9F%E8%83%BD"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 使用记忆功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-%E8%AE%B0%E5%BF%86%E5%8A%9F%E8%83%BD%E5%8E%9F%E7%90%86"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 记忆功能原理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E7%B3%BB%E7%BB%9F%E6%8F%90%E7%A4%BA%E8%AF%8D"><span class="nav-number">5.</span> <span class="nav-text">五、系统提示词</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-%E4%BB%8E%E6%96%87%E4%BB%B6%E5%8A%A0%E8%BD%BD"><span class="nav-number">5.1.</span> <span class="nav-text">5.1 从文件加载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-%E5%8A%A8%E6%80%81%E5%8F%82%E6%95%B0"><span class="nav-number">5.2.</span> <span class="nav-text">5.2 动态参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-3-%E5%AE%9E%E9%99%85%E6%A1%88%E4%BE%8B"><span class="nav-number">5.3.</span> <span class="nav-text">5.3 实际案例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AD%E3%80%81Advisor-%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="nav-number">6.</span> <span class="nav-text">六、Advisor 拦截器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#6-1-%E8%87%AA%E5%AE%9A%E4%B9%89-Advisor"><span class="nav-number">6.1.</span> <span class="nav-text">6.1 自定义 Advisor</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-2-%E5%86%85%E7%BD%AE-Advisor"><span class="nav-number">6.2.</span> <span class="nav-text">6.2 内置 Advisor</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SimpleLoggerAdvisor"><span class="nav-number">6.2.1.</span> <span class="nav-text">SimpleLoggerAdvisor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PromptChatMemoryAdvisor"><span class="nav-number">6.2.2.</span> <span class="nav-text">PromptChatMemoryAdvisor</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-3-%E6%89%A7%E8%A1%8C%E9%A1%BA%E5%BA%8F"><span class="nav-number">6.3.</span> <span class="nav-text">6.3 执行顺序</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%83%E3%80%81SSE-%E6%B5%81%E5%BC%8F%E5%93%8D%E5%BA%94"><span class="nav-number">7.</span> <span class="nav-text">七、SSE 流式响应</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#7-1-%E5%90%8E%E7%AB%AF%E5%AE%9E%E7%8E%B0"><span class="nav-number">7.1.</span> <span class="nav-text">7.1 后端实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-2-%E5%89%8D%E7%AB%AF%E6%8E%A5%E6%94%B6"><span class="nav-number">7.2.</span> <span class="nav-text">7.2 前端接收</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="nav-number">8.</span> <span class="nav-text">八、常见问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-ChatModel-%E6%B3%A8%E5%85%A5%E5%A4%B1%E8%B4%A5"><span class="nav-number">8.1.</span> <span class="nav-text">8.1 ChatModel 注入失败</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-2-%E8%AE%B0%E5%BF%86%E5%8A%9F%E8%83%BD%E4%B8%8D%E7%94%9F%E6%95%88"><span class="nav-number">8.2.</span> <span class="nav-text">8.2 记忆功能不生效</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-3-SSE-%E8%BF%9E%E6%8E%A5%E6%96%AD%E5%BC%80"><span class="nav-number">8.3.</span> <span class="nav-text">8.3 SSE 连接断开</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-4-%E4%B8%AD%E6%96%87%E4%B9%B1%E7%A0%81"><span class="nav-number">8.4.</span> <span class="nav-text">8.4 中文乱码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-5-Advisor-%E6%89%A7%E8%A1%8C%E9%A1%BA%E5%BA%8F%E4%B8%8D%E5%AF%B9"><span class="nav-number">8.5.</span> <span class="nav-text">8.5 Advisor 执行顺序不对</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B9%9D%E3%80%81%E6%80%BB%E7%BB%93"><span class="nav-number">9.</span> <span class="nav-text">九、总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">97</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

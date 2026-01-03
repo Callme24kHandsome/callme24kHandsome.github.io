@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="SpringWebFlux使用，响应式编程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringWebFlux">
+<meta property="og:url" content="http://example.com/2025/11/08/SpringWebFlux/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="SpringWebFlux使用，响应式编程">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-11-08T13:00:00.000Z">
+<meta property="article:modified_time" content="2025-11-10T14:17:19.682Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="Spring">
+<meta property="article:tag" content="SpringWebFlux">
+<meta property="article:tag" content="Flux">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2025/11/08/SpringWebFlux/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SpringWebFlux | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/11/08/SpringWebFlux/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringWebFlux
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-11-08 21:00:00" itemprop="dateCreated datePublished" datetime="2025-11-08T21:00:00+08:00">2025-11-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-11-10 22:17:19" itemprop="dateModified" datetime="2025-11-10T22:17:19+08:00">2025-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SpringWebFlux/" itemprop="url" rel="index"><span itemprop="name">SpringWebFlux</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">SpringWebFlux使用，响应式编程</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="SpringWebFlux使用"><a href="#SpringWebFlux使用" class="headerlink" title="SpringWebFlux使用"></a>SpringWebFlux使用</h1><h2 id="为什么需要WebFlux"><a href="#为什么需要WebFlux" class="headerlink" title="为什么需要WebFlux"></a>为什么需要WebFlux</h2><h3 id="传统阻塞式模型的瓶颈（Spring-MVC-Servlet）"><a href="#传统阻塞式模型的瓶颈（Spring-MVC-Servlet）" class="headerlink" title="传统阻塞式模型的瓶颈（Spring MVC Servlet）"></a>传统阻塞式模型的瓶颈（Spring MVC Servlet）</h3><p>​    SpringMVC  + Tomcat NIO，NIO 模型主要是为了处理网络连接的接入，在将请求交给 Servlet 容器后，业务逻辑仍然使用线程池处理。</p>
+<p>​    SpringMVC  +  <strong>Jetty &amp; Undertow</strong>：从架构层面就深度使用 NIO，在处理连接和请求分发上更高效，尤其是在大量并发长连接（如 WebSocket）的场景下表现优异。<strong>但是本质上是分作2个线程池，一个线程池负责管理外部请求，一个线程池负责承接前一个线程池的任务，这个线程池内遇到阻塞IO时，依旧是阻塞等待的</strong>。</p>
+<p>​    因此，传统MVC模式存在以下瓶颈：</p>
+<h4 id="同步阻塞I-O"><a href="#同步阻塞I-O" class="headerlink" title="同步阻塞I/O"></a><strong>同步阻塞I/O</strong></h4><p>​    工作线程遇到HTTP/数据库查询时，同步阻塞等待</p>
+<h4 id="并发能力受限"><a href="#并发能力受限" class="headerlink" title="并发能力受限"></a><strong>并发能力受限</strong></h4><p>​    线程池的大小有限，当并发请求数超过线程池大小时，新请求必须等待，导致延迟增加和吞吐量下降。这在高并发场景下是致命的。</p>
+<h3 id="解决方式：异步-非阻塞"><a href="#解决方式：异步-非阻塞" class="headerlink" title="解决方式：异步+非阻塞"></a>解决方式：异步+非阻塞</h3><ul>
+<li><strong>目标</strong>： 用更少的资源（尤其是线程）处理更高的并发。</li>
+<li><strong>如何实现</strong>： 当等待 I/O 操作（如数据库查询）完成时，不阻塞当前线程，而是立即释放它去服务其他请求。当 I/O 操作完成后，再通过回调机制通知你来处理结果。</li>
+<li><strong>这就是 WebFlux 的核心价值</strong>： 它提供了一套完整的、非阻塞的、支持背压的 Web 栈，让我们能够轻松地编写异步和响应式应用。</li>
+</ul>
+<h2 id="什么是WebFlux"><a href="#什么是WebFlux" class="headerlink" title="什么是WebFlux"></a>什么是WebFlux</h2><p>​    Spring WebFlux 是 Spring Framework 5.0 引入的一个全新的、响应式的 Web 框架。它完全支持<strong>响应式流</strong>规范，可以在 Netty, Undertow 和 Servlet 3.1+ 容器等服务器上运行。</p>
+<h3 id="响应式编程的核心特性-Reactive-Program"><a href="#响应式编程的核心特性-Reactive-Program" class="headerlink" title="响应式编程的核心特性(Reactive Program)"></a>响应式编程的核心特性(Reactive Program)</h3><h4 id="异步非阻塞-Asynchronous-amp-Non-blocking"><a href="#异步非阻塞-Asynchronous-amp-Non-blocking" class="headerlink" title="异步非阻塞 (Asynchronous &amp; Non-blocking)"></a>异步非阻塞 (Asynchronous &amp; Non-blocking)</h4><ul>
+<li><strong>传统阻塞</strong>：线程等待操作完成，期间不能做其他事情</li>
+<li><strong>响应式非阻塞</strong>：发起操作后立即返回，操作完成后通过回调通知</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 传统阻塞方式</span><br>User user = userRepository.findById(id); <span class="hljs-comment">// 线程在此等待</span><br>System.out.println(user.getName());<br><br><span class="hljs-comment">// 响应式非阻塞方式</span><br>Mono&lt;User&gt; userMono = userRepository.findById(id);<br>userMono.subscribe(user -&gt; System.out.println(user.getName())); <span class="hljs-comment">// 回调方式</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="数据流-Data-Streams"><a href="#数据流-Data-Streams" class="headerlink" title="数据流 (Data Streams)"></a>数据流 (Data Streams)</h4><p>​    将数据视为流，而不是孤立的对象。流是一系列按时间顺序排列的事件序列，可以包含0个或者多个事件。这些事件可以是数据或者各种信号（完成、订阅、异常、完成信号等）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 处理用户流，而不是单个用户</span><br>Flux&lt;User&gt; userStream = userRepository.findAll();<br>userStream<br>    .filter(user -&gt; user.getAge() &gt; <span class="hljs-number">18</span>)<br>    .map(User::getName)<br>    .subscribe(name -&gt; System.out.println(<span class="hljs-string">&quot;Adult: &quot;</span> + name));<br></code></pre></td></tr></table></figure>
+
+<h4 id="背压机制-Backpressure"><a href="#背压机制-Backpressure" class="headerlink" title="背压机制 (Backpressure)"></a>背压机制 (Backpressure)</h4><p>数据处理的速度由消费者决定（即便生产者生产速度大于消费者消费速度），防止生产者压垮消费者</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux.range(<span class="hljs-number">1</span>, <span class="hljs-number">1000000</span>)        <span class="hljs-comment">// 生产者：100万个数据</span><br>    .onBackpressureBuffer(<span class="hljs-number">100</span>) <span class="hljs-comment">// 缓冲区：最多缓存100个</span><br>    .subscribe(<br>        data -&gt; &#123;<br>            <span class="hljs-comment">// 慢速处理</span><br>            Thread.sleep(<span class="hljs-number">10</span>);<br>            System.out.println(data);<br>        &#125;,<br>        error -&gt; System.err.println(<span class="hljs-string">&quot;Error: &quot;</span> + error)<br>    );<br></code></pre></td></tr></table></figure>
+
+<h4 id="函数式和声明式（Declarative-Functional）"><a href="#函数式和声明式（Declarative-Functional）" class="headerlink" title="函数式和声明式（Declarative + Functional）"></a>函数式和声明式（Declarative + Functional）</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> Flux&lt;String&gt; <span class="hljs-title">processUsers</span><span class="hljs-params">(Flux&lt;User&gt; users)</span> </span>&#123;<br>    <span class="hljs-keyword">return</span> users<br>        .filter(user -&gt; user.getStatus() == Status.ACTIVE)<br>        .take(<span class="hljs-number">100</span>)                          <span class="hljs-comment">// 只取前100个</span><br>        .delayElements(Duration.ofMillis(<span class="hljs-number">10</span>)) <span class="hljs-comment">// 每个元素延迟10ms</span><br>        .map(user -&gt; transformUser(user))<br>        .onErrorResume(error -&gt; fallbackUsers());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="消息-事件驱动-Event-Drive"><a href="#消息-事件驱动-Event-Drive" class="headerlink" title="消息/事件驱动(Event Drive)"></a>消息/事件驱动(Event Drive)</h4><p>​    通过消息驱动机制实现异步等效果，当目标事件（异常、结束等）发生时，回调特定钩子。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java">userRepository.findById(userId)<br>    .map(<span class="hljs-keyword">this</span>::processUser)<br>    .onErrorResume(throwable -&gt; &#123;<br>        <span class="hljs-comment">// 错误恢复：返回默认用户</span><br>        <span class="hljs-keyword">return</span> Mono.just(getDefaultUser());<br>    &#125;)<br>    <span class="hljs-comment">//.onErrorReturn(User.EMPTY) // 或者直接返回默认值</span><br>    .doOnError(error -&gt; log.error(<span class="hljs-string">&quot;Processing failed&quot;</span>, error)); <span class="hljs-comment">// 副作用记录</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>​    在Spring WebFlux中，这些特点使得<strong>应用程序能够以更少的资源（尤其是线程）处理更高的并发连接</strong>。</p>
+<p>​    特别适合I/O密集型应用（如微服务网关、实时通信等）。然而，对于CPU密集型应用，响应式编程的优势并不明显，因为CPU密集型任务会占用线程进行计算，而响应式编程的优势在于I/O等待期间释放线程。</p>
+<p>从而能够用少量固定数量的线程处理高并发请求。</p>
+<h2 id="WebFlux的核心概念和编程模型"><a href="#WebFlux的核心概念和编程模型" class="headerlink" title="WebFlux的核心概念和编程模型"></a>WebFlux的核心概念和编程模型</h2><h3 id="1、响应式流-Reactive-Streams"><a href="#1、响应式流-Reactive-Streams" class="headerlink" title="1、响应式流 (Reactive Streams)"></a>1、响应式流 (Reactive Streams)</h3><p>Reactive Streams 是一个规范，定义了异步组件与背压之间的交互。它的核心接口只有四个：</p>
+<p>Publisher 发布者</p>
+<p>Subscriber 订阅者</p>
+<p>Subscription 订阅关系，记录发布者和订阅者的关系</p>
+<p>Processor 处理器</p>
+<p>Spring WebFlux 基于 Reactor 库实现，而 Reactor 实现了响应式流规范</p>
+<h3 id="2、Reactor-核心类型：Mono-和-Flux"><a href="#2、Reactor-核心类型：Mono-和-Flux" class="headerlink" title="2、Reactor 核心类型：Mono 和 Flux"></a>2、Reactor 核心类型：Mono 和 Flux</h3><p><code>Flux</code>： 代表一个包含 0 到 N 个元素的异步序列。类似于 <code>List</code>，但是非阻塞的。例如：从数据库返回多个对象、从 SSE 流接收多个事件。<br><code>Mono</code>： 代表一个包含 0 或 1 个元素的异步序列。例如：根据ID查询一个对象、执行保存或删除操作（通常只返回成功/失败信息）。</p>
+<h3 id="3、两种编程模型"><a href="#3、两种编程模型" class="headerlink" title="3、两种编程模型"></a>3、两种编程模型</h3><h4 id="注解模型-Annotation-based-Model"><a href="#注解模型-Annotation-based-Model" class="headerlink" title="注解模型 (Annotation-based Model)"></a>注解模型 (Annotation-based Model)</h4><p>​    与 Spring MVC 非常相似，易于上手。关键区别：控制器方法的返回值是 <code>Mono</code> 或 <code>Flux</code>，而不是具体的对象或 <code>List</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span><br><span class="hljs-meta">@RequestMapping(&quot;/users&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserController</span> </span>&#123;<br><br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> UserRepository userRepository; <span class="hljs-comment">// 假设这是一个响应式的 Repository</span><br><br>    <span class="hljs-comment">// 返回多个用户 - Flux</span><br>    <span class="hljs-meta">@GetMapping</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Flux&lt;User&gt; <span class="hljs-title">getAllUsers</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> userRepository.findAll();<br>    &#125;<br><br>    <span class="hljs-comment">// 返回一个用户 - Mono</span><br>    <span class="hljs-meta">@GetMapping(&quot;/&#123;id&#125;&quot;)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Mono&lt;User&gt; <span class="hljs-title">getUserById</span><span class="hljs-params">(<span class="hljs-meta">@PathVariable</span> String id)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> userRepository.findById(id);<br>    &#125;<br><br>    <span class="hljs-comment">// 保存用户 - 接收一个Mono（请求体），返回一个Mono（保存后的用户）</span><br>    <span class="hljs-meta">@PostMapping</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Mono&lt;User&gt; <span class="hljs-title">createUser</span><span class="hljs-params">(<span class="hljs-meta">@RequestBody</span> Mono&lt;User&gt; userMono)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> userMono.flatMap(userRepository::save);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="函数式端点-Functional-Endpoints"><a href="#函数式端点-Functional-Endpoints" class="headerlink" title="函数式端点 (Functional Endpoints)"></a>函数式端点 (Functional Endpoints)</h4><p>​    一种更轻量级、函数式的编程模型。它通过将请求路由到 <code>HandlerFunction</code> 来处理。</p>
+<ul>
+<li>核心组件：<ul>
+<li>  <code>RouterFunction</code>： 类似于 <code>@RequestMapping</code>，定义 URL 路由规则。</li>
+<li>  <code>HandlerFunction</code>： 类似于 <code>@Controller</code> 中的方法，包含实际的业务逻辑。</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Configuration</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserRouter</span> </span>&#123;<br><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> RouterFunction&lt;ServerResponse&gt; <span class="hljs-title">route</span><span class="hljs-params">(UserHandler userHandler)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> RouterFunctions.route()<br>                .GET(<span class="hljs-string">&quot;/fn/users&quot;</span>, userHandler::getAllUsers)<br>                .GET(<span class="hljs-string">&quot;/fn/users/&#123;id&#125;&quot;</span>, userHandler::getUserById)<br>                .POST(<span class="hljs-string">&quot;/fn/users&quot;</span>, userHandler::createUser)<br>                .build();<br>    &#125;<br>&#125;<br><br><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserHandler</span> </span>&#123;<br><br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> UserRepository userRepository;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Mono&lt;ServerResponse&gt; <span class="hljs-title">getAllUsers</span><span class="hljs-params">(ServerRequest request)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> ServerResponse.ok()<br>                .contentType(MediaType.APPLICATION_JSON)<br>                .body(userRepository.findAll(), User.class);<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Mono&lt;ServerResponse&gt; <span class="hljs-title">getUserById</span><span class="hljs-params">(ServerRequest request)</span> </span>&#123;<br>        String id = request.pathVariable(<span class="hljs-string">&quot;id&quot;</span>);<br>        <span class="hljs-keyword">return</span> userRepository.findById(id)<br>                .flatMap(user -&gt; ServerResponse.ok().bodyValue(user))<br>                .switchIfEmpty(ServerResponse.notFound().build()); <span class="hljs-comment">// 处理找不到的情况</span><br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Mono&lt;ServerResponse&gt; <span class="hljs-title">createUser</span><span class="hljs-params">(ServerRequest request)</span> </span>&#123;<br>        Mono&lt;User&gt; userMono = request.bodyToMono(User.class);<br>        <span class="hljs-keyword">return</span> userMono.flatMap(userRepository::save)<br>                .flatMap(savedUser -&gt; ServerResponse.ok().bodyValue(savedUser));<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="4、背压"><a href="#4、背压" class="headerlink" title="4、背压"></a>4、背压</h3><p>​    见上文。<strong>在 WebFlux 中</strong>： 通过 <code>Flux</code> 和 <code>Mono</code> 内部实现，当使用如 <code>application/stream+json</code>  媒体类型时，背压机制会自动生效，具体背压策略看服务端和客户端如何实现。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@GetMapping(value = &quot;/controlled-data&quot;, produces = MediaType.APPLICATION_STREAM_JSON_VALUE)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Flux&lt;String&gt; <span class="hljs-title">getControlledData</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> Flux.interval(Duration.ofMillis(<span class="hljs-number">1</span>))<br>                  .map(i -&gt; <span class="hljs-string">&quot;Data item &quot;</span> + i + <span class="hljs-string">&quot; at &quot;</span> + Instant.now())<br>                  .onBackpressureBuffer(<span class="hljs-number">100</span>); <span class="hljs-comment">// 关键：设置缓冲区大小</span><br>                  <span class="hljs-comment">// 或者使用其他背压策略：</span><br>                  <span class="hljs-comment">// .onBackpressureDrop()    // 丢弃超出的数据</span><br>                  <span class="hljs-comment">// .onBackpressureLatest()  // 只保留最新的数据</span><br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="5、服务器推送-Server-Sent-Events-SSE"><a href="#5、服务器推送-Server-Sent-Events-SSE" class="headerlink" title="5、服务器推送 (Server-Sent Events, SSE)"></a>5、服务器推送 <strong>(Server-Sent Events, SSE)</strong></h3><p>WebFlux 非常适合实现服务器向客户端单向推送数据，客户端通过 EventSource API 连接到此端点，服务端会每隔一秒单向向客户端发送一个用户数据。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@GetMapping(value = &quot;/stream&quot;, produces = MediaType.TEXT_EVENT_STREAM_VALUE)</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> Flux&lt;User&gt; <span class="hljs-title">streamUsers</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">return</span> userService.getAllUsers()<br>            .delayElements(Duration.ofSeconds(<span class="hljs-number">1</span>)); <span class="hljs-comment">// 每秒发送一个用户</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="6、响应式数据库驱动"><a href="#6、响应式数据库驱动" class="headerlink" title="6、响应式数据库驱动"></a>6、响应式数据库驱动</h3><pre><code> **WebFlux 的真正威力需要与非阻塞的数据库驱动结合**，如果只定义了响应式接口，而底层的数据库驱动依旧是阻塞的，那只是伪响应式，本质上也是一个请求，阻塞占用一个工作线程。
+响应式数据库驱动支持的数据库： MongoDB (ReactiveMongoTemplate), Cassandra, Redis (ReactiveRedisTemplate), R2DBC (用于关系型数据库，如 PostgreSQL, MySQL)。
+</code></pre>
+<h3 id="7、响应式的函数或操作"><a href="#7、响应式的函数或操作" class="headerlink" title="7、响应式的函数或操作"></a>7、响应式的函数或操作</h3><h4 id="1、过滤与转换操作符"><a href="#1、过滤与转换操作符" class="headerlink" title="1、过滤与转换操作符"></a>1、过滤与转换操作符</h4><h5 id="filter-过滤"><a href="#filter-过滤" class="headerlink" title="filter - 过滤"></a>filter - 过滤</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux.range(<span class="hljs-number">1</span>, <span class="hljs-number">10</span>)<br>    .filter(i -&gt; i % <span class="hljs-number">2</span> == <span class="hljs-number">0</span>) <span class="hljs-comment">// 只保留偶数</span><br>    .subscribe(System.out::println); <span class="hljs-comment">// 2,4,6,8,10</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="map-一对一转换"><a href="#map-一对一转换" class="headerlink" title="map - 一对一转换"></a>map - 一对一转换</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux.just(<span class="hljs-string">&quot;apple&quot;</span>, <span class="hljs-string">&quot;banana&quot;</span>)<br>    .map(String::toUpperCase) <span class="hljs-comment">// 每个元素单独转换</span><br>    .subscribe(System.out::println); <span class="hljs-comment">// APPLE, BANANA</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="2、扁平化操作符"><a href="#2、扁平化操作符" class="headerlink" title="2、扁平化操作符"></a>2、扁平化操作符</h4><h5 id="flatMap-异步扁平化"><a href="#flatMap-异步扁平化" class="headerlink" title="flatMap - 异步扁平化"></a>flatMap - 异步扁平化</h5><table>
+<thead>
+<tr>
+<th align="left">操作</th>
+<th align="left">输入 → 输出</th>
+<th align="left">核心作用</th>
+<th align="left">适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>map</strong></td>
+<td align="left"><code>T → R</code></td>
+<td align="left">一对一转换</td>
+<td align="left">简单数据类型转换</td>
+</tr>
+<tr>
+<td align="left"><strong>flatMap</strong></td>
+<td align="left"><code>T → Stream</code></td>
+<td align="left">一对多转换 + 扁平化</td>
+<td align="left">嵌套集合、Optional处理、数据展开</td>
+</tr>
+</tbody></table>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux.just(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>)<br>    .flatMap(i -&gt; <br>        Mono.just(i * <span class="hljs-number">10</span>).delayElement(Duration.ofMillis(<span class="hljs-number">100</span>))<br>    ) <span class="hljs-comment">// 1→10, 2→20, 3→30（可能乱序） </span><br>    .subscribe(System.out::println);<br><span class="hljs-comment">//过程解析</span><br>Flux&lt;Integer&gt; <br>    map映射 Integer -&gt; Mono&lt;Integer&gt;<br>    flat聚合 Mono&lt;Integer&gt; -&gt; Flux&lt;Integer&gt;  <br></code></pre></td></tr></table></figure>
+
+<h5 id="concatMap-顺序扁平化"><a href="#concatMap-顺序扁平化" class="headerlink" title="concatMap - 顺序扁平化"></a>concatMap - 顺序扁平化</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux.just(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>)<br>    .concatMap(i -&gt; <br>        Mono.just(i * <span class="hljs-number">10</span>).delayElement(Duration.ofMillis(<span class="hljs-number">100</span>))<br>    ) <span class="hljs-comment">// 保证顺序：1→10, 2→20, 3→30</span><br>    .subscribe(System.out::println);<br></code></pre></td></tr></table></figure>
+
+<h5 id="flatMapMany-Mono转Flux"><a href="#flatMapMany-Mono转Flux" class="headerlink" title="flatMapMany - Mono转Flux"></a>flatMapMany - Mono转Flux</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">Mono.just(Arrays.asList(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>))<br>    .flatMapMany(Flux::fromIterable) <span class="hljs-comment">// Mono&lt;List&gt; → Flux&lt;Integer&gt;</span><br>    .subscribe(System.out::println); <span class="hljs-comment">// 1,2,3</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="3-组合操作符"><a href="#3-组合操作符" class="headerlink" title="3. 组合操作符"></a>3. 组合操作符</h4><h5 id="concat-顺序连接"><a href="#concat-顺序连接" class="headerlink" title="concat - 顺序连接"></a>concat - 顺序连接</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux&lt;Integer&gt; flux1 = Flux.just(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>);<br>Flux&lt;Integer&gt; flux2 = Flux.just(<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>);<br><br>Flux.concat(flux1, flux2) <span class="hljs-comment">// 先消费flux1，再flux2</span><br>    .subscribe(System.out::println); <span class="hljs-comment">// 1,2,3,4,5,6</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="concatWith-实例方法"><a href="#concatWith-实例方法" class="headerlink" title="concatWith - 实例方法"></a>concatWith - 实例方法</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux.just(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>)<br>    .concatWith(Flux.just(<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>))<br>    .subscribe(System.out::println); <span class="hljs-comment">// 1,2,3,4,5,6</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="merge-并行合并"><a href="#merge-并行合并" class="headerlink" title="merge - 并行合并"></a>merge - 并行合并</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux&lt;Integer&gt; flux1 = Flux.just(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>).delayElements(Duration.ofMillis(<span class="hljs-number">100</span>));<br>Flux&lt;Integer&gt; flux2 = Flux.just(<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>).delayElements(Duration.ofMillis(<span class="hljs-number">50</span>));<br><br>Flux.merge(flux1, flux2) <span class="hljs-comment">// 按元素到达时间合并，可能乱序</span><br>    .subscribe(System.out::println); <span class="hljs-comment">// 4,1,5,2,6,3</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="mergeWith-实例方法"><a href="#mergeWith-实例方法" class="headerlink" title="mergeWith - 实例方法"></a>mergeWith - 实例方法</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux.just(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>)<br>    .mergeWith(Flux.just(<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>))<br>    .subscribe(System.out::println); <span class="hljs-comment">// 1,2,3,4,5,6</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="mergeSequential-按订阅顺序合并"><a href="#mergeSequential-按订阅顺序合并" class="headerlink" title="mergeSequential - 按订阅顺序合并"></a>mergeSequential - 按订阅顺序合并</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux&lt;Integer&gt; flux1 = Flux.just(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>).delayElements(Duration.ofMillis(<span class="hljs-number">100</span>));<br>Flux&lt;Integer&gt; flux2 = Flux.just(<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>).delayElements(Duration.ofMillis(<span class="hljs-number">50</span>));<br><br>Flux.mergeSequential(flux1, flux2) <span class="hljs-comment">// 先输出flux1全部，再flux2全部</span><br>    .subscribe(System.out::println); <span class="hljs-comment">// 1,2,3,4,5,6</span><br><span class="hljs-comment">// mergeSequential: 1 (100ms后)</span><br><span class="hljs-comment">// mergeSequential: 2 (200ms后)</span><br><span class="hljs-comment">// mergeSequential: 3 (300ms后)</span><br><span class="hljs-comment">// mergeSequential: 4 (300ms后) ← B1早已到达但被缓存，现在才输出</span><br><span class="hljs-comment">// mergeSequential: 5 (300ms后)</span><br><span class="hljs-comment">// mergeSequential: 6 (300ms后)</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="zip-一对一组合"><a href="#zip-一对一组合" class="headerlink" title="zip - 一对一组合"></a><strong>zip - 一对一组合</strong></h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux&lt;Integer&gt; numbers = Flux.just(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>);<br>Flux&lt;String&gt; letters = Flux.just(<span class="hljs-string">&quot;A&quot;</span>, <span class="hljs-string">&quot;B&quot;</span>, <span class="hljs-string">&quot;C&quot;</span>);<br><br>Flux.zip(numbers, letters)<br>    .map(tuple -&gt; tuple.getT1() + <span class="hljs-string">&quot;:&quot;</span> + tuple.getT2())<br>    .subscribe(System.out::println); <span class="hljs-comment">// 1:A, 2:B, 3:C</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="zipWith-实例方法"><a href="#zipWith-实例方法" class="headerlink" title="zipWith - 实例方法"></a><strong>zipWith - 实例方法</strong></h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux.just(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>)<br>    .zipWith(Flux.just(<span class="hljs-string">&quot;A&quot;</span>, <span class="hljs-string">&quot;B&quot;</span>, <span class="hljs-string">&quot;C&quot;</span>))<br>    .map(tuple -&gt; tuple.getT1() + <span class="hljs-string">&quot;:&quot;</span> + tuple.getT2())<br>    .subscribe(System.out::println); <span class="hljs-comment">// 1:A, 2:B, 3:C</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="4-空值处理"><a href="#4-空值处理" class="headerlink" title="4. 空值处理"></a>4. 空值处理</h4><h5 id="defaultIfEmpty-默认值"><a href="#defaultIfEmpty-默认值" class="headerlink" title="defaultIfEmpty - 默认值"></a>defaultIfEmpty - 默认值</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux.empty()<br>    .defaultIfEmpty(<span class="hljs-string">&quot;No Data&quot;</span>) <span class="hljs-comment">// 如果流为空，发射默认值</span><br>    .subscribe(System.out::println); <span class="hljs-comment">// &quot;No Data&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="switchIfEmpty-切换备用流"><a href="#switchIfEmpty-切换备用流" class="headerlink" title="switchIfEmpty - 切换备用流"></a>switchIfEmpty - 切换备用流</h5><figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Flux</span>.</span></span>empty<span class="hljs-literal">()</span><br>    .switch<span class="hljs-constructor">IfEmpty(Flux.<span class="hljs-params">just</span>(<span class="hljs-string">&quot;Fallback&quot;</span>, <span class="hljs-string">&quot;Data&quot;</span>)</span>) <span class="hljs-comment">// 切换到备用流</span><br>    .subscribe(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">System</span>.</span></span>out::println); <span class="hljs-comment">// &quot;Fallback&quot;, &quot;Data&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="5-transform-操作符组合"><a href="#5-transform-操作符组合" class="headerlink" title="5. transform - 操作符组合"></a>5. transform - 操作符组合</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java">Function&lt;Flux&lt;String&gt;, Flux&lt;String&gt;&gt; filterAndTransform = <br>    flux -&gt; flux.filter(s -&gt; s.length() &gt; <span class="hljs-number">3</span>)<br>               .map(String::toUpperCase);<br><br>Flux.just(<span class="hljs-string">&quot;one&quot;</span>, <span class="hljs-string">&quot;two&quot;</span>, <span class="hljs-string">&quot;three&quot;</span>, <span class="hljs-string">&quot;four&quot;</span>)<br>    .transform(filterAndTransform) <span class="hljs-comment">// 应用组合操作</span><br>    .subscribe(System.out::println); <span class="hljs-comment">// &quot;THREE&quot;, &quot;FOUR&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="6-错误处理"><a href="#6-错误处理" class="headerlink" title="6. 错误处理"></a>6. 错误处理</h4><h5 id="onErrorReturn-错误时返回默认值"><a href="#onErrorReturn-错误时返回默认值" class="headerlink" title="onErrorReturn - 错误时返回默认值"></a>onErrorReturn - 错误时返回默认值</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux.error(<span class="hljs-keyword">new</span> RuntimeException(<span class="hljs-string">&quot;Boom!&quot;</span>))<br>    .onErrorReturn(<span class="hljs-string">&quot;Recovered&quot;</span>)<br>    .subscribe(System.out::println); <span class="hljs-comment">// &quot;Recovered&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="onErrorResume-错误时切换流"><a href="#onErrorResume-错误时切换流" class="headerlink" title="onErrorResume - 错误时切换流"></a>onErrorResume - 错误时切换流</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux.error(<span class="hljs-keyword">new</span> RuntimeException(<span class="hljs-string">&quot;Boom!&quot;</span>))<br>    .onErrorResume(error -&gt; Flux.just(<span class="hljs-string">&quot;Fallback&quot;</span>, <span class="hljs-string">&quot;Data&quot;</span>))<br>    .subscribe(System.out::println); <span class="hljs-comment">// &quot;Fallback&quot;, &quot;Data&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="onErrorMap-错误转换"><a href="#onErrorMap-错误转换" class="headerlink" title="onErrorMap - 错误转换"></a>onErrorMap - 错误转换</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux.error(<span class="hljs-keyword">new</span> IOException(<span class="hljs-string">&quot;Network error&quot;</span>))<br>    .onErrorMap(original -&gt; <span class="hljs-keyword">new</span> BusinessException(<span class="hljs-string">&quot;Service unavailable&quot;</span>, original))<br>    .subscribe(<br>        System.out::println,<br>        error -&gt; System.out.println(error.getClass()) <span class="hljs-comment">// BusinessException</span><br>    );<br></code></pre></td></tr></table></figure>
+
+<h5 id="doOnError-错误时作用"><a href="#doOnError-错误时作用" class="headerlink" title="doOnError - 错误时作用"></a>doOnError - 错误时作用</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux.error(<span class="hljs-keyword">new</span> RuntimeException(<span class="hljs-string">&quot;Boom!&quot;</span>))<br>    .doOnError(error -&gt; log.error(<span class="hljs-string">&quot;Error occurred: &#123;&#125;&quot;</span>, error.getMessage()))<br>    .subscribe();<br></code></pre></td></tr></table></figure>
+
+<h4 id="7、超时与重试"><a href="#7、超时与重试" class="headerlink" title="7、超时与重试"></a>7、超时与重试</h4><h5 id="retry-重试机制"><a href="#retry-重试机制" class="headerlink" title="retry - 重试机制"></a>retry - 重试机制</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux.error(<span class="hljs-keyword">new</span> RuntimeException(<span class="hljs-string">&quot;Temporary failure&quot;</span>))<br>    .retry(<span class="hljs-number">3</span>) <span class="hljs-comment">// 重试3次</span><br>    .subscribe(<br>        System.out::println,<br>        error -&gt; System.out.println(<span class="hljs-string">&quot;Final error: &quot;</span> + error)<br>    );<br></code></pre></td></tr></table></figure>
+
+<h5 id="retryWhen-条件重试"><a href="#retryWhen-条件重试" class="headerlink" title="retryWhen - 条件重试"></a>retryWhen - 条件重试</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux.error(<span class="hljs-keyword">new</span> RuntimeException(<span class="hljs-string">&quot;Temporary failure&quot;</span>))<br>    .retryWhen(Retry.fixedDelay(<span class="hljs-number">3</span>, Duration.ofSeconds(<span class="hljs-number">1</span>))) <span class="hljs-comment">// 固定延迟重试</span><br>    .subscribe();<br></code></pre></td></tr></table></figure>
+
+<h4 id="8、Sinks工具类"><a href="#8、Sinks工具类" class="headerlink" title="8、Sinks工具类"></a>8、Sinks工具类</h4><h5 id="创建可编程数据源"><a href="#创建可编程数据源" class="headerlink" title="创建可编程数据源"></a>创建可编程数据源</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 单值Sink</span><br>Sinks.One&lt;String&gt; sinkOne = Sinks.one();<br>Mono&lt;String&gt; mono = sinkOne.asMono();<br>sinkOne.emitValue(<span class="hljs-string">&quot;Hello&quot;</span>, Sinks.EmitFailureHandler.FAIL_FAST);<br><br><span class="hljs-comment">// 多值Sink</span><br>Sinks.Many&lt;String&gt; sinkMany = Sinks.many().unicast().onBackpressureBuffer();<br>Flux&lt;String&gt; flux = sinkMany.asFlux();<br>sinkMany.tryEmitNext(<span class="hljs-string">&quot;Message 1&quot;</span>);<br>sinkMany.tryEmitNext(<span class="hljs-string">&quot;Message 2&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<h5 id="单播-Unicast"><a href="#单播-Unicast" class="headerlink" title="单播 (Unicast)"></a>单播 (Unicast)</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java">Sinks.Many&lt;Integer&gt; unicastSink = Sinks.many().unicast().onBackpressureBuffer();<br><span class="hljs-comment">// 只能有一个订阅者，多个订阅会报错</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="多播-Multicast"><a href="#多播-Multicast" class="headerlink" title="多播 (Multicast)"></a>多播 (Multicast)</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java">Sinks.Many&lt;Integer&gt; multicastSink = Sinks.many().multicast().onBackpressureBuffer();<br><span class="hljs-comment">// 多个订阅者共享后续数据（不包含历史数据）</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="重放-Replay"><a href="#重放-Replay" class="headerlink" title="重放 (Replay)"></a>重放 (Replay)</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java">Sinks.Many&lt;Integer&gt; replaySink = Sinks.many().replay().all();<br><span class="hljs-comment">// 新订阅者会收到所有历史数据</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="9、阻塞式API处理"><a href="#9、阻塞式API处理" class="headerlink" title="9、阻塞式API处理"></a>9、阻塞式API处理</h4><h5 id="阻塞操作包装"><a href="#阻塞操作包装" class="headerlink" title="阻塞操作包装"></a>阻塞操作包装</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java">Mono.fromCallable(() -&gt; &#123;<br>        <span class="hljs-comment">// 阻塞的JDBC调用</span><br>        <span class="hljs-keyword">return</span> jdbcTemplate.queryForList(<span class="hljs-string">&quot;SELECT * FROM users&quot;</span>);<br>    &#125;)<br>    .subscribeOn(Schedulers.boundedElastic()) <span class="hljs-comment">// 在弹性线程池执行</span><br>    .subscribe();<br></code></pre></td></tr></table></figure>
+
+<h4 id="10、block-同步阻塞获取"><a href="#10、block-同步阻塞获取" class="headerlink" title="10、block - 同步阻塞获取"></a>10、block - 同步阻塞获取</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 测试或边缘场景使用，避免在生产环境主线程使用</span><br>List&lt;User&gt; users = userRepository.findAll()<br>.collectList()<br>.block(Duration.ofSeconds(<span class="hljs-number">5</span>)); <span class="hljs-comment">// 同步等待，最多5秒</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="11、Context-API-响应式中的ThreadLocal"><a href="#11、Context-API-响应式中的ThreadLocal" class="headerlink" title="11、Context-API - 响应式中的ThreadLocal"></a>11、Context-API - 响应式中的ThreadLocal</h4><p>​    在响应式编程中，尤其是使用 Reactor（如 Spring WebFlux）时，传统的 ThreadLocal 机制会失效，因为响应式编程是非阻塞的，并且操作可能在不同的线程上执行。这意味着，一个操作可能在一个线程上开始，在另一个线程上继续，因此无法通过 ThreadLocal 来传递上下文。</p>
+<p>​    Reactor 提供了 Context 机制来替代 ThreadLocal，用于在响应式流中传递上下文数据。Context 是绑定到订阅（Subscription）上的，而不是线程。它随着数据流在操作符之间传递，因此可以在整个流处理过程中访问和修改上下文。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//Context 从下往上传播（从订阅点向上游传播）,如果存在覆盖时，所有读到的都以最上层最后一次写的为准</span><br>Flux.range(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>)<br>    .flatMap(i -&gt; <br>        Mono.deferContextual(ctx -&gt; <br>            Mono.just(<span class="hljs-string">&quot;Value: &quot;</span> + i + <span class="hljs-string">&quot;, Context: &quot;</span> + ctx.get(<span class="hljs-string">&quot;traceId&quot;</span>))<br>        )<br>    )<br>    .contextWrite(Context.of(<span class="hljs-string">&quot;traceId&quot;</span>, <span class="hljs-string">&quot;12345&quot;</span>)) <span class="hljs-comment">// 写入上下文</span><br>    .subscribe(System.out::println);<br><span class="hljs-comment">// 输出: Value: 1, Context: 12345</span><br><span class="hljs-comment">//       Value: 2, Context: 12345  </span><br><span class="hljs-comment">//       Value: 3, Context: 12345</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="12、ParallelFlux-并行处理"><a href="#12、ParallelFlux-并行处理" class="headerlink" title="12、ParallelFlux - 并行处理"></a>12、ParallelFlux - 并行处理</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java">Flux.range(<span class="hljs-number">1</span>, <span class="hljs-number">100</span>)<br>.parallel(<span class="hljs-number">4</span>) <span class="hljs-comment">// 分成4个并行轨道</span><br>.runOn(Schedulers.parallel()) <span class="hljs-comment">// 在并行调度器执行</span><br>.map(i -&gt; i * <span class="hljs-number">2</span>) <span class="hljs-comment">// 并行处理</span><br>.sequential() <span class="hljs-comment">// 转换回普通Flux</span><br>.subscribe(System.out::println);<br>实际业务场景组合<br></code></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spring/" rel="tag"># Spring</a>
+              <a href="/tags/SpringWebFlux/" rel="tag"># SpringWebFlux</a>
+              <a href="/tags/Flux/" rel="tag"># Flux</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/08/31/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E7%B3%BB%E5%88%9701-%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E5%B8%B8%E8%A7%84%E6%96%B9%E6%A1%88%E6%A6%82%E8%BF%B0/" rel="prev" title="消息推送系列01-消息推送常规方案概述">
+      <i class="fa fa-chevron-left"></i> 消息推送系列01-消息推送常规方案概述
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/01/03/SpringAI-01-%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A8/" rel="next" title="SpringAI-01-基础入门">
+      SpringAI-01-基础入门 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SpringWebFlux%E4%BD%BF%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">SpringWebFlux使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81WebFlux"><span class="nav-number">1.1.</span> <span class="nav-text">为什么需要WebFlux</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%A0%E7%BB%9F%E9%98%BB%E5%A1%9E%E5%BC%8F%E6%A8%A1%E5%9E%8B%E7%9A%84%E7%93%B6%E9%A2%88%EF%BC%88Spring-MVC-Servlet%EF%BC%89"><span class="nav-number">1.1.1.</span> <span class="nav-text">传统阻塞式模型的瓶颈（Spring MVC Servlet）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E9%98%BB%E5%A1%9EI-O"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">同步阻塞I&#x2F;O</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E8%83%BD%E5%8A%9B%E5%8F%97%E9%99%90"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">并发能力受限</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E5%BC%8F%EF%BC%9A%E5%BC%82%E6%AD%A5-%E9%9D%9E%E9%98%BB%E5%A1%9E"><span class="nav-number">1.1.2.</span> <span class="nav-text">解决方式：异步+非阻塞</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFWebFlux"><span class="nav-number">1.2.</span> <span class="nav-text">什么是WebFlux</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B%E7%9A%84%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7-Reactive-Program"><span class="nav-number">1.2.1.</span> <span class="nav-text">响应式编程的核心特性(Reactive Program)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5%E9%9D%9E%E9%98%BB%E5%A1%9E-Asynchronous-amp-Non-blocking"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">异步非阻塞 (Asynchronous &amp; Non-blocking)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%B5%81-Data-Streams"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">数据流 (Data Streams)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%83%8C%E5%8E%8B%E6%9C%BA%E5%88%B6-Backpressure"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">背压机制 (Backpressure)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E5%BC%8F%E5%92%8C%E5%A3%B0%E6%98%8E%E5%BC%8F%EF%BC%88Declarative-Functional%EF%BC%89"><span class="nav-number">1.2.1.4.</span> <span class="nav-text">函数式和声明式（Declarative + Functional）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF-%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8-Event-Drive"><span class="nav-number">1.2.1.5.</span> <span class="nav-text">消息&#x2F;事件驱动(Event Drive)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.2.1.6.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WebFlux%E7%9A%84%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E5%92%8C%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.3.</span> <span class="nav-text">WebFlux的核心概念和编程模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E5%93%8D%E5%BA%94%E5%BC%8F%E6%B5%81-Reactive-Streams"><span class="nav-number">1.3.1.</span> <span class="nav-text">1、响应式流 (Reactive Streams)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81Reactor-%E6%A0%B8%E5%BF%83%E7%B1%BB%E5%9E%8B%EF%BC%9AMono-%E5%92%8C-Flux"><span class="nav-number">1.3.2.</span> <span class="nav-text">2、Reactor 核心类型：Mono 和 Flux</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E4%B8%A4%E7%A7%8D%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.3.3.</span> <span class="nav-text">3、两种编程模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B3%A8%E8%A7%A3%E6%A8%A1%E5%9E%8B-Annotation-based-Model"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">注解模型 (Annotation-based Model)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E5%BC%8F%E7%AB%AF%E7%82%B9-Functional-Endpoints"><span class="nav-number">1.3.3.2.</span> <span class="nav-text">函数式端点 (Functional Endpoints)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4%E3%80%81%E8%83%8C%E5%8E%8B"><span class="nav-number">1.3.4.</span> <span class="nav-text">4、背压</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5%E3%80%81%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%8E%A8%E9%80%81-Server-Sent-Events-SSE"><span class="nav-number">1.3.5.</span> <span class="nav-text">5、服务器推送 (Server-Sent Events, SSE)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6%E3%80%81%E5%93%8D%E5%BA%94%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93%E9%A9%B1%E5%8A%A8"><span class="nav-number">1.3.6.</span> <span class="nav-text">6、响应式数据库驱动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7%E3%80%81%E5%93%8D%E5%BA%94%E5%BC%8F%E7%9A%84%E5%87%BD%E6%95%B0%E6%88%96%E6%93%8D%E4%BD%9C"><span class="nav-number">1.3.7.</span> <span class="nav-text">7、响应式的函数或操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1%E3%80%81%E8%BF%87%E6%BB%A4%E4%B8%8E%E8%BD%AC%E6%8D%A2%E6%93%8D%E4%BD%9C%E7%AC%A6"><span class="nav-number">1.3.7.1.</span> <span class="nav-text">1、过滤与转换操作符</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#filter-%E8%BF%87%E6%BB%A4"><span class="nav-number">1.3.7.1.1.</span> <span class="nav-text">filter - 过滤</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#map-%E4%B8%80%E5%AF%B9%E4%B8%80%E8%BD%AC%E6%8D%A2"><span class="nav-number">1.3.7.1.2.</span> <span class="nav-text">map - 一对一转换</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2%E3%80%81%E6%89%81%E5%B9%B3%E5%8C%96%E6%93%8D%E4%BD%9C%E7%AC%A6"><span class="nav-number">1.3.7.2.</span> <span class="nav-text">2、扁平化操作符</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#flatMap-%E5%BC%82%E6%AD%A5%E6%89%81%E5%B9%B3%E5%8C%96"><span class="nav-number">1.3.7.2.1.</span> <span class="nav-text">flatMap - 异步扁平化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#concatMap-%E9%A1%BA%E5%BA%8F%E6%89%81%E5%B9%B3%E5%8C%96"><span class="nav-number">1.3.7.2.2.</span> <span class="nav-text">concatMap - 顺序扁平化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#flatMapMany-Mono%E8%BD%ACFlux"><span class="nav-number">1.3.7.2.3.</span> <span class="nav-text">flatMapMany - Mono转Flux</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E7%BB%84%E5%90%88%E6%93%8D%E4%BD%9C%E7%AC%A6"><span class="nav-number">1.3.7.3.</span> <span class="nav-text">3. 组合操作符</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#concat-%E9%A1%BA%E5%BA%8F%E8%BF%9E%E6%8E%A5"><span class="nav-number">1.3.7.3.1.</span> <span class="nav-text">concat - 顺序连接</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#concatWith-%E5%AE%9E%E4%BE%8B%E6%96%B9%E6%B3%95"><span class="nav-number">1.3.7.3.2.</span> <span class="nav-text">concatWith - 实例方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#merge-%E5%B9%B6%E8%A1%8C%E5%90%88%E5%B9%B6"><span class="nav-number">1.3.7.3.3.</span> <span class="nav-text">merge - 并行合并</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#mergeWith-%E5%AE%9E%E4%BE%8B%E6%96%B9%E6%B3%95"><span class="nav-number">1.3.7.3.4.</span> <span class="nav-text">mergeWith - 实例方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#mergeSequential-%E6%8C%89%E8%AE%A2%E9%98%85%E9%A1%BA%E5%BA%8F%E5%90%88%E5%B9%B6"><span class="nav-number">1.3.7.3.5.</span> <span class="nav-text">mergeSequential - 按订阅顺序合并</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#zip-%E4%B8%80%E5%AF%B9%E4%B8%80%E7%BB%84%E5%90%88"><span class="nav-number">1.3.7.3.6.</span> <span class="nav-text">zip - 一对一组合</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#zipWith-%E5%AE%9E%E4%BE%8B%E6%96%B9%E6%B3%95"><span class="nav-number">1.3.7.3.7.</span> <span class="nav-text">zipWith - 实例方法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E7%A9%BA%E5%80%BC%E5%A4%84%E7%90%86"><span class="nav-number">1.3.7.4.</span> <span class="nav-text">4. 空值处理</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#defaultIfEmpty-%E9%BB%98%E8%AE%A4%E5%80%BC"><span class="nav-number">1.3.7.4.1.</span> <span class="nav-text">defaultIfEmpty - 默认值</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#switchIfEmpty-%E5%88%87%E6%8D%A2%E5%A4%87%E7%94%A8%E6%B5%81"><span class="nav-number">1.3.7.4.2.</span> <span class="nav-text">switchIfEmpty - 切换备用流</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-transform-%E6%93%8D%E4%BD%9C%E7%AC%A6%E7%BB%84%E5%90%88"><span class="nav-number">1.3.7.4.3.</span> <span class="nav-text">5. transform - 操作符组合</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86"><span class="nav-number">1.3.7.5.</span> <span class="nav-text">6. 错误处理</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#onErrorReturn-%E9%94%99%E8%AF%AF%E6%97%B6%E8%BF%94%E5%9B%9E%E9%BB%98%E8%AE%A4%E5%80%BC"><span class="nav-number">1.3.7.5.1.</span> <span class="nav-text">onErrorReturn - 错误时返回默认值</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#onErrorResume-%E9%94%99%E8%AF%AF%E6%97%B6%E5%88%87%E6%8D%A2%E6%B5%81"><span class="nav-number">1.3.7.5.2.</span> <span class="nav-text">onErrorResume - 错误时切换流</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#onErrorMap-%E9%94%99%E8%AF%AF%E8%BD%AC%E6%8D%A2"><span class="nav-number">1.3.7.5.3.</span> <span class="nav-text">onErrorMap - 错误转换</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#doOnError-%E9%94%99%E8%AF%AF%E6%97%B6%E4%BD%9C%E7%94%A8"><span class="nav-number">1.3.7.5.4.</span> <span class="nav-text">doOnError - 错误时作用</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7%E3%80%81%E8%B6%85%E6%97%B6%E4%B8%8E%E9%87%8D%E8%AF%95"><span class="nav-number">1.3.7.6.</span> <span class="nav-text">7、超时与重试</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#retry-%E9%87%8D%E8%AF%95%E6%9C%BA%E5%88%B6"><span class="nav-number">1.3.7.6.1.</span> <span class="nav-text">retry - 重试机制</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#retryWhen-%E6%9D%A1%E4%BB%B6%E9%87%8D%E8%AF%95"><span class="nav-number">1.3.7.6.2.</span> <span class="nav-text">retryWhen - 条件重试</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#8%E3%80%81Sinks%E5%B7%A5%E5%85%B7%E7%B1%BB"><span class="nav-number">1.3.7.7.</span> <span class="nav-text">8、Sinks工具类</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%8F%AF%E7%BC%96%E7%A8%8B%E6%95%B0%E6%8D%AE%E6%BA%90"><span class="nav-number">1.3.7.7.1.</span> <span class="nav-text">创建可编程数据源</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8D%95%E6%92%AD-Unicast"><span class="nav-number">1.3.7.7.2.</span> <span class="nav-text">单播 (Unicast)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A4%9A%E6%92%AD-Multicast"><span class="nav-number">1.3.7.7.3.</span> <span class="nav-text">多播 (Multicast)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8D%E6%94%BE-Replay"><span class="nav-number">1.3.7.7.4.</span> <span class="nav-text">重放 (Replay)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#9%E3%80%81%E9%98%BB%E5%A1%9E%E5%BC%8FAPI%E5%A4%84%E7%90%86"><span class="nav-number">1.3.7.8.</span> <span class="nav-text">9、阻塞式API处理</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%98%BB%E5%A1%9E%E6%93%8D%E4%BD%9C%E5%8C%85%E8%A3%85"><span class="nav-number">1.3.7.8.1.</span> <span class="nav-text">阻塞操作包装</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#10%E3%80%81block-%E5%90%8C%E6%AD%A5%E9%98%BB%E5%A1%9E%E8%8E%B7%E5%8F%96"><span class="nav-number">1.3.7.9.</span> <span class="nav-text">10、block - 同步阻塞获取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#11%E3%80%81Context-API-%E5%93%8D%E5%BA%94%E5%BC%8F%E4%B8%AD%E7%9A%84ThreadLocal"><span class="nav-number">1.3.7.10.</span> <span class="nav-text">11、Context-API - 响应式中的ThreadLocal</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#12%E3%80%81ParallelFlux-%E5%B9%B6%E8%A1%8C%E5%A4%84%E7%90%86"><span class="nav-number">1.3.7.11.</span> <span class="nav-text">12、ParallelFlux - 并行处理</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">97</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>

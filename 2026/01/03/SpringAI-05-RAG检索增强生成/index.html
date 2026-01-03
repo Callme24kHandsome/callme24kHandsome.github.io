@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="SpringAI RAG检索增强生成详解">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringAI-05-RAG检索增强生成">
+<meta property="og:url" content="http://example.com/2026/01/03/SpringAI-05-RAG%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90/index.html">
+<meta property="og:site_name" content="24khandsome&#39;s Blog">
+<meta property="og:description" content="SpringAI RAG检索增强生成详解">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-01-03T13:00:00.000Z">
+<meta property="article:modified_time" content="2026-01-03T06:56:54.399Z">
+<meta property="article:author" content="24khandsome">
+<meta property="article:tag" content="SpringAI">
+<meta property="article:tag" content="RAG">
+<meta property="article:tag" content="检索增强">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2026/01/03/SpringAI-05-RAG%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SpringAI-05-RAG检索增强生成 | 24khandsome's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">24khandsome's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">24khandsome's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/01/03/SpringAI-05-RAG%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="24khandsome">
+      <meta itemprop="description" content="24khandsome's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="24khandsome's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringAI-05-RAG检索增强生成
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-01-03 21:00:00 / 修改时间：14:56:54" itemprop="dateCreated datePublished" datetime="2026-01-03T21:00:00+08:00">2026-01-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SpringAI/" itemprop="url" rel="index"><span itemprop="name">SpringAI</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">SpringAI RAG检索增强生成详解</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h1><h1 id="一、RAG-是什么"><a href="#一、RAG-是什么" class="headerlink" title="一、RAG 是什么"></a>一、RAG 是什么</h1><p>​    RAG（Retrieval-Augmented Generation，检索增强生成）是一种结合信息检索和文本生成的技术。简单说，就是先检索相关文档，再把文档内容作为上下文，让 AI 基于这些内容生成回答。</p>
+<p><strong>传统 AI 的问题：</strong></p>
+<ul>
+<li>知识有截止日期（训练数据的时间点）</li>
+<li>无法获取实时信息</li>
+<li>可能产生幻觉（编造信息）</li>
+</ul>
+<p><strong>RAG 的优势：</strong></p>
+<ul>
+<li><strong>准确性提升</strong>：通过检索真实文档，提供更准确的答案</li>
+<li><strong>知识更新</strong>：可以检索最新的文档，保持知识更新</li>
+<li><strong>减少幻觉</strong>：基于真实文档生成，减少错误信息</li>
+<li><strong>可解释性</strong>：可以展示检索到的文档，提高可解释性</li>
+</ul>
+<p><strong>RAG 的应用场景：</strong></p>
+<ul>
+<li><strong>知识问答</strong>：基于文档库进行问答</li>
+<li><strong>文档摘要</strong>：基于文档生成摘要</li>
+<li><strong>智能客服</strong>：基于知识库进行客服问答</li>
+<li><strong>代码生成</strong>：基于代码库生成代码</li>
+</ul>
+<h1 id="二、RAG-的核心概念"><a href="#二、RAG-的核心概念" class="headerlink" title="二、RAG 的核心概念"></a>二、RAG 的核心概念</h1><p><strong>向量（Embedding）：</strong></p>
+<ul>
+<li>将文本转换为数值向量</li>
+<li>语义相似的文本，向量也相似</li>
+<li>通过向量相似度检索相关文档</li>
+</ul>
+<p><strong>向量数据库（Vector Store）：</strong></p>
+<ul>
+<li>存储文档向量和元数据</li>
+<li>支持相似度检索</li>
+<li>常见的有 Milvus、Pinecone、Weaviate 等</li>
+</ul>
+<p><strong>检索（Retrieval）：</strong></p>
+<ul>
+<li>将用户查询转换为向量</li>
+<li>在向量数据库中检索相似文档</li>
+<li>返回最相关的文档片段</li>
+</ul>
+<p><strong>增强生成（Augmented Generation）：</strong></p>
+<ul>
+<li>将检索到的文档作为上下文</li>
+<li>AI 基于上下文生成回答</li>
+<li>提高回答的准确性和相关性</li>
+</ul>
+<h1 id="三、RAG-工作流程"><a href="#三、RAG-工作流程" class="headerlink" title="三、RAG 工作流程"></a>三、RAG 工作流程</h1><p><strong>完整的 RAG 流程：</strong></p>
+<ol>
+<li><strong>文档加载</strong>：从各种来源加载文档（文件、数据库、API 等）</li>
+<li><strong>文档分割</strong>：将文档分割成小块（chunks），便于检索</li>
+<li><strong>向量化</strong>：使用 Embedding 模型将文档块转换为向量</li>
+<li><strong>存储</strong>：将向量存储到向量数据库</li>
+<li><strong>查询向量化</strong>：将用户查询转换为向量</li>
+<li><strong>检索</strong>：在向量数据库中检索相似文档</li>
+<li><strong>增强生成</strong>：将检索到的文档作为上下文，生成回答</li>
+</ol>
+<p><strong>流程图：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plain">文档 → 分割 → 向量化 → 存储到向量数据库<br>                                    ↓<br>用户查询 → 向量化 → 检索相似文档 → 增强生成 → 回答<br></code></pre></td></tr></table></figure>
+
+<h1 id="四、Spring-AI-RAG-组件"><a href="#四、Spring-AI-RAG-组件" class="headerlink" title="四、Spring AI RAG 组件"></a>四、Spring AI RAG 组件</h1><h2 id="4-1-DocumentReader"><a href="#4-1-DocumentReader" class="headerlink" title="4.1 DocumentReader"></a>4.1 DocumentReader</h2><p>​    文档读取器，负责从各种来源读取文档。</p>
+<p><strong>支持的格式：</strong></p>
+<ul>
+<li>文本文件（TXT、MD）</li>
+<li>PDF 文件</li>
+<li>HTML 页面</li>
+<li>数据库</li>
+</ul>
+<p><strong>示例：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 从文件读取</span><br>Resource resource = <span class="hljs-keyword">new</span> ClassPathResource(<span class="hljs-string">&quot;documents/knowledge.txt&quot;</span>);<br>DocumentReader documentReader = <span class="hljs-keyword">new</span> TextReader(resource);<br>List&lt;Document&gt; documents = documentReader.get();<br></code></pre></td></tr></table></figure>
+
+<h2 id="4-2-TextSplitter"><a href="#4-2-TextSplitter" class="headerlink" title="4.2 TextSplitter"></a>4.2 TextSplitter</h2><p>​    文本分割器，负责将文档分割成小块。</p>
+<p><strong>为什么需要分割：</strong></p>
+<ul>
+<li>文档可能很长，不适合直接向量化</li>
+<li>分割后可以更精确地检索相关片段</li>
+<li>提高检索效率</li>
+</ul>
+<p><strong>分割策略：</strong></p>
+<ul>
+<li>固定大小分割：按固定 token 数或字符数分割</li>
+<li>语义分割：按语义边界分割，保持语义完整性</li>
+<li>自定义分割：实现自定义分割逻辑</li>
+</ul>
+<h2 id="4-3-EmbeddingModel"><a href="#4-3-EmbeddingModel" class="headerlink" title="4.3 EmbeddingModel"></a>4.3 EmbeddingModel</h2><p>​    嵌入模型，负责将文本转换为向量。</p>
+<p><strong>配置示例：</strong></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-comment"># 阿里百炼 Embedding 模型</span><br><span class="hljs-meta">spring.ai.dashscope.embedding.options.model</span>=<span class="hljs-string">text-embedding-v4</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>使用：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Autowired</span><br><span class="hljs-keyword">private</span> EmbeddingModel embeddingModel;<br><br><span class="hljs-comment">// 将文档转换为向量</span><br>List&lt;Double&gt; embedding = embeddingModel.embed(<span class="hljs-string">&quot;文档内容&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<h2 id="4-4-VectorStore"><a href="#4-4-VectorStore" class="headerlink" title="4.4 VectorStore"></a>4.4 VectorStore</h2><p>​    向量存储，负责存储和检索向量。</p>
+<p><strong>Spring AI 提供的实现：</strong></p>
+<ul>
+<li><code>SimpleVectorStore</code>：内存向量存储（适合开发测试）</li>
+<li><code>MilvusVectorStore</code>：Milvus 向量数据库</li>
+<li><code>PineconeVectorStore</code>：Pinecone 向量数据库</li>
+</ul>
+<p><strong>使用：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Bean</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> VectorStore <span class="hljs-title">vectorStore</span><span class="hljs-params">(EmbeddingModel embeddingModel)</span> </span>&#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> SimpleVectorStore(embeddingModel);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="4-5-RetrievalAugmentationAdvisor"><a href="#4-5-RetrievalAugmentationAdvisor" class="headerlink" title="4.5 RetrievalAugmentationAdvisor"></a>4.5 RetrievalAugmentationAdvisor</h2><p>​    检索增强顾问，负责在生成过程中检索相关文档。</p>
+<p><strong>工作原理：</strong></p>
+<ol>
+<li>拦截用户查询</li>
+<li>将查询转换为向量</li>
+<li>在向量数据库中检索相似文档</li>
+<li>将检索到的文档添加到 Prompt 中</li>
+<li>调用 AI 模型生成回答</li>
+</ol>
+<p><strong>配置：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Bean</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> RetrievalAugmentationAdvisor <span class="hljs-title">retrievalAugmentationAdvisor</span><span class="hljs-params">(</span></span><br><span class="hljs-function"><span class="hljs-params">        VectorStore vectorStore)</span> </span>&#123;<br>    <span class="hljs-keyword">return</span> RetrievalAugmentationAdvisor.builder()<br>        .vectorStore(vectorStore)<br>        .topK(<span class="hljs-number">5</span>)  <span class="hljs-comment">// 返回最相似的 5 个文档</span><br>        .build();<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="五、快速开始"><a href="#五、快速开始" class="headerlink" title="五、快速开始"></a>五、快速开始</h1><h2 id="5-1-依赖配置"><a href="#5-1-依赖配置" class="headerlink" title="5.1 依赖配置"></a>5.1 依赖配置</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-comment">&lt;!-- RAG 核心依赖 --&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.ai<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-ai-advisors-vector-store<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><br><span class="hljs-comment">&lt;!-- Embedding 模型（阿里百炼） --&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.alibaba.cloud.ai<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-ai-alibaba-starter-dashscope<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="5-2-Embedding-模型配置"><a href="#5-2-Embedding-模型配置" class="headerlink" title="5.2 Embedding 模型配置"></a>5.2 Embedding 模型配置</h2><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-comment"># DashScope API Key</span><br><span class="hljs-meta">spring.ai.dashscope.api-key</span>=<span class="hljs-string">sk-your-api-key</span><br><br><span class="hljs-comment"># Embedding 模型配置</span><br><span class="hljs-meta">spring.ai.dashscope.embedding.options.model</span>=<span class="hljs-string">text-embedding-v4</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>支持的 Embedding 模型：</strong></p>
+<ul>
+<li><code>text-embedding-v1</code>：基础版本</li>
+<li><code>text-embedding-v2</code>：增强版本</li>
+<li><code>text-embedding-v4</code>：最新版本（推荐）</li>
+</ul>
+<h2 id="5-3-VectorStore-配置"><a href="#5-3-VectorStore-配置" class="headerlink" title="5.3 VectorStore 配置"></a>5.3 VectorStore 配置</h2><p><strong>内存向量存储（开发测试）：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@SpringBootApplication</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RagApplication</span> </span>&#123;<br>    <br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> VectorStore <span class="hljs-title">vectorStore</span><span class="hljs-params">(EmbeddingModel embeddingModel)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> SimpleVectorStore(embeddingModel);<br>    &#125;<br>    <br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> RetrievalAugmentationAdvisor <span class="hljs-title">retrievalAugmentationAdvisor</span><span class="hljs-params">(</span></span><br><span class="hljs-function"><span class="hljs-params">            VectorStore vectorStore)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> RetrievalAugmentationAdvisor.builder()<br>            .vectorStore(vectorStore)<br>            .topK(<span class="hljs-number">5</span>)<br>            .build();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>注意：</strong></p>
+<ul>
+<li><code>SimpleVectorStore</code> 是内存存储，重启后数据丢失</li>
+<li>生产环境建议使用专门的向量数据库（如 Milvus）</li>
+</ul>
+<h2 id="5-4-文档加载和索引"><a href="#5-4-文档加载和索引" class="headerlink" title="5.4 文档加载和索引"></a>5.4 文档加载和索引</h2><p><strong>完整示例：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Service</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DocumentService</span> </span>&#123;<br>    <br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> VectorStore vectorStore;<br>    <br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> EmbeddingModel embeddingModel;<br>    <br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 加载文档并建立索引</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-meta">@PostConstruct</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">loadDocuments</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-comment">// 1. 读取文档</span><br>        Resource resource = <span class="hljs-keyword">new</span> ClassPathResource(<span class="hljs-string">&quot;documents/knowledge.txt&quot;</span>);<br>        DocumentReader documentReader = <span class="hljs-keyword">new</span> TextReader(resource);<br>        List&lt;Document&gt; documents = documentReader.get();<br>        <br>        <span class="hljs-comment">// 2. 分割文档</span><br>        TextSplitter textSplitter = <span class="hljs-keyword">new</span> TokenTextSplitter()<br>            .setChunkSize(<span class="hljs-number">1000</span>)      <span class="hljs-comment">// 每个块 1000 token</span><br>            .setChunkOverlap(<span class="hljs-number">200</span>);   <span class="hljs-comment">// 块之间重叠 200 token</span><br>        List&lt;Document&gt; chunks = textSplitter.split(documents);<br>        <br>        <span class="hljs-comment">// 3. 存储到向量数据库</span><br>        vectorStore.add(chunks);<br>        <br>        log.info(<span class="hljs-string">&quot;文档加载完成，共 &#123;&#125; 个文档块&quot;</span>, chunks.size());<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>关键点：</strong></p>
+<ul>
+<li><code>chunkSize</code>：每个块的大小，建议 500-2000 token</li>
+<li><code>chunkOverlap</code>：块之间的重叠，避免边界信息丢失</li>
+<li><code>add()</code> 方法会自动进行向量化并存储</li>
+</ul>
+<h2 id="5-5-RAG-查询"><a href="#5-5-RAG-查询" class="headerlink" title="5.5 RAG 查询"></a>5.5 RAG 查询</h2><p><strong>Controller 实现：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span><br><span class="hljs-meta">@RequestMapping(&quot;/api/rag&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RagController</span> </span>&#123;<br>    <br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> ChatModel chatModel;<br>    <br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> RetrievalAugmentationAdvisor retrievalAugmentationAdvisor;<br>    <br>    <span class="hljs-meta">@GetMapping(value = &quot;/query&quot;, produces = MediaType.TEXT_EVENT_STREAM_VALUE)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Flux&lt;String&gt; <span class="hljs-title">query</span><span class="hljs-params">(<span class="hljs-meta">@RequestParam</span> String question)</span> </span>&#123;<br>        ChatClient chatClient = ChatClient.builder(chatModel)<br>            .defaultSystem(<span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;</span><br><span class="hljs-string">                你是一个知识问答助手，请根据检索到的文档回答问题。</span><br><span class="hljs-string">                如果文档中没有相关信息，请明确说明。</span><br><span class="hljs-string">                回答时请引用文档来源。</span><br><span class="hljs-string">                &quot;</span><span class="hljs-string">&quot;&quot;</span>)<br>            .defaultAdvisors(retrievalAugmentationAdvisor)<br>            .build();<br>        <br>        <span class="hljs-keyword">return</span> chatClient.prompt()<br>            .user(question)<br>            .stream()<br>            .content();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>使用示例：</strong></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs routeros"><span class="hljs-builtin-name">GET</span> /api/rag/query?<span class="hljs-attribute">question</span>=Spring AI 是什么？<br></code></pre></td></tr></table></figure>
+
+<p><strong>工作流程：</strong></p>
+<ol>
+<li>用户提问：”Spring AI 是什么？”</li>
+<li><code>RetrievalAugmentationAdvisor</code> 拦截查询</li>
+<li>将查询转换为向量</li>
+<li>在向量数据库中检索相似文档</li>
+<li>将检索到的文档添加到 Prompt 中</li>
+<li>AI 基于文档内容生成回答</li>
+</ol>
+<h1 id="六、文档分割策略"><a href="#六、文档分割策略" class="headerlink" title="六、文档分割策略"></a>六、文档分割策略</h1><h2 id="6-1-固定大小分割"><a href="#6-1-固定大小分割" class="headerlink" title="6.1 固定大小分割"></a>6.1 固定大小分割</h2><p>​    按固定大小分割文档，简单直接。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java">TextSplitter textSplitter = <span class="hljs-keyword">new</span> TokenTextSplitter()<br>    .setChunkSize(<span class="hljs-number">1000</span>)      <span class="hljs-comment">// 每个块 1000 token</span><br>    .setChunkOverlap(<span class="hljs-number">200</span>);   <span class="hljs-comment">// 块之间重叠 200 token</span><br><br>List&lt;Document&gt; chunks = textSplitter.split(documents);<br></code></pre></td></tr></table></figure>
+
+<p><strong>适用场景：</strong></p>
+<ul>
+<li>结构化文档</li>
+<li>对语义完整性要求不高的场景</li>
+</ul>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li>可能截断句子</li>
+<li>语义可能不完整</li>
+</ul>
+<h2 id="6-2-语义分割"><a href="#6-2-语义分割" class="headerlink" title="6.2 语义分割"></a>6.2 语义分割</h2><p>​    按语义分割文档，保持语义完整性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java">TextSplitter textSplitter = <span class="hljs-keyword">new</span> SemanticTextSplitter()<br>    .setChunkSize(<span class="hljs-number">1000</span>)<br>    .setChunkOverlap(<span class="hljs-number">200</span>);<br><br>List&lt;Document&gt; chunks = textSplitter.split(documents);<br></code></pre></td></tr></table></figure>
+
+<p><strong>适用场景：</strong></p>
+<ul>
+<li>非结构化文档</li>
+<li>对语义完整性要求高的场景</li>
+</ul>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li>需要 Embedding 模型支持</li>
+<li>分割速度较慢</li>
+</ul>
+<h2 id="6-3-自定义分割器"><a href="#6-3-自定义分割器" class="headerlink" title="6.3 自定义分割器"></a>6.3 自定义分割器</h2><p>​    实现自定义分割逻辑。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CustomTextSplitter</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">TextSplitter</span> </span>&#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> List&lt;Document&gt; <span class="hljs-title">split</span><span class="hljs-params">(Document document)</span> </span>&#123;<br>        <span class="hljs-comment">// 自定义分割逻辑</span><br>        <span class="hljs-comment">// 例如：按段落分割、按章节分割等</span><br>        List&lt;Document&gt; chunks = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();<br>        <span class="hljs-comment">// ... 分割逻辑</span><br>        <span class="hljs-keyword">return</span> chunks;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>适用场景：</strong></p>
+<ul>
+<li>特殊格式的文档</li>
+<li>需要特定分割规则的场景</li>
+</ul>
+<h1 id="七、向量检索策略"><a href="#七、向量检索策略" class="headerlink" title="七、向量检索策略"></a>七、向量检索策略</h1><h2 id="7-1-Top-K-检索"><a href="#7-1-Top-K-检索" class="headerlink" title="7.1 Top-K 检索"></a>7.1 Top-K 检索</h2><p>​    返回最相似的 K 个文档。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Bean</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> RetrievalAugmentationAdvisor <span class="hljs-title">retrievalAugmentationAdvisor</span><span class="hljs-params">(</span></span><br><span class="hljs-function"><span class="hljs-params">        VectorStore vectorStore)</span> </span>&#123;<br>    <span class="hljs-keyword">return</span> RetrievalAugmentationAdvisor.builder()<br>        .vectorStore(vectorStore)<br>        .topK(<span class="hljs-number">5</span>)  <span class="hljs-comment">// 返回最相似的 5 个文档</span><br>        .build();<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>K 值选择：</strong></p>
+<ul>
+<li>太小：可能遗漏相关信息</li>
+<li>太大：可能包含不相关信息，增加 token 消耗</li>
+<li>建议：3-10 之间</li>
+</ul>
+<h2 id="7-2-相似度阈值"><a href="#7-2-相似度阈值" class="headerlink" title="7.2 相似度阈值"></a>7.2 相似度阈值</h2><p>​    设置相似度阈值，只返回相似度高于阈值的文档。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 在检索时设置阈值</span><br>List&lt;Document&gt; documents = vectorStore.similaritySearch(<br>    SearchRequest.query(<span class="hljs-string">&quot;查询内容&quot;</span>)<br>        .withTopK(<span class="hljs-number">5</span>)<br>        .withSimilarityThreshold(<span class="hljs-number">0.7</span>)  <span class="hljs-comment">// 相似度阈值 0.7</span><br>);<br></code></pre></td></tr></table></figure>
+
+<p><strong>阈值选择：</strong></p>
+<ul>
+<li>太高：可能检索不到文档</li>
+<li>太低：可能包含不相关文档</li>
+<li>建议：0.6-0.8 之间</li>
+</ul>
+<h2 id="7-3-元数据过滤"><a href="#7-3-元数据过滤" class="headerlink" title="7.3 元数据过滤"></a>7.3 元数据过滤</h2><p>​    根据元数据过滤文档。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 添加元数据</span><br>Document document = <span class="hljs-keyword">new</span> Document(<span class="hljs-string">&quot;内容&quot;</span>, Map.of(<span class="hljs-string">&quot;category&quot;</span>, <span class="hljs-string">&quot;技术文档&quot;</span>));<br>vectorStore.add(document);<br><br><span class="hljs-comment">// 检索时过滤</span><br>List&lt;Document&gt; documents = vectorStore.similaritySearch(<br>    SearchRequest.query(<span class="hljs-string">&quot;查询内容&quot;</span>)<br>        .withTopK(<span class="hljs-number">5</span>)<br>        .withFilterExpression(<span class="hljs-string">&quot;category == &#x27;技术文档&#x27;&quot;</span>)<br>);<br></code></pre></td></tr></table></figure>
+
+<p><strong>适用场景：</strong></p>
+<ul>
+<li>文档分类</li>
+<li>按来源过滤</li>
+<li>按时间过滤</li>
+</ul>
+<h1 id="八、实际案例"><a href="#八、实际案例" class="headerlink" title="八、实际案例"></a>八、实际案例</h1><p><strong>场景：</strong> 基于技术文档库进行问答。</p>
+<p><strong>文档准备：</strong></p>
+<figure class="highlight mel"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs mel">documents/<br>├── <span class="hljs-keyword">spring</span>-ai-basics.txt<br>├── <span class="hljs-keyword">spring</span>-ai-chatclient.txt<br>└── <span class="hljs-keyword">spring</span>-ai-tools.txt<br></code></pre></td></tr></table></figure>
+
+<p><strong>文档加载：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Service</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DocumentService</span> </span>&#123;<br>    <br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> VectorStore vectorStore;<br>    <br>    <span class="hljs-meta">@PostConstruct</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">loadDocuments</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-comment">// 加载多个文档</span><br>        List&lt;Document&gt; allDocuments = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();<br>        <br>        <span class="hljs-comment">// 加载 Spring AI 基础文档</span><br>        Resource resource1 = <span class="hljs-keyword">new</span> ClassPathResource(<span class="hljs-string">&quot;documents/spring-ai-basics.txt&quot;</span>);<br>        DocumentReader reader1 = <span class="hljs-keyword">new</span> TextReader(resource1);<br>        allDocuments.addAll(reader1.get());<br>        <br>        <span class="hljs-comment">// 加载 ChatClient 文档</span><br>        Resource resource2 = <span class="hljs-keyword">new</span> ClassPathResource(<span class="hljs-string">&quot;documents/spring-ai-chatclient.txt&quot;</span>);<br>        DocumentReader reader2 = <span class="hljs-keyword">new</span> TextReader(resource2);<br>        allDocuments.addAll(reader2.get());<br>        <br>        <span class="hljs-comment">// 分割文档</span><br>        TextSplitter textSplitter = <span class="hljs-keyword">new</span> TokenTextSplitter()<br>            .setChunkSize(<span class="hljs-number">1000</span>)<br>            .setChunkOverlap(<span class="hljs-number">200</span>);<br>        List&lt;Document&gt; chunks = textSplitter.split(allDocuments);<br>        <br>        <span class="hljs-comment">// 存储到向量数据库</span><br>        vectorStore.add(chunks);<br>        <br>        log.info(<span class="hljs-string">&quot;文档加载完成，共 &#123;&#125; 个文档块&quot;</span>, chunks.size());<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>查询接口：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span><br><span class="hljs-meta">@RequestMapping(&quot;/api/rag&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RagController</span> </span>&#123;<br>    <br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> ChatModel chatModel;<br>    <br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> RetrievalAugmentationAdvisor retrievalAugmentationAdvisor;<br>    <br>    <span class="hljs-meta">@GetMapping(value = &quot;/query&quot;, produces = MediaType.TEXT_EVENT_STREAM_VALUE)</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Flux&lt;String&gt; <span class="hljs-title">query</span><span class="hljs-params">(<span class="hljs-meta">@RequestParam</span> String question)</span> </span>&#123;<br>        ChatClient chatClient = ChatClient.builder(chatModel)<br>            .defaultSystem(<span class="hljs-string">&quot;&quot;</span><span class="hljs-string">&quot;</span><br><span class="hljs-string">                你是一个 Spring AI 技术专家，请根据检索到的文档回答问题。</span><br><span class="hljs-string">                如果文档中没有相关信息，请明确说明。</span><br><span class="hljs-string">                回答时请引用文档来源。</span><br><span class="hljs-string">                &quot;</span><span class="hljs-string">&quot;&quot;</span>)<br>            .defaultAdvisors(retrievalAugmentationAdvisor)<br>            .build();<br>        <br>        <span class="hljs-keyword">return</span> chatClient.prompt()<br>            .user(question)<br>            .stream()<br>            .content();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>使用示例：</strong></p>
+<figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs prolog">用户：<span class="hljs-symbol">ChatClient</span> 怎么使用？<br><span class="hljs-symbol">AI</span>：[检索相关文档] 根据文档，<span class="hljs-symbol">ChatClient</span> 的使用方式如下...<br></code></pre></td></tr></table></figure>
+
+<h1 id="九、常见问题"><a href="#九、常见问题" class="headerlink" title="九、常见问题"></a>九、常见问题</h1><h2 id="9-1-检索不到相关文档"><a href="#9-1-检索不到相关文档" class="headerlink" title="9.1 检索不到相关文档"></a>9.1 检索不到相关文档</h2><p><strong>问题：</strong> 查询时检索不到相关文档。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li>文档未正确加载</li>
+<li>查询和文档不匹配</li>
+<li>相似度阈值过高</li>
+</ul>
+<p><strong>解决：</strong></p>
+<ol>
+<li>检查文档是否已加载：查看日志</li>
+<li>优化查询语句：使用更具体的关键词</li>
+<li>降低相似度阈值：从 0.7 降到 0.6</li>
+</ol>
+<h2 id="9-2-检索到不相关文档"><a href="#9-2-检索到不相关文档" class="headerlink" title="9.2 检索到不相关文档"></a>9.2 检索到不相关文档</h2><p><strong>问题：</strong> 检索到的文档和查询不相关。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li>文档分割不合理</li>
+<li>Embedding 模型质量不高</li>
+<li>Top-K 值太大</li>
+</ul>
+<p><strong>解决：</strong></p>
+<ol>
+<li>优化文档分割策略：使用语义分割</li>
+<li>使用更好的 Embedding 模型</li>
+<li>减小 Top-K 值：从 10 降到 5</li>
+</ol>
+<h2 id="9-3-生成答案不准确"><a href="#9-3-生成答案不准确" class="headerlink" title="9.3 生成答案不准确"></a>9.3 生成答案不准确</h2><p><strong>问题：</strong> AI 生成的答案不准确。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li>检索到的文档不准确</li>
+<li>Prompt 设计不合理</li>
+<li>上下文过长</li>
+</ul>
+<p><strong>解决：</strong></p>
+<ol>
+<li>提高检索质量：优化分割策略、调整 Top-K</li>
+<li>优化 Prompt：明确指示 AI 如何使用文档</li>
+<li>控制上下文长度：减小 Top-K 或 chunkSize</li>
+</ol>
+<h2 id="9-4-性能问题"><a href="#9-4-性能问题" class="headerlink" title="9.4 性能问题"></a>9.4 性能问题</h2><p><strong>问题：</strong> RAG 查询速度慢。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li>向量数据库性能问题</li>
+<li>Embedding 模型调用慢</li>
+<li>文档数量过多</li>
+</ul>
+<p><strong>解决：</strong></p>
+<ol>
+<li>使用高性能向量数据库（如 Milvus）</li>
+<li>使用本地 Embedding 模型</li>
+<li>优化文档数量：只加载必要的文档</li>
+</ol>
+<h2 id="9-5-内存占用高"><a href="#9-5-内存占用高" class="headerlink" title="9.5 内存占用高"></a>9.5 内存占用高</h2><p><strong>问题：</strong> 使用 <code>SimpleVectorStore</code> 内存占用高。</p>
+<p><strong>原因：</strong></p>
+<ul>
+<li>内存向量存储，所有数据在内存中</li>
+<li>文档数量多</li>
+</ul>
+<p><strong>解决：</strong></p>
+<ol>
+<li>生产环境使用专门的向量数据库</li>
+<li>减少文档数量</li>
+<li>优化文档分割：减小 chunkSize</li>
+</ol>
+<h1 id="十、最佳实践"><a href="#十、最佳实践" class="headerlink" title="十、最佳实践"></a>十、最佳实践</h1><h2 id="10-1-文档质量"><a href="#10-1-文档质量" class="headerlink" title="10.1 文档质量"></a>10.1 文档质量</h2><p><strong>确保文档质量：</strong></p>
+<ul>
+<li><strong>准确性</strong>：文档内容准确</li>
+<li><strong>完整性</strong>：文档内容完整</li>
+<li><strong>时效性</strong>：及时更新文档</li>
+</ul>
+<h2 id="10-2-分割策略"><a href="#10-2-分割策略" class="headerlink" title="10.2 分割策略"></a>10.2 分割策略</h2><p><strong>选择合适的分割策略：</strong></p>
+<ul>
+<li><strong>固定大小</strong>：适合结构化文档</li>
+<li><strong>语义分割</strong>：适合非结构化文档</li>
+<li><strong>自定义分割</strong>：适合特殊需求</li>
+</ul>
+<p><strong>分割参数建议：</strong></p>
+<ul>
+<li><code>chunkSize</code>：500-2000 token</li>
+<li><code>chunkOverlap</code>：100-300 token</li>
+</ul>
+<h2 id="10-3-Embedding-模型"><a href="#10-3-Embedding-模型" class="headerlink" title="10.3 Embedding 模型"></a>10.3 Embedding 模型</h2><p><strong>选择合适的 Embedding 模型：</strong></p>
+<ul>
+<li><strong>中文场景</strong>：使用支持中文的模型</li>
+<li><strong>领域场景</strong>：使用领域特定的模型</li>
+<li><strong>多语言场景</strong>：使用多语言模型</li>
+</ul>
+<h2 id="10-4-向量数据库"><a href="#10-4-向量数据库" class="headerlink" title="10.4 向量数据库"></a>10.4 向量数据库</h2><p><strong>选择合适的向量数据库：</strong></p>
+<ul>
+<li><strong>开发测试</strong>：<code>SimpleVectorStore</code>（内存）</li>
+<li><strong>生产环境</strong>：Milvus、Pinecone、Weaviate 等</li>
+</ul>
+<h2 id="10-5-检索策略"><a href="#10-5-检索策略" class="headerlink" title="10.5 检索策略"></a>10.5 检索策略</h2><p><strong>优化检索策略：</strong></p>
+<ul>
+<li><strong>Top-K 选择</strong>：根据场景选择合适的 K 值（3-10）</li>
+<li><strong>相似度阈值</strong>：设置合理的阈值（0.6-0.8）</li>
+<li><strong>元数据过滤</strong>：使用元数据提高精度</li>
+</ul>
+<h2 id="10-6-Prompt-设计"><a href="#10-6-Prompt-设计" class="headerlink" title="10.6 Prompt 设计"></a>10.6 Prompt 设计</h2><p><strong>优化 Prompt 设计：</strong></p>
+<ul>
+<li><strong>明确指令</strong>：明确指示 AI 如何使用文档</li>
+<li><strong>格式要求</strong>：指定回答格式</li>
+<li><strong>引用要求</strong>：要求 AI 引用文档来源</li>
+</ul>
+<p><strong>示例：</strong></p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs css">你是一个知识问答助手，请根据检索到的文档回答问题。<br>如果文档中没有相关信息，请明确说明。<br>回答时请引用文档来源，格式：<span class="hljs-selector-attr">[来源1]</span> <span class="hljs-selector-attr">[来源2]</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="十一、总结"><a href="#十一、总结" class="headerlink" title="十一、总结"></a>十一、总结</h1><ol>
+<li><strong>RAG 原理</strong>：通过检索相关文档来增强生成过程，提高回答的准确性</li>
+<li><strong>核心组件</strong>：DocumentReader、TextSplitter、EmbeddingModel、VectorStore、RetrievalAugmentationAdvisor</li>
+<li><strong>工作流程</strong>：文档加载 → 文档分割 → 向量化 → 存储 → 检索 → 增强生成</li>
+<li><strong>文档分割</strong>：固定大小分割、语义分割、自定义分割</li>
+<li><strong>向量检索</strong>：Top-K 检索、相似度阈值、元数据过滤</li>
+<li><strong>配置要点</strong>：Embedding 模型配置、VectorStore 配置、RetrievalAugmentationAdvisor 配置</li>
+<li><strong>最佳实践</strong>：文档质量、分割策略、Embedding 模型、向量数据库、检索策略、Prompt 设计</li>
+</ol>
+<p>​    RAG 是 Spring AI 的一个重要功能，可以显著提高 AI 应用的准确性和实用性。在实际项目中，需要根据具体场景选择合适的策略和参数。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SpringAI/" rel="tag"># SpringAI</a>
+              <a href="/tags/RAG/" rel="tag"># RAG</a>
+              <a href="/tags/%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA/" rel="tag"># 检索增强</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/01/03/SpringAI-01-%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A8/" rel="prev" title="SpringAI-01-基础入门">
+      <i class="fa fa-chevron-left"></i> SpringAI-01-基础入门
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/01/03/SpringAI-03-Tools%E4%B8%8EFunctionCall/" rel="next" title="SpringAI-03-Tools与FunctionCall">
+      SpringAI-03-Tools与FunctionCall <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9B%AE%E5%BD%95"><span class="nav-number">1.</span> <span class="nav-text">目录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81RAG-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">2.</span> <span class="nav-text">一、RAG 是什么</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81RAG-%E7%9A%84%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><span class="nav-number">3.</span> <span class="nav-text">二、RAG 的核心概念</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81RAG-%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">三、RAG 工作流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81Spring-AI-RAG-%E7%BB%84%E4%BB%B6"><span class="nav-number">5.</span> <span class="nav-text">四、Spring AI RAG 组件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-DocumentReader"><span class="nav-number">5.1.</span> <span class="nav-text">4.1 DocumentReader</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-TextSplitter"><span class="nav-number">5.2.</span> <span class="nav-text">4.2 TextSplitter</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-EmbeddingModel"><span class="nav-number">5.3.</span> <span class="nav-text">4.3 EmbeddingModel</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-4-VectorStore"><span class="nav-number">5.4.</span> <span class="nav-text">4.4 VectorStore</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-5-RetrievalAugmentationAdvisor"><span class="nav-number">5.5.</span> <span class="nav-text">4.5 RetrievalAugmentationAdvisor</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B"><span class="nav-number">6.</span> <span class="nav-text">五、快速开始</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-%E4%BE%9D%E8%B5%96%E9%85%8D%E7%BD%AE"><span class="nav-number">6.1.</span> <span class="nav-text">5.1 依赖配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-Embedding-%E6%A8%A1%E5%9E%8B%E9%85%8D%E7%BD%AE"><span class="nav-number">6.2.</span> <span class="nav-text">5.2 Embedding 模型配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-3-VectorStore-%E9%85%8D%E7%BD%AE"><span class="nav-number">6.3.</span> <span class="nav-text">5.3 VectorStore 配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-4-%E6%96%87%E6%A1%A3%E5%8A%A0%E8%BD%BD%E5%92%8C%E7%B4%A2%E5%BC%95"><span class="nav-number">6.4.</span> <span class="nav-text">5.4 文档加载和索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-5-RAG-%E6%9F%A5%E8%AF%A2"><span class="nav-number">6.5.</span> <span class="nav-text">5.5 RAG 查询</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E6%96%87%E6%A1%A3%E5%88%86%E5%89%B2%E7%AD%96%E7%95%A5"><span class="nav-number">7.</span> <span class="nav-text">六、文档分割策略</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#6-1-%E5%9B%BA%E5%AE%9A%E5%A4%A7%E5%B0%8F%E5%88%86%E5%89%B2"><span class="nav-number">7.1.</span> <span class="nav-text">6.1 固定大小分割</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-2-%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2"><span class="nav-number">7.2.</span> <span class="nav-text">6.2 语义分割</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-3-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%88%86%E5%89%B2%E5%99%A8"><span class="nav-number">7.3.</span> <span class="nav-text">6.3 自定义分割器</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5"><span class="nav-number">8.</span> <span class="nav-text">七、向量检索策略</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#7-1-Top-K-%E6%A3%80%E7%B4%A2"><span class="nav-number">8.1.</span> <span class="nav-text">7.1 Top-K 检索</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-2-%E7%9B%B8%E4%BC%BC%E5%BA%A6%E9%98%88%E5%80%BC"><span class="nav-number">8.2.</span> <span class="nav-text">7.2 相似度阈值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-3-%E5%85%83%E6%95%B0%E6%8D%AE%E8%BF%87%E6%BB%A4"><span class="nav-number">8.3.</span> <span class="nav-text">7.3 元数据过滤</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E5%AE%9E%E9%99%85%E6%A1%88%E4%BE%8B"><span class="nav-number">9.</span> <span class="nav-text">八、实际案例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B9%9D%E3%80%81%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="nav-number">10.</span> <span class="nav-text">九、常见问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#9-1-%E6%A3%80%E7%B4%A2%E4%B8%8D%E5%88%B0%E7%9B%B8%E5%85%B3%E6%96%87%E6%A1%A3"><span class="nav-number">10.1.</span> <span class="nav-text">9.1 检索不到相关文档</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-2-%E6%A3%80%E7%B4%A2%E5%88%B0%E4%B8%8D%E7%9B%B8%E5%85%B3%E6%96%87%E6%A1%A3"><span class="nav-number">10.2.</span> <span class="nav-text">9.2 检索到不相关文档</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-3-%E7%94%9F%E6%88%90%E7%AD%94%E6%A1%88%E4%B8%8D%E5%87%86%E7%A1%AE"><span class="nav-number">10.3.</span> <span class="nav-text">9.3 生成答案不准确</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-4-%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98"><span class="nav-number">10.4.</span> <span class="nav-text">9.4 性能问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-5-%E5%86%85%E5%AD%98%E5%8D%A0%E7%94%A8%E9%AB%98"><span class="nav-number">10.5.</span> <span class="nav-text">9.5 内存占用高</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8D%81%E3%80%81%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">11.</span> <span class="nav-text">十、最佳实践</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#10-1-%E6%96%87%E6%A1%A3%E8%B4%A8%E9%87%8F"><span class="nav-number">11.1.</span> <span class="nav-text">10.1 文档质量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-2-%E5%88%86%E5%89%B2%E7%AD%96%E7%95%A5"><span class="nav-number">11.2.</span> <span class="nav-text">10.2 分割策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-3-Embedding-%E6%A8%A1%E5%9E%8B"><span class="nav-number">11.3.</span> <span class="nav-text">10.3 Embedding 模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-4-%E5%90%91%E9%87%8F%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-number">11.4.</span> <span class="nav-text">10.4 向量数据库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-5-%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5"><span class="nav-number">11.5.</span> <span class="nav-text">10.5 检索策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-6-Prompt-%E8%AE%BE%E8%AE%A1"><span class="nav-number">11.6.</span> <span class="nav-text">10.6 Prompt 设计</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8D%81%E4%B8%80%E3%80%81%E6%80%BB%E7%BB%93"><span class="nav-number">12.</span> <span class="nav-text">十一、总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="24khandsome"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">24khandsome</p>
+  <div class="site-description" itemprop="description">24khandsome's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">97</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="sidebar-button motion-element"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">24khandsome</span>
+  
+	<br/>
+	<span id="busuanzi_container_site_pv">
+		<span class="post-meta-item-icon">
+			<i class="fa fa-user"></i>
+		</span>
+		访问量：<span id="busuanzi_value_site_pv"></span> 次数
+	</span>
+
+	<span class="post-meta-divider">|</span>
+		<span id="busuanzi_container_site_uv">
+			<i class="fa fa-eye"></i>
+			访客数：<span id="busuanzi_value_site_uv"></span> 人次
+	</span>
+
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+<!-- 动态背景 -->
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+
+</html>
