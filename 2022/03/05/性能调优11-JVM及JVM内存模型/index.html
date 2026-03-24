@@ -36,7 +36,7 @@
 <meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9811-JVM%E5%8F%8AJVM%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/%E4%BA%BF%E7%BA%A7%E6%B5%81%E9%87%8F%E7%94%B5%E5%95%86%E7%B3%BB%E7%BB%9FJVM%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE%E4%BC%98%E5%8C%96.png">
 <meta property="og:image" content="http://example.com/images/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%9811-JVM%E5%8F%8AJVM%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/image-20240325210337112.png">
 <meta property="article:published_time" content="2022-03-05T13:00:00.000Z">
-<meta property="article:modified_time" content="2024-07-08T03:24:33.426Z">
+<meta property="article:modified_time" content="2026-03-24T00:44:22.228Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="性能调优">
 <meta property="article:tag" content="JVM">
@@ -231,7 +231,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-07-08 11:24:33" itemprop="dateModified" datetime="2024-07-08T11:24:33+08:00">2024-07-08</time>
+                <time title="修改时间：2026-03-24 08:44:22" itemprop="dateModified" datetime="2026-03-24T08:44:22+08:00">2026-03-24</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -293,7 +293,7 @@
 <h2 id="逃逸分析"><a href="#逃逸分析" class="headerlink" title="逃逸分析"></a>逃逸分析</h2><p>JVM的运行模式有三种：</p>
 <p>1、解释器模式：只使用解释器，执行一行jvm字节码就解释一行为机器码</p>
 <p>2、编译模式：只使用编译模式，先将所有jvm字节码一次性编译为机器码，然后一次性执行所有机器码</p>
-<p>3、混合模式：混合模式，依然使用解释器模式执行代码，但是对于一些“热点”代码采用编译模式执行，JVM一般采用编译模式执行,JVM默认采用混合模式执行代码</p>
+<p>3、混合模式：混合模式，依然使用解释器模式执行代码，但是对于一些“热点”代码采用编译模式执行，JVM默认采用混合模式执行代码</p>
 <p>​    <strong>解释模式</strong>启动快，对于只需要执行部分代码，并且大多数代码只会执行一次的情况比较适合；</p>
 <p>​    <strong>编译模式</strong>启动慢，但是后期执行速度快，而且比较占用内存，因为机器码的数量至少是JVM字节码的十倍以上，这种模式适合代码可能会被反复执行的场景；    </p>
 <p>​    <strong>混合模式</strong>是JVM默认采用的执行代码方式，一开始还是解释执行，但是对于少部分 “热点 ”代码会采用编译模式执行，这些热点代码对应的机器码会被缓存起来，下次再执行无需再编译，这就是我们常见的<strong>JIT(Just In Time Compiler)即时编译技术</strong>。 </p>
@@ -346,28 +346,35 @@
 <p>3、TreadLocal、内部类实例被引用导致外部类实例无法释放等等</p>
 <p>4、定义太多无效类、枚举、静态常量、变量等，导致元空间占用。</p>
 <h2 id="OOM的原因"><a href="#OOM的原因" class="headerlink" title="OOM的原因"></a>OOM的原因</h2><ol>
-<li><strong>堆内存溢出（Heap Space OOM）</strong>：<ul>
+<li><strong>堆内存溢出（Heap Space OOM）</strong>：java.lang.OutOfMemoryError: Java heap space<ul>
 <li>大量对象创建且未被及时回收：例如在程序中创建了大量的对象，尤其是大对象，而垃圾回收机制未能及时清理这些不再使用的对象，导致堆内存被耗尽。</li>
 <li>内存泄漏：某些对象一直被引用，无法被垃圾回收，导致内存逐渐被占用完。</li>
 <li>不合理的缓存：比如创建了一个过大的缓存，且缓存中的元素没有有效的过期策略。</li>
 </ul>
 </li>
-<li><strong>线程栈溢出（StackOverflowError）</strong>：<ul>
-<li>线程数量过多：创建了过多的线程（存咋死循环或者递归没有出口），每个线程都需要分配一定的栈空间。</li>
-<li>单个线程栈空间过大：通过<code>-Xss</code>参数设置的线程栈大小过大，导致可用的线程栈数量减少。</li>
-</ul>
-</li>
-<li>元空间（方法区）溢出<strong>（Metaspace OOM）</strong>：加大元空间<ul>
+<li>元空间（方法区）溢出<strong>（Metaspace OOM）</strong>：java.lang.OutOfMemoryError: Metaspace<ul>
 <li>加载了过多的类：在动态加载类的应用中，可能会加载大量的类，导致方法区空间不足（过多无效类，枚举）。</li>
 <li>常量池过大：字符串常量过多或者其他常量占用了大量空间。</li>
 </ul>
 </li>
-<li>直接内存溢出<strong>（Direct Buffer Memory OOM）</strong>：<ul>
+<li>直接内存溢出<strong>（Direct Buffer Memory OOM）</strong>：java.lang.OutOfMemoryError: Direct buffer memory<ul>
 <li>直接使用<code>ByteBuffer</code>分配了过大的本地内存，且没有合理的释放。</li>
 <li>可以通过 <code>-XX:MaxDirectMemorySize</code> 来指定最大的直接内存大小。当直接内存的使用达到了阈值的时候，JVM 会尝试调用 <code>System.gc()</code> 来触发一次 FULL GC，从而完成可控的堆外内存回收</li>
 </ul>
 </li>
+<li><strong>线程创建过多</strong>：java.lang.OutOfMemoryError: unable to create new native thread<ul>
+<li>栈总内存超出系统限制</li>
+<li>无限创建线程，耗尽系统内存</li>
+<li>线程池使用不当，无限制创建线程</li>
+</ul>
+</li>
+<li>GC 开销超限  java.lang.OutOfMemoryError: GC overhead limit exceeded  了解即可</li>
+<li>数组大小超限 java.lang.OutOfMemoryError: Requested array size exceeds VM limit 了解即可</li>
 </ol>
+<h2 id="非OOM"><a href="#非OOM" class="headerlink" title="非OOM"></a>非OOM</h2><h3 id="StackOverflow-栈调用溢出"><a href="#StackOverflow-栈调用溢出" class="headerlink" title="StackOverflow 栈调用溢出"></a>StackOverflow 栈调用溢出</h3><ul>
+<li>方法调用太深，超出jvm限制</li>
+<li>代码死循环，代码终止条件异常</li>
+</ul>
 
     </div>
 
@@ -452,7 +459,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">JVM内存模型介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">JDK体系结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JDK"><span class="nav-number">1.1.1.</span> <span class="nav-text">JDK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JRE"><span class="nav-number">1.1.2.</span> <span class="nav-text">JRE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM"><span class="nav-number">1.1.3.</span> <span class="nav-text">JVM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%BA%E5%88%AB%E4%B8%8E%E8%81%94%E7%B3%BB"><span class="nav-number">1.1.4.</span> <span class="nav-text">区别与联系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E8%AF%AD%E8%A8%80%E7%9A%84%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%89%B9%E6%80%A7"><span class="nav-number">1.2.</span> <span class="nav-text">Java语言的跨平台特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%EF%BC%88%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">JVM内存模型（运行时数据区）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84"><span class="nav-number">1.3.1.</span> <span class="nav-text">内存模型结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE"><span class="nav-number">1.3.2.</span> <span class="nav-text">JVM内存参数设置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E5%8F%82%E6%95%B0%E5%A4%A7%E5%B0%8F%E8%AE%BE%E7%BD%AE%E4%B8%BE%E4%BE%8B"><span class="nav-number">1.4.</span> <span class="nav-text">JVM内存参数大小设置举例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90"><span class="nav-number">1.5.</span> <span class="nav-text">逃逸分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Server%E6%A8%A1%E5%BC%8F%E5%92%8CClient%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.6.</span> <span class="nav-text">Server模式和Client模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F"><span class="nav-number">1.7.</span> <span class="nav-text">内存泄漏</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AF%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2"><span class="nav-number">1.7.1.</span> <span class="nav-text">1、什么是内存泄露</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E7%9A%84%E5%9C%BA%E6%99%AF"><span class="nav-number">1.7.2.</span> <span class="nav-text">2、内存泄露的场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OOM%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">1.8.</span> <span class="nav-text">OOM的原因</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">JVM内存模型介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">JDK体系结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JDK"><span class="nav-number">1.1.1.</span> <span class="nav-text">JDK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JRE"><span class="nav-number">1.1.2.</span> <span class="nav-text">JRE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM"><span class="nav-number">1.1.3.</span> <span class="nav-text">JVM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%BA%E5%88%AB%E4%B8%8E%E8%81%94%E7%B3%BB"><span class="nav-number">1.1.4.</span> <span class="nav-text">区别与联系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E8%AF%AD%E8%A8%80%E7%9A%84%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%89%B9%E6%80%A7"><span class="nav-number">1.2.</span> <span class="nav-text">Java语言的跨平台特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%EF%BC%88%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">JVM内存模型（运行时数据区）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84"><span class="nav-number">1.3.1.</span> <span class="nav-text">内存模型结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE"><span class="nav-number">1.3.2.</span> <span class="nav-text">JVM内存参数设置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E5%8F%82%E6%95%B0%E5%A4%A7%E5%B0%8F%E8%AE%BE%E7%BD%AE%E4%B8%BE%E4%BE%8B"><span class="nav-number">1.4.</span> <span class="nav-text">JVM内存参数大小设置举例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90"><span class="nav-number">1.5.</span> <span class="nav-text">逃逸分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Server%E6%A8%A1%E5%BC%8F%E5%92%8CClient%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.6.</span> <span class="nav-text">Server模式和Client模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F"><span class="nav-number">1.7.</span> <span class="nav-text">内存泄漏</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AF%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2"><span class="nav-number">1.7.1.</span> <span class="nav-text">1、什么是内存泄露</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E7%9A%84%E5%9C%BA%E6%99%AF"><span class="nav-number">1.7.2.</span> <span class="nav-text">2、内存泄露的场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OOM%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">1.8.</span> <span class="nav-text">OOM的原因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%9EOOM"><span class="nav-number">1.9.</span> <span class="nav-text">非OOM</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#StackOverflow-%E6%A0%88%E8%B0%83%E7%94%A8%E6%BA%A2%E5%87%BA"><span class="nav-number">1.9.1.</span> <span class="nav-text">StackOverflow 栈调用溢出</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
