@@ -37,7 +37,7 @@
 <meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20211109233748646.png">
 <meta property="og:image" content="http://example.com/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20221106233921455.png">
 <meta property="article:published_time" content="2021-11-07T13:00:00.000Z">
-<meta property="article:modified_time" content="2022-11-08T13:47:47.174Z">
+<meta property="article:modified_time" content="2026-04-04T08:45:19.040Z">
 <meta property="article:author" content="24khandsome">
 <meta property="article:tag" content="并发编程">
 <meta property="article:tag" content="AQS等待队列">
@@ -233,7 +233,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-11-08 21:47:47" itemprop="dateModified" datetime="2022-11-08T21:47:47+08:00">2022-11-08</time>
+                <time title="修改时间：2026-04-04 16:45:19" itemprop="dateModified" datetime="2026-04-04T16:45:19+08:00">2026-04-04</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -347,7 +347,9 @@
 <p>​    HashTable是用一把锁锁住了所有数据，而ConcurrentHashMap是将数组分为多个段，每把锁只锁数组中的一段数据，就能大大减少锁的竞争。</p>
 <h4 id="JDK7组成结构"><a href="#JDK7组成结构" class="headerlink" title="JDK7组成结构"></a>JDK7组成结构</h4><p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20211109233748646.png" alt="image-20211109233748646"></p>
 <h4 id="扩容"><a href="#扩容" class="headerlink" title="扩容"></a>扩容</h4><p>​    1、扩容仅仅针对HashEntry数组，Segement数组在初始化后就无法扩容</p>
-<h3 id="1-8桶锁"><a href="#1-8桶锁" class="headerlink" title="1.8桶锁"></a>1.8桶锁</h3><p>ConcurrentHashMap 1.8 = Node数组 +  链表/红黑树，区别在于每次插入，都<strong>synchronized第一个节点</strong>，相同于锁一条链表，锁的粒度变小，并且通过CAS的算法插入每个链表的第一个阶段，从而达到并发，锁的粒度较小，灵活</p>
+<h3 id="1-8桶锁"><a href="#1-8桶锁" class="headerlink" title="1.8桶锁"></a>1.8桶锁</h3><p>ConcurrentHashMap 1.8 = Node数组 +  链表/红黑树，区别在于每次插入，都<strong>synchronized第一个节点</strong>，相当于锁一条链表，锁的粒度变小。</p>
+<p>1、当当前下标table[i] = null 时，通过CAS设置头结点（无锁，自由并发争抢）。</p>
+<p>2、table[i] != null时，synchronized 该节点，锁这个链表的，其他链表不影响。 </p>
 <p><img src="/images/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06-Collection&Queue/image-20221106233921455.png" alt="image-20221106233921455"></p>
 
     </div>
